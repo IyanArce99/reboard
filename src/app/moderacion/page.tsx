@@ -3,6 +3,7 @@ import Link from "next/link";
 import { Suspense } from "react";
 import { EmptyState } from "@/components/brand/EmptyState";
 import { ModerationRow } from "@/components/moderation/ModerationRow";
+import { MODERATION_ACTION_LABEL } from "@/components/moderation/labels";
 import { noindexRobots } from "@/lib/seo";
 import { currentModerator } from "@/lib/moderation/auth";
 import styles from "@/components/moderation/Moderation.module.css";
@@ -44,7 +45,7 @@ async function Queue() {
       return {
         publicId: l.public_id ?? `a${l.id}`,
         href: `/anuncio/${l.slug}-${l.public_id ?? `a${l.id}`}`,
-        title: `${l.brand?.name ?? l.brand_text ?? "Artesanal"} ${l.size_label} · ${l.price_eur} € · ${l.town}`,
+        title: `${l.brand?.name ?? l.brand_text ?? "Sin marca"} ${l.size_label} · ${l.price_eur} € · ${l.town}`,
         moderation: l.moderation,
         status: l.status,
         reports: rs.map((r) => ({ reason: REASON[r.reason] ?? r.reason, details: r.details, at: r.created_at })),
@@ -67,7 +68,7 @@ async function Queue() {
       <ul className={styles.log}>
         {(log ?? []).map((a) => (
           <li key={`${a.listing_id}-${a.created_at}`}>
-            <time dateTime={a.created_at}>{new Date(a.created_at).toLocaleString("es-ES")}</time> · a{a.listing_id} · {a.action}
+            <time dateTime={a.created_at}>{new Date(a.created_at).toLocaleString("es-ES")}</time> · a{a.listing_id} · {MODERATION_ACTION_LABEL[a.action] ?? a.action}
             {a.reason ? ` · ${a.reason}` : ""}
           </li>
         ))}

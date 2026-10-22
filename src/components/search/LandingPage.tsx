@@ -1,6 +1,7 @@
 import "server-only";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { RelatedLandings } from "./RelatedLandings";
 import { SearchResults } from "./SearchResults";
 import { getRepository } from "@/lib/data";
 import { getCatalogNames } from "@/lib/data/names";
@@ -12,11 +13,13 @@ import {
   isLandingForm,
   isLandingPlace,
   landingFilters,
+  landingDescription,
   landingIntro,
   landingPath,
   landingTitle,
   type LandingForm,
 } from "@/lib/search/landings";
+import { landingIndexable } from "@/lib/search/indexing";
 import { noindexRobots } from "@/lib/seo";
 
 /** Interpreta los segmentos de /tablas/[segmento]/[forma]. */
@@ -39,14 +42,14 @@ export async function landingMetadata(place: string | null, form: LandingForm | 
   const title = await titleFor(place, form);
   const path = landingPath(place, form);
   const n = await getRepository().count(landingFilters(place, form));
-  const intro = landingIntro(place, form);
+  const description = landingDescription(place, form, n);
   return {
     title,
-    description: `${n} anuncios. ${intro || "Busca por litros, medidas, tipo y ubicación."} Sin comisiones.`.trim(),
+    description,
     alternates: { canonical: path, languages: { "es-ES": path } },
-    openGraph: { title, url: path },
-    // Umbral de indexación pendiente (docs/SEO.md): de momento, sin anuncios no se indexa.
-    ...(n === 0 ? { robots: noindexRobots() } : {}),
+    openGraph: { title, description, url: path },
+    // Política de indexación: src/lib/search/indexing.ts (el sitemap aplica la misma).
+    ...(landingIndexable(place, form, n) ? {} : { robots: noindexRobots() }),
   };
 }
 
@@ -69,6 +72,7 @@ export async function LandingPage({ place, form }: { place: string | null; form:
       crumbs={crumbs}
       current={current}
       isSearchPage={false}
+      related={<RelatedLandings place={place} form={form} />}
     />
   );
 }

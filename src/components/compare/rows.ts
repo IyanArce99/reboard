@@ -35,9 +35,9 @@ type Def = [label: string, value: (l: Listing, c: Ctx) => string | null, mono?: 
 
 const DEFS: Def[] = [
   ["Precio", (l) => eur(l.price), true],
-  ["Marca y modelo", (l) => (l.brand ? [l.brand, l.model].filter(Boolean).join(" ") : "Artesanal")],
+  ["Marca y modelo", (l) => (l.brand ? [l.brand, l.model].filter(Boolean).join(" ") : "Sin marca")],
   ["Longitud", (l) => (l.length.value != null ? `${l.sizeLabel} · ${inToCm(l.length.value)} cm` : l.sizeLabel || null), true],
-  ["Volumen", (l) => (l.volume.value != null ? `${l.volume.value} L` : null), true],
+  ["Litros", (l) => (l.volume.value != null ? `${l.volume.value} L` : null), true],
   [
     "Anchura / grosor",
     (l) =>
@@ -58,7 +58,7 @@ const DEFS: Def[] = [
     "Te encaja",
     (l, c) => {
       const p = c.profile;
-      if (!p) return "Sin perfil";
+      if (!p) return "Haz el test de «¿Qué tabla necesito?»";
       const v = l.volume.value;
       if (v == null) return null;
       return v >= p.lo && v <= p.hi ? FIT_IN : "Fuera de tu rango";

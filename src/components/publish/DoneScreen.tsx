@@ -22,12 +22,11 @@ export function DoneScreen({ done, editing, onAgain }: { done: Done; editing: bo
         <h1 ref={ref} tabIndex={-1} className={styles.doneH1}>
           {real ? (editing ? "Cambios guardados" : "Tu tabla está publicada") : editing ? "Cambios revisados (demo)" : "Anuncio listo (demo)"}
         </h1>
-        <div className={styles.doneKicker}>Reboard · su próxima vida empieza aquí</div>
         {real ? (
           <p className={styles.doneText}>
             {editing
               ? "Los cambios ya se ven en el anuncio y en las búsquedas."
-              : "Ya aparece en las búsquedas por sus medidas. Cada 14 días te pediremos que confirmes que sigue disponible; si no, caduca a los 30."}
+              : "Ya aparece en las búsquedas por sus medidas. Confirma cada 14 días en «Mis anuncios» que sigue disponible; si no, caduca a los 30 días."}
           </p>
         ) : (
           <p className={styles.doneText}>
@@ -42,7 +41,7 @@ export function DoneScreen({ done, editing, onAgain }: { done: Done; editing: bo
             </Link>
           )}
           <Link href="/panel" className={real && done.path ? styles.btnWhite : styles.btnPetrol}>
-            Ir a mi panel
+            Ver mis anuncios
           </Link>
           {!editing && (
             <button type="button" className={styles.btnWhite} onClick={onAgain}>

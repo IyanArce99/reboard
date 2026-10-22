@@ -14,6 +14,7 @@ import {
 import { Gallery } from "@/components/listing/Gallery";
 import { ListingCard } from "@/components/listing/ListingCard";
 import { authEnabled } from "@/lib/auth/config";
+import { noindexRobots } from "@/lib/seo";
 import { Breadcrumbs } from "@/components/seo/Breadcrumbs";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { AlertButton, CompareButton, SaveTextButton } from "@/components/user/islands";
@@ -42,7 +43,7 @@ import styles from "@/components/listing/Ficha.module.css";
 const UNAVAILABLE: Partial<Record<Listing["status"], [string, string]>> = {
   vendida: ["Esta tabla ya se ha vendido", "El vendedor la marcó como vendida. Te mostramos alternativas con medidas parecidas."],
   caducada: ["Este anuncio ha caducado", "El vendedor no confirmó la disponibilidad en 30 días. Puede que ya no esté a la venta."],
-  retirada: ["Anuncio retirado", "El vendedor retiró este anuncio."],
+  retirada: ["Anuncio retirado", "Este anuncio ya no está publicado."],
 };
 
 export async function generateStaticParams() {
@@ -63,12 +64,16 @@ export async function generateMetadata({ params }: PageProps<"/anuncio/[slugId]"
   const l = await load((await params).slugId);
   const vol = l.volume.value != null ? ` · ${l.volume.value} L` : "";
   const title = `${listingTitle(l)}${vol} · ${eur(l.price)} en ${zoneName(l)}`;
-  const description = `${SHAPE_INFO[l.shape].label} ${CONSTRUCTION_INFO[l.construction].short}, ${CONDITION_LABEL[l.condition].toLowerCase()}, en ${l.town}. Contacto directo con el vendedor, sin comisiones.`;
+  // Sin doble punto cuando la localidad acaba en abreviatura («Las Palmas de G.C.»).
+  const description = `${SHAPE_INFO[l.shape].label} ${CONSTRUCTION_INFO[l.construction].short}, ${CONDITION_LABEL[l.condition].toLowerCase()}, en ${l.town.replace(/\.$/, "")}. Contacto directo con el vendedor, sin comisiones.`;
   return {
     title,
     description,
     alternates: { canonical: listingPath(l), languages: { "es-ES": listingPath(l) } },
     openGraph: { title, description, url: listingPath(l), images: l.photos[0] ? [{ url: l.photos[0].url }] : undefined },
+    // Vendida, caducada o retirada: la URL sigue (con alternativas parecidas), pero noindex para
+    // que no aparezca en Google una tabla que ya no se puede comprar. Sale también del sitemap.
+    ...(isOff(l) ? { robots: noindexRobots() } : {}),
   };
 }
 
@@ -80,14 +85,14 @@ export default async function FichaPage({ params }: PageProps<"/anuncio/[slugId]
 
   const title = listingTitle(l);
   const off = isOff(l);
-  const av = availability(l, now, true);
+  const av = availability(l, now);
   const unavailable = UNAVAILABLE[l.status];
   const vol = l.volume.value;
   const len = l.length.value;
   const width = l.width.value;
   const thick = l.thickness.value;
   const isModel = Boolean(l.brand && l.modelSlug);
-
+  const hasDescription = l.description.trim().length > 0;
 
   const similarFilters = withFilters({
     shapes: [l.shape],
@@ -98,15 +103,15 @@ export default async function FichaPage({ params }: PageProps<"/anuncio/[slugId]
 
   const keySpecs = [
     { k: "Longitud", v: l.sizeLabel, s: len != null ? `${inToCm(len)} cm` : "" },
-    { k: "Volumen", v: vol != null ? `${vol} L` : "—", s: vol != null ? (l.volume.source === "manufacturer" ? "según fabricante" : "del vendedor") : "sin indicar", unknown: vol == null },
-    { k: "Ancho", v: width != null ? fmtIn(width) : "—", s: thick != null ? `grosor ${fmtIn(thick)}` : "" },
+    { k: "Litros", v: vol != null ? `${vol} L` : "—", s: vol != null ? (l.volume.source === "manufacturer" ? "según fabricante" : "indicado por el vendedor") : "sin indicar", unknown: vol == null },
+    { k: "Anchura", v: width != null ? fmtIn(width) : "—", s: thick != null ? `grosor ${fmtIn(thick)}` : "" },
   ];
 
   const rows: { k: string; v: string | null; src: Listing["volume"]["source"] }[] = [
     { k: "Longitud", v: len != null ? `${l.sizeLabel} · ${inToCm(len)} cm` : null, src: l.length.source },
     { k: "Anchura", v: width != null ? `${fmtIn(width)} · ${(width * 2.54).toFixed(1)} cm` : null, src: l.width.source },
     { k: "Grosor", v: thick != null ? `${fmtIn(thick)} · ${(thick * 2.54).toFixed(1)} cm` : null, src: l.thickness.source },
-    { k: "Volumen", v: vol != null ? `${vol} L` : null, src: l.volume.source },
+    { k: "Litros", v: vol != null ? `${vol} L` : null, src: l.volume.source },
     { k: "Forma", v: SHAPE_INFO[l.shape].label, src: l.shapeSource },
     { k: "Construcción", v: CONSTRUCTION_INFO[l.construction].label, src: l.constructionSource },
     { k: "Quillas", v: l.fins.value, src: l.fins.source },
@@ -114,20 +119,32 @@ export default async function FichaPage({ params }: PageProps<"/anuncio/[slugId]
   ];
 
   const nearText = `${l.town}, ${zoneName(l)}${l.distanceKm != null ? ` · a ${l.distanceKm} km` : ""}`;
-  const message = `Hola ${l.seller.name}, he visto tu ${title} en Reboard por ${eur(l.price)}. ¿Sigue disponible? ¿Cuándo podría verla?`;
+  // «tu evolutiva sin marca…»: sin mayúscula a mitad de frase cuando el título empieza por el tipo.
+  const inSentence = l.brand ? title : title.charAt(0).toLowerCase() + title.slice(1);
+  const message = `Hola ${l.seller.name}, he visto tu ${inSentence} en Reboard por ${eur(l.price)}. ¿Sigue disponible? ¿Cuándo podría verla?`;
   const url = absoluteUrl(listingPath(l));
 
   return (
     <ContactProvider
-      data={{ sellerName: l.seller.name, message, phone: l.contact.phone, unavailable: off, listingId: l.id, live: authEnabled() }}
+      data={{
+        sellerName: l.seller.name,
+        message,
+        phone: l.contact.phone,
+        method: l.contact.method === "phone" ? "phone" : "whatsapp",
+        // «Vendida», «Caducada» o «Retirada» en el botón desactivado.
+        unavailable: off ? av.text : null,
+        listingId: l.id,
+        live: authEnabled(),
+      }}
     >
       <main className={`container ${styles.page}`}>
         <Breadcrumbs
           items={[
             { label: "Inicio", href: "/" },
             { label: SHAPE_INFO[l.shape].plural, href: landingPath(null, l.shape) },
+            { label: zoneName(l), href: landingPath(l.zone, l.shape) },
           ]}
-          current={{ label: zoneName(l), href: landingPath(l.zone, l.shape) }}
+          current={{ label: title, href: listingPath(l) }}
         />
         <div className={styles.backRow}>
           <BackLink fallback={landingPath(null, l.shape)} className={styles.back} />
@@ -140,11 +157,13 @@ export default async function FichaPage({ params }: PageProps<"/anuncio/[slugId]
               <div className={styles.unavailText}>{unavailable[1]}</div>
             </div>
             <div className={styles.unavailActions}>
-              <a href="#similares" className={ui.btnStrong}>
-                Ver {similar.length} alternativas
-              </a>
+              {similar.length > 0 && (
+                <a href="#similares" className={ui.btnStrong}>
+                  {similar.length === 1 ? "Ver 1 alternativa" : `Ver ${similar.length} alternativas`}
+                </a>
+              )}
               <AlertButton text={alertText(similarFilters, names)} query={toQuery(similarFilters)} className={styles.unavailAlert}>
-                Avísame de una similar
+                Crear alerta de una similar
               </AlertButton>
             </div>
           </div>
@@ -152,7 +171,7 @@ export default async function FichaPage({ params }: PageProps<"/anuncio/[slugId]
 
         <div className={styles.grid}>
           <div className={styles.gallery}>
-            <Gallery photos={l.photos} title={title} off={off} isDemo={l.isDemo} />
+            <Gallery photos={l.photos} title={title} off={off} isDemo={l.isDemo} shape={l.shape} />
           </div>
 
           <div className={styles.panel}>
@@ -222,13 +241,15 @@ export default async function FichaPage({ params }: PageProps<"/anuncio/[slugId]
             <section>
               <h2 className={styles.h2}>Reparaciones y desperfectos</h2>
               <div className={styles.repairs} data-has={l.repairs ? true : undefined}>
-                {l.repairs ?? "El vendedor indica que la tabla no tiene reparaciones ni entradas de agua."}
+                {l.repairs ?? "El vendedor no ha indicado reparaciones."}
               </div>
             </section>
-            <section>
-              <h2 className={styles.h2}>Descripción del vendedor</h2>
-              <p className={styles.desc}>{l.description}</p>
-            </section>
+            {hasDescription && (
+              <section>
+                <h2 className={styles.h2}>Descripción del vendedor</h2>
+                <p className={styles.desc}>{l.description}</p>
+              </section>
+            )}
             <section className={styles.twoCards}>
               <div className={styles.card}>
                 <div className={ui.label}>Vendedor</div>
@@ -249,8 +270,10 @@ export default async function FichaPage({ params }: PageProps<"/anuncio/[slugId]
                 <div className={ui.label}>Ficha técnica del modelo</div>
                 <div className={styles.modelText}>
                   {isModel
-                    ? `${l.brand} ${l.model} — variante ${l.sizeLabel} confirmada por el vendedor.`
-                    : "Tabla artesanal sin modelo de catálogo. Las medidas son las que indica el vendedor."}
+                    ? `${l.brand} ${l.model}, medida ${l.sizeLabel} del catálogo, elegida por el vendedor.`
+                    : l.brand
+                      ? `${l.brand}, modelo fuera del catálogo. Las medidas son las que indica el vendedor.`
+                      : "Tabla sin marca o de shaper local. Las medidas son las que indica el vendedor."}
                 </div>
                 {isModel && (
                   <Link href={`/marcas/${slugify(l.brand!)}/${l.modelSlug}`} className={styles.modelLink}>
@@ -288,7 +311,7 @@ export default async function FichaPage({ params }: PageProps<"/anuncio/[slugId]
         </section>
       </main>
 
-      <ContactBar price={eur(l.price)} specs={`${l.sizeLabel} · ${vol != null ? `${vol} L` : "litros s/i"}`} />
+      <ContactBar price={eur(l.price)} specs={`${l.sizeLabel} · ${vol != null ? `${vol} L` : "sin litros"}`} />
 
       <JsonLd
         data={{
@@ -297,7 +320,7 @@ export default async function FichaPage({ params }: PageProps<"/anuncio/[slugId]
           name: title,
           url,
           image: l.photos.map((p) => p.url),
-          description: l.description,
+          ...(hasDescription ? { description: l.description } : {}),
           ...(l.brand ? { brand: { "@type": "Brand", name: l.brand } } : {}),
           ...(l.model ? { model: l.model } : {}),
           offers: {
@@ -311,7 +334,7 @@ export default async function FichaPage({ params }: PageProps<"/anuncio/[slugId]
           },
           additionalProperty: [
             { "@type": "PropertyValue", name: "Longitud", value: l.sizeLabel },
-            ...(vol != null ? [{ "@type": "PropertyValue", name: "Volumen", value: vol, unitText: "L" }] : []),
+            ...(vol != null ? [{ "@type": "PropertyValue", name: "Litros", value: vol, unitText: "L" }] : []),
             { "@type": "PropertyValue", name: "Construcción", value: CONSTRUCTION_INFO[l.construction].label },
           ],
         }}

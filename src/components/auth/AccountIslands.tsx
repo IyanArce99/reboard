@@ -101,7 +101,7 @@ export function DeleteAccount() {
         </label>
         <input id="borrar" className={ui.input} value={text} onChange={(e) => setText(e.target.value)} autoComplete="off" />
       </div>
-      <button type="submit" className={ui.btnStrong} disabled={busy || text.trim().toUpperCase() !== "BORRAR"}>
+      <button type="submit" className={`${ui.btnStrong} ${styles.btnDanger}`} disabled={busy || text.trim().toUpperCase() !== "BORRAR"}>
         {busy ? "Borrando…" : "Borrar definitivamente"}
       </button>
       <p className={styles.error} role="alert" style={{ flexBasis: "100%" }}>

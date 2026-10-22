@@ -39,15 +39,15 @@ export interface Filters {
   fins: string;
   widthMin: number | null;
   thickMin: number | null;
-  /** «Solo tablas para mí»: rango de litros del perfil de surfista. */
+  /** «Solo mi rango de litros»: rango de litros del perfil de surfista. */
   fit: { lo: number; hi: number } | null;
 }
 
 export const SORTS = [
   ["recientes", "Más recientes"],
-  ["precio", "Precio: menor"],
-  ["precio-desc", "Precio: mayor"],
-  ["litros", "Litros: menor"],
+  ["precio", "Más baratas primero"],
+  ["precio-desc", "Más caras primero"],
+  ["litros", "Menos litros primero"],
   ["distancia", "Más cerca"],
 ] as const;
 export type Sort = (typeof SORTS)[number][0];

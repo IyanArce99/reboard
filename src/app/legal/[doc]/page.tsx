@@ -12,7 +12,7 @@ export function generateStaticParams() {
 export async function generateMetadata({ params }: PageProps<"/legal/[doc]">): Promise<Metadata> {
   const d = legalDoc((await params).doc);
   // Borradores sin revisar: no se indexan.
-  return d ? { title: d.title, robots: noindexRobots(), alternates: { canonical: `/legal/${d.slug}` } } : {};
+  return d ? { title: d.title, description: d.intro, robots: noindexRobots(), alternates: { canonical: `/legal/${d.slug}` } } : {};
 }
 
 export default async function LegalPage({ params }: PageProps<"/legal/[doc]">) {

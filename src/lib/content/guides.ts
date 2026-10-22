@@ -46,10 +46,10 @@ export const GUIDES: Guide[] = [
       { zone: "Cubierta", ok: "marcas de pies y talones (pressure dings)", ko: "zonas blandas que ceden al presionar" },
       { zone: "Fondo", ok: "arañazos superficiales", ko: "burbujas o delaminación" },
       { zone: "Cajas de quillas", ok: "cajas firmes, sin holgura", ko: "cajas sueltas o con grietas alrededor" },
-      { zone: "Medidas", ok: "coinciden con lo grabado en el stringer", ko: "el vendedor no sabe las medidas ni hay marca" },
+      { zone: "Medidas", ok: "coinciden con lo escrito en el larguero (stringer)", ko: "el vendedor no sabe las medidas ni hay marca" },
     ],
     updatedAt: "2026-10-22",
-    byline: "Basada en la experiencia de reparadores y shapers (contenido de demostración)",
+    byline: "Contenido de demostración, pendiente de revisar por un reparador.",
     isDemo: true,
   },
 ];

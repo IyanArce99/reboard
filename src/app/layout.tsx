@@ -30,6 +30,8 @@ const plexMono = IBM_Plex_Mono({
   subsets: ["latin"],
   weight: ["400", "500", "600"],
   display: "swap",
+  // Solo cifras y etiquetas pequeñas: no compite con el texto principal por la precarga.
+  preload: false,
 });
 
 const isDemo = getRepository().isDemo;
@@ -58,9 +60,14 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
     <html lang="es" className={`${barlow.variable} ${barlowCondensed.variable} ${plexMono.variable}`}>
       <body>
         <UserStateProvider authEnabled={authEnabled()}>
+          <a className="skip-link" href="#contenido">
+            Saltar al contenido
+          </a>
           {repo.isDemo && <DemoBanner />}
           <Header />
-          {children}
+          <div id="contenido" className="skip-target" tabIndex={-1}>
+            {children}
+          </div>
           <Footer />
           <Suspense fallback={null}>
             <CompareTray />

@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
+import { useDialogFocus } from "@/lib/a11y/useDialogFocus";
 import {
   CONDITIONS,
   CONDITION_LABEL,
@@ -10,6 +11,7 @@ import {
   REGIONS,
   SELLER_LABEL,
   SELLER_TYPES,
+  NO_BRAND,
   SHAPES,
   SHAPE_INFO,
   ZONES,
@@ -27,6 +29,7 @@ export interface PanelCounts {
   total: number;
   zones: Record<string, number>;
   shapes: Record<string, number>;
+  brands: Record<string, number>;
 }
 
 interface Props {
@@ -43,6 +46,15 @@ const DISTANCES: [string, string][] = [
   ["25", "Menos de 25 km"],
   ["50", "Menos de 50 km"],
 ];
+
+const MOBILE = "(max-width: 759px)";
+/** Marcas visibles antes de «Ver todas»: las que más tablas tienen con los filtros actuales. */
+const TOP_BRANDS = 8;
+const subscribeMobile = (cb: () => void) => {
+  const mq = window.matchMedia(MOBILE);
+  mq.addEventListener("change", cb);
+  return () => mq.removeEventListener("change", cb);
+};
 
 const toggle = <T,>(arr: T[], v: T) => (arr.includes(v) ? arr.filter((x) => x !== v) : [...arr, v]);
 const parseNum = (s: string) => {
@@ -79,6 +91,7 @@ export function FilterPanel({ counts, resultCount, brands, models, openAdvanced 
   const { profile } = useUserState();
   const [draft, setDraft] = useState(filters);
   const [adv, setAdv] = useState(openAdvanced);
+  const [allBrands, setAllBrands] = useState(false);
   // Última query enviada desde este panel: sus propios cambios no deben resetear el borrador.
   const [committed, setCommitted] = useState(() => toQuery(filters));
   const timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
@@ -96,7 +109,7 @@ export function FilterPanel({ counts, resultCount, brands, models, openAdvanced 
   }
 
   useEffect(() => {
-    if (openAdvanced && window.matchMedia("(max-width: 759px)").matches) setSheetOpen(true);
+    if (openAdvanced && window.matchMedia(MOBILE).matches) setSheetOpen(true);
   }, [openAdvanced, setSheetOpen]);
 
   useEffect(() => {
@@ -104,12 +117,17 @@ export function FilterPanel({ counts, resultCount, brands, models, openAdvanced 
     const onKey = (e: KeyboardEvent) => e.key === "Escape" && setSheetOpen(false);
     document.addEventListener("keydown", onKey);
     document.body.style.overflow = "hidden";
-    sheetRef.current?.focus();
     return () => {
       document.removeEventListener("keydown", onKey);
       document.body.style.overflow = "";
     };
   }, [sheetOpen, setSheetOpen]);
+
+  // Solo la hoja móvil es un diálogo modal: foco dentro, Tab atrapado y vuelta al botón «Filtros».
+  // En escritorio el panel es una barra lateral normal.
+  const isMobile = useSyncExternalStore(subscribeMobile, () => window.matchMedia(MOBILE).matches, () => false);
+  const isSheet = sheetOpen && isMobile;
+  useDialogFocus(isSheet, sheetRef);
 
   const commit = (f: Filters, delay: number) => {
     setDraft(f);
@@ -125,14 +143,32 @@ export function FilterPanel({ counts, resultCount, brands, models, openAdvanced 
   const f = draft;
   const isRegion = Boolean(regionBySlug(f.zone));
   const visibleModels = models.filter((m) => !f.brand || m.brandSlug === f.brand);
+  // Marcas como chips (antes, un desplegable escondido en «más filtros»): ordenadas por número de
+  // tablas, sin las que no tienen ninguna (salvo la elegida) y «Sin marca» siempre al final.
+  const brandChips = brands
+    .filter((b) => b.slug !== NO_BRAND.slug)
+    .map((b) => ({ ...b, n: counts.brands[b.slug] ?? 0 }))
+    .filter((b) => b.n > 0 || b.slug === f.brand)
+    .sort((a, b) => b.n - a.n || a.name.localeCompare(b.name, "es"));
+  const shownBrands = allBrands ? brandChips : brandChips.filter((b, i) => i < TOP_BRANDS || b.slug === f.brand);
+  const noBrandCount = counts.brands[NO_BRAND.slug] ?? 0;
   const lens = LENGTH_STEPS.map((i) => ({ v: String(i), l: `${ftLabel(i)} · ${inToCm(i)} cm` }));
 
   return (
-    <aside ref={sheetRef} tabIndex={-1} className={styles.panel} data-open={sheetOpen || undefined} aria-label="Filtros">
+    <aside
+      ref={sheetRef}
+      id="filtros"
+      tabIndex={-1}
+      className={styles.panel}
+      data-open={sheetOpen || undefined}
+      aria-label="Filtros"
+      role={isSheet ? "dialog" : undefined}
+      aria-modal={isSheet || undefined}
+    >
       <div className={styles.panelHead}>
         <span className={styles.panelTitle}>Filtros</span>
         <div className={styles.panelHeadActions}>
-          <button type="button" className={styles.linkBtn} onClick={() => commit(emptyFilters(), 0)}>
+          <button type="button" className={`${styles.linkBtn} ${styles.dOnly}`} onClick={() => commit(emptyFilters(), 0)}>
             Limpiar
           </button>
           <button type="button" aria-label="Cerrar" className={`${styles.closeBtn} ${styles.mOnly}`} onClick={() => setSheetOpen(false)}>
@@ -222,10 +258,10 @@ export function FilterPanel({ counts, resultCount, brands, models, openAdvanced 
             >
               <span className={styles.onlyMeBox} aria-hidden="true" />
               <span>
-                <strong>Solo tablas para mí</strong>
+                <strong>Solo mi rango de litros</strong>
                 <br />
                 <span className={styles.onlyMeText}>
-                  Tu rango orientativo: {profile.lo}–{profile.hi} L ({profile.level}, {profile.weight} kg)
+                  {profile.lo}–{profile.hi} L, según el asistente ({profile.level.toLowerCase()}, {profile.weight} kg)
                 </span>
               </span>
             </button>
@@ -275,6 +311,53 @@ export function FilterPanel({ counts, resultCount, brands, models, openAdvanced 
           </div>
         </div>
 
+        <div className={styles.group} role="group" aria-labelledby="f-marca">
+          <span className={ui.label} id="f-marca">
+            Marca
+          </span>
+          <div className={styles.chips}>
+            {shownBrands.map((b) => (
+              <button
+                key={b.slug}
+                type="button"
+                className={ui.chip}
+                aria-pressed={f.brand === b.slug}
+                onClick={() => set({ brand: f.brand === b.slug ? "" : b.slug, model: "" })}
+              >
+                {b.name} · {b.n}
+              </button>
+            ))}
+            {(noBrandCount > 0 || f.brand === NO_BRAND.slug) && (
+              <button
+                type="button"
+                className={ui.chip}
+                aria-pressed={f.brand === NO_BRAND.slug}
+                onClick={() => set({ brand: f.brand === NO_BRAND.slug ? "" : NO_BRAND.slug, model: "" })}
+              >
+                {NO_BRAND.label} · {noBrandCount}
+              </button>
+            )}
+          </div>
+          {brandChips.length > TOP_BRANDS && (
+            <button type="button" className={styles.moreLink} aria-expanded={allBrands} onClick={() => setAllBrands((a) => !a)}>
+              {allBrands ? "Ver menos marcas" : `Ver todas las marcas (${brandChips.length})`}
+            </button>
+          )}
+          {f.brand && f.brand !== NO_BRAND.slug && visibleModels.length > 0 && (
+            <label className={`${ui.label} ${styles.field}`}>
+              Modelo
+              <select className={`${ui.select} ${styles.selectField}`} value={f.model} onChange={(e) => set({ model: e.target.value })}>
+                <option value="">Cualquier modelo</option>
+                {visibleModels.map((m) => (
+                  <option key={m.slug} value={m.slug}>
+                    {m.name}
+                  </option>
+                ))}
+              </select>
+            </label>
+          )}
+        </div>
+
         <div className={styles.group}>
           <span className={ui.label}>Precio (€)</span>
           <div className={styles.range}>
@@ -301,7 +384,7 @@ export function FilterPanel({ counts, resultCount, brands, models, openAdvanced 
             min={50}
             max={600}
             step={10}
-            aria-label="Precio máximo"
+            aria-label="Precio máximo (deslizador)"
             className={styles.slider}
             style={{ "--p": `${(((f.priceMax ?? 600) - 50) / 550) * 100}%` } as React.CSSProperties}
             value={f.priceMax ?? 600}
@@ -327,35 +410,11 @@ export function FilterPanel({ counts, resultCount, brands, models, openAdvanced 
         </div>
 
         <button type="button" className={styles.advToggle} aria-expanded={adv} onClick={() => setAdv((a) => !a)}>
-          {adv ? "− Menos filtros" : "+ Marca, modelo, estado, quillas, medidas…"}
+          {adv ? "− Menos filtros" : "+ Más filtros: estado, quillas, anchura…"}
         </button>
 
         {adv && (
           <div className={styles.adv}>
-            <div className={styles.two}>
-              <label className={`${ui.label} ${styles.field}`}>
-                Marca
-                <select className={`${ui.select} ${styles.selectField}`} value={f.brand} onChange={(e) => set({ brand: e.target.value, model: "" })}>
-                  <option value="">Cualquier marca</option>
-                  {brands.map((b) => (
-                    <option key={b.slug} value={b.slug}>
-                      {b.name}
-                    </option>
-                  ))}
-                </select>
-              </label>
-              <label className={`${ui.label} ${styles.field}`}>
-                Modelo
-                <select className={`${ui.select} ${styles.selectField}`} value={f.model} onChange={(e) => set({ model: e.target.value })}>
-                  <option value="">Cualquier modelo</option>
-                  {visibleModels.map((m) => (
-                    <option key={m.slug} value={m.slug}>
-                      {brands.find((b) => b.slug === m.brandSlug)?.name} {m.name}
-                    </option>
-                  ))}
-                </select>
-              </label>
-            </div>
             <div className={styles.group}>
               <span className={ui.label}>Estado</span>
               <div className={styles.chips}>
@@ -379,7 +438,7 @@ export function FilterPanel({ counts, resultCount, brands, models, openAdvanced 
                   Sin reparaciones
                 </button>
                 <button type="button" className={`${ui.chip} ${ui.chipSm}`} aria-pressed={f.accessories} onClick={() => set({ accessories: !f.accessories })}>
-                  Incluye funda o accesorios
+                  Con funda o accesorios
                 </button>
               </div>
             </div>
@@ -396,7 +455,7 @@ export function FilterPanel({ counts, resultCount, brands, models, openAdvanced 
             </label>
             <div className={styles.two}>
               <label className={`${ui.label} ${styles.field}`}>
-                Anchura mín. (&quot;)
+                Anchura mínima (&quot;)
                 <NumField
                   className={`${ui.input} ${ui.mono} ${styles.selectField}`}
                   inputMode="decimal"
@@ -406,11 +465,11 @@ export function FilterPanel({ counts, resultCount, brands, models, openAdvanced 
                 />
               </label>
               <label className={`${ui.label} ${styles.field}`}>
-                Grosor mín. (&quot;)
+                Grosor mínimo (&quot;)
                 <NumField
                   className={`${ui.input} ${ui.mono} ${styles.selectField}`}
                   inputMode="decimal"
-                  placeholder="p. ej. 2.75"
+                  placeholder="p. ej. 2,75"
                   value={f.thickMin}
                   onValue={(v) => setTyped({ thickMin: v })}
                 />
@@ -441,7 +500,7 @@ export function FilterPanel({ counts, resultCount, brands, models, openAdvanced 
           Limpiar
         </button>
         <button type="button" className={ui.btnPrimary} onClick={() => setSheetOpen(false)}>
-          Ver {num(resultCount)} tablas
+          {resultCount === 0 ? "Sin resultados" : resultCount === 1 ? "Ver 1 tabla" : `Ver ${num(resultCount)} tablas`}
         </button>
       </div>
     </aside>

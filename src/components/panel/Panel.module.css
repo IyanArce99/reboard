@@ -182,13 +182,6 @@
   font-family: var(--rb-font-mono);
 }
 
-.simTag {
-  font-size: 11px;
-  background: var(--rb-warning-tint);
-  color: #8a5a12;
-  padding: 2px 6px;
-  border-radius: 4px;
-}
 
 .actions {
   display: flex;
@@ -272,4 +265,13 @@
   flex-basis: 100%;
   font-size: 13px;
   font-weight: 700;
+}
+.priceError {
+  flex-basis: 100%;
+  font-size: 13px;
+  line-height: 1.4;
+  color: var(--rb-error);
+}
+.priceError:empty {
+  display: none;
 }

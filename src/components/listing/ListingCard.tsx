@@ -27,8 +27,13 @@ interface Props {
   hereZone: string;
   /** responsive = vertical en escritorio y horizontal en móvil (< 760 px). */
   layout?: "vertical" | "horizontal" | "responsive";
-  /** Solo para la imagen LCP (primera tarjeta). */
+  /** Solo para la imagen LCP (primera tarjeta): inserta un preload en <head>. */
   preload?: boolean;
+  /**
+   * Primeras 1–2 tarjetas de una lista: foto con fetchPriority="high". Se mantiene loading="lazy"
+   * para que la variante oculta por CSS (responsive) no se descargue también.
+   */
+  eager?: boolean;
   /** Vista previa al publicar: el anuncio aún no existe y sus enlaces no se precargan. */
   preview?: boolean;
 }
@@ -49,7 +54,7 @@ export function ListingCard(props: Props) {
   return <Card {...props} />;
 }
 
-function Card({ listing: l, now, hereZone, layout = "vertical", preload = false, preview = false }: Props) {
+function Card({ listing: l, now, hereZone, layout = "vertical", preload = false, eager = false, preview = false }: Props) {
   const title = listingTitle(l);
   const href = listingPath(l);
   const prefetch = preview ? false : undefined;
@@ -64,7 +69,15 @@ function Card({ listing: l, now, hereZone, layout = "vertical", preload = false,
       <article className={styles.h}>
         <Link href={href} prefetch={prefetch} className={styles.hPhoto} tabIndex={-1} aria-hidden="true">
           {photo && (
-            <Image src={photo.url} alt="" fill sizes="116px" className={styles.img} data-off={off || undefined} />
+            <Image
+              src={photo.url}
+              alt=""
+              fill
+              sizes="116px"
+              className={styles.img}
+              data-off={off || undefined}
+              fetchPriority={eager ? "high" : undefined}
+            />
           )}
           {pro && <span className={`${ui.proBadge} ${styles.hPro}`}>{SELLER_LABEL[l.seller.type]}</span>}
           {off && <span className={`${ui.offBadge} ${styles.hOff}`}>{av.text}</span>}
@@ -75,11 +88,13 @@ function Card({ listing: l, now, hereZone, layout = "vertical", preload = false,
               <span className={styles.hPrice}>{eur(l.price)}</span>
               {l.previousPrice && <s className={styles.hOld}>{eur(l.previousPrice)}</s>}
             </div>
-            <SaveButton id={l.id} className={styles.hSave} />
+            <SaveButton id={l.id} name={title} className={styles.hSave} />
           </div>
-          <Link href={href} prefetch={prefetch} className={styles.hTitle}>
-            {title}
-          </Link>
+          <h3 className={styles.hTitle}>
+            <Link href={href} prefetch={prefetch} className={styles.titleLink}>
+              {title}
+            </Link>
+          </h3>
           <div className={styles.hSpec}>
             <strong>{volumeShort(l)}</strong>
             <span>
@@ -96,7 +111,7 @@ function Card({ listing: l, now, hereZone, layout = "vertical", preload = false,
           </div>
           <div className={styles.hFoot}>
             <FitBadge volume={l.volume.value} text="Te encaja" className={styles.hFit} />
-            <CompareButton id={l.id} label={listingShortLabel(l)} className={styles.hCmp} />
+            <CompareButton id={l.id} label={listingShortLabel(l)} name={title} className={styles.hCmp} />
           </div>
         </div>
       </article>
@@ -115,6 +130,7 @@ function Card({ listing: l, now, hereZone, layout = "vertical", preload = false,
             className={styles.img}
             data-off={off || undefined}
             preload={preload}
+            fetchPriority={eager && !preload ? "high" : undefined}
           />
         )}
         <span className={styles.vBadges}>
@@ -126,18 +142,20 @@ function Card({ listing: l, now, hereZone, layout = "vertical", preload = false,
             <span className={styles.kmDot} />
             {near ? `A ${l.distanceKm} km` : zoneName(l)}
           </span>
-          <span className={styles.count}>{l.photos.length} fotos</span>
+          <span className={styles.count}>{l.photos.length === 1 ? "1 foto" : `${l.photos.length} fotos`}</span>
         </span>
       </Link>
-      <SaveButton id={l.id} className={styles.vSave} />
+      <SaveButton id={l.id} name={title} className={styles.vSave} />
       <div className={styles.vBody}>
         <div className={styles.priceRow}>
           <span className={styles.vPrice}>{eur(l.price)}</span>
           {l.previousPrice && <s className={styles.vOld}>{eur(l.previousPrice)}</s>}
         </div>
-        <Link href={href} prefetch={prefetch} className={styles.vTitle}>
-          {title}
-        </Link>
+        <h3 className={styles.vTitle}>
+          <Link href={href} prefetch={prefetch} className={styles.titleLink}>
+            {title}
+          </Link>
+        </h3>
         <div className={styles.vSpec}>
           <strong>{volumeShort(l)}</strong>
           <span>
@@ -154,7 +172,7 @@ function Card({ listing: l, now, hereZone, layout = "vertical", preload = false,
         </div>
         <FitBadge volume={l.volume.value} className={`${ui.fitBadge} ${styles.vFit}`} />
         <div className={styles.vFoot}>
-          <CompareButton id={l.id} label={listingShortLabel(l)} className={styles.vCmp} />
+          <CompareButton id={l.id} label={listingShortLabel(l)} name={title} className={styles.vCmp} />
           <span>{postedText(l, now)}</span>
         </div>
       </div>

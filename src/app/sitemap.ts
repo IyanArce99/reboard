@@ -3,11 +3,13 @@ import { getRepository } from "@/lib/data";
 import { GUIDES } from "@/lib/content/guides";
 import { slugify } from "@/lib/domain/taxonomy";
 import { listingPath } from "@/lib/listing/present";
+import { landingIndexable } from "@/lib/search/indexing";
 import { LANDING_FORMS, LANDING_PLACES, landingFilters, landingPath } from "@/lib/search/landings";
 import { emptyFilters } from "@/lib/search/filters";
 import { absoluteUrl } from "@/lib/site";
 
-// Solo páginas indexables con contenido. Umbral de inventario pendiente (docs/SEO.md).
+// Solo páginas indexables con contenido. Las landings siguen src/lib/search/indexing.ts y los
+// anuncios solo entran si están disponibles (vendidos, caducados o retirados son noindex).
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const repo = getRepository();
   if (repo.isDemo) return [];
@@ -30,12 +32,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: absoluteUrl("/tiendas") },
     { url: absoluteUrl("/guias") },
     ...combos
-      .filter((_, i) => comboCounts[i] > 0)
+      .filter(([p, f], i) => landingIndexable(p, f, comboCounts[i]))
       .map(([p, f]) => ({ url: absoluteUrl(landingPath(p, f)) })),
     ...brands.map((b) => ({ url: absoluteUrl(`/marcas/${b}`) })),
     ...catalog.map((m) => ({ url: absoluteUrl(`/marcas/${slugify(m.brand)}/${m.slug}`) })),
     ...shops.map((s) => ({ url: absoluteUrl(`/tiendas/${s.slug}`) })),
-    ...GUIDES.map((g) => ({ url: absoluteUrl(`/guias/${g.slug}`), lastModified: g.updatedAt })),
+    // Las guías de demostración llevan noindex hasta que las revise alguien con experiencia.
+    ...GUIDES.filter((g) => !g.isDemo).map((g) => ({ url: absoluteUrl(`/guias/${g.slug}`), lastModified: g.updatedAt })),
     ...active.items.map((l) => ({ url: absoluteUrl(listingPath(l)), lastModified: l.confirmedAt })),
   ];
 }

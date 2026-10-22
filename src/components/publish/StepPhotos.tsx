@@ -10,7 +10,6 @@ import type { DraftPhoto } from "@/lib/publish/draft";
 import { MAX_PHOTOS } from "./parts";
 import styles from "./Publish.module.css";
 
-const PHOTO_LABELS = ["cubierta", "fondo", "cola", "nose", "canto", "quillas", "detalle", "funda"];
 /** Fotos que recomendamos, en orden. */
 const SUGGESTED = ["Cubierta", "Fondo", "Cola y quillas", "Golpes o reparaciones"];
 
@@ -106,7 +105,7 @@ export function StepPhotos({ photos, processing, live, onFiles, onRemove, onMove
               <li key={p.url} className={styles.photo} data-cover={i === 0 || undefined}>
                 <Image
                   src={p.url}
-                  alt={i === 0 ? `Foto 1 (portada): ${PHOTO_LABELS[0]}` : `Foto ${i + 1}: ${PHOTO_LABELS[i]}`}
+                  alt={i === 0 ? "Foto 1 (portada)" : `Foto ${i + 1}`}
                   fill
                   sizes={i === 0 ? "(max-width: 759px) 66vw, 260px" : "(max-width: 759px) 33vw, 130px"}
                   className={styles.photoImg}

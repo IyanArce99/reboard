@@ -9,6 +9,11 @@ import { ftLabel } from "@/lib/domain/format";
 import { NO_BRAND_OPTION, OTHER_MODEL, SHAPER_LOCAL, type FieldSource, type PublishDraft } from "./draft";
 import { fieldToInches, parseLitres, type MeasureKey } from "./parse";
 
+// En el navegador, sin compilación con `new Function`: la CSP lo bloquea y zod lo detectaba con una
+// prueba que deja un aviso `securitypolicyviolation`. Va antes de crear los esquemas (zod lee la
+// opción al construirlos). En el servidor se mantiene el modo rápido.
+if (typeof window !== "undefined") z.config({ jitless: true });
+
 const source = z.enum(["seller", "manufacturer"]);
 const text = (max: number) =>
   z
@@ -93,7 +98,7 @@ export const FIELD_TEXT: Record<string, string> = {
   priceEur: "El precio debe estar entre 1 y 20.000 €.",
   town: "Indica la localidad (2–80 caracteres).",
   phone: "Revisa el teléfono: por ejemplo, 600 000 000 o +34 600 000 000.",
-  shape: "Elige la forma.",
+  shape: "Elige el tipo de tabla.",
   construction: "Elige la construcción.",
   condition: "Elige el estado.",
   repairs: "Las reparaciones admiten hasta 600 caracteres.",

@@ -23,7 +23,18 @@
   overflow: hidden;
 }
 
+/* El botón mide 44 px de alto (área táctil); la ficha visible sigue siendo de 36 px. */
 .item {
+  display: flex;
+  align-items: center;
+  height: 44px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--rb-white);
+  flex: none;
+}
+.chip {
   display: flex;
   align-items: center;
   gap: 6px;
@@ -36,7 +47,7 @@
   font-size: 13px;
   white-space: nowrap;
 }
-.item span {
+.chip span {
   color: var(--rb-on-petrol-muted);
 }
 

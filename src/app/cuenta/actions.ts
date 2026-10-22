@@ -45,7 +45,7 @@ export async function deleteAccountAction(confirm: string): Promise<{ ok: boolea
     await deleteAccount(createServiceClient(), auth.user.id);
   } catch (e) {
     console.error("[cuenta] borrar", e);
-    return { ok: false, message: "No se ha podido borrar la cuenta. Escríbenos y lo hacemos a mano." };
+    return { ok: false, message: "No se ha podido borrar la cuenta. Vuelve a intentarlo más tarde." };
   }
   await supabase.auth.signOut();
   updateTag("listings");

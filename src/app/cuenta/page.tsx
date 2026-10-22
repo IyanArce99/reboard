@@ -37,7 +37,7 @@ async function Account() {
       </section>
 
       <section className={styles.card} aria-labelledby="atajos-title">
-        <h2 id="atajos-title">Lo tuyo</h2>
+        <h2 id="atajos-title">Accesos rápidos</h2>
         <div className={styles.links}>
           <Link href="/guardado">
             Guardadas<span>Sincronizadas con tu cuenta.</span>
@@ -46,7 +46,7 @@ async function Account() {
             Mis anuncios<span>Confirmar, bajar precio o marcar vendida.</span>
           </Link>
           <Link href="/alertas">
-            Alertas<span>Las búsquedas que sigues.</span>
+            Alertas<span>Guardadas en este dispositivo, no en tu cuenta.</span>
           </Link>
         </div>
       </section>
@@ -60,7 +60,7 @@ async function Account() {
       <section className={styles.card} aria-labelledby="borrar-title">
         <h2 id="borrar-title">Borrar la cuenta</h2>
         <p className={styles.meta}>
-          Se borran tu perfil, tus anuncios con sus fotos, tu teléfono de contacto y tus guardados. No se puede deshacer.
+          Se borran tu perfil, tus anuncios con sus fotos, tu teléfono de contacto, tus guardados y tus reportes. No se puede deshacer.
         </p>
         <DeleteAccount />
       </section>

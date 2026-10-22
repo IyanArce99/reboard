@@ -46,7 +46,7 @@ const SaveArgs = z.object({
 /** Paso 1 de publicar: valida, comprueba Turnstile y guarda el anuncio (borrador si es nuevo). */
 export async function saveListingAction(args: z.input<typeof SaveArgs>): Promise<ActionResult<{ publicId: string; listingId: number; userId: string; status: string }>> {
   const a = SaveArgs.safeParse(args);
-  if (!a.success) return { ok: false, message: "Petición no válida." };
+  if (!a.success) return { ok: false, message: "Algo no ha ido bien. Recarga la página y vuelve a intentarlo." };
   const parsed = ListingInput.safeParse(a.data.input);
   if (!parsed.success) return { ok: false, message: firstIssueText(parsed.error) };
 
@@ -57,13 +57,12 @@ export async function saveListingAction(args: z.input<typeof SaveArgs>): Promise
   const ip = h.get("x-forwarded-for")?.split(",")[0]?.trim() ?? h.get("x-real-ip");
   const captcha = await verifyTurnstile(a.data.turnstileToken, { ip });
   if (!captcha.ok) {
-    return {
-      ok: false,
-      message:
-        captcha.reason === "not-configured"
-          ? "La verificación anti-spam no está configurada en el servidor."
-          : "No hemos podido comprobar que no eres un robot. Vuelve a intentarlo.",
-    };
+    if (captcha.reason === "not-configured") {
+      // Fallo de configuración del servidor: se registra aquí y el usuario ve un mensaje neutro.
+      console.error("[publicar] Turnstile no está configurado (falta la clave secreta).");
+      return { ok: false, message: "No se puede publicar ahora mismo. Inténtalo más tarde." };
+    }
+    return { ok: false, message: "No hemos podido comprobar que no eres un robot. Vuelve a intentarlo." };
   }
 
   try {
@@ -107,7 +106,7 @@ const PanelArgs = z.object({
 /** Acciones del panel del vendedor (E5). */
 export async function panelActionServer(args: { publicId: string; action: PanelAction; price?: number }): Promise<ActionResult<object>> {
   const a = PanelArgs.safeParse(args);
-  if (!a.success) return { ok: false, message: "Petición no válida." };
+  if (!a.success) return { ok: false, message: "Algo no ha ido bien. Recarga la página y vuelve a intentarlo." };
   const s = await session();
   if ("error" in s) return s.error!;
   try {

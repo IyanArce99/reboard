@@ -37,3 +37,19 @@
   color: var(--rb-petrol);
   font-weight: 600;
 }
+
+/* Área táctil de 44 px sin cambiar el tamaño visible (DESIGN_AUDIT §6). */
+.item a,
+.back {
+  position: relative;
+}
+.item a::after,
+.back::after {
+  content: "";
+  position: absolute;
+  left: -2px;
+  right: -2px;
+  top: 50%;
+  height: 44px;
+  transform: translateY(-50%);
+}

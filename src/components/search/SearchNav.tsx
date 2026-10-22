@@ -110,9 +110,9 @@ export function ViewToggle() {
 }
 
 export function OpenFiltersButton({ count }: { count: number }) {
-  const { setSheetOpen } = useSearchNav();
+  const { sheetOpen, setSheetOpen } = useSearchNav();
   return (
-    <button type="button" className={styles.mFilters} onClick={() => setSheetOpen(true)}>
+    <button type="button" className={styles.mFilters} aria-expanded={sheetOpen} aria-controls="filtros" onClick={() => setSheetOpen(true)}>
       Filtros{count ? ` · ${count}` : ""}
     </button>
   );

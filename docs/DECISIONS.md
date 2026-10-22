@@ -392,3 +392,15 @@ Con la caché de páginas (minutos), la mayoría de las visitas no consultan la 
 - **Tipo y construcción pasan al paso 2** («La tabla») y la descripción al paso 3; el teléfono pasa al paso 4, junto al método de contacto. El servidor exige lo mismo que antes; solo cambia en qué paso se pide cada dato.
 - **Vista previa propia (`LivePreview`) en lugar de `ListingCard`:** la tarjeta real incluye guardar, comparar y enlaces que no tienen sentido en un anuncio que no existe; sin fotos, muestra la silueta de la forma, nunca una foto de stock.
 - **Estado de la tabla: solo los 4 valores del enum `board_condition`** (`como-nueva`, `muy-buen-estado`, `buen-estado`, `con-reparaciones`). Lo decidió el usuario: sin migración ni valores nuevos; se explican con texto llano en cada tarjeta.
+
+## Auditoría integral UX, copy y SEO (sin métricas externas)
+Detalle en `docs/seo-ux-audit.md`.
+- **Sin DataForSEO.** La cuenta quedó pausada antes de la primera consulta. No se publican volúmenes ni dificultades: las keywords (`docs/seo/keywords.csv`) llevan columnas vacías para Keyword Planner, y las decisiones que dependen de la demanda quedan en la §G del informe.
+- **Indexación por inventario.** Una landing de tipo o de zona se indexa con 1 anuncio activo; una combinación zona + tipo, con 3. Sin llegar al umbral, la landing es navegable pero noindex y queda fuera del sitemap. Los umbrales viven en `src/lib/search/indexing.ts`.
+- **Anuncios inactivos.** Un anuncio vendido, caducado o retirado mantiene su URL (con alternativas) pero lleva noindex. Así no se rompen enlaces externos.
+- **Slugs sin cambios.** Los títulos dicen «Tablas evolutivas» o «Softboards (tablas de espuma)» porque así se busca, pero `/tablas/evolutiva` y `/tablas/softboard` se quedan: sin datos no se justifica una redirección.
+- **Nombre de la herramienta de litros.** «TablaFinder» en la navegación, por decisión del usuario. «¿Qué tabla necesito?» en el H1 y el pie, y «calculadora de litros» en el `<title>`. Se revisará con datos (G-7).
+- **Sin marca.** Para quien compra, «Sin marca», en lugar de «Shaper local / sin marca» o «Artesanal». Al publicar siguen las dos opciones («Shaper local» y «Sin marca»), y el slug de los anuncios no cambia.
+- **Marcas en los filtros.** Pasan de un desplegable escondido en «más filtros» a chips con recuento tras «Tipo de tabla», a petición del usuario: la marca es un criterio de búsqueda frecuente en tablas usadas. El modelo aparece solo con una marca elegida.
+- **Copy honesto.** Mientras las alertas sean locales, «Crear alerta», nunca «te avisamos». No hay recordatorio de los 14 días: se dice dónde confirmarlo. No se inventan estadísticas, ni siquiera en la demo.
+- **npm 11.6.2 en CI.** Con npm 10, `npm ci` falla por las dependencias opcionales de `@emnapi`.

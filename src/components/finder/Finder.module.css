@@ -37,6 +37,15 @@
   gap: 8px 20px;
 }
 
+.kicker {
+  margin-top: 6px;
+  font-family: var(--rb-font-mono);
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--rb-teal-text);
+}
+
 .h1 {
   margin: 6px 0 0;
   font-family: var(--rb-font-display);
@@ -186,6 +195,11 @@ button.seg::after {
 .weightField[data-state="error"] {
   border-color: var(--rb-error);
 }
+/* Foco propio, distinto del estado «válido» (mismo borde turquesa): anillo de 2 px como en .budgetField. */
+.weightField:focus-within {
+  outline: 2px solid var(--rb-teal);
+  outline-offset: 2px;
+}
 
 .weightInput {
   flex: 1;
@@ -241,27 +255,6 @@ button.seg::after {
   background: var(--rb-teal);
   border-color: var(--rb-teal);
   color: var(--rb-white);
-}
-
-.heightField {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  font-size: 14px;
-  color: var(--rb-muted);
-  margin-top: 6px;
-}
-
-.smallInput {
-  width: 90px;
-  height: 44px;
-  border: 1px solid var(--rb-line-strong);
-  border-radius: 10px;
-  padding: 0 10px;
-  font-size: 16px;
-  font-family: var(--rb-font-mono);
-  color: var(--rb-petrol);
-  background: var(--rb-white);
 }
 
 /* OptionCard */

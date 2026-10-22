@@ -14,19 +14,28 @@ export function CompareTray() {
   if (!compare.length || hidden) return null;
   const ready = compare.length >= 2;
   return (
-    <div className={styles.tray}>
+    <aside className={styles.tray} aria-label="Comparar tablas">
       <div className={styles.inner}>
         <div className={styles.items}>
           {compare.map((c) => (
             <button key={c.id} type="button" className={styles.item} onClick={() => removeCompare(c.id)} aria-label={`Quitar ${c.label} de la comparación`}>
-              {c.label} <span aria-hidden="true">✕</span>
+              <span className={styles.chip}>
+                {c.label} <span aria-hidden="true">✕</span>
+              </span>
             </button>
           ))}
         </div>
-        <Link href="/comparar" className={styles.go} data-ready={ready || undefined}>
-          Comparar ({compare.length})
-        </Link>
+        {ready ? (
+          <Link href="/comparar" className={styles.go} data-ready>
+            Comparar ({compare.length})
+          </Link>
+        ) : (
+          // Con una sola tabla, /comparar solo diría que falta otra.
+          <span className={styles.go} aria-disabled="true">
+            Añade otra para comparar
+          </span>
+        )}
       </div>
-    </div>
+    </aside>
   );
 }

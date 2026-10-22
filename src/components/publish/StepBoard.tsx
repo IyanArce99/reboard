@@ -33,6 +33,8 @@ interface Props extends StepProps, CatalogProps {
 
 export function StepBoard({ d, set, setD, catalog, toast }: Props) {
   const [paste, setPaste] = useState("");
+  // Error fijo bajo el campo (no un toast que desaparece): DESIGN_AUDIT §8.
+  const [pasteError, setPasteError] = useState("");
   const brands = useMemo(() => [...new Set(catalog.map((m) => m.brand))], [catalog]);
   const models = catalog.filter((m) => m.brand === d.brand);
   const pm = catalog.find((m) => m.brand === d.brand && m.model === d.model);
@@ -41,9 +43,10 @@ export function StepBoard({ d, set, setD, catalog, toast }: Props) {
     const o = parseMeasures(paste);
     const keys = Object.keys(o) as MeasureKey[];
     if (!keys.length) {
-      toast("No hemos reconocido las medidas. Prueba así: 6'4 x 20 1/2 x 2 5/8 34L");
+      setPasteError("No hemos reconocido las medidas. Prueba así: 6'4 x 20 1/2 x 2 5/8 34L");
       return;
     }
+    setPasteError("");
     // El parser devuelve pies y pulgadas: se pasa a cm si es la unidad elegida.
     const parsed = convertUnits({ ...d, unit: "ft", len: o.len ?? "", width: o.width ?? "", thick: o.thick ?? "", vol: o.vol ?? "" }, d.unit);
     const patch: Partial<PublishDraft> = { src: { ...d.src } };
@@ -59,7 +62,7 @@ export function StepBoard({ d, set, setD, catalog, toast }: Props) {
   const fields: [MeasureKey, string, string, React.HTMLAttributes<HTMLInputElement>["inputMode"]][] = [
     ["len", "Longitud", ft ? "6'4\"" : "193", ft ? "text" : "decimal"],
     ["width", "Anchura", ft ? '20 1/2"' : "52", ft ? "text" : "decimal"],
-    ["thick", "Grosor", ft ? '2 5/8"' : "6.7", ft ? "text" : "decimal"],
+    ["thick", "Grosor", ft ? '2 5/8"' : "6,7", ft ? "text" : "decimal"],
     ["vol", "Litros", "34", "decimal"],
   ];
 
@@ -133,7 +136,12 @@ export function StepBoard({ d, set, setD, catalog, toast }: Props) {
               value={paste}
               autoComplete="off"
               spellCheck={false}
-              onChange={(e) => setPaste(e.target.value)}
+              aria-invalid={pasteError ? true : undefined}
+              aria-describedby="pub-paste-error"
+              onChange={(e) => {
+                setPaste(e.target.value);
+                if (pasteError) setPasteError("");
+              }}
               onKeyDown={(e) => {
                 if (e.key === "Enter") doParse();
               }}
@@ -142,6 +150,9 @@ export function StepBoard({ d, set, setD, catalog, toast }: Props) {
               Rellenar
             </button>
           </div>
+          <p id="pub-paste-error" className={styles.error} role="alert">
+            {pasteError}
+          </p>
         </div>
 
         <div className={styles.fields}>

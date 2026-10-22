@@ -110,7 +110,7 @@ export function LoginForm({ onDone }: { onDone?: () => void } = {}) {
             className={`${ui.btnPrimary} ${styles.submit}`}
             disabled={busy || !email.includes("@") || (needsCaptcha && !captcha)}
           >
-            {busy ? "Enviando…" : needsCaptcha && !captcha ? "Comprobando conexión…" : "Enviarme el código"}
+            {busy ? "Enviando…" : needsCaptcha && !captcha ? "Comprobando que no eres un robot…" : "Enviarme el código"}
           </button>
         </form>
       ) : (

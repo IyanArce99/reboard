@@ -70,7 +70,7 @@ export function StepPrice({ d, set, model, refs, dataIsDemo, live }: Props) {
         )}
       </div>
 
-      <Group id="pub-zone" title="Zona">
+      <Group id="pub-zone" title="Zona" hint="De momento solo publicamos en estas zonas.">
         {ZONE_GROUPS.map((g) => (
           <div key={g.name} className={styles.zoneGroup}>
             <span className={styles.zoneName}>{g.name}</span>
@@ -141,7 +141,7 @@ export function StepPrice({ d, set, model, refs, dataIsDemo, live }: Props) {
             onChange={(e) => set({ phone: e.target.value })}
           />
           <span id="pub-phone-help" className={styles.small}>
-            Es privado: no aparece en el anuncio. Solo lo ve quien pulsa «Mostrar contacto», con protección contra robots.
+            No aparece escrito en el anuncio: lo ve quien pulsa «Mostrar contacto», con protección contra robots.
             {!live && " Demo: no se guarda."}
           </span>
         </div>

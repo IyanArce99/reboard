@@ -114,6 +114,24 @@
   font-weight: 600;
 }
 
+/* Área táctil de 44 px en móvil sin cambiar el tamaño visual de los chips (como .photoRm o .unit). */
+@media (max-width: 759px) {
+  .chip,
+  .chipApplied {
+    position: relative;
+  }
+  .chip::after,
+  .chipApplied::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 50%;
+    height: 44px;
+    transform: translateY(-50%);
+  }
+}
+
 .label {
   font-size: 12px;
   font-weight: 700;

@@ -1287,13 +1287,6 @@ button.slot:hover {
 .doneH1:focus {
   outline: none;
 }
-.doneKicker {
-  font-family: var(--rb-font-mono);
-  font-size: 12px;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--rb-teal-text);
-}
 .doneText {
   font-size: 16px;
   color: var(--rb-muted);

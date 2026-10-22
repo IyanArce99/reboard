@@ -6,14 +6,16 @@ import { HeartIcon } from "@/components/icons";
 import ui from "@/styles/ui.module.css";
 import { useUserState } from "./UserStateProvider";
 
-export function SaveButton({ id, className, size = 19 }: { id: string; className?: string; size?: number }) {
+/** `name`: título del anuncio, para que en una lista no se oigan N «Guardar» iguales. */
+export function SaveButton({ id, name, className, size = 19 }: { id: string; name?: string; className?: string; size?: number }) {
   const { saved, toggleSaved } = useUserState();
   const on = saved.includes(id);
+  const label = on ? (name ? `Quitar ${name} de guardadas` : "Quitar de guardadas") : name ? `Guardar ${name}` : "Guardar";
   return (
     <button
       type="button"
       className={className}
-      aria-label={on ? "Quitar de guardadas" : "Guardar"}
+      aria-label={label}
       aria-pressed={on}
       onClick={() => toggleSaved(id)}
       style={{ color: on ? "var(--rb-teal)" : "var(--rb-petrol)" }}
@@ -33,7 +35,8 @@ export function SaveTextButton({ id, className }: { id: string; className?: stri
   );
 }
 
-export function CompareButton({ id, label, className }: { id: string; label: string; className?: string }) {
+/** `label`: etiqueta corta de la bandeja; `name`: título completo para lectores de pantalla. */
+export function CompareButton({ id, label, name, className }: { id: string; label: string; name?: string; className?: string }) {
   const { compare, toggleCompare } = useUserState();
   const on = compare.some((c) => c.id === id);
   return (
@@ -44,7 +47,8 @@ export function CompareButton({ id, label, className }: { id: string; label: str
       data-on={on || undefined}
       onClick={() => toggleCompare({ id, label })}
     >
-      {on ? "✓ Comparando" : "Comparar"}
+      {on ? "En comparación" : "Comparar"}
+      <span className="visually-hidden">: {name ?? label}</span>
     </button>
   );
 }

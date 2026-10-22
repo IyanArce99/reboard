@@ -58,7 +58,7 @@ export function Comparator() {
           <span>
             {listings.length === 1
               ? "Tienes 1 tabla seleccionada. Añade al menos otra desde los resultados."
-              : "Pulsa «Comparar» en 2 a 4 tarjetas o fichas."}
+              : "Pulsa «Comparar» en 2 a 4 tablas desde la búsqueda o la ficha."}
           </span>
           <Link href="/buscar" className={styles.pick}>
             Elegir tablas
@@ -102,7 +102,7 @@ export function Comparator() {
                         </Link>
                         <div className={styles.headActions}>
                           <Link href={href} className={styles.open}>
-                            Abrir ficha
+                            Ver anuncio
                           </Link>
                           <button
                             type="button"

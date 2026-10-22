@@ -16,6 +16,18 @@
   display: inline-flex;
   align-items: center;
   min-height: 32px;
+  position: relative;
+}
+/* Área táctil de 44 px sin cambiar el tamaño visible. */
+.back::after,
+.report::after {
+  content: "";
+  position: absolute;
+  left: -4px;
+  right: -4px;
+  top: 50%;
+  height: 44px;
+  transform: translateY(-50%);
 }
 .back:hover {
   text-decoration: underline;
@@ -77,6 +89,16 @@
   border-radius: 16px;
   overflow: hidden;
   background: repeating-linear-gradient(135deg, #dde9e8 0 9px, #e6efee 9px 18px);
+}
+.galEmpty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  color: var(--rb-muted);
+  font-size: 14px;
+  font-weight: 600;
 }
 .galMain[data-off] {
   opacity: 0.55;
@@ -190,7 +212,7 @@
 
 .oldPrice {
   font-size: 15px;
-  color: var(--rb-faint);
+  color: var(--rb-muted);
 }
 
 .title {
@@ -232,12 +254,12 @@
   margin-top: 3px;
 }
 .keyV[data-unknown] {
-  color: var(--rb-faint);
+  color: var(--rb-muted);
 }
 
 .keyS {
   font-size: 12px;
-  color: var(--rb-faint);
+  color: var(--rb-muted);
   margin-top: 2px;
 }
 
@@ -330,6 +352,7 @@
 }
 
 .report {
+  position: relative;
   border: 0;
   background: transparent;
   padding: 0;
@@ -396,7 +419,7 @@
   font-weight: 500;
 }
 .specV[data-unknown] {
-  color: var(--rb-faint);
+  color: var(--rb-muted);
 }
 
 .badge {
@@ -769,7 +792,7 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  min-height: 40px;
+  min-height: 44px;
   font-size: 15px;
 }
 .reportOption input {

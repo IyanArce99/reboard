@@ -19,7 +19,7 @@ export function ClosingBand() {
             Buscar tablas
           </Link>
           <Link href="/vender/publicar" className={styles.secondary}>
-            Vender la mía gratis
+            Publicar la mía gratis
           </Link>
         </div>
       </div>

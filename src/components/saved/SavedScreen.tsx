@@ -24,7 +24,7 @@ export function SavedScreen({ tab }: { tab: Tab }) {
   ];
   return (
     <>
-      <nav className={styles.tabs} aria-label="Guardado">
+      <nav className={styles.tabs} aria-label="Guardadas y alertas">
         {tabs.map(([v, href, label]) => (
           <Link key={v} href={href} className={styles.tab} aria-current={tab === v ? "page" : undefined} scroll={false}>
             {label}
@@ -60,7 +60,7 @@ function SavedList() {
           </Link>
         }
       >
-        Pulsa el corazón en cualquier anuncio y aquí verás si baja de precio o se vende.
+        Pulsa el corazón en cualquier anuncio y aquí verás si baja de precio o se vende. Se guardan en este dispositivo.
       </EmptyState>
     );
   }
@@ -75,7 +75,7 @@ function SavedList() {
         <p className={styles.gone}>
           {gone.length === 1 ? "1 tabla guardada ya no existe en Reboard." : `${gone.length} tablas guardadas ya no existen en Reboard.`}{" "}
           <button type="button" className={styles.linkBtn} onClick={() => gone.forEach((id) => toggleSaved(id))}>
-            Quitarlas de la lista
+            {gone.length === 1 ? "Quitarla de la lista" : "Quitarlas de la lista"}
           </button>
         </p>
       )}
@@ -170,7 +170,9 @@ function AlertRow({ alert: a }: { alert: SavedAlert }) {
       ? "contando tablas…"
       : res.count == null
         ? "no hemos podido contar las tablas"
-        : `${res.count} tabla${res.count === 1 ? "" : "s"} coinciden ahora`;
+        : res.count === 1
+          ? "1 tabla coincide ahora"
+          : `${res.count} tablas coinciden ahora`;
   return (
     <div className={styles.alert} data-off={!a.on || undefined}>
       <div className={styles.alertBody}>

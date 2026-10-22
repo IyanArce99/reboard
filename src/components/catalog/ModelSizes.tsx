@@ -76,7 +76,7 @@ export function ModelSizes({ brand, model, intro, photo, sizes, sourceNote, tota
               ["Longitud", sz.label],
               ["Anchura", sz.width],
               ["Grosor", sz.thick],
-              ["Volumen", sz.volumeText],
+              ["Litros", sz.volumeText],
             ].map(([k, v]) => (
               <div key={k} className={styles.spec}>
                 <dt className={styles.specK}>{k}</dt>
@@ -86,7 +86,7 @@ export function ModelSizes({ brand, model, intro, photo, sizes, sourceNote, tota
           </dl>
           <div className={styles.sourceRow}>
             <span className={styles.sourceBadge}>Según fabricante</span>
-            <span>Medidas de catálogo. En cada anuncio, el vendedor confirma su variante.</span>
+            <span>Medidas del catálogo. En cada anuncio, el vendedor elige su medida.</span>
           </div>
           {profile && (
             <div className={styles.fit} data-in={inRange(sz.volume) || undefined} role="status">
@@ -144,23 +144,23 @@ export function ModelSizes({ brand, model, intro, photo, sizes, sourceNote, tota
 
       <section className={styles.usedSection} aria-labelledby="usadas-title">
         <h2 id="usadas-title" className={styles.h2}>
-          {model} {sz.label} de segunda mano · {sz.count}
+          {model} {sz.label} de segunda mano ({sz.count})
         </h2>
         {sz.count > 0 ? (
           <div className={styles.grid}>{sz.cards}</div>
         ) : (
           <div className={styles.noneBox}>
             <div className={styles.noneText}>
-              No hay ninguna {brand} {model} {sz.label} usada publicada ahora mismo. Te avisamos en cuanto aparezca una.
+              No hay ninguna {brand} {model} {sz.label} usada publicada ahora mismo. Guarda una alerta para seguirla.
             </div>
             <AlertButton text={sz.alert.text} query={sz.alert.query} className={`${ui.btnStrong} ${styles.noneBtn}`}>
-              Avísame cuando aparezca una de segunda mano
+              Crear alerta de esta medida
             </AlertButton>
           </div>
         )}
         {total > sz.count && (
           <Link href={allHref} className={styles.more}>
-            Ver las {total} {model} usadas de todas las medidas →
+            {total === 1 ? `Ver la única ${model} usada →` : `Ver las ${total} ${model} usadas de todas las medidas →`}
           </Link>
         )}
       </section>

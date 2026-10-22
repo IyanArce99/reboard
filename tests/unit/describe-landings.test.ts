@@ -9,6 +9,7 @@ import {
   landingFilters,
   landingPath,
   landingPathFor,
+  landingIntro,
   landingTitle,
 } from "@/lib/search/landings";
 
@@ -19,9 +20,9 @@ const names: CatalogNames = {
 
 describe("títulos", () => {
   it("H1 dinámico como el prototipo", () => {
-    expect(resultsTitle(withFilters({ shapes: ["evolutiva"], zone: "gran-canaria" }), names)).toBe("Evolutivas de segunda mano en Gran Canaria");
+    expect(resultsTitle(withFilters({ shapes: ["evolutiva"], zone: "gran-canaria" }), names)).toBe("Tablas evolutivas de segunda mano en Gran Canaria");
     expect(resultsTitle(withFilters({ shapes: ["fish"] }), names)).toBe("Tablas fish de segunda mano");
-    expect(resultsTitle(withFilters({ constructions: ["softboard"] }), names)).toBe("Softboards de segunda mano");
+    expect(resultsTitle(withFilters({ constructions: ["softboard"] }), names)).toBe("Softboards (tablas de espuma) de segunda mano");
     expect(resultsTitle(withFilters({ brand: "torq", zone: "tenerife" }), names)).toBe("Tablas Torq de segunda mano en Tenerife");
     expect(resultsTitle(withFilters({ brand: "sin-marca" }), names)).toBe("Tablas de surf de segunda mano");
     expect(resultsTitle(withFilters({ zone: "canarias" }), names)).toBe("Tablas de surf de segunda mano en Canarias");
@@ -34,7 +35,7 @@ describe("títulos", () => {
   });
 
   it("título de landing de principiantes", () => {
-    expect(landingTitle("asturias", "principiantes", "x")).toBe("Tablas de surf para principiantes de segunda mano en Asturias");
+    expect(landingTitle("asturias", "principiantes", "x")).toBe("Tablas de surf de segunda mano para principiantes en Asturias");
     expect(landingTitle(null, "evolutiva", "fallback")).toBe("fallback");
   });
 });
@@ -43,7 +44,11 @@ describe("alertText", () => {
   it("describe los filtros", () => {
     expect(
       alertText(withFilters({ shapes: ["evolutiva"], volMin: 45, volMax: 60, priceMax: 200, zone: "gran-canaria" }), names),
-    ).toBe("Evolutivas de 45–60 L, por menos de 200 €, en Gran Canaria");
+    ).toBe("Evolutivas de 45 a 60 L, por menos de 200 €, en Gran Canaria");
+    expect(alertText(withFilters({ volMin: 55 }), names)).toBe("Tablas de 55 L o más, en toda España");
+    expect(alertText(withFilters({ volMax: 40 }), names)).toBe("Tablas de hasta 40 L, en toda España");
+    expect(alertText(withFilters({ lenMax: 90 }), names)).toBe(`Tablas de hasta 7'6", en toda España`);
+    expect(alertText(withFilters({ lenMin: 84 }), names)).toBe(`Tablas desde 7'0", en toda España`);
     expect(alertText(emptyFilters(), names)).toBe("Tablas, en toda España");
     expect(alertText(withFilters({ brand: "torq", lenMin: 84, lenMax: 90 }), names)).toBe(`Tablas Torq entre 7'0" y 7'6", en toda España`);
   });
@@ -59,9 +64,20 @@ describe("chips aplicados y sugerencias", () => {
     expect(chips.find((c) => c.key === "marca")!.without).toMatchObject({ brand: "", model: "" });
   });
 
+  it("chips de rangos sin ∞ ni 0", () => {
+    const label = (p: Parameters<typeof withFilters>[0]) => appliedChips(withFilters(p), names).map((c) => c.label);
+    expect(label({ volMin: 55 })).toEqual(["Desde 55 L"]);
+    expect(label({ volMax: 40 })).toEqual(["Hasta 40 L"]);
+    expect(label({ volMin: 45, volMax: 60 })).toEqual(["45–60 L"]);
+    expect(label({ priceMax: 200 })).toEqual(["Hasta 200 €"]);
+    expect(label({ priceMin: 100 })).toEqual(["Desde 100 €"]);
+    expect(label({ thickMin: 2.75 })).toEqual(['Grosor ≥ 2,75"']);
+    expect(label({ fit: { lo: 62, hi: 79 } })).toEqual(["Mi rango: 62–79 L"]);
+  });
+
   it("sugerencias del estado vacío", () => {
     const s = emptySuggestions(withFilters({ shapes: ["longboard"], zone: "lanzarote", priceMax: 150, volMin: 60 }));
-    expect(s.map((x) => x.label)).toEqual(["Toda España", "Hasta 200 €", "Litros 55–∞", "Cualquier forma", "Quitar todos los filtros"]);
+    expect(s.map((x) => x.label)).toEqual(["Toda España", "Hasta 200 €", "Desde 55 L", "Cualquier tipo", "Quitar todos los filtros"]);
   });
 });
 
@@ -80,6 +96,12 @@ describe("landings", () => {
     expect(landingFilters("tenerife", "fish")).toMatchObject({ zone: "tenerife", shapes: ["fish"] });
     expect(landingPath("tenerife", "fish")).toBe("/tablas/tenerife/fish");
     expect(landingPath(null, "fish")).toBe("/tablas/fish");
+  });
+
+  it("intros: todas las formas tienen una y las de zona citan la zona", () => {
+    for (const form of LANDING_FORMS) expect(landingIntro(null, form)).not.toBe("");
+    expect(landingIntro("tenerife", "fish")).toContain("Tenerife");
+    expect(landingIntro("tenerife", null)).not.toMatch(/distancia/);
   });
 
   it("canonical de /buscar hacia la landing equivalente", () => {

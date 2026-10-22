@@ -7,10 +7,10 @@ import { ago, daysBetween } from "@/lib/domain/format";
 export const listingTitle = (l: Listing) =>
   l.brand
     ? [l.brand, l.model, l.sizeLabel].filter(Boolean).join(" ")
-    : `${SHAPE_INFO[l.shape].label} artesanal ${l.sizeLabel}`;
+    : `${SHAPE_INFO[l.shape].label} sin marca ${l.sizeLabel}`;
 
 /** Etiqueta corta para la bandeja de comparación. */
-export const listingShortLabel = (l: Listing) => `${l.brand ?? "Artesanal"} ${l.sizeLabel}`;
+export const listingShortLabel = (l: Listing) => `${l.brand ?? "Sin marca"} ${l.sizeLabel}`;
 
 export const listingPath = (l: Listing) => `/anuncio/${l.slug}-${l.id}`;
 
@@ -23,11 +23,10 @@ export const volumeShort = (l: Listing) => (l.volume.value != null ? `${l.volume
 
 export type Tone = "success" | "warning" | "error";
 
-export function availability(l: Listing, now: Date, long = false): { text: string; tone: Tone } {
+export function availability(l: Listing, now: Date): { text: string; tone: Tone } {
   const d = ago(daysBetween(l.confirmedAt, now));
   if (l.status === "disponible") return { text: `Disponible · confirmada ${d}`, tone: "success" };
-  if (l.status === "pendiente")
-    return { text: long ? `Pendiente de confirmar · última confirmación ${d}` : `Pendiente de confirmar · ${d}`, tone: "warning" };
+  if (l.status === "pendiente") return { text: `Sin confirmar desde ${d}`, tone: "warning" };
   return { text: { vendida: "Vendida", caducada: "Caducada", retirada: "Retirada" }[l.status], tone: "error" };
 }
 
@@ -45,6 +44,6 @@ export const consShort = (l: Listing) => CONSTRUCTION_INFO[l.construction].short
 export function sourceBadge(value: unknown, source: DataSource): { text: string; tone: "seller" | "manufacturer" | "none" } {
   if (value == null || source == null) return { text: "Sin indicar", tone: "none" };
   return source === "manufacturer"
-    ? { text: "Según fabricante · variante confirmada", tone: "manufacturer" }
-    : { text: "Confirmado por vendedor", tone: "seller" };
+    ? { text: "Según fabricante", tone: "manufacturer" }
+    : { text: "Indicado por el vendedor", tone: "seller" };
 }

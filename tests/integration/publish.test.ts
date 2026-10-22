@@ -122,7 +122,7 @@ describe("publicar (E3, E4)", () => {
     const ghost = { path: `${seller.userId}/${listingId}/${crypto.randomUUID()}.webp`, width: 40, height: 120 };
     await expect(finalizeListing(seller.client, seller.userId, publicId, [ghost], true)).rejects.toThrow(PublishError);
     const foreign = { path: `${other.userId}/${listingId}/${crypto.randomUUID()}.webp`, width: 40, height: 120 };
-    await expect(finalizeListing(seller.client, seller.userId, publicId, [foreign], true)).rejects.toThrow(/Ruta/);
+    await expect(finalizeListing(seller.client, seller.userId, publicId, [foreign], true)).rejects.toThrow(/Vuelve a añadir las fotos/);
     await expect(finalizeListing(other.client, other.userId, publicId, [ghost], true)).rejects.toThrow(/No encontramos/);
   });
 
@@ -185,6 +185,6 @@ describe("publicar (E3, E4)", () => {
     // El dueño sigue viendo su anuncio retirado (el panel lo lee con su sesión).
     const own = await seller.client.from("listings").select("public_id").neq("status", "draft");
     expect(own.data?.map((r) => r.public_id)).toContain(publicId);
-    await expect(panelAction(seller.client, seller.userId, publicId, "price", 0)).rejects.toThrow(/Precio/);
+    await expect(panelAction(seller.client, seller.userId, publicId, "price", 0)).rejects.toThrow(/precio entre 1 y 20.000/);
   });
 });

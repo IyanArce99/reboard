@@ -16,16 +16,16 @@ const COLUMNS: { title: string; links: [string, string][] }[] = [
   {
     title: "Elegir bien",
     links: [
-      ["¿Cuántos litros necesito?", "/calculadora-litros"],
-      ["Comparar anuncios", "/comparar"],
+      ["¿Qué tabla necesito?", "/calculadora-litros"],
+      ["Comparar tablas", "/comparar"],
       ["Guías", "/guias"],
     ],
   },
   {
     title: "Vender",
     links: [
-      ["Publicar gratis", "/vender/publicar"],
-      ["Cómo funciona vender", "/vender"],
+      ["Publicar tabla", "/vender/publicar"],
+      ["Cómo vender tu tabla", "/vender"],
       ["Tiendas y escuelas", "/tiendas"],
     ],
   },
@@ -43,7 +43,8 @@ export function Footer() {
         </div>
         {COLUMNS.map((c) => (
           <nav key={c.title} className={styles.col} aria-label={c.title}>
-            <h2 className={styles.colTitle}>{c.title}</h2>
+            {/* Título de columna, no de sección: no entra en el esquema de encabezados de la página. */}
+            <p className={styles.colTitle}>{c.title}</p>
             {c.links.map(([l, href]) => (
               <Link key={href} href={href}>
                 {l}

@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { LISTING_STATUS_LABEL } from "./labels";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { moderateAction } from "@/app/moderacion/actions";
@@ -39,7 +40,7 @@ export function ModerationRow({ row }: { row: ModerationRowData }) {
           {row.title}
         </Link>
         <span className={styles.badge} data-tone={row.moderation}>
-          {row.moderation === "flagged" ? "En revisión" : row.moderation === "removed" ? "Retirado" : "Visible"} · {row.status}
+          {row.moderation === "flagged" ? "En revisión" : row.moderation === "removed" ? "Retirado" : "Visible"} · {LISTING_STATUS_LABEL[row.status] ?? row.status}
         </span>
       </div>
       <ul className={styles.reports}>

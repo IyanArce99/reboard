@@ -25,6 +25,8 @@ interface Props {
   set: (patch: Partial<FinderState>) => void;
   /** Se intentó continuar el paso 1 sin un peso válido. */
   weightError: boolean;
+  /** Se intentó continuar el paso 2 sin elegir nivel. */
+  levelError: boolean;
   onEnter: () => void;
   headingRef: React.Ref<HTMLHeadingElement>;
 }
@@ -32,7 +34,7 @@ interface Props {
 const digits = (v: string, max = 3) => v.replace(/[^0-9]/g, "").slice(0, max);
 
 /** Una pregunta del asistente: título, ayuda y controles del paso. */
-export function FinderStep({ state: W, set, weightError, onEnter, headingRef }: Props) {
+export function FinderStep({ state: W, set, weightError, levelError, onEnter, headingRef }: Props) {
   const step = Math.min(W.step, 7);
   const [q, help] = QUESTIONS[step - 1];
   const single = (key: "lvl" | "cur" | "freq" | "waves", required = false) => (v: string) =>
@@ -82,27 +84,23 @@ export function FinderStep({ state: W, set, weightError, onEnter, headingRef }: 
               </button>
             ))}
           </div>
-          <label className={styles.heightField}>
-            Altura (opcional)
-            <input
-              inputMode="numeric"
-              placeholder="—"
-              value={W.hgt}
-              onChange={(e) => set({ hgt: digits(e.target.value) })}
-              className={styles.smallInput}
-            />{" "}
-            cm
-          </label>
         </div>
       )}
 
       {step === 2 && (
-        <OptionGroup
-          label={q}
-          options={LEVELS.map(([value, title, description]) => ({ value, title, description }))}
-          selected={W.lvl ? [W.lvl] : []}
-          onToggle={single("lvl", true)}
-        />
+        <>
+          <OptionGroup
+            label={q}
+            options={LEVELS.map(([value, title, description]) => ({ value, title, description }))}
+            selected={W.lvl ? [W.lvl] : []}
+            onToggle={single("lvl", true)}
+          />
+          {levelError && !W.lvl && (
+            <span id="finder-level-error" className={styles.error} role="alert">
+              Elige tu nivel para continuar.
+            </span>
+          )}
+        </>
       )}
 
       {step === 3 && (
@@ -118,7 +116,7 @@ export function FinderStep({ state: W, set, weightError, onEnter, headingRef }: 
               <label className={styles.fieldLabel}>
                 Longitud (opcional)
                 <select value={W.curLen} onChange={(e) => set({ curLen: e.target.value })} className={styles.select}>
-                  <option value="">Desde…</option>
+                  <option value="">Elige…</option>
                   {LENGTH_STEPS.map((i) => (
                     <option key={i} value={i}>
                       {ftLabel(i)}
@@ -229,7 +227,6 @@ export function FinderStep({ state: W, set, weightError, onEnter, headingRef }: 
                 €
               </label>
             </div>
-            <div className={styles.hint}>Solo filtra los anuncios: no cambia la recomendación técnica.</div>
           </div>
         </div>
       )}

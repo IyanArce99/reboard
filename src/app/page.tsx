@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { Suspense } from "react";
 import { BoardShape } from "@/components/brand/BoardShape";
@@ -6,6 +7,7 @@ import { Photo } from "@/components/brand/Photo";
 import { SectionHeader } from "@/components/brand/SectionHeader";
 import { NearSection, NearSkeleton, getHere } from "@/components/home/NearSection";
 import { SearchBar } from "@/components/search/SearchBar";
+import { JsonLd } from "@/components/seo/JsonLd";
 import { AlertButton } from "@/components/user/islands";
 import { getRepository } from "@/lib/data";
 import { getCatalogNames } from "@/lib/data/names";
@@ -14,7 +16,17 @@ import type { PhotoSlug } from "@/lib/photos";
 import { alertText } from "@/lib/search/describe";
 import { emptyFilters, toQuery, withFilters } from "@/lib/search/filters";
 import { formFilters, landingPath, type LandingForm } from "@/lib/search/landings";
+import { absoluteUrl, SITE_NAME } from "@/lib/site";
 import styles from "@/components/home/Home.module.css";
+
+const DESCRIPTION =
+  "Compra y vende tablas de surf de segunda mano en España. Busca por litros, medidas, tipo y zona y habla directamente con quien vende, sin comisiones.";
+
+export const metadata: Metadata = {
+  description: DESCRIPTION,
+  alternates: { canonical: "/", languages: { "es-ES": "/" } },
+  openGraph: { url: "/", description: DESCRIPTION },
+};
 
 // Tipos de tabla con su silueta. Softboard es una construcción y «principiantes» una necesidad:
 // se dibujan con la forma más habitual y en tono suave para distinguirlos.
@@ -30,7 +42,7 @@ const CATEGORIES: { label: string; form: LandingForm; shape: Shape; soft?: boole
 ];
 
 const STEPS = [
-  { n: "01", t: "Busca por lo que importa", d: "Litros, largo, tipo, precio y zona. Cada medida dice de dónde sale: del vendedor, del fabricante o sin indicar." },
+  { n: "01", t: "Busca por lo que importa", d: "Litros, longitud, tipo, precio y zona. Cada medida indica su origen: el vendedor, el fabricante o «sin indicar»." },
   { n: "02", t: "Habla directamente con quien vende", d: "Un mensaje de WhatsApp o una llamada, sin intermediarios. Reboard no cobra comisión." },
   { n: "03", t: "Mírala en persona y paga al recogerla", d: "Queda en un sitio público, revisa cantos, fondo y quillas, y paga en mano. Nunca por adelantado." },
 ];
@@ -50,7 +62,7 @@ const GUIDES: { t: string; d: string; href: string; photo: PhotoSlug }[] = [
   },
   {
     t: "Compara antes de decidir",
-    d: "Hasta tres anuncios lado a lado: litros, medidas, estado, precio y zona.",
+    d: "Hasta cuatro tablas lado a lado: litros, medidas, estado, precio y zona.",
     href: "/comparar",
     photo: "entrando-al-agua",
   },
@@ -97,7 +109,7 @@ export default async function Home() {
         <section className={`container ${styles.hero}`}>
           <p className={styles.kicker}>Compraventa entre surfistas · España</p>
           <h1 className={styles.h1}>
-            Tablas de surf
+            Tablas de surf{" "}
             <br />
             <span>de segunda mano</span>
           </h1>
@@ -126,7 +138,7 @@ export default async function Home() {
 
       {/* ───────── Tipos de tabla ───────── */}
       <section className={`container ${styles.section}`} aria-labelledby="tipos-title">
-        <SectionHeader id="tipos-title" eyebrow="Explora por tipo" title="¿Qué forma buscas?" action={{ href: "/buscar", label: "Ver todas las tablas" }} />
+        <SectionHeader id="tipos-title" eyebrow="Explora por tipo" title="¿Qué tipo de tabla buscas?" action={{ href: "/buscar", label: "Ver todas las tablas" }} />
         <div data-rail="1" className={styles.types}>
           {cats.map((c) =>
             c.n ? (
@@ -147,7 +159,7 @@ export default async function Home() {
                 </span>
                 <span className={styles.typeName}>{c.label}</span>
                 <span className={styles.typeHint}>{c.hint}</span>
-                <span className={styles.typeCount}>Sin anuncios · avísame</span>
+                <span className={styles.typeCount}>Sin anuncios · crear alerta</span>
               </AlertButton>
             ),
           )}
@@ -195,7 +207,7 @@ export default async function Home() {
             <span className={styles.promoEyebrow}>¿Qué tabla necesito?</span>
             <span className={styles.promoTitle}>No compres a ciegas</span>
             <span className={styles.promoText}>
-              Peso, nivel, olas y lo que quieres conseguir. Te damos un rango de litros y te enseñamos las tablas que encajan.
+              Peso, nivel, olas y lo que quieres conseguir. Te damos un rango orientativo de litros y las tablas publicadas que entran en él.
             </span>
             <span className={styles.promoCta}>Calcular mis litros →</span>
           </span>
@@ -206,7 +218,7 @@ export default async function Home() {
             <span className={styles.promoEyebrow}>Vender</span>
             <span className={styles.promoTitle}>¿Tienes una tabla parada?</span>
             <span className={styles.promoText}>
-              Publícala gratis en 5 pasos desde el móvil. Te escriben directamente quienes buscan esas medidas.
+              Publícala gratis en 5 pasos desde el móvil. Quien busca esas medidas te escribe o te llama directamente.
             </span>
             <span className={styles.promoCtaSell}>Publicar mi tabla</span>
           </span>
@@ -243,7 +255,7 @@ export default async function Home() {
               ) : (
                 <AlertButton key={z.slug} text={alertText(f, names)} query={toQuery(f)} className={styles.zone}>
                   {z.name}
-                  <span className={styles.zoneAlert}>Avísame</span>
+                  <span className={styles.zoneAlert}>Crear alerta</span>
                 </AlertButton>
               );
             })}
@@ -267,6 +279,23 @@ export default async function Home() {
       </section>
 
       <ClosingBand />
+
+      <JsonLd
+        data={{
+          "@context": "https://schema.org",
+          "@graph": [
+            { "@type": "WebSite", "@id": absoluteUrl("/#web"), name: SITE_NAME, url: absoluteUrl("/"), inLanguage: "es-ES" },
+            {
+              "@type": "Organization",
+              "@id": absoluteUrl("/#org"),
+              name: SITE_NAME,
+              url: absoluteUrl("/"),
+              logo: absoluteUrl("/brand/reboard-app-icon.svg"),
+              description: DESCRIPTION,
+            },
+          ],
+        }}
+      />
     </main>
   );
 }

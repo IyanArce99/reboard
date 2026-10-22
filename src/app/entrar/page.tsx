@@ -34,7 +34,7 @@ export default function EntrarPage() {
             </Suspense>
             <p className={styles.fine}>
               Con la cuenta, tus tablas guardadas se sincronizan entre dispositivos y puedes gestionar tus anuncios. Solo usamos
-              tu email para entrar y para avisos sobre tus anuncios.
+              tu email para que entres en tu cuenta.
             </p>
           </>
         ) : (

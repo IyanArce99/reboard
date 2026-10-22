@@ -84,13 +84,18 @@ export default async function BrandPage({ params }: PageProps<"/marcas/[marca]">
           )}
         </div>
         <AlertButton text={alertText(f, names)} query={toQuery(f)} className={`${ui.btnStrong} ${styles.alertBtn}`}>
-          Avísame de nuevas {b.name}
+          Crear alerta de {b.name}
         </AlertButton>
       </div>
 
       <section className={styles.section} aria-labelledby="usadas-title">
         <h2 id="usadas-title" className={styles.h2}>
-          {b.name} en venta <span className={styles.h2Count}>{usedPage.total}</span>
+          {b.name} en venta{" "}
+          <span className={styles.h2Count}>
+            <span className="visually-hidden">(</span>
+            {usedPage.total}
+            <span className="visually-hidden">)</span>
+          </span>
         </h2>
         {used.length > 0 ? (
           <>
@@ -106,7 +111,7 @@ export default async function BrandPage({ params }: PageProps<"/marcas/[marca]">
             )}
           </>
         ) : (
-          <div className={styles.empty}>Ahora no hay ninguna {b.name} usada publicada. Crea una alerta y te avisamos.</div>
+          <div className={styles.empty}>Ahora no hay ninguna {b.name} usada publicada. Guarda una alerta para seguirla.</div>
         )}
       </section>
 

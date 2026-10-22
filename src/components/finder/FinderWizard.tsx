@@ -19,7 +19,7 @@ import {
   sanitizeFinderState,
   type FinderState,
 } from "@/lib/finder/recommend";
-import { FinderResult } from "./FinderResult";
+import { FINDER_DISCLAIMER, FinderResult } from "./FinderResult";
 import { FinderStep } from "./FinderStep";
 import styles from "./Finder.module.css";
 
@@ -53,7 +53,7 @@ function summaryOf(W: FinderState): SummaryItem[] {
 }
 
 export function FinderWizard({ intro }: { intro: React.ReactNode }) {
-  const { setProfile, toast } = useUserState();
+  const { setProfile } = useUserState();
   const [W, setW] = useState<FinderState>(initialFinderState);
   const [loaded, setLoaded] = useState(false);
   const [tried, setTried] = useState(false);
@@ -114,7 +114,8 @@ export function FinderWizard({ intro }: { intro: React.ReactNode }) {
       return;
     }
     if (step === 2 && !W.lvl) {
-      toast("Elige tu nivel para continuar");
+      // Mensaje fijo bajo las opciones (role="alert"), como el error del peso.
+      setTried(true);
       return;
     }
     if (step === TOTAL_STEPS) {
@@ -125,7 +126,7 @@ export function FinderWizard({ intro }: { intro: React.ReactNode }) {
           setTried(true);
         } else {
           goTo(2);
-          toast("Elige tu nivel para continuar");
+          setTried(true);
         }
         return;
       }
@@ -182,7 +183,7 @@ export function FinderWizard({ intro }: { intro: React.ReactNode }) {
               })}
             </div>
 
-            <FinderStep state={W} set={set} weightError={tried && !weightOk} onEnter={next} headingRef={headingRef} />
+            <FinderStep state={W} set={set} weightError={tried && !weightOk} levelError={tried && step === 2} onEnter={next} headingRef={headingRef} />
 
             <div className={styles.grow} />
             <div className={styles.nav}>
@@ -192,7 +193,7 @@ export function FinderWizard({ intro }: { intro: React.ReactNode }) {
                 onClick={() => step > 1 && goTo(step - 1)}
                 disabled={step <= 1}
               >
-                Anterior
+                Atrás
               </button>
               <div className={styles.navRight}>
                 {optional && (
@@ -216,10 +217,11 @@ export function FinderWizard({ intro }: { intro: React.ReactNode }) {
                   type="button"
                   className={styles.profileRow}
                   onClick={() => goTo(s.step)}
-                  aria-label={`${s.label}: ${s.value}. Editar`}
                 >
+                  {/* Sin aria-label: el nombre accesible es el texto visible (WCAG 2.5.3) más «Editar». */}
                   <span className={styles.profileKey}>{s.label}</span>
                   <span className={styles.profileVal}>{s.value}</span>
+                  <span className={styles.srOnly}> · Editar</span>
                 </button>
               ))}
               <div className={styles.live}>
@@ -229,10 +231,10 @@ export function FinderWizard({ intro }: { intro: React.ReactNode }) {
                 </div>
               </div>
             </div>
-            <p className={styles.asideNote}>Lógica simplificada de demostración: orienta, pero no es un motor validado técnicamente.</p>
           </aside>
         </div>
       )}
+      {!isResult && <p className={styles.disclaimer}>{FINDER_DISCLAIMER}</p>}
     </div>
   );
 }

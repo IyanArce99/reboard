@@ -33,6 +33,25 @@ test("buscador: filtrar por forma y litros, y quitar un filtro", async ({ page }
   expect(errors).toEqual([]);
 });
 
+test("buscador: filtrar por marca con chips y elegir modelo", async ({ page }) => {
+  const errors = trackErrors(page);
+  await page.goto("/buscar");
+  const panel = page.locator("#filtros");
+  await expect(panel.getByRole("button", { name: /^Sin marca · \d+$/ })).toBeVisible();
+  await expect(panel.getByRole("combobox").filter({ hasText: "Cualquier modelo" })).toHaveCount(0);
+
+  await panel.getByRole("button", { name: /^Torq · / }).click();
+  await page.waitForURL(/marca=torq/);
+  await expect(count(page)).toHaveText("26 tablas coinciden");
+  await expect(panel.getByRole("button", { name: /^Torq · / })).toHaveAttribute("aria-pressed", "true");
+  await expect(panel.getByRole("combobox").filter({ hasText: "Cualquier modelo" })).toBeVisible();
+
+  await panel.getByRole("button", { name: /^Torq · / }).click();
+  await page.waitForURL((u) => !u.search.includes("marca="));
+  await expect(count(page)).toHaveText("100 tablas coinciden");
+  expect(errors).toEqual([]);
+});
+
 test("buscador: estado vacío con sugerencias", async ({ page }) => {
   await page.goto("/buscar?forma=longboard&zona=lanzarote&precio-max=150");
   await expect(page.getByRole("heading", { name: "No encontramos tablas con estos filtros" })).toBeVisible();
@@ -90,7 +109,7 @@ test("calculadora de litros: recorrido completo y perfil guardado", async ({ pag
   expect(profile).toMatchObject({ lo: 74, hi: 92, weight: 75 });
 
   await page.goto("/buscar");
-  await expect(page.getByRole("button", { name: /Solo tablas para mí/ })).toBeVisible();
+  await expect(page.getByRole("button", { name: /Solo mi rango de litros/ })).toBeVisible();
   expect(errors).toEqual([]);
 });
 
@@ -115,7 +134,7 @@ test("ficha: contacto y anuncio vendido", async ({ page }) => {
 
   await page.goto("/anuncio/x-a1096");
   await expect(page.getByText("Esta tabla ya se ha vendido")).toBeVisible();
-  await expect(page.getByRole("button", { name: "No disponible" }).first()).toBeDisabled();
+  await expect(page.getByRole("button", { name: "Vendida" }).first()).toBeDisabled();
 });
 
 test("sin errores de hidratación con estado guardado", async ({ page }) => {
@@ -281,10 +300,10 @@ test("publicar (escritorio): 5 pasos con vista previa en vivo hasta el anuncio d
   const preview = page.getByRole("complementary", { name: "Vista previa" });
   await expect(preview).toBeVisible();
   await expect(preview.getByText("280 €")).toBeVisible();
-  await expect(preview.getByText(`Híbrida artesanal 6'4"`)).toBeVisible();
+  await expect(preview.getByText(`Híbrida sin marca 6'4"`)).toBeVisible();
   await expect(preview.getByText("Gijón, Asturias · Muy buen estado")).toBeVisible();
   await expect(page.getByText(/no se publica nada/)).toBeVisible();
-  await page.getByRole("button", { name: "Publicar gratis" }).click();
+  await page.getByRole("button", { name: "Probar (no se publica)" }).click();
   await expect(page.getByRole("heading", { name: "Anuncio listo (demo)" })).toBeVisible();
   expect(errors).toEqual([]);
 });
@@ -296,7 +315,7 @@ test("publicar (móvil): 5 pasos en una columna sin desbordar hasta el anuncio d
   await fillToReview(page);
   // En móvil la vista previa lateral no se muestra: va arriba de la revisión.
   await expect(page.getByRole("complementary", { name: "Vista previa" })).toBeHidden();
-  await page.getByRole("button", { name: "Publicar gratis" }).click();
+  await page.getByRole("button", { name: "Probar (no se publica)" }).click();
   await expect(page.getByRole("heading", { name: "Anuncio listo (demo)" })).toBeVisible();
   expect(errors).toEqual([]);
   await ctx.close();
@@ -358,7 +377,8 @@ test("publicar: recupera el borrador (con fotos) al recargar", async ({ page }) 
   await page.getByRole("button", { name: "Volver al paso 1: Fotos" }).click();
   await expect(page.getByRole("img", { name: /Foto 1/ })).toBeVisible();
 
-  await page.getByRole("button", { name: "Empezar de cero" }).click();
+  page.once("dialog", (d) => void d.accept());
+  await page.getByRole("button", { name: "Empezar de nuevo" }).click();
   await expect(h1(page)).toHaveText("Enséñanos tu tabla");
   await expect(page.getByRole("img", { name: /Foto 1/ })).toHaveCount(0);
   expect(errors).toEqual([]);

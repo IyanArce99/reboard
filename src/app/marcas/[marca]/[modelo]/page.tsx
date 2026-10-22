@@ -33,7 +33,7 @@ const vol = (v: number | null) => (v == null ? "litros sin publicar" : `${v.toLo
 export async function generateMetadata({ params }: PageProps<"/marcas/[marca]/[modelo]">): Promise<Metadata> {
   const { marca, modelo } = await params;
   const m = await model(marca, modelo);
-  const title = `${m.brand} ${m.model}: medidas, litros y tablas de segunda mano`;
+  const title = `${m.brand} ${m.model}: medidas, litros y segunda mano`;
   const sizes = m.sizes.map((s) => `${s.label} (${vol(s.volume)})`).join(", ");
   const description = `${SHAPE_INFO[m.shape].label} ${CONSTRUCTION_INFO[m.construction].short} de ${m.brand}. Medidas del catálogo: ${sizes}. Unidades usadas en venta de cada medida.`;
   const path = modelPath(m);
@@ -71,8 +71,8 @@ export default async function ModelPage({ params }: PageProps<"/marcas/[marca]/[
   });
 
   const sourceNote = repo.isDemo
-    ? "Fuente: tabla del fabricante (datos de demostración) · rango de peso del fabricante: no publicado."
-    : "Fuente: tabla del fabricante · rango de peso del fabricante: no publicado.";
+    ? "Fuente: tabla de medidas del fabricante (datos de demostración)."
+    : "Fuente: tabla de medidas del fabricante.";
 
   return (
     <main className={`container ${styles.page}`}>
@@ -92,8 +92,8 @@ export default async function ModelPage({ params }: PageProps<"/marcas/[marca]/[
         allHref={searchHref(withFilters({ brand: brandSlug, model: m.slug }))}
         photo={
           <div className={styles.photo}>
-            <BoardShape shape={m.shape} size={300} title={`Silueta orientativa de una ${SHAPE_INFO[m.shape].label.toLowerCase()}`} />
-            <span className={styles.stockTag}>Silueta orientativa de una {SHAPE_INFO[m.shape].label.toLowerCase()}</span>
+            <BoardShape shape={m.shape} size={300} title={`Silueta orientativa (${SHAPE_INFO[m.shape].short.toLowerCase()})`} />
+            <span className={styles.stockTag}>Silueta orientativa ({SHAPE_INFO[m.shape].short.toLowerCase()})</span>
           </div>
         }
         intro={

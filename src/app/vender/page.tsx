@@ -17,16 +17,16 @@ export const metadata: Metadata = {
 const BENEFITS = [
   ["Gratis y sin comisión", "Publicar no cuesta nada y no nos quedamos con parte de la venta."],
   ["Hablas directamente", "Quien la quiera te escribe por WhatsApp o te llama. Sin chats intermedios ni pagos por la plataforma."],
-  ["Te encuentran por sus medidas", "Litros, largo, tipo y zona: tu tabla aparece a quien busca exactamente eso."],
+  ["Te encuentran por sus medidas", "Litros, longitud, tipo y zona: tu tabla aparece a quien busca exactamente eso."],
   ["Sin registrarte antes", "Empiezas por las fotos. La cuenta se crea al final, con tu email, justo antes de publicar."],
 ] as const;
 
 const STEPS = [
   ["Fotos", "Con el móvil o desde la galería. La tabla entera por arriba y por abajo, y los detalles: quillas, cantos y reparaciones."],
-  ["La tabla", "Marca, modelo y medida del catálogo, o escribe las medidas que tengas apuntadas."],
-  ["Tipo y estado", "Forma, construcción, estado y reparaciones. Contarlo todo ahorra mensajes y viajes en balde."],
-  ["Precio y zona", "Tu precio, el municipio donde se puede ver y cómo prefieres que te contacten."],
-  ["Revisa y publica", "Ves cómo quedará el anuncio y confirmas tu email."],
+  ["La tabla", "Marca, modelo y medida del catálogo, o las medidas que tengas apuntadas. Y el tipo de tabla y su construcción."],
+  ["Estado", "Cómo está, sus golpes o reparaciones y lo que quieras contar. Contarlo todo ahorra mensajes y viajes en balde."],
+  ["Precio y ubicación", "Tu precio, la localidad donde se puede ver y cómo prefieres que te contacten."],
+  ["Revisar", "Ves cómo quedará el anuncio y confirmas tu email."],
 ] as const;
 
 const TIPS = [
@@ -48,14 +48,14 @@ export default function VenderPage() {
               Vende tu tabla de surf <span>usada</span>
             </h1>
             <p className={styles.lead}>
-              Si lleva meses parada, alguien la está buscando con esas medidas. Publícala gratis desde el móvil en cinco pasos.
+              Si lleva meses parada, publícala gratis desde el móvil en cinco pasos. Quien busque esas medidas la encontrará.
             </p>
             <div className={styles.ctas}>
               <Link href="/vender/publicar" className={styles.cta}>
-                Publicar gratis
+                Publicar mi tabla
               </Link>
               <Link href="/panel" className={styles.secondary}>
-                Ya tengo anuncios
+                Ver mis anuncios
               </Link>
             </div>
             {isDemo && (
@@ -100,7 +100,7 @@ export default function VenderPage() {
               ))}
             </ol>
             <p className={styles.note}>
-              Cada 14 días te pediremos que confirmes que sigue disponible. Si no lo confirmas, el anuncio caduca a los 30 días.
+              Confirma cada 14 días en «Mis anuncios» que sigue disponible; si no, caduca a los 30 días.
             </p>
             <Link href="/vender/publicar" className={styles.cta}>
               Empezar con las fotos

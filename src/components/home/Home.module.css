@@ -259,6 +259,15 @@
   background: transparent;
   color: var(--rb-muted);
 }
+/* 36 px visibles + padding y borde del grupo: el área táctil se amplía a 44 px (4 px arriba y abajo). */
+.toggle button {
+  position: relative;
+}
+.toggle button::after {
+  content: "";
+  position: absolute;
+  inset: -4px 0;
+}
 .toggle button[aria-pressed="true"] {
   background: var(--rb-petrol);
   color: var(--rb-white);

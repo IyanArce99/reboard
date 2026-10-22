@@ -24,8 +24,6 @@ export interface FinderState {
   step: number;
   /** Peso en kg, tal como se escribe. */
   w: string;
-  /** Altura en cm (opcional, no interviene en el cálculo, como en el prototipo). */
-  hgt: string;
   lvl: LevelKey | null;
   cur: string | null;
   /** Longitud de la tabla actual en pulgadas (opcional). */
@@ -44,7 +42,6 @@ export interface FinderState {
 export const initialFinderState = (): FinderState => ({
   step: 1,
   w: "",
-  hgt: "",
   lvl: null,
   cur: null,
   curLen: "",
@@ -94,7 +91,7 @@ export const WAVES: [WavesKey, string, string][] = [
   ["small", "Pequeñas y suaves", "0,5–1 m · olas blandas, orilla y espuma"],
   ["med", "Medianas", "1–2 m · pared definida y algo de fuerza"],
   ["big", "Potentes o grandes", "Más de 2 m · olas rápidas o huecas"],
-  ["unsure", "No estoy seguro", "Usaremos un término medio"],
+  ["unsure", "No lo sé", "Usaremos un término medio"],
 ];
 
 export const GOALS: [GoalKey, string][] = [
@@ -109,17 +106,18 @@ export const GOALS: [GoalKey, string][] = [
 /** [pregunta, ayuda] de cada paso. */
 export const QUESTIONS: [string, string][] = [
   ["¿Cuánto pesas?", "El peso es el dato que más influye en el volumen que necesitas. Solo lo usamos para calcular."],
-  ["¿Cuál es tu nivel?", "Sé sincero: un poco más de volumen te hará progresar más rápido."],
+  ["¿Cuál es tu nivel?", "Responde con sinceridad: un poco más de volumen te hará progresar más rápido."],
   ["¿Qué tabla usas ahora?", "Nos ayuda a entender de dónde vienes, para no proponerte un salto demasiado brusco."],
   ["¿Con qué frecuencia surfeas?", "Quien surfea poco agradece más volumen. Con más práctica puedes ajustar."],
   ["¿Qué olas sueles surfear?", "Las olas pequeñas piden más volumen y superficie; las potentes, más control."],
   ["¿Qué quieres conseguir?", "Puedes elegir más de una opción."],
-  ["¿Dónde buscas y cuánto quieres gastar?", "Lo usamos para enseñarte anuncios. No cambia la recomendación técnica."],
+  ["¿Dónde buscas y cuánto quieres gastar?", "Solo filtra las tablas que te enseñamos: no cambia la recomendación técnica."],
 ];
 
 export interface TypeInfo {
   label: string;
-  /** Plural en minúsculas para «Ver N evolutivas». */
+  /** Singular y plural en minúsculas para «Ver 1 evolutiva» / «Ver N evolutivas». */
+  singular: string;
   plural: string;
   why: string;
   cons: string;
@@ -129,18 +127,18 @@ export interface TypeInfo {
 }
 
 export const TYPE_INFO: Record<FinderType, TypeInfo> = {
-  softboard: { label: "Softboard", plural: "softboards", why: "Máxima estabilidad y seguridad mientras aprendes.", cons: "Se queda corta cuando empiezas a ir por la pared.", lens: "7'0\"–8'6\"", shape: "evolutiva" },
-  evolutiva: { label: "Evolutiva", plural: "evolutivas", why: "Rígida, con mucho volumen y remada fácil: el paso natural después de la softboard.", cons: "Menos ágil en olas potentes.", lens: "7'0\"–8'0\"", shape: "evolutiva" },
-  longboard: { label: "Longboard", plural: "longboards", why: "Coge olas muy pequeñas y es muy estable.", cons: "Pesada, y cuesta más pasar la rompiente y transportarla.", lens: "9'0\"–9'6\"", shape: "longboard" },
-  midlength: { label: "Midlength", plural: "midlengths", why: "Deslizamiento y remada con un surf fluido y tranquilo.", cons: "Menos reactiva en giros cerrados.", lens: "6'10\"–7'10\"", shape: "midlength" },
-  fish: { label: "Fish", plural: "fish", why: "Corta y ancha: rápida y divertida en olas pequeñas y medianas.", cons: "Puede costar en olas grandes y huecas.", lens: "5'6\"–6'4\"", shape: "fish" },
-  hibrida: { label: "Híbrida", plural: "híbridas", why: "Equilibrio entre facilidad y rendimiento para progresar en maniobras.", cons: "Exige ya cierta técnica.", lens: "5'8\"–6'6\"", shape: "hibrida" },
-  shortboard: { label: "Shortboard", plural: "shortboards", why: "Máxima respuesta en olas con fuerza.", cons: "Poco volumen: penaliza mucho en olas pequeñas.", lens: "5'8\"–6'4\"", shape: "shortboard" },
+  softboard: { label: "Softboard", singular: "softboard", plural: "softboards", why: "Máxima estabilidad y seguridad mientras aprendes.", cons: "Se queda corta cuando empiezas a ir por la pared.", lens: "7'0\"–8'6\"", shape: "evolutiva" },
+  evolutiva: { label: "Evolutiva", singular: "evolutiva", plural: "evolutivas", why: "Rígida, con mucho volumen y remada fácil: el paso natural después de la softboard.", cons: "Menos ágil en olas potentes.", lens: "7'0\"–8'0\"", shape: "evolutiva" },
+  longboard: { label: "Longboard", singular: "longboard", plural: "longboards", why: "Coge olas muy pequeñas y es muy estable.", cons: "Pesada, y cuesta más pasar la rompiente y transportarla.", lens: "9'0\"–9'6\"", shape: "longboard" },
+  midlength: { label: "Midlength", singular: "midlength", plural: "midlengths", why: "Deslizamiento y remada con un surf fluido y tranquilo.", cons: "Menos reactiva en giros cerrados.", lens: "6'10\"–7'10\"", shape: "midlength" },
+  fish: { label: "Fish", singular: "fish", plural: "fish", why: "Corta y ancha: rápida y divertida en olas pequeñas y medianas.", cons: "Puede costar en olas grandes y huecas.", lens: "5'6\"–6'4\"", shape: "fish" },
+  hibrida: { label: "Híbrida", singular: "híbrida", plural: "híbridas", why: "Equilibrio entre facilidad y rendimiento para progresar en maniobras.", cons: "Exige ya cierta técnica.", lens: "5'8\"–6'6\"", shape: "hibrida" },
+  shortboard: { label: "Shortboard", singular: "shortboard", plural: "shortboards", why: "Máxima respuesta en olas con fuerza.", cons: "Poco volumen: penaliza mucho en olas pequeñas.", lens: "5'8\"–6'4\"", shape: "shortboard" },
 };
 
 
-/** Factor de litros por kg según el nivel (REC del prototipo). */
-const FACTORS: Record<LevelKey, [number, number]> = {
+/** Factor de litros por kg según el nivel (REC del prototipo). Lo cita el contenido SEO. */
+export const FACTORS: Record<LevelKey, [number, number]> = {
   learn: [0.85, 1.05],
   ride: [0.6, 0.78],
   turn: [0.46, 0.58],
@@ -275,7 +273,6 @@ export function sanitizeFinderState(raw: unknown): FinderState {
   const s: FinderState = {
     step,
     w: str(p.w, 3).replace(/[^0-9]/g, ""),
-    hgt: str(p.hgt, 3).replace(/[^0-9]/g, ""),
     lvl: pick(p.lvl, LEVELS.map((l) => l[0])),
     cur: pick(p.cur, CURRENT_BOARDS.map((c) => c[0])),
     curLen: str(p.curLen, 3).replace(/[^0-9]/g, ""),

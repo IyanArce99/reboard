@@ -51,7 +51,7 @@
 .caption {
   margin-top: 8px;
   font-size: 13px;
-  color: var(--rb-faint);
+  color: var(--rb-muted);
 }
 
 .body {
@@ -268,7 +268,7 @@
 
 .itemDate {
   font-size: 13px;
-  color: var(--rb-faint);
+  color: var(--rb-muted);
 }
 
 .tools {

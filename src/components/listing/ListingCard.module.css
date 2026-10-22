@@ -142,16 +142,31 @@
 .vOld,
 .hOld {
   font-size: 13px;
-  color: var(--rb-faint);
+  color: var(--rb-muted);
 }
 
+/* El título es un <h3> (esquema de encabezados en listados) con el mismo aspecto que el enlace. */
 .vTitle {
   font-size: 16px;
   font-weight: 600;
   line-height: 1.25;
 }
-.vTitle:hover,
-.hTitle:hover {
+.titleLink {
+  display: block;
+  position: relative;
+}
+/* Área táctil de 44 px como mínimo para el enlace principal de la tarjeta, sin cambiar su aspecto. */
+.titleLink::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  min-height: 100%;
+  height: 44px;
+  transform: translateY(-50%);
+}
+.titleLink:hover {
   text-decoration: underline;
 }
 
@@ -190,7 +205,7 @@
   gap: 8px;
   border-top: 1px solid var(--rb-line-soft);
   font-size: 12px;
-  color: var(--rb-faint);
+  color: var(--rb-muted);
 }
 
 .vCmp,
@@ -200,10 +215,22 @@
   padding: 0 10px;
   min-height: 32px;
   border-radius: 8px;
+  position: relative;
   border: 1px solid var(--rb-line-strong);
   background: var(--rb-white);
   color: var(--rb-petrol);
   white-space: nowrap;
+}
+/* Área táctil de 44 px sin cambiar el tamaño visible del botón. */
+.vCmp::after,
+.hCmp::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  height: 44px;
+  transform: translateY(-50%);
 }
 .vCmp:hover,
 .hCmp:hover {
@@ -283,6 +310,8 @@
 }
 
 .hSave {
+  position: relative;
+  z-index: 1;
   width: 44px;
   height: 44px;
   margin: -10px -8px 0 0;

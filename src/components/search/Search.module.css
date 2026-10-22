@@ -319,6 +319,21 @@
   display: none;
 }
 
+/* «Ver todas las marcas»: enlace de texto con área táctil de 44 px. */
+.moreLink {
+  align-self: flex-start;
+  border: 0;
+  background: transparent;
+  padding: 0;
+  min-height: 44px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--rb-teal-text, #07717C);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+
 /* ——— Resultados ——— */
 .results {
   min-width: 0;
@@ -368,6 +383,7 @@
 }
 .viewToggle button {
   height: 42px;
+  position: relative;
   border: 0;
   padding: 0 12px;
   font-size: 14px;
@@ -375,22 +391,15 @@
   background: var(--rb-white);
   color: var(--rb-petrol);
 }
+/* El borde del grupo suma 2 px: el área táctil se amplía a 44 px sin cambiar el aspecto. */
+.viewToggle button::after {
+  content: "";
+  position: absolute;
+  inset: -1px 0;
+}
 .viewToggle button[aria-pressed="true"] {
   background: var(--rb-petrol);
   color: var(--rb-white);
-}
-
-.saveSearch {
-  height: 44px;
-  border: 1px solid var(--rb-line-strong);
-  border-radius: 9px;
-  background: var(--rb-white);
-  font-size: 14px;
-  font-weight: 600;
-  padding: 0 12px;
-}
-.saveSearch:hover {
-  border-color: var(--rb-teal);
 }
 
 .dAlert {
@@ -510,12 +519,6 @@
   text-transform: uppercase;
   line-height: 1;
 }
-.emptyTag {
-  font-size: 14px;
-  color: var(--rb-teal-text);
-  font-weight: 600;
-  margin-top: 4px;
-}
 .emptyText {
   margin-top: 8px;
   font-size: 15px;
@@ -597,9 +600,27 @@
   .mOnly {
     display: flex;
   }
+  /* En la hoja móvil, «Limpiar» ya está en el pie junto a «Ver N tablas». */
+  .dOnly {
+    display: none;
+  }
 
   .dControls {
     display: none;
+  }
+
+  /* Presets DEMO: área táctil de 44 px sin cambiar su tamaño visual. */
+  .preset {
+    position: relative;
+  }
+  .preset::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 50%;
+    height: 44px;
+    transform: translateY(-50%);
   }
 
   .grid,
@@ -611,4 +632,63 @@
   .empty {
     padding: 20px;
   }
+}
+
+/* ——— Enlaces a landings relacionadas ——— */
+.related {
+  margin-top: 48px;
+  padding-top: 28px;
+  border-top: 1px solid var(--rb-line);
+}
+.relatedTitle {
+  font-family: var(--rb-font-display);
+  font-size: clamp(24px, 2.6vw, 32px);
+  font-weight: 800;
+  text-transform: uppercase;
+  line-height: 1;
+  margin-bottom: 18px;
+}
+.relatedGroups {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 20px 32px;
+}
+.relatedGroup {
+  font-family: var(--rb-font-mono);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--rb-teal-text);
+  margin-bottom: 6px;
+}
+.relatedList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.relatedList a {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 44px;
+  padding: 0 14px;
+  border: 1px solid var(--rb-line-strong);
+  border-radius: 999px;
+  background: var(--rb-white);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--rb-petrol);
+}
+.relatedList a:hover {
+  border-color: var(--rb-teal);
+}
+.relatedList span {
+  font-family: var(--rb-font-mono);
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--rb-muted);
 }

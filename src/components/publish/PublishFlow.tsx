@@ -172,8 +172,15 @@ export function PublishFlow({ catalog, priceRefs, nowIso, dataIsDemo, initial, e
     if (!files?.length) return;
     const room = MAX_PHOTOS - d.photos.length;
     const picked = [...files].filter((f) => f.type.startsWith("image/") || /\.(heic|heif)$/i.test(f.name));
-    if (picked.length > room) toast(`Puedes añadir hasta ${MAX_PHOTOS} fotos`);
     const batch = picked.slice(0, Math.max(0, room));
+    if (picked.length > room) {
+      const dropped = picked.length - batch.length;
+      toast(
+        batch.length
+          ? `Puedes añadir hasta ${MAX_PHOTOS} fotos: hemos añadido ${batch.length} y descartado ${dropped}.`
+          : `Puedes añadir hasta ${MAX_PHOTOS} fotos.`,
+      );
+    }
     if (!batch.length) return;
     setError("");
     setProcessing((n) => n + batch.length);
@@ -322,8 +329,15 @@ export function PublishFlow({ catalog, priceRefs, nowIso, dataIsDemo, initial, e
         {restored && (
           <div className={styles.restored} role="status">
             <span>Hemos recuperado el anuncio que dejaste a medias en este dispositivo.</span>
-            <button type="button" className={styles.linkBtn} onClick={() => void restart()}>
-              Empezar de cero
+            <button
+              type="button"
+              className={styles.linkBtn}
+              onClick={() => {
+                // Acción destructiva: borra datos y fotos del borrador de este dispositivo.
+                if (window.confirm("¿Borrar el borrador y sus fotos? No se puede deshacer.")) void restart();
+              }}
+            >
+              Empezar de nuevo
             </button>
           </div>
         )}
@@ -367,7 +381,7 @@ export function PublishFlow({ catalog, priceRefs, nowIso, dataIsDemo, initial, e
                 onFiles={(f) => void addFiles(f)}
                 onRemove={removePhoto}
                 onMove={movePhoto}
-                onLimit={() => toast(`Puedes añadir hasta ${MAX_PHOTOS} fotos`)}
+                onLimit={() => toast(`Puedes añadir hasta ${MAX_PHOTOS} fotos.`)}
               />
             )}
             {step === 2 && <StepBoard d={d} set={set} setD={setD} catalog={catalog} toast={toast} />}

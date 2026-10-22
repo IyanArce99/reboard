@@ -1,6 +1,9 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { Photo } from "@/components/brand/Photo";
 import styles from "./not-found.module.css";
+
+export const metadata: Metadata = { title: "Página no encontrada" };
 
 export default function NotFound() {
   return (
@@ -10,8 +13,8 @@ export default function NotFound() {
         <p className={styles.eyebrow}>Error 404</p>
         <h1 className={styles.title}>Esta ola ya pasó</h1>
         <p className={styles.lead}>
-          No encontramos esta página. Puede que el anuncio se haya retirado o que el enlace no sea correcto. Tu próxima tabla ya existe:
-          búscala por litros, tipo y zona.
+          No encontramos esta página. Puede que el anuncio se haya retirado o que el enlace esté mal. Busca otra tabla por litros, tipo y
+          zona.
         </p>
         <div className={styles.actions}>
           <Link href="/buscar" className={styles.primary}>

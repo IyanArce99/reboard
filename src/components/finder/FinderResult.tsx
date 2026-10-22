@@ -1,6 +1,6 @@
 "use client";
 
-// Resultado del asistente: rango orientativo, tipos de tabla y anuncios compatibles.
+// Resultado del asistente: rango orientativo, tipos de tabla y tablas publicadas en ese rango.
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
@@ -24,6 +24,9 @@ import { alertText } from "@/lib/search/describe";
 import { searchHref, toQuery, withFilters, type Filters } from "@/lib/search/filters";
 import type { SummaryItem } from "./FinderWizard";
 import styles from "./Finder.module.css";
+
+/** Aviso único por pantalla (asistente o resultado): el cálculo no está validado. */
+export const FINDER_DISCLAIMER = "Cálculo orientativo y simplificado. Todavía no lo han validado surfistas ni shapers.";
 
 interface Props {
   state: FinderState;
@@ -66,7 +69,7 @@ function usePool(lo: number, hi: number) {
 }
 
 export function FinderResult({ state: W, rec: r, summary, onEdit, onRestart, set }: Props) {
-  const { profile, setProfile, addAlert, toast } = useUserState();
+  const { profile, setProfile, addAlert } = useUserState();
   const { pool, failed } = usePool(r.lo, r.hi);
   const listings = pool?.listings ?? [];
   const zone = finderZone(W);
@@ -98,9 +101,10 @@ export function FinderResult({ state: W, rec: r, summary, onEdit, onRestart, set
       <section className={styles.res} aria-labelledby="finder-result-title">
         <div className={styles.resKicker}>Tu recomendación · orientativa</div>
         <h2 id="finder-result-title" tabIndex={-1} className={styles.resTitle}>
-          Estas son las tablas que mejor
-          <br />
-          <span className={styles.resAccent}>podrían encajarte</span>
+          Tu rango orientativo:{" "}
+          <span className={styles.resAccent}>
+            {r.lo}–{r.hi} L
+          </span>
         </h2>
         <p className={styles.resSub}>
           Con {r.weight} kg y el nivel «{lvName.toLowerCase()}»{waves ? `, en olas ${waves}` : ""}, estas son las opciones con
@@ -176,7 +180,7 @@ export function FinderResult({ state: W, rec: r, summary, onEdit, onRestart, set
                     </button>
                   ) : (
                     <Link href={searchHref(f)} className={styles.typeCta}>
-                      Ver {n ?? ""} {info.plural}
+                      {n == null ? `Ver ${info.plural}` : `Ver ${n} ${n === 1 ? info.singular : info.plural}`}
                     </Link>
                   )}
                 </div>
@@ -194,10 +198,10 @@ export function FinderResult({ state: W, rec: r, summary, onEdit, onRestart, set
             </h2>
             <div className={styles.listSub} aria-live="polite">
               {pool
-                ? `${comp.length} anuncio${comp.length === 1 ? "" : "s"} entre ${r.lo} y ${r.hi} L · ${r.types.map((t) => TYPE_INFO[t].label).join(", ")} · ${zoneName}${budget != null ? ` · hasta ${budget} €` : ""}`
+                ? `${comp.length} tabla${comp.length === 1 ? "" : "s"} entre ${r.lo} y ${r.hi} L · ${r.types.map((t) => TYPE_INFO[t].label).join(", ")} · ${zoneName}${budget != null ? ` · hasta ${budget} €` : ""}`
                 : failed
-                  ? "No hemos podido cargar los anuncios."
-                  : "Buscando anuncios compatibles…"}
+                  ? "No hemos podido cargar las tablas."
+                  : "Buscando tablas en tu rango…"}
             </div>
           </div>
           {allCount > 0 && (
@@ -223,7 +227,7 @@ export function FinderResult({ state: W, rec: r, summary, onEdit, onRestart, set
 
         {failed && (
           <div className={styles.none}>
-            <div className={styles.noneTitle}>No hemos podido cargar los anuncios.</div>
+            <div className={styles.noneTitle}>No hemos podido cargar las tablas.</div>
             <Link href={searchHref(all)} className={styles.widen}>
               Buscar tablas de {r.lo}–{r.hi} L
             </Link>
@@ -233,7 +237,7 @@ export function FinderResult({ state: W, rec: r, summary, onEdit, onRestart, set
         {pool && comp.length === 0 && (
           <div className={styles.none}>
             <div className={styles.noneTitle}>No hay tablas disponibles ahora mismo con estas características.</div>
-            <div className={styles.noneText}>Tu próxima tabla ya existe; puede que aún no esté publicada. Prueba a ampliar la búsqueda:</div>
+            <div className={styles.noneText}>Prueba a ampliar la búsqueda:</div>
             <div className={styles.widenRow}>
               {widen.map((w) =>
                 w.href ? (
@@ -262,31 +266,35 @@ export function FinderResult({ state: W, rec: r, summary, onEdit, onRestart, set
             </div>
           </div>
           <div className={styles.saveBox}>
-            <strong className={styles.boxTitle}>{saved ? "Tu perfil de surfista está guardado" : "Guarda tu perfil de surfista"}</strong>
-            <span className={styles.saveText}>
-              Verás «Te encaja» en tarjetas y fichas, y podrás usar «Solo tablas para mí» en el buscador. Lo guardamos en este
-              dispositivo, sin registro.
+            {/* El perfil se guarda solo al llegar al resultado (FinderWizard): aquí se avisa y se puede borrar. */}
+            <strong className={styles.boxTitle}>{saved ? "Tu perfil está guardado" : "No hay ningún perfil guardado"}</strong>
+            <span className={styles.saveText} role="status">
+              {saved
+                ? "Hemos guardado tu rango en este dispositivo: verás «Te encaja» en las tablas que entran en él."
+                : "Sin perfil no verás «Te encaja» en las tablas. Puedes guardar este rango en este dispositivo cuando quieras."}
             </span>
             <div className={styles.saveActions}>
-              <button
-                type="button"
-                className={styles.saveBtn}
-                aria-pressed={saved}
-                onClick={() => {
-                  setProfile({ lo: r.lo, hi: r.hi, level: r.levelName, weight: r.weight });
-                  toast("Perfil guardado: verás «Te encaja» en las tablas de tu rango");
-                }}
-              >
-                {saved ? "Perfil guardado ✓" : "Guardar mi perfil de surfista"}
-              </button>
+              {saved ? (
+                <button type="button" className={styles.repeatBtn} onClick={() => setProfile(null)}>
+                  Borrar mi perfil
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  className={styles.saveBtn}
+                  onClick={() => setProfile({ lo: r.lo, hi: r.hi, level: r.levelName, weight: r.weight })}
+                >
+                  Guardar mi rango
+                </button>
+              )}
               <button type="button" className={styles.repeatBtn} onClick={onRestart}>
-                Repetir cuestionario
+                Empezar de nuevo
               </button>
             </div>
           </div>
         </div>
         <p className={styles.disclaimer}>
-          Recomendación generada con una lógica simplificada de demostración. No es un motor validado técnicamente.
+          {FINDER_DISCLAIMER}
         </p>
       </section>
     </>

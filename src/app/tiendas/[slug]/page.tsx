@@ -31,8 +31,8 @@ async function shop(slug: string) {
 export async function generateMetadata({ params }: PageProps<"/tiendas/[slug]">): Promise<Metadata> {
   const s = await shop((await params).slug);
   const kind = s.type === "escuela" ? "Escuela de surf" : "Tienda de surf";
-  const title = `${s.name} · ${kind} en ${s.town}: tablas de segunda mano`;
-  const description = `${kind} en ${shopPlace(s)}. Tablas usadas disponibles, dirección, horario y contacto.`;
+  const title = `${s.name} (${s.town}): tablas de surf de segunda mano`;
+  const description = `${kind} en ${shopPlace(s)}. Tablas usadas disponibles, dirección y horario.`;
   const path = shopPath(s);
   return {
     title,
@@ -54,7 +54,8 @@ export default async function ShopPage({ params }: PageProps<"/tiendas/[slug]">)
   // No hay filtro por tienda en /buscar: la alerta cubre las tablas de tiendas (o escuelas) de su zona.
   // Ver el informe: se recomienda añadir un filtro por vendedor profesional.
   const alertFilters = withFilters({ zone: s.zone, sellers: [s.type] });
-  const alertLabel = `Tablas de ${s.type === "escuela" ? "escuelas" : "tiendas"} en ${zone} (como ${s.name})`;
+  const shopsIn = `${s.type === "escuela" ? "escuelas" : "tiendas"} en ${zone}`;
+  const alertLabel = `Tablas de ${shopsIn}`;
 
   return (
     <main className={`container ${styles.page}`}>
@@ -68,6 +69,7 @@ export default async function ShopPage({ params }: PageProps<"/tiendas/[slug]">)
       <div className={styles.profile}>
         <div className={styles.hero}>
           <Image src={unsplash(s.image, 1200)} alt="" fill sizes="(max-width: 759px) 100vw, 50vw" preload />
+          {/* Las tiendas aún no tienen foto propia (rowToShop usa una de stock): la etiqueta es cierta en demo y en real. */}
           <span className={styles.stockTag}>foto de stock</span>
         </div>
         <div className={styles.panel}>
@@ -96,16 +98,15 @@ export default async function ShopPage({ params }: PageProps<"/tiendas/[slug]">)
             </div>
           </div>
           <div className={styles.actions}>
-            <ToastButton
-              className={`${ui.btnStrong} ${styles.contactBtn}`}
-              text={
-                repo.isDemo
-                  ? `Demo: ${s.name} es un perfil ficticio y no tiene teléfono. Con datos reales se abriría WhatsApp.`
-                  : `El contacto de ${s.name} aún no está disponible.`
-              }
-            >
-              Contactar por WhatsApp
-            </ToastButton>
+            {/* Las tiendas aún no tienen teléfono en el modelo: sin dato, no hay botón de contacto (solo en demo, explicado). */}
+            {repo.isDemo && (
+              <ToastButton
+                className={`${ui.btnStrong} ${styles.contactBtn}`}
+                text={`Demo: ${s.name} es un perfil ficticio y no tiene teléfono. Con datos reales, «Contactar» solo aparece si la tienda tiene teléfono.`}
+              >
+                Contactar
+              </ToastButton>
+            )}
             {repo.isDemo ? (
               <>
                 <ToastButton className={`${ui.btnNeutral} ${styles.secondaryBtn}`} text="Demo: aquí iría el enlace a la web de la tienda.">
@@ -132,10 +133,10 @@ export default async function ShopPage({ params }: PageProps<"/tiendas/[slug]">)
       <section className={styles.inventory} aria-labelledby="inventario-title">
         <div className={styles.invHead}>
           <h2 id="inventario-title" className={styles.h2}>
-            Tablas usadas disponibles · {listings.length}
+            Tablas usadas disponibles ({listings.length})
           </h2>
           <AlertButton text={alertLabel} query={toQuery(alertFilters)} className={styles.textBtn}>
-            Avísame de nuevas tablas de {s.name}
+            Crear alerta: tablas de {shopsIn}
           </AlertButton>
         </div>
         {listings.length > 0 ? (

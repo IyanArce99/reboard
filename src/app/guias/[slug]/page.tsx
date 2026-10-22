@@ -10,6 +10,7 @@ import { GUIDES, PENDING_GUIDES, guideBySlug, guideDate, type Guide } from "@/li
 import { getRepository } from "@/lib/data";
 import { PHOTOS } from "@/lib/photos";
 import { emptyFilters } from "@/lib/search/filters";
+import { noindexRobots } from "@/lib/seo";
 import { absoluteUrl, SITE_NAME } from "@/lib/site";
 import styles from "@/components/guides/Guides.module.css";
 
@@ -51,6 +52,8 @@ export async function generateMetadata({ params }: PageProps<"/guias/[slug]">): 
       ],
       modifiedTime: g.updatedAt,
     },
+    // Contenido de demostración (sin revisar por un experto): noindex aunque haya datos reales.
+    ...(g.isDemo ? { robots: noindexRobots() } : {}),
   };
 }
 
@@ -60,7 +63,7 @@ export default async function GuidePage({ params }: PageProps<"/guias/[slug]">) 
     return (
       <PendingPage
         title={r.pending}
-        text="Estamos escribiendo esta guía. Mientras tanto, el asistente de litros te da un rango orientativo y te enseña las tablas que encajan."
+        text="Estamos escribiendo esta guía. Mientras tanto, «¿Qué tabla necesito?» te da un rango orientativo de litros y las tablas publicadas que entran en él."
       />
     );
   }
@@ -74,7 +77,13 @@ export default async function GuidePage({ params }: PageProps<"/guias/[slug]">) 
     <main className={styles.article}>
       <div className="container">
         <header className={styles.head}>
-          <Breadcrumbs items={[{ label: "Guías", href: "/guias" }]} current={{ label: g.section, href: guidePath(g) }} />
+          <Breadcrumbs
+            items={[
+              { label: "Inicio", href: "/" },
+              { label: "Guías", href: "/guias" },
+            ]}
+            current={{ label: g.title, href: guidePath(g) }}
+          />
           <p className={styles.eyebrow}>Guía · {g.section}</p>
           <h1 className={styles.title}>{g.h1}</h1>
           <p className={styles.meta}>

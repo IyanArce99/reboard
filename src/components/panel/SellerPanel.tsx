@@ -4,8 +4,8 @@
 // en design/source/prototype-logic.js).
 // - Con cuenta (`live`): sus anuncios reales; las acciones van a la base de datos
 //   (src/app/vender/actions.ts) y se ven al momento en las búsquedas.
-// - DEMO: anuncios simulados; las acciones solo cambian este dispositivo (panelStore.ts) y las
-//   estadísticas son SIMULADAS.
+// - DEMO: anuncios simulados; las acciones solo cambian este dispositivo (panelStore.ts). Sin
+//   estadísticas: CLAUDE.md prohíbe inventarlas, aunque sea con etiqueta de demo.
 
 import Image from "next/image";
 import Link from "next/link";
@@ -28,19 +28,12 @@ const TABS: [Tab, string][] = [
   ["activos", "Activos"],
   ["pendientes", "Pendientes"],
   ["vendidos", "Vendidos"],
-  ["inactivos", "Retirados"],
+  ["inactivos", "Caducados y retirados"],
 ];
 
 /** Días sin confirmar a partir de los que el anuncio pasa a «pendiente» (docs/PRODUCT.md). */
 const CONFIRM_DAYS = 14;
 const MIN_PRICE = 1;
-
-// Estadísticas SIMULADAS de la demo, deterministas por id (como hash() del prototipo).
-const hash = (s: string) => {
-  let x = 0;
-  for (const c of s) x = (x * 31 + c.charCodeAt(0)) % 9973;
-  return x;
-};
 
 const DONE_TEXT: Record<PanelAction, string> = {
   confirm: "Disponibilidad confirmada hoy",
@@ -67,7 +60,7 @@ export function SellerPanel({ listings, nowIso, live = false, sellerName, contac
   const [ready, setReady] = useState(false);
   const [tab, setTab] = useState<Tab>("activos");
   const [busy, setBusy] = useState<string | null>(null);
-  const [pricing, setPricing] = useState<{ id: string; value: string } | null>(null);
+  const [pricing, setPricing] = useState<{ id: string; value: string; error?: string } | null>(null);
   const tabRefs = useRef<(HTMLButtonElement | null)[]>([]);
 
   useEffect(() => {
@@ -138,7 +131,7 @@ export function SellerPanel({ listings, nowIso, live = false, sellerName, contac
     if (l.status === "vendida") return "Vendida · ya no aparece en búsquedas";
     if (l.status === "retirada") return "Retirada · no aparece en búsquedas";
     if (l.status === "caducada") return "Caducada · no se confirmó en 30 días";
-    if (t === "pendientes") return `Pendiente: confirma que sigue disponible (última vez ${ago(confDays(l))})`;
+    if (t === "pendientes") return `Confirma que sigue disponible · última confirmación ${ago(confDays(l))}`;
     return `Activa · confirmada ${ago(confDays(l))}`;
   };
 
@@ -148,10 +141,10 @@ export function SellerPanel({ listings, nowIso, live = false, sellerName, contac
         <div>
           <div className={styles.who}>
             {live ? (
-              <>Mi panel · {sellerName}</>
+              <>Cuenta · {sellerName}</>
             ) : (
               <>
-                Mi panel · vendedor de demostración <span className={ui.demoTag}>DEMO</span>
+                Vendedor de demostración <span className={ui.demoTag}>DEMO</span>
               </>
             )}
           </div>
@@ -165,8 +158,9 @@ export function SellerPanel({ listings, nowIso, live = false, sellerName, contac
       {pend.length > 0 && (
         <div className={styles.need} role="status">
           <span>
-            {pend.length} anuncio{pend.length > 1 ? "s" : ""} sin confirmar desde hace más de {CONFIRM_DAYS} días. Si no lo
-            confirmas, caducará a los 30.
+            {pend.length > 1
+              ? `${pend.length} anuncios sin confirmar desde hace más de ${CONFIRM_DAYS} días. Si no los confirmas, caducarán a los 30 días.`
+              : `1 anuncio sin confirmar desde hace más de ${CONFIRM_DAYS} días. Si no lo confirmas, caducará a los 30 días.`}
           </span>
           <button
             type="button"
@@ -176,7 +170,7 @@ export function SellerPanel({ listings, nowIso, live = false, sellerName, contac
               for (const l of pend) await run(l, "confirm");
             }}
           >
-            Confirmar todas
+            {pend.length > 1 ? "Confirmar todos" : "Confirmar"}
           </button>
         </div>
       )}
@@ -218,7 +212,6 @@ export function SellerPanel({ listings, nowIso, live = false, sellerName, contac
 
           <div id="panel-rows" role="tabpanel" aria-labelledby={`panel-tab-${tab}`} className={styles.rows}>
             {rows.map((l) => {
-              const k = hash(l.id);
               const t = tabOf(l);
               const off = t === "vendidos" || t === "inactivos";
               const photo = l.photos[0];
@@ -250,14 +243,6 @@ export function SellerPanel({ listings, nowIso, live = false, sellerName, contac
                         </span>
                       </div>
                     )}
-                    {!live && (
-                      <div className={styles.stats}>
-                        <span>{40 + (k % 300)} visitas</span>
-                        <span>{k % 17} guardados</span>
-                        <span>{k % 6} clics en contactar</span>
-                        <span className={styles.simTag}>simuladas (demo)</span>
-                      </div>
-                    )}
                     {pricing?.id === l.id && (
                       <form
                         className={styles.priceForm}
@@ -265,7 +250,8 @@ export function SellerPanel({ listings, nowIso, live = false, sellerName, contac
                           e.preventDefault();
                           const v = Number(pricing.value);
                           if (!Number.isInteger(v) || v < MIN_PRICE || v > 20000) {
-                            toast("Indica un precio entre 1 y 20.000 €");
+                            // Mensaje fijo bajo el campo, como en publicar (no un toast que desaparece).
+                            setPricing({ ...pricing, error: "Indica un precio entre 1 y 20.000 €." });
                             return;
                           }
                           setPricing(null);
@@ -280,6 +266,8 @@ export function SellerPanel({ listings, nowIso, live = false, sellerName, contac
                           inputMode="numeric"
                           className={ui.input}
                           value={pricing.value}
+                          aria-invalid={pricing.error ? true : undefined}
+                          aria-describedby={`precio-${l.id}-error`}
                           onChange={(e) => setPricing({ id: l.id, value: e.target.value.replace(/\D/g, "").slice(0, 5) })}
                         />
                         <button type="submit" className={styles.act} data-primary>
@@ -288,6 +276,9 @@ export function SellerPanel({ listings, nowIso, live = false, sellerName, contac
                         <button type="button" className={styles.act} onClick={() => setPricing(null)}>
                           Cancelar
                         </button>
+                        <p id={`precio-${l.id}-error`} className={styles.priceError} role="alert">
+                          {pricing.error}
+                        </p>
                       </form>
                     )}
                   </div>
@@ -316,7 +307,7 @@ export function SellerPanel({ listings, nowIso, live = false, sellerName, contac
                           type="button"
                           className={styles.act}
                           disabled={working}
-                          onClick={() => setPricing({ id: l.id, value: String(Math.max(MIN_PRICE, l.price - 10)) })}
+                          onClick={() => setPricing({ id: l.id, value: String(l.price) })}
                         >
                           Cambiar precio
                         </button>
@@ -356,8 +347,8 @@ export function SellerPanel({ listings, nowIso, live = false, sellerName, contac
 
       <p className={styles.foot}>
         {live
-          ? "Los cambios se ven al momento en las búsquedas. Si bajas el precio, la ficha mostrará el precio anterior tachado. Solo mostraremos contactos que podamos medir; no hay chat propio."
-          : "Estadísticas simuladas para la demostración: no son visitas reales. Solo mostraremos los contactos que podamos medir (clics en WhatsApp o teléfono); no hay chat propio. Los cambios de este panel se guardan solo en este dispositivo."}
+          ? "Los cambios se ven al momento en las búsquedas. Si bajas el precio, la ficha mostrará el precio anterior tachado. Solo contamos las veces que alguien pulsa «Mostrar contacto»; no hay chat propio."
+          : "En la demo no mostramos estadísticas. Con datos reales, solo contamos las veces que alguien pulsa «Mostrar contacto»; no hay chat propio. Los cambios de este panel se guardan solo en este dispositivo."}
       </p>
     </main>
   );

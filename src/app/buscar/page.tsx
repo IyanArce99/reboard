@@ -17,6 +17,7 @@ export async function generateMetadata({ searchParams }: PageProps<"/buscar">): 
   const names = await getCatalogNames(getRepository());
   return {
     title: resultsTitle(f, names),
+    description: "Busca tablas de surf de segunda mano por litros, medidas, tipo, precio y zona, y crea una alerta si aún no hay ninguna.",
     robots: noindexRobots(),
     alternates: { canonical: landingPathFor(f) ?? "/buscar" },
   };

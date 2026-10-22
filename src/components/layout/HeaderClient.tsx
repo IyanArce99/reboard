@@ -7,6 +7,7 @@ import { createPortal } from "react-dom";
 import { Logo } from "@/components/Logo";
 import { HeartIcon, MenuIcon, UserIcon } from "@/components/icons";
 import { useUserState } from "@/components/user/UserStateProvider";
+import { useDialogFocus } from "@/lib/a11y/useDialogFocus";
 import styles from "./Header.module.css";
 
 /** Secciones principales. «Explorar» también se marca en las landings de /tablas. */
@@ -161,6 +162,9 @@ export function MobileMenu() {
   const pathname = usePathname();
   const closeRef = useRef<HTMLButtonElement>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
+  // Tab no sale del panel mientras está abierto (el foco inicial y el retorno los gestiona el efecto de abajo).
+  useDialogFocus(open, menuRef);
 
   useEffect(() => {
     if (!open) return;
@@ -199,7 +203,7 @@ export function MobileMenu() {
         createPortal(
           <>
             <div className={styles.menuOverlay} onClick={() => setOpen(false)} aria-hidden="true" />
-            <div className={styles.menu} role="dialog" aria-modal="true" aria-label="Menú">
+            <div ref={menuRef} className={styles.menu} role="dialog" aria-modal="true" aria-label="Menú">
               <div className={styles.menuHead}>
                 <Logo size={26} />
                 <button ref={closeRef} type="button" aria-label="Cerrar" className={styles.menuClose} onClick={() => setOpen(false)}>

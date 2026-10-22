@@ -9,7 +9,7 @@ import { createUserClient } from "@/lib/supabase/server";
 
 // Área privada: noindex (docs/SEO.md).
 export const metadata: Metadata = {
-  title: "Mi panel de vendedor",
+  title: "Mis anuncios",
   robots: noindexRobots(),
 };
 

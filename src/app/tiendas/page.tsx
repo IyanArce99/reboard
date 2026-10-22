@@ -3,7 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { Photo } from "@/components/brand/Photo";
 import { Breadcrumbs } from "@/components/seo/Breadcrumbs";
-import { ShopDirectory, ToastButton } from "@/components/shops/ShopIslands";
+import { ShopDirectory } from "@/components/shops/ShopIslands";
 import { SHOP_TYPE_LABEL, shopPath, shopPlace, usedBoards } from "@/components/shops/shops";
 import { getRepository } from "@/lib/data";
 import { unsplash } from "@/lib/images";
@@ -12,7 +12,7 @@ import styles from "@/components/shops/Shops.module.css";
 
 const TITLE = "Tiendas y escuelas";
 const DESCRIPTION =
-  "Tiendas de surf y escuelas con tablas de segunda mano: su inventario completo, horarios y contacto. Sus tablas aparecen también en todas las búsquedas.";
+  "Tiendas de surf y escuelas con tablas de segunda mano: sus tablas usadas, su dirección y su horario. Sus tablas aparecen también en todas las búsquedas.";
 
 export const metadata: Metadata = {
   title: TITLE,
@@ -36,7 +36,7 @@ export default async function ShopsPage() {
           <span className={`${ui.proBadge} ${styles.typeBadge}`}>{SHOP_TYPE_LABEL[s.type]}</span>
         </div>
         <div className={styles.cardBody}>
-          <span className={styles.cardName}>{s.name}</span>
+          <h2 className={styles.cardName}>{s.name}</h2>
           <span className={styles.cardMeta}>{shopPlace(s)}</span>
           <span className={styles.cardMeta}>{s.hours}</span>
           <span className={styles.cardCount}>{usedBoards(shopCounts[i])}</span>
@@ -54,15 +54,10 @@ export default async function ShopsPage() {
             <p className={styles.eyebrow}>Profesionales</p>
             <h1 className={styles.title}>{TITLE}</h1>
             <p className={styles.intro}>
-              Sus tablas usadas aparecen junto a las de particulares en todas las búsquedas. Aquí ves su inventario completo,
-              horarios y cómo contactar.
+              Sus tablas usadas aparecen junto a las de particulares en todas las búsquedas. Aquí ves sus tablas usadas, su
+              dirección y su horario.
             </p>
-            <ToastButton
-              className={`${ui.btnOutline} ${styles.joinBtn}`}
-              text="Alta profesional: subida por CSV, feed autorizado o carga asistida por nuestro equipo. El alta aún no está abierta."
-            >
-              Añadir mi tienda o escuela
-            </ToastButton>
+            <p className={styles.joinNote}>El alta de tiendas y escuelas aún no está abierta.</p>
           </div>
           <div className={styles.heroPhoto}>
             <Photo slug="tablas-alquiler" sizes="(max-width: 759px) 100vw, 40vw" preload />

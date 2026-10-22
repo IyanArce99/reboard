@@ -82,9 +82,10 @@
   line-height: 1.5;
 }
 
-.joinBtn {
-  height: 46px;
+.joinNote {
   margin-top: 8px;
+  font-size: 14px;
+  color: var(--rb-muted);
 }
 
 .filters {

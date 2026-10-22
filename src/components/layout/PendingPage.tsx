@@ -15,9 +15,6 @@ export function PendingPage({ title, text }: { title: string; text: string }) {
     <main className={`container ${styles.page}`}>
       <h1 className={ui.h1}>{title}</h1>
       <p className={styles.text}>{text}</p>
-      <p className={styles.note}>
-        Esta pantalla ya está diseñada en el prototipo y se implementará en una próxima fase.
-      </p>
       <div className={styles.actions}>
         <Link href="/buscar" className={ui.btnPrimary}>
           Buscar tablas

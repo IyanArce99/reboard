@@ -7,7 +7,6 @@
 
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import { listingDbId } from "@/lib/auth/shared";
-import { getBrowserSupabase } from "@/lib/supabase/browser";
 import styles from "./Toast.module.css";
 
 export interface CompareItem {
@@ -85,9 +84,15 @@ function load(): Stored {
   }
 }
 
+/**
+ * Cliente de Supabase bajo demanda: solo se descarga con cuentas activas (`authEnabled`).
+ * En modo demo ninguna ruta de código llega a pedirlo, así que no entra en el bundle de cada página.
+ */
+const loadSupabase = () => import("@/lib/supabase/browser").then((m) => m.getBrowserSupabase());
+
 /** Guardados de la cuenta como ids públicos («a123»). */
 async function loadFavorites(): Promise<string[] | null> {
-  const { data, error } = await getBrowserSupabase().from("favorites").select("listing_id").order("created_at", { ascending: false });
+  const { data, error } = await (await loadSupabase()).from("favorites").select("listing_id").order("created_at", { ascending: false });
   return error ? null : (data ?? []).map((r) => "a" + r.listing_id);
 }
 
@@ -117,7 +122,8 @@ export function UserStateProvider({ children, authEnabled = false }: { children:
   const toast = useCallback((text: string) => {
     setToastText(text);
     clearTimeout(timer.current);
-    timer.current = setTimeout(() => setToastText(""), 2800);
+    // Los avisos largos (con instrucciones) se quedan más tiempo en pantalla (WCAG 2.2.1).
+    timer.current = setTimeout(() => setToastText(""), text.length > 80 ? 5000 : 2800);
   }, []);
 
   // Copia del estado para decidir los avisos fuera de los updaters de setState.
@@ -134,10 +140,12 @@ export function UserStateProvider({ children, authEnabled = false }: { children:
   // Sesión: el cliente del navegador lee las cookies, refresca el token y avisa de los cambios.
   useEffect(() => {
     if (!authEnabled || !ready) return;
-    const supabase = getBrowserSupabase();
+    let cancelled = false;
+    let unsubscribe = () => {};
     let syncedFor: string | null = null;
+    type Client = Awaited<ReturnType<typeof loadSupabase>>;
 
-    async function signedIn(user: { id: string; email?: string | null }) {
+    async function signedIn(supabase: Client, user: { id: string; email?: string | null }) {
       if (syncedFor === user.id) return;
       syncedFor = user.id;
       const { data: profile } = await supabase.from("profiles").select("display_name").eq("id", user.id).maybeSingle();
@@ -157,20 +165,27 @@ export function UserStateProvider({ children, authEnabled = false }: { children:
       setState((s) => ({ ...s, saved: [...new Set([...remote, ...missing])] }));
     }
 
-    supabase.auth.getUser().then(({ data }) => {
-      if (data.user) void signedIn(data.user);
+    void loadSupabase().then((supabase) => {
+      if (cancelled) return;
+      supabase.auth.getUser().then(({ data }) => {
+        if (data.user && !cancelled) void signedIn(supabase, data.user);
+      });
+      const { data: sub } = supabase.auth.onAuthStateChange((event, session) => {
+        if (event === "SIGNED_IN" && session?.user) {
+          // Fuera del callback: Supabase recomienda no esperar a otras llamadas dentro de él.
+          const user = session.user;
+          setTimeout(() => void signedIn(supabase, user), 0);
+        } else if (event === "SIGNED_OUT") {
+          syncedFor = null;
+          setAccount(null);
+        }
+      });
+      unsubscribe = () => sub.subscription.unsubscribe();
     });
-    const { data: sub } = supabase.auth.onAuthStateChange((event, session) => {
-      if (event === "SIGNED_IN" && session?.user) {
-        // Fuera del callback: Supabase recomienda no esperar a otras llamadas dentro de él.
-        const user = session.user;
-        setTimeout(() => void signedIn(user), 0);
-      } else if (event === "SIGNED_OUT") {
-        syncedFor = null;
-        setAccount(null);
-      }
-    });
-    return () => sub.subscription.unsubscribe();
+    return () => {
+      cancelled = true;
+      unsubscribe();
+    };
   }, [authEnabled, ready]);
 
   const toggleSaved = useCallback(
@@ -180,22 +195,29 @@ export function UserStateProvider({ children, authEnabled = false }: { children:
       const dbId = listingDbId(id);
       setState((s) => ({ ...s, saved: on ? s.saved.filter((x) => x !== id) : [...s.saved, id] }));
       if (!acc || dbId === null) {
-        if (!on) toast("Guardada en este dispositivo. Los avisos de bajada de precio aún no están activos.");
+        if (!on) toast("Guardada en este dispositivo. Mira en Guardadas si baja de precio o se vende.");
         return;
       }
-      const table = getBrowserSupabase().from("favorites");
-      const req = on
-        ? table.delete().eq("listing_id", dbId)
-        : table.upsert({ listing_id: dbId }, { onConflict: "user_id,listing_id", ignoreDuplicates: true });
-      void Promise.resolve(req).then(({ error }) => {
-        if (error) {
-          // Se deshace el cambio optimista.
-          setState((s) => ({ ...s, saved: on ? [...s.saved, id] : s.saved.filter((x) => x !== id) }));
-          toast("No se ha podido guardar en tu cuenta. Vuelve a intentarlo.");
-        } else if (!on) {
-          toast("Guardada en tu cuenta.");
-        }
-      });
+      void loadSupabase()
+        .then((supabase) => {
+          const table = supabase.from("favorites");
+          return on
+            ? table.delete().eq("listing_id", dbId)
+            : table.upsert({ listing_id: dbId }, { onConflict: "user_id,listing_id", ignoreDuplicates: true });
+        })
+        .then(
+          ({ error }) => !error,
+          () => false,
+        )
+        .then((ok) => {
+          if (!ok) {
+            // Se deshace el cambio optimista.
+            setState((s) => ({ ...s, saved: on ? [...s.saved, id] : s.saved.filter((x) => x !== id) }));
+            toast("No se ha podido guardar en tu cuenta. Vuelve a intentarlo.");
+          } else if (!on) {
+            toast("Guardada en tu cuenta.");
+          }
+        });
     },
     [toast],
   );
@@ -206,7 +228,7 @@ export function UserStateProvider({ children, authEnabled = false }: { children:
 
   const signOut = useCallback(async () => {
     if (!authEnabled) return;
-    await getBrowserSupabase().auth.signOut();
+    await (await loadSupabase()).auth.signOut();
     setAccount(null);
     // Los guardados quedan en la cuenta; en un dispositivo compartido no deben seguir a la vista.
     setState((s) => ({ ...s, saved: [] }));
@@ -218,7 +240,7 @@ export function UserStateProvider({ children, authEnabled = false }: { children:
       if (s.compare.some((c) => c.id === item.id)) {
         setState((p) => ({ ...p, compare: p.compare.filter((c) => c.id !== item.id) }));
       } else if (s.compare.length >= MAX_COMPARE) {
-        toast(`Puedes comparar hasta ${MAX_COMPARE} tablas`);
+        toast(`Puedes comparar hasta ${MAX_COMPARE} tablas. Quita una para añadir esta.`);
       } else {
         setState((p) => ({ ...p, compare: [...p.compare, item] }));
       }
@@ -232,11 +254,20 @@ export function UserStateProvider({ children, authEnabled = false }: { children:
 
   const addAlert = useCallback(
     (text: string, query: string) => {
-      setState((s) => ({
-        ...s,
-        alerts: [{ id: crypto.randomUUID(), text, query, on: true, createdAt: new Date().toISOString() }, ...s.alerts],
-      }));
-      toast(`Alerta guardada: ${text}. Los avisos por email aún no están activos.`);
+      // Una alerta por búsqueda: si ya existe la misma `query`, no se duplica.
+      if (current.current.alerts.some((a) => a.query === query)) {
+        toast("Ya tienes esta alerta.");
+        return;
+      }
+      setState((s) =>
+        s.alerts.some((a) => a.query === query)
+          ? s
+          : {
+              ...s,
+              alerts: [{ id: crypto.randomUUID(), text, query, on: true, createdAt: new Date().toISOString() }, ...s.alerts],
+            },
+      );
+      toast("Alerta guardada en este dispositivo. Aún no enviamos avisos: la verás en Alertas.");
     },
     [toast],
   );

@@ -10,6 +10,7 @@ import { createPortal } from "react-dom";
 import { reportListingAction, revealContactAction } from "@/app/anuncio/actions";
 import { Turnstile, TURNSTILE_SITE_KEY, type TurnstileHandle } from "@/components/security/Turnstile";
 import { useUserState } from "@/components/user/UserStateProvider";
+import { useDialogFocus } from "@/lib/a11y/useDialogFocus";
 import ui from "@/styles/ui.module.css";
 import styles from "./Ficha.module.css";
 
@@ -17,11 +18,20 @@ interface ContactData {
   sellerName: string;
   message: string;
   phone: string | null;
-  unavailable: boolean;
+  /** Método que eligió el vendedor al publicar. */
+  method: "whatsapp" | "phone";
+  /** Estado del anuncio no activo («Vendida», «Caducada», «Retirada»); null si se puede contactar. */
+  unavailable: string | null;
   /** Id público del anuncio («a123»). */
   listingId: string;
   /** Datos reales: contacto y reportes van al servidor. */
   live: boolean;
+}
+
+/** «+34 600 000 000» a partir de «34600000000». */
+function prettyPhone(phone: string) {
+  const m = phone.match(/^34(\d{3})(\d{3})(\d{3})$/);
+  return m ? `+34 ${m[1]} ${m[2]} ${m[3]}` : `+${phone}`;
 }
 
 function RevealContact({ data, onClose }: { data: ContactData; onClose: () => void }) {
@@ -41,7 +51,7 @@ function RevealContact({ data, onClose }: { data: ContactData; onClose: () => vo
           </a>
         )}
         <a href={`tel:+${contact.phone}`} className={contact.method === "whatsapp" ? styles.callBtn : styles.waBtn}>
-          Llamar · +{contact.phone}
+          Llamar al {prettyPhone(contact.phone)}
         </a>
       </>
     );
@@ -64,7 +74,7 @@ function RevealContact({ data, onClose }: { data: ContactData; onClose: () => vo
           else setError(r.message);
         }}
       >
-        {busy ? "Un momento…" : waiting ? "Comprobando conexión…" : "Mostrar contacto"}
+        {busy ? "Un momento…" : waiting ? "Comprobando que no eres un robot…" : "Mostrar contacto"}
       </button>
       <p className={styles.modalError} role="alert">
         {error}
@@ -78,17 +88,19 @@ const Ctx = createContext<{ open: () => void; data: ContactData } | null>(null);
 export function ContactProvider({ data, children }: { data: ContactData; children: React.ReactNode }) {
   const [isOpen, setOpen] = useState(false);
   const { toast } = useUserState();
-  const closeRef = useRef<HTMLButtonElement>(null);
+  const dialogRef = useRef<HTMLDivElement>(null);
+  // Foco dentro del modal (el primero es «Cerrar»), atrapado con Tab y devuelto al botón al cerrar.
+  useDialogFocus(isOpen, dialogRef);
 
   useEffect(() => {
     if (!isOpen) return;
-    closeRef.current?.focus();
     const onKey = (e: KeyboardEvent) => e.key === "Escape" && setOpen(false);
     document.addEventListener("keydown", onKey);
     return () => document.removeEventListener("keydown", onKey);
   }, [isOpen]);
 
   const wa = data.phone ? `https://wa.me/${data.phone}?text=${encodeURIComponent(data.message)}` : null;
+  const byWhatsApp = data.method === "whatsapp";
 
   return (
     <Ctx.Provider value={{ open: () => !data.unavailable && setOpen(true), data }}>
@@ -97,18 +109,18 @@ export function ContactProvider({ data, children }: { data: ContactData; childre
         createPortal(
           <>
             <div className={styles.modalOverlay} onClick={() => setOpen(false)} aria-hidden="true" />
-            <div className={styles.modal} role="dialog" aria-modal="true" aria-labelledby="contact-title">
+            <div ref={dialogRef} className={styles.modal} role="dialog" aria-modal="true" aria-labelledby="contact-title">
               <div className={styles.modalHead}>
                 <span id="contact-title">Contactar con {data.sellerName}</span>
-                <button ref={closeRef} type="button" aria-label="Cerrar" onClick={() => setOpen(false)}>
+                <button type="button" aria-label="Cerrar" onClick={() => setOpen(false)}>
                   ✕
                 </button>
               </div>
-              <div className={styles.modalHint}>Mensaje sugerido (puedes editarlo en WhatsApp):</div>
+              <div className={styles.modalHint}>{byWhatsApp ? "Mensaje sugerido (puedes editarlo en WhatsApp):" : "Qué preguntar:"}</div>
               <div className={styles.modalMsg}>{data.message}</div>
               {data.live ? (
                 <RevealContact data={data} onClose={() => setOpen(false)} />
-              ) : wa ? (
+              ) : !byWhatsApp ? null : wa ? (
                 <a href={wa} target="_blank" rel="noopener noreferrer" className={styles.waBtn}>
                   Abrir WhatsApp
                 </a>
@@ -125,13 +137,13 @@ export function ContactProvider({ data, children }: { data: ContactData; childre
                 </button>
               )}
               {data.live ? null : data.phone ? (
-                <a href={`tel:+${data.phone}`} className={styles.callBtn}>
+                <a href={`tel:+${data.phone}`} className={byWhatsApp ? styles.callBtn : styles.waBtn}>
                   Llamar
                 </a>
               ) : (
                 <button
                   type="button"
-                  className={styles.callBtn}
+                  className={byWhatsApp ? styles.callBtn : styles.waBtn}
                   onClick={() => {
                     setOpen(false);
                     toast("Demo: se mostraría el teléfono del vendedor.");
@@ -158,25 +170,25 @@ const useContact = () => {
 export function ContactButton({ className }: { className: string }) {
   const { open, data } = useContact();
   return (
-    <button type="button" className={className} disabled={data.unavailable} onClick={open}>
-      {data.unavailable ? "No disponible" : "Contactar por WhatsApp"}
+    <button type="button" className={className} disabled={!!data.unavailable} onClick={open}>
+      {data.unavailable ?? (data.method === "whatsapp" ? "Contactar por WhatsApp" : "Llamar al vendedor")}
     </button>
   );
 }
 
-/** Barra fija abajo en la ficha móvil: precio + «Contactar con el vendedor». */
+/** Barra fija abajo en la ficha móvil: precio + «Contactar». */
 export function ContactBar({ price, specs }: { price: string; specs: string }) {
   const { open, data } = useContact();
   return (
-    <div className={styles.contactBar}>
+    <aside className={styles.contactBar} aria-label="Contacto">
       <div>
         <div className={styles.barPrice}>{price}</div>
         <div className={styles.barSpecs}>{specs}</div>
       </div>
-      <button type="button" className={styles.barBtn} disabled={data.unavailable} onClick={open}>
-        {data.unavailable ? "No disponible" : "Contactar con el vendedor"}
+      <button type="button" className={styles.barBtn} disabled={!!data.unavailable} onClick={open}>
+        {data.unavailable ?? "Contactar"}
       </button>
-    </div>
+    </aside>
   );
 }
 
@@ -191,7 +203,7 @@ export function ShareButton({ url, className }: { url: string; className: string
           if (navigator.share) await navigator.share({ url });
           else {
             await navigator.clipboard.writeText(url);
-            toast(`Enlace copiado: ${url}`);
+            toast("Enlace copiado");
           }
         } catch {
           // El usuario canceló el diálogo de compartir.
@@ -226,11 +238,11 @@ export function ReportButton({ className }: { className: string }) {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const turnstile = useRef<TurnstileHandle>(null);
-  const closeRef = useRef<HTMLButtonElement>(null);
+  const dialogRef = useRef<HTMLDivElement>(null);
+  useDialogFocus(open, dialogRef);
 
   useEffect(() => {
     if (!open) return;
-    closeRef.current?.focus();
     const onKey = (e: KeyboardEvent) => e.key === "Escape" && setOpen(false);
     document.addEventListener("keydown", onKey);
     return () => document.removeEventListener("keydown", onKey);
@@ -241,11 +253,7 @@ export function ReportButton({ className }: { className: string }) {
       toast("Demo: con datos reales, el reporte llega a moderación.");
       return;
     }
-    if (!account) {
-      // Reportar requiere sesión (decisión aprobada).
-      router.push(`/entrar?siguiente=${encodeURIComponent(pathname)}`);
-      return;
-    }
+    // Reportar requiere sesión (decisión aprobada): sin ella, el modal lo explica antes de ir a /entrar.
     setOpen(true);
   };
 
@@ -275,13 +283,25 @@ export function ReportButton({ className }: { className: string }) {
         createPortal(
           <>
             <div className={styles.modalOverlay} onClick={() => setOpen(false)} aria-hidden="true" />
-            <div className={styles.modal} role="dialog" aria-modal="true" aria-labelledby="report-title">
+            <div ref={dialogRef} className={styles.modal} role="dialog" aria-modal="true" aria-labelledby="report-title">
               <div className={styles.modalHead}>
                 <span id="report-title">Reportar anuncio</span>
-                <button ref={closeRef} type="button" aria-label="Cerrar" onClick={() => setOpen(false)}>
+                <button type="button" aria-label="Cerrar" onClick={() => setOpen(false)}>
                   ✕
                 </button>
               </div>
+              {!account ? (
+                <>
+                  <p className={styles.modalHint}>Para reportar necesitas entrar con tu email. Volverás a este anuncio.</p>
+                  <button
+                    type="button"
+                    className={styles.waBtn}
+                    onClick={() => router.push(`/entrar?siguiente=${encodeURIComponent(pathname)}`)}
+                  >
+                    Entrar
+                  </button>
+                </>
+              ) : (
               <form onSubmit={send} className={styles.reportForm}>
                 <fieldset>
                   <legend className={styles.modalHint}>¿Qué pasa con este anuncio?</legend>
@@ -304,6 +324,7 @@ export function ReportButton({ className }: { className: string }) {
                   {error}
                 </p>
               </form>
+              )}
               <div className={styles.modalNote}>Con tres reportes, el anuncio pasa a revisión. Lo revisa una persona.</div>
             </div>
           </>,

@@ -124,14 +124,17 @@ export async function finalizeListing(sb: Sb, userId: string, publicId: string, 
   const own = await ownListing(sb, userId, publicId);
   if (!own) throw new PublishError("not-found", "No encontramos ese anuncio en tu cuenta.");
   if (photos.length < 1 || photos.length > MAX_PHOTOS) throw new PublishError("photos", "Hace falta entre 1 y 8 fotos.");
-  if (new Set(photos.map((p) => p.path)).size !== photos.length) throw new PublishError("photos", "Fotos repetidas.");
+  if (new Set(photos.map((p) => p.path)).size !== photos.length) throw new PublishError("photos", "Has añadido la misma foto dos veces.");
   for (const p of photos) {
-    if (!photoPathOk(p.path, userId, own.id)) throw new PublishError("photos", "Ruta de foto no válida.");
+    if (!photoPathOk(p.path, userId, own.id)) throw new PublishError("photos", "Vuelve a añadir las fotos.");
   }
 
   const folder = `${userId}/${own.id}`;
   const { data: objects, error: listError } = await sb.storage.from("listing-photos").list(folder, { limit: 100 });
-  if (listError) throw new PublishError("photos", listError.message);
+  if (listError) {
+    console.error("[publicar] list photos", listError.message);
+    throw new PublishError("photos", "No se ha podido comprobar las fotos. Vuelve a intentarlo.");
+  }
   const stored = new Set((objects ?? []).map((o) => `${folder}/${o.name}`));
   if (photos.some((p) => !stored.has(p.path))) throw new PublishError("photos", "Alguna foto no se ha subido. Vuelve a intentarlo.");
 
@@ -178,7 +181,7 @@ export async function panelAction(sb: Sb, userId: string, publicId: string, acti
   };
   const patch = patches[action];
   if (action === "price" && !(Number.isInteger(price) && price! >= 1 && price! <= 20000)) {
-    throw new PublishError("state", "Precio no válido.");
+    throw new PublishError("state", "Indica un precio entre 1 y 20.000 €.");
   }
   if (action === "confirm" && own.status !== "published") throw new PublishError("state", "Solo se confirman anuncios publicados.");
   const { error } = await sb.from("listings").update(patch).eq("id", own.id);

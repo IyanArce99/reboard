@@ -115,7 +115,7 @@ export const LEGAL_DOCS: LegalDoc[] = [
       {
         h: "Publicar",
         p: [
-          "Publicar es gratis. Solo se pueden anunciar tablas de surf y accesorios propios que estén a la venta. Las fotos deben ser de la tabla anunciada y los datos, veraces. Cada 14 días te pediremos que confirmes que sigue disponible; si no lo haces, el anuncio caduca a los 30.",
+          "Publicar es gratis. Solo se pueden anunciar tablas de surf propias que estén a la venta. Las fotos deben ser de la tabla anunciada y los datos, veraces. Cada 14 días tienes que confirmar en «Mis anuncios» que sigue disponible; si no lo haces, el anuncio caduca a los 30.",
         ],
       },
       {

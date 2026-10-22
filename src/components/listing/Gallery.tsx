@@ -2,13 +2,33 @@
 
 import Image from "next/image";
 import { useState } from "react";
+import { BoardShape } from "@/components/brand/BoardShape";
+import type { Shape } from "@/lib/domain/taxonomy";
 import type { Photo } from "@/lib/domain/types";
 import styles from "./Ficha.module.css";
 
-export function Gallery({ photos, title, off, isDemo }: { photos: Photo[]; title: string; off: boolean; isDemo: boolean }) {
+export function Gallery({
+  photos,
+  title,
+  off,
+  isDemo,
+  shape,
+}: {
+  photos: Photo[];
+  title: string;
+  off: boolean;
+  isDemo: boolean;
+  shape?: Shape;
+}) {
   const [ix, setIx] = useState(0);
   const n = photos.length;
-  if (!n) return <div className={styles.galMain} />;
+  if (!n)
+    return (
+      <div className={`${styles.galMain} ${styles.galEmpty}`}>
+        {shape && <BoardShape shape={shape} size={180} />}
+        <span>Sin fotos</span>
+      </div>
+    );
   const p = photos[ix % n];
   const go = (d: number) => setIx((i) => (i + d + n) % n);
 
@@ -22,7 +42,8 @@ export function Gallery({ photos, title, off, isDemo }: { photos: Photo[]; title
           fill
           sizes="(max-width: 759px) 100vw, 60vw"
           className={styles.galImg}
-          preload={ix === 0}
+          // LCP de la ficha: la primera foto se pide enseguida y con prioridad alta.
+          {...(ix === 0 ? { loading: "eager" as const, fetchPriority: "high" as const } : {})}
         />
         <span className={styles.galLabel}>
           {p.label}

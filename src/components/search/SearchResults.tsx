@@ -41,10 +41,12 @@ interface Props {
   crumbs: Crumb[];
   current: Crumb;
   isSearchPage: boolean;
+  /** Bloque de enlaces a landings relacionadas (solo en landings). */
+  related?: React.ReactNode;
   openAdvanced?: boolean;
 }
 
-export async function SearchResults({ filters: f, view, here, title, intro, crumbs, current, isSearchPage, openAdvanced = false }: Props) {
+export async function SearchResults({ filters: f, view, here, title, intro, crumbs, current, isSearchPage, openAdvanced = false, related }: Props) {
   const repo = getRepository();
   const suggestions = emptySuggestions(f);
   const [names, res, unknown, facets] = await Promise.all([
@@ -57,7 +59,7 @@ export async function SearchResults({ filters: f, view, here, title, intro, crum
   const suggestionCounts = res.total === 0 ? await Promise.all(suggestions.map((s) => repo.count(s.filters))) : [];
   const now = await repo.now();
   const shown = res.items;
-  const counts = { total: facets.anyZone, zones: facets.zones, shapes: facets.shapes };
+  const counts = { total: facets.anyZone, zones: facets.zones, shapes: facets.shapes, brands: facets.brands };
   const applied = appliedChips(f, names);
   const alert = { text: alertText(f, names), query: toQuery(f) };
   const viewKeep = { sort: view.sort, view: view.view };
@@ -73,7 +75,7 @@ export async function SearchResults({ filters: f, view, here, title, intro, crum
       {repo.isDemo && (
         <div className={styles.presets}>
           <span className={ui.demoTag}>DEMO</span>
-          <span className={styles.presetsLabel}>Prueba un caso real:</span>
+          <span className={styles.presetsLabel}>Prueba un ejemplo:</span>
           {PRESETS.map(([label, p]) => (
             <Link key={label} href={searchHref(withFilters(p))} className={styles.preset}>
               {label}
@@ -83,6 +85,7 @@ export async function SearchResults({ filters: f, view, here, title, intro, crum
       )}
 
       <SearchNavProvider filters={f} view={view} isSearchPage={isSearchPage} supportsDistance={repo.capabilities.distance}>
+        {/* Móvil: el botón de alerta va en esta barra; en escritorio, en la cabecera de resultados (.dControls). */}
         <div className={styles.mBar}>
           <OpenFiltersButton count={applied.length} />
           <SortSelect className={styles.mSort} />
@@ -99,6 +102,7 @@ export async function SearchResults({ filters: f, view, here, title, intro, crum
           />
 
           <PendingArea className={styles.results}>
+            <h2 className="visually-hidden">Resultados</h2>
             <div className={styles.resultsHead}>
               <div className={styles.count} aria-live="polite">
                 <strong>{num(res.total)}</strong> {res.total === 1 ? "tabla coincide" : "tablas coinciden"}
@@ -106,9 +110,6 @@ export async function SearchResults({ filters: f, view, here, title, intro, crum
               <div className={styles.dControls}>
                 <SortSelect className={styles.dSort} />
                 <ViewToggle />
-                <AlertButton text={alert.text} query={alert.query} className={styles.saveSearch}>
-                  Guardar búsqueda
-                </AlertButton>
                 <AlertButton text={alert.text} query={alert.query} className={`${ui.btnStrong} ${styles.dAlert}`} />
               </div>
             </div>
@@ -126,10 +127,10 @@ export async function SearchResults({ filters: f, view, here, title, intro, crum
             {unknown.total > 0 && (
               <div className={styles.unknown}>
                 <span>
-                  También hay {unknown.total} tabla{unknown.total > 1 ? "s" : ""} con estas medidas cuyos litros no están indicados.
+                  Hay {unknown.total} {unknown.total === 1 ? "tabla más" : "tablas más"} con estas medidas pero sin litros indicados.
                 </span>
                 <Link href={searchHref(f, { ...view, showUnknown: !view.showUnknown })} scroll={false}>
-                  {view.showUnknown ? "Ocultarlas" : "Verlas"}
+                  {unknown.total === 1 ? (view.showUnknown ? "Ocultarla" : "Verla") : view.showUnknown ? "Ocultarlas" : "Verlas"}
                 </Link>
               </div>
             )}
@@ -138,7 +139,7 @@ export async function SearchResults({ filters: f, view, here, title, intro, crum
               <>
                 <div className={gridClass}>
                   {shown.map((l, i) => (
-                    <ListingCard key={l.id} listing={l} now={now} hereZone={here} layout={cardLayout} preload={i === 0} />
+                    <ListingCard key={l.id} listing={l} now={now} hereZone={here} layout={cardLayout} preload={i === 0} eager={i === 1} />
                   ))}
                 </div>
                 {view.showUnknown && unknown.total > 0 && (
@@ -167,7 +168,7 @@ export async function SearchResults({ filters: f, view, here, title, intro, crum
                 <div className={styles.alertBox}>
                   <div>
                     <div className={styles.alertTitle}>¿No es lo que buscas?</div>
-                    <div className={styles.alertText}>Te avisamos cuando se publique: «{alert.text}»</div>
+                    <div className={styles.alertText}>Guarda esta búsqueda como alerta y vuelve a ver cuántas tablas coinciden: «{alert.text}»</div>
                   </div>
                   <AlertButton text={alert.text} query={alert.query} className={ui.btnStrong} />
                 </div>
@@ -176,8 +177,7 @@ export async function SearchResults({ filters: f, view, here, title, intro, crum
               <div className={styles.empty}>
                 <BoardsIllustration />
                 <h2 className={styles.emptyTitle}>No encontramos tablas con estos filtros</h2>
-                <div className={styles.emptyTag}>Tu próxima tabla ya existe; puede que aún no esté publicada.</div>
-                <p className={styles.emptyText}>Prueba a ampliar la búsqueda. Entre paréntesis, cuántas tablas aparecerían.</p>
+                <p className={styles.emptyText}>Amplía la búsqueda (entre paréntesis, las tablas que verías):</p>
                 <div className={styles.suggestions}>
                   {suggestions.map((s, i) => (
                     <Link key={s.label} href={searchHref(s.filters, viewKeep)} scroll={false} className={ui.btnNeutral}>
@@ -187,17 +187,17 @@ export async function SearchResults({ filters: f, view, here, title, intro, crum
                 </div>
                 <div className={styles.emptyAlert}>
                   <div>
-                    <strong>O espera a que aparezca.</strong> «{alert.text}»
+                    <strong>O guarda la búsqueda como alerta.</strong> «{alert.text}»
                   </div>
-                  <AlertButton text={alert.text} query={alert.query} className={`${ui.btnStrong} ${styles.emptyAlertBtn}`}>
-                    Crear alerta con estos filtros
-                  </AlertButton>
+                  <AlertButton text={alert.text} query={alert.query} className={`${ui.btnStrong} ${styles.emptyAlertBtn}`} />
                 </div>
               </div>
             )}
           </PendingArea>
         </div>
       </SearchNavProvider>
+
+      {related}
 
       {shown.length > 0 && (
         <JsonLd

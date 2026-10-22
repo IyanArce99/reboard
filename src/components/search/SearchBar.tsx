@@ -8,6 +8,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
+import { useDialogFocus } from "@/lib/a11y/useDialogFocus";
 import { createPortal } from "react-dom";
 import { BoardShape } from "@/components/brand/BoardShape";
 import { SlidersIcon } from "@/components/icons";
@@ -18,7 +19,7 @@ import { searchHref, toQuery, withFilters, type Filters } from "@/lib/search/fil
 import styles from "./SearchBar.module.css";
 
 const DISTANCES: [number | null, string][] = [
-  [null, "Toda la zona"],
+  [null, "Cualquier distancia"],
   [10, "< 10 km"],
   [25, "< 25 km"],
   [50, "< 50 km"],
@@ -122,10 +123,22 @@ export function SearchBar({ here, initialCount, supportsDistance = true, zoneCou
     };
   }, [panel]);
 
+  // Al abrir un panel, el foco entra en él: así el orden de tabulación sigue el visual (el panel
+  // va después de toda la barra en el DOM).
+  const panelRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (!panel) return;
+    panelRef.current?.querySelector<HTMLElement>("button, a[href], input, select")?.focus();
+  }, [panel]);
+  const closePanel = () => {
+    if (panel) segRefs.current[panel]?.focus();
+    setPanel(null);
+  };
+
   const zn = zone ? (zoneBySlug(zone)?.name ?? zone) : "Toda España";
   const hasVol = Boolean(volMin || volMax);
   const where = `${zn}${zone && dist ? ` · < ${dist} km` : ""}`;
-  const vol = hasVol ? `${volMin || "0"}–${volMax || "∞"} L` : null;
+  const vol = hasVol ? (volMin && volMax ? `${volMin}–${volMax} L` : volMin ? `Desde ${volMin} L` : `Hasta ${volMax} L`) : null;
   const type = shapes.length ? shapes.map((s) => SHAPE_INFO[s].label).join(", ") : null;
   const goText = count === 0 ? "Ver alternativas" : `Buscar ${num(count)} ${count === 1 ? "tabla" : "tablas"}`;
   const href = searchHref(filters);
@@ -198,6 +211,7 @@ export function SearchBar({ here, initialCount, supportsDistance = true, zoneCou
       type="button"
       data-seg={p}
       className={`${styles.seg} ${extra}`}
+      aria-haspopup="dialog"
       aria-expanded={panel === p}
       aria-controls={panel === p ? "hero-panel" : undefined}
       data-active={panel === p || undefined}
@@ -218,7 +232,7 @@ export function SearchBar({ here, initialCount, supportsDistance = true, zoneCou
         <span className={styles.sep} />
         {seg("litros", "Litros", vol, "¿Cuántos litros?")}
         <span className={`${styles.sep} ${styles.dOnly}`} />
-        {seg("tipo", "Tipo de tabla", type, "Cualquier forma", styles.dOnly)}
+        {seg("tipo", "Tipo de tabla", type, "Cualquier tipo", styles.dOnly)}
         <Link href={`${href}${href.includes("?") ? "&" : "?"}avanzados=1`} className={`${styles.filters} ${styles.dOnly}`}>
           <SlidersIcon />
           Más filtros
@@ -230,6 +244,7 @@ export function SearchBar({ here, initialCount, supportsDistance = true, zoneCou
 
       {panel && (
         <div
+          ref={panelRef}
           id="hero-panel"
           role="dialog"
           aria-label={panel === "zona" ? "Zona" : panel === "litros" ? "Litros" : "Tipo de tabla"}
@@ -239,9 +254,9 @@ export function SearchBar({ here, initialCount, supportsDistance = true, zoneCou
           {sections[panel]}
           <div className={styles.panelFoot}>
             <button type="button" className={styles.textBtn} onClick={() => clearPanel(panel)}>
-              Borrar
+              Limpiar
             </button>
-            <button type="button" className={styles.doneBtn} onClick={() => setPanel(null)}>
+            <button type="button" className={styles.doneBtn} onClick={closePanel}>
               Hecho
             </button>
           </div>
@@ -279,7 +294,7 @@ function ZoneOptions({
   const option = (slug: string, name: string, n?: number) => (
     <button key={slug || "todas"} type="button" className={styles.zoneOpt} aria-pressed={zone === slug} onClick={() => onZone(slug)}>
       <span>{name}</span>
-      {n != null && <span className={styles.zoneCount}>{n ? num(n) : "—"}</span>}
+      {n != null && <span className={styles.zoneCount}>{num(n)}</span>}
     </button>
   );
   const group = (title: string, list: typeof ZONES) => (
@@ -290,10 +305,10 @@ function ZoneOptions({
   );
   return (
     <section className={styles.group} aria-labelledby="sb-zona">
-      <h3 id="sb-zona" className={styles.groupTitle}>
+      <h2 id="sb-zona" className={styles.groupTitle}>
         ¿Dónde buscas?
-      </h3>
-      <p className={styles.groupHint}>Por isla o provincia. Cada anuncio indica su municipio. El número es de tablas publicadas.</p>
+      </h2>
+      <p className={styles.groupHint}>Por isla o provincia. El número son las tablas publicadas.</p>
       {option("", "Toda España", total)}
       <div className={styles.zoneCols}>
         {group(
@@ -333,9 +348,9 @@ function VolumeOptions({
 }) {
   return (
     <section className={styles.group} aria-labelledby="sb-litros">
-      <h3 id="sb-litros" className={styles.groupTitle}>
+      <h2 id="sb-litros" className={styles.groupTitle}>
         ¿Cuántos litros?
-      </h3>
+      </h2>
       <div className={styles.volGrid}>
         {VOLUME_CHIPS.map(([a, b]) => {
           const on = volMin === String(a) && volMax === (b == null ? "" : String(b));
@@ -365,7 +380,7 @@ function VolumeOptions({
       <p className={styles.groupHint}>
         Orientativo para unos 75 kg: depende de tu peso y tu nivel.{" "}
         <Link href="/calculadora-litros" className={styles.inlineLink}>
-          Calcula los tuyos en 7 preguntas →
+          Calcular mis litros →
         </Link>
       </p>
     </section>
@@ -375,9 +390,9 @@ function VolumeOptions({
 function ShapeOptions({ shapes, onToggle }: { shapes: Shape[]; onToggle: (s: Shape) => void }) {
   return (
     <section className={styles.group} aria-labelledby="sb-tipo">
-      <h3 id="sb-tipo" className={styles.groupTitle}>
-        ¿Qué forma buscas? <span className={styles.groupNote}>Puedes elegir varias</span>
-      </h3>
+      <h2 id="sb-tipo" className={styles.groupTitle}>
+        ¿Qué tipo de tabla buscas? <span className={styles.groupNote}>Puedes elegir varias</span>
+      </h2>
       <div className={styles.shapeGrid}>
         {SHAPES.map((s) => (
           <button key={s} type="button" className={styles.shapeOpt} aria-pressed={shapes.includes(s)} onClick={() => onToggle(s)}>
@@ -416,6 +431,10 @@ function SearchSheet({
     onCloseRef.current = onClose;
   }, [onClose]);
   const initialFocus = useRef(focus);
+  // Diálogo modal: Tab no sale de la hoja y, al cerrar, el foco vuelve al segmento que la abrió.
+  // Va antes del efecto que enfoca «Cerrar» para recordar el disparador.
+  const sheetRef = useRef<HTMLDivElement>(null);
+  useDialogFocus(true, sheetRef);
 
   useEffect(() => {
     closeRef.current?.focus();
@@ -433,7 +452,7 @@ function SearchSheet({
   return createPortal(
     <>
       <div className={styles.overlay} onClick={onClose} aria-hidden="true" />
-      <div className={styles.sheet} role="dialog" aria-modal="true" aria-labelledby="search-sheet-title">
+      <div ref={sheetRef} className={styles.sheet} role="dialog" aria-modal="true" aria-labelledby="search-sheet-title">
         <div className={styles.sheetHead}>
           <span id="search-sheet-title" className={styles.sheetTitle}>
             Buscar tablas

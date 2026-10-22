@@ -214,3 +214,16 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* Acción destructiva (borrar la cuenta): tono de error, no el petróleo de la acción principal.
+   Selector con elemento para ganar a ui.btnStrong sea cual sea el orden de carga del CSS. */
+button.btnDanger {
+  background: var(--rb-error);
+}
+button.btnDanger:hover {
+  background: var(--rb-error-ink);
+}
+button.btnDanger:disabled {
+  background: var(--rb-line-strong);
+  color: var(--rb-muted);
+}

@@ -19,14 +19,22 @@ const BANDS: [number, number, string][] = [
   [30, 9999, "A más de 30 km"],
 ];
 
-export async function getHere() {
+/** Zona de referencia y si la ha elegido el usuario (cookie) o es la de por defecto. */
+async function readHere() {
   const v = (await cookies()).get(HERE_COOKIE)?.value ?? "";
-  return zoneBySlug(v) ? v : DEFAULT_HERE;
+  return zoneBySlug(v) ? { here: v, chosen: true } : { here: DEFAULT_HERE, chosen: false };
 }
 
-/** «Recién publicadas cerca de ti». Con menos de 8 cerca, añade anuncios de otras zonas, señalados. */
+export async function getHere() {
+  return (await readHere()).here;
+}
+
+/**
+ * «Recién publicadas cerca de ti» (zona elegida) o «Recién publicadas en {zona}» (zona por defecto:
+ * no se sabe dónde está el usuario). Con menos de 8 en la zona, añade anuncios de otras zonas.
+ */
 export async function NearSection() {
-  const here = await getHere();
+  const { here, chosen } = await readHere();
   const repo = getRepository();
   const zoneFilters = withFilters({ zone: here });
   const [names, nearPage, byKmPage, totalActive] = await Promise.all([
@@ -56,8 +64,8 @@ export async function NearSection() {
   const lowInv = totalActive < 60 || near.length < 8;
   const lowText =
     totalActive < 60
-      ? `Hay ${totalActive} tablas publicadas en toda España, la mayoría en Canarias. Crea una alerta con tus medidas y te avisamos cuando aparezca una cerca.`
-      : `Todavía hay pocas tablas en ${zn}. Crea una alerta y te avisamos en cuanto se publique una.`;
+      ? `Hay ${totalActive} ${totalActive === 1 ? "tabla publicada" : "tablas publicadas"} en toda España. Guarda una alerta con tu zona y vuelve a mirar cuántas coinciden.`
+      : `Todavía hay pocas tablas en ${zn}. Guarda una alerta y consulta en Alertas cuántas coinciden.`;
   const allText = `Ver ${nearPage.total} en ${zn} →`;
   const zoneHref = landingPath(here, null);
 
@@ -66,13 +74,13 @@ export async function NearSection() {
       <NearSwitcher
         heading={
           <div>
-            <p className={styles.nearEyebrow}>Cerca de ti · {zn}</p>
+            <p className={styles.nearEyebrow}>{chosen ? `Cerca de ti · ${zn}` : `Zona · ${zn} (cámbiala arriba)`}</p>
             <h2 id="near-title" className={styles.h2}>
-              Recién publicadas cerca de ti
+              {chosen ? "Recién publicadas cerca de ti" : `Recién publicadas en ${zn}`}
             </h2>
             <div className={styles.nearSub}>
               {near.length} en {zn}
-              {other.length ? " · y algunas de otras zonas, señaladas" : ""} · más recientes primero
+              {other.length ? " · y algunas de otras zonas" : ""} · más recientes primero
             </div>
           </div>
         }
@@ -121,8 +129,8 @@ export async function NearSection() {
 export function NearSkeleton() {
   return (
     <section className={`container ${styles.near}`} aria-busy="true">
-      <p className={styles.nearEyebrow}>Cerca de ti</p>
-      <h2 className={styles.h2}>Recién publicadas cerca de ti</h2>
+      <p className={styles.nearEyebrow}>Tu zona</p>
+      <h2 className={styles.h2}>Recién publicadas</h2>
       <div className={styles.skeletonRail} />
     </section>
   );

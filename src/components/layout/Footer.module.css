@@ -101,16 +101,13 @@
   }
   /* Áreas táctiles de 44 px en móvil. */
   .col a,
-  .legal {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 4px 18px;
-}
-
-.bottom a {
+  .bottom a {
     min-height: 44px;
     display: flex;
     align-items: center;
     padding: 0;
+  }
+  .legal {
+    gap: 0 18px;
   }
 }

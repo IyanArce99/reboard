@@ -183,7 +183,7 @@
   color: var(--rb-petrol);
 }
 .modelCount[data-none] {
-  color: var(--rb-faint);
+  color: var(--rb-muted);
 }
 
 /* ——— Modelo ——— */
@@ -441,7 +441,7 @@
   color: var(--rb-success) !important;
 }
 .cellNone {
-  color: var(--rb-faint) !important;
+  color: var(--rb-muted) !important;
 }
 
 .usedSection {

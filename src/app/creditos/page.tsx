@@ -1,12 +1,14 @@
 import type { Metadata } from "next";
 import { SectionHeader } from "@/components/brand/SectionHeader";
 import { PHOTOS, type EditorialPhoto } from "@/lib/photos";
+import { noindexRobots } from "@/lib/seo";
 import styles from "./creditos.module.css";
 
 export const metadata: Metadata = {
   title: "Créditos de fotografía",
   description: "Autoría y origen de las fotografías editoriales que usa Reboard.",
   alternates: { canonical: "/creditos" },
+  robots: noindexRobots(),
 };
 
 export default function Creditos() {
@@ -17,8 +19,8 @@ export default function Creditos() {
         <SectionHeader
           as="h1"
           eyebrow="Créditos"
-          title="Fotografía"
-          lead="Las fotos de ambiente de Reboard son de Pexels y se usan con su licencia gratuita. No son fotos de anuncios: las tablas en venta siempre se muestran con las fotos que sube quien vende."
+          title="Créditos de fotografía"
+          lead="Las fotos de ambiente de Reboard son de Pexels y se usan con su licencia gratuita. No son fotos de anuncios: las tablas en venta se muestran con las fotos que sube quien vende. (Con datos de demostración, los anuncios usan fotos de stock de Unsplash, señaladas como tales. Las tiendas y escuelas sin foto propia también usan una foto de stock de Unsplash.)"
         />
         <ul className={styles.list}>
           {photos.map(([slug, p]) => (

@@ -16,6 +16,7 @@ Nada de esto se ha ejecutado aún en remoto.
 - [ ] **Resend:** cuenta y dominio `reboard.es` verificado (SPF y DKIM en el DNS); crear la API key.
 - [ ] **Vercel:**
   - proyecto conectado al repositorio;
+  - *Install Command*: `npx -y npm@11.6.2 ci`. Con npm 10, el que trae Node 22, `npm ci` falla con «Missing: @emnapi/… from lock file». Es la misma razón por la que el CI usa npm 11.6.2.
   - ⚠️ **el plan Hobby no permite uso comercial**: para un marketplace con actividad económica hace falta **Pro**. Decisión del titular.
 - [ ] **Dominio** `reboard.es`, apuntado a Vercel.
 

@@ -48,7 +48,8 @@ function Row({ title, step, onEdit, children }: { title: string; step: number; o
   );
 }
 
-const CONTACT_LABEL = { whatsapp: "WhatsApp", phone: "Llamada", email: "Email" } as const;
+// Solo los dos métodos que admite la base de datos (como draftToInput).
+const CONTACT_LABEL = { whatsapp: "WhatsApp", phone: "Llamada" } as const;
 
 export function StepReview({ d, catalog, now, live, editing, pending, needsLogin, account, busy, progress, error, turnstile, onCaptcha, onEdit, onPublish, onLogin }: Props) {
   const t = previewTexts(d, catalog, now);
@@ -107,7 +108,7 @@ export function StepReview({ d, catalog, now, live, editing, pending, needsLogin
         <Row title="Precio y ubicación" step={4} onEdit={onEdit}>
           <span className={styles.sumMain}>{t.price ?? "Sin precio"}</span>
           <span className={styles.sumMeta}>
-            {d.town.trim() ? `${d.town.trim()}, ${zone}` : zone} · {CONTACT_LABEL[d.contact]} al {d.phone.trim() || "—"}
+            {d.town.trim() ? `${d.town.trim()}, ${zone}` : zone} · Contacto: {CONTACT_LABEL[d.contact === "phone" ? "phone" : "whatsapp"]} · {d.phone.trim() || "—"}
           </span>
         </Row>
       </div>
@@ -124,7 +125,7 @@ export function StepReview({ d, catalog, now, live, editing, pending, needsLogin
               <>
                 <li>Aparece en las búsquedas en cuanto lo publiques. Es gratis y sin comisiones.</li>
                 <li>Tu teléfono no se muestra: solo lo ve quien pulsa «Mostrar contacto».</li>
-                <li>Cada 14 días te pediremos que confirmes que sigue disponible; si no, caduca a los 30.</li>
+                <li>Confirma cada 14 días en «Mis anuncios» que sigue disponible; si no, caduca a los 30 días.</li>
               </>
             )}
           </ul>
@@ -153,7 +154,7 @@ export function StepReview({ d, catalog, now, live, editing, pending, needsLogin
             )}
             {live && <Turnstile ref={turnstile} action="publicar" onToken={onCaptcha} />}
             <button type="button" className={styles.publishBtn} onClick={onPublish} disabled={busy} aria-busy={busy || undefined}>
-              {busy ? progress || "Publicando…" : editing ? "Guardar cambios" : "Publicar gratis"}
+              {busy ? progress || "Publicando…" : !live ? "Probar (no se publica)" : editing ? "Guardar cambios" : "Publicar gratis"}
             </button>
           </>
         )}

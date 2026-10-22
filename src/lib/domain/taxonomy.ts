@@ -75,7 +75,9 @@ export const isActiveStatus = (s: ListingStatus) => s === "disponible" || s === 
 export const FIN_SYSTEMS = ["FCS II", "Futures", "Quillas blandas"] as const;
 
 /** Marca de los anuncios sin marca de catálogo. */
-export const NO_BRAND = { slug: "sin-marca", label: "Shaper local / sin marca", short: "Shapers locales" };
+// Para quien compra: «Sin marca» (incluye tablas de shapers locales). Al publicar se puede elegir
+// «Shaper local» o «Sin marca»; las dos acaban aquí.
+export const NO_BRAND = { slug: "sin-marca", label: "Sin marca", short: "Sin marca" };
 
 export interface Zone {
   slug: string;

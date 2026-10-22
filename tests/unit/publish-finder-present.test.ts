@@ -75,7 +75,7 @@ describe("present", () => {
   it("títulos", () => {
     expect(listingTitle(first)).toBe(`Torq Fun TET 7'2"`);
     expect(listingTitle({ ...first, brand: "Torq", model: null })).toBe(`Torq 7'2"`);
-    expect(listingTitle({ ...first, brand: null, model: null })).toBe(`Evolutiva artesanal 7'2"`);
+    expect(listingTitle({ ...first, brand: null, model: null })).toBe(`Evolutiva sin marca 7'2"`);
   });
 
   it("disponibilidad y fecha", () => {
@@ -88,7 +88,7 @@ describe("present", () => {
   it("origen del dato", () => {
     expect(sourceBadge(null, null).tone).toBe("none");
     expect(sourceBadge(47, null).tone).toBe("none");
-    expect(sourceBadge(47, "manufacturer").text).toBe("Según fabricante · variante confirmada");
-    expect(sourceBadge(47, "seller").text).toBe("Confirmado por vendedor");
+    expect(sourceBadge(47, "manufacturer").text).toBe("Según fabricante");
+    expect(sourceBadge(47, "seller").text).toBe("Indicado por el vendedor");
   });
 });

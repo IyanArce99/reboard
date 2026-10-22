@@ -9,7 +9,7 @@ import styles from "@/components/guides/Guides.module.css";
 
 const TITLE = "Guías de compra";
 const DESCRIPTION =
-  "Guías útiles para comprar y vender tablas de surf de segunda mano: qué revisar antes de pagar, cuántos litros necesitas y cómo interpretar las medidas.";
+  "Qué revisar antes de comprar una tabla usada y herramientas para calcular tus litros y comparar tablas.";
 
 export const metadata: Metadata = {
   title: TITLE,
@@ -21,14 +21,14 @@ export const metadata: Metadata = {
 const TOOLS: { t: string; d: string; href: string; photo: PhotoSlug; cta: string }[] = [
   {
     t: "¿Qué tabla necesito?",
-    d: "Peso, nivel, olas y lo que quieres conseguir. Un rango de litros y las tablas que encajan.",
+    d: "Peso, nivel, olas y lo que quieres conseguir. Un rango orientativo de litros y las tablas publicadas que entran en él.",
     href: "/calculadora-litros",
     photo: "clase-surf",
     cta: "Calcular mis litros",
   },
   {
-    t: "Comparar anuncios",
-    d: "Hasta tres tablas lado a lado: litros, medidas, estado, precio y zona.",
+    t: "Comparar tablas",
+    d: "Hasta cuatro tablas lado a lado: litros, medidas, estado, precio y zona.",
     href: "/comparar",
     photo: "tablas-orilla",
     cta: "Abrir el comparador",
@@ -46,7 +46,7 @@ export default function GuidesPage() {
             as="h1"
             eyebrow="Antes de comprar"
             title={TITLE}
-            lead="Respuestas cortas y listas de comprobación para comprar una tabla usada con criterio, sin tecnicismos."
+            lead="Respuestas cortas y listas de comprobación para comprar una tabla usada con criterio."
           />
         </div>
       </div>
