@@ -55,16 +55,17 @@ Notación:
 Ver **SURFBOARD_FINDER.md**.
 
 ## Publicar `/vender/publicar`
-5 pasos con barra de progreso y barra Atrás / Continuar fija abajo:
-1. **Fotos:** hacer foto o elegir de la galería, hasta 8.
-2. **La tabla:**
+5 pasos con progreso compacto («Paso 2 de 5 · La tabla» y 5 segmentos; los anteriores son pulsables) y un titular natural por paso. En escritorio (≥ 1024 px), formulario a la izquierda y **vista previa en vivo** fija a la derecha; en móvil, una columna, vista previa plegable y barra Atrás / Continuar fija abajo. Rediseño explicado en DESIGN_AUDIT.md («Publicar: rediseño del asistente»).
+1. **Fotos · «Enséñanos tu tabla»:** hacer foto o elegir de la galería (o arrastrar en escritorio), hasta 8. La primera es la portada (más grande y marcada); se ordenan con flechas y se quitan con ✕.
+2. **La tabla · «Cuéntanos qué tabla es»:**
    - Marca: catálogo, «Shaper local» o «Sin marca».
    - Modelo y medida de catálogo, que autorrellenan los datos marcados «Según catálogo · confírmalo».
-   - Campo para pegar medidas (`7'2 x 21 1/2 x 2 7/8 47L`), cuyo resultado se marca «Propuesta automática · revísala».
+   - Campo para copiar las medidas (`6'4 x 20 1/2 x 2 5/8 34L`), cuyo resultado se marca «Propuesta automática · revísala».
    - Selector pies / cm y botón «Confirmar» en cada dato.
-3. **Tipo y estado:** forma, construcción, estado y reparaciones.
-4. **Precio y contacto:** precio (con referencia de otros anuncios del mismo modelo), zona, localidad, WhatsApp / teléfono / email y descripción.
-5. **Revisar:** vista previa de la tarjeta, aviso de datos sin confirmar y verificación del teléfono → publicado.
+   - Tipo de tabla (con silueta) y construcción.
+3. **Estado · «¿En qué estado está?»:** 4 tarjetas con explicación en lenguaje llano, reparaciones y descripción opcional.
+4. **Precio y ubicación · «¿Por cuánto la vendes?»:** precio grande (con referencia de otros anuncios del mismo modelo), zona en chips (Canarias / Península), localidad con sugerencias, WhatsApp o llamada y teléfono privado.
+5. **Revisar · «Así quedará tu anuncio»:** vista previa, resumen por secciones con «Editar» (vuelve al paso y el botón principal pasa a «Volver a revisar»), aviso de datos sin confirmar, qué pasa al publicar y, en real, acceso con código por email y Turnstile → publicado.
 
 ## Comparador `/comparar`
 - De 2 a 4 columnas; en M se desplaza en horizontal.
