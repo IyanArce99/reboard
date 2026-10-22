@@ -19,7 +19,7 @@ export default function EntrarPage() {
   return (
     <main className={styles.wrap}>
       <div className={styles.photo}>
-        <Photo slug="entrando-al-agua" sizes="45vw" decorative />
+        <Photo slug="tablas-orilla" sizes="45vw" position="50% 50%" decorative />
       </div>
       <div className={styles.panel}>
         <p className={styles.eyebrow}>Tu cuenta</p>

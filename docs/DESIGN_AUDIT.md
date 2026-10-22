@@ -99,7 +99,7 @@ Pero **parece un prototipo** por estos problemas, ordenados por impacto.
 | `surfista-a-coruna` | Home: «Compra como entre surfistas» | Tanhauser Vázquez R. (A Coruña) |
 | `clase-surf` | Home y `/guias`: tarjeta del asistente | Serg Alesenko |
 | `entrando-al-agua` | Home: tarjeta del comparador | Kampus Production |
-| `tablas-orilla` | `/guias`: tarjeta del comparador | Alexa Fernando |
+| `tablas-orilla` | `/guias`: tarjeta del comparador; columna de `/entrar` | Alexa Fernando |
 | `tablas-alquiler` | Cabecera de `/tiendas` | ArtHouse Studio |
 | `atardecer-playa` | Cierre de marca (`ClosingBand`) | Victoria Marzullo |
 | `surfista-niebla` | 404 | Romina Ordóñez |
