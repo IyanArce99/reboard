@@ -69,7 +69,7 @@ export default function GuidesPage() {
         </div>
       </section>
 
-      <section className={`container ${styles.indexBody}`} aria-labelledby="herramientas-title">
+      <section className={`container ${styles.indexBody} ${styles.indexEnd}`} aria-labelledby="herramientas-title">
         <SectionHeader id="herramientas-title" eyebrow="Herramientas" title="Para decidir con datos" />
         <div className={styles.tools}>
           {TOOLS.map((t) => (
