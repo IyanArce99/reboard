@@ -34,8 +34,9 @@ Reboard es un **marketplace especializado en compraventa de tablas de surf de se
   - Nunca se muestran en producción como si fueran anuncios reales.
   - Nunca inventes litros, valoraciones, estadísticas ni disponibilidad.
 - **No inventes integraciones de backend.**
-  - Si falta un servicio (SMS, email, almacenamiento, base de datos), crea una interfaz y un stub claramente marcado.
+  - Si falta un servicio externo (SMS, emails de alertas…), crea una interfaz y un stub claramente marcado.
   - Documéntalo en `docs/ROADMAP.md`.
+  - **No declares una integración completa si no la has probado de verdad** (en local con Supabase/Mailpit, o en remoto).
 - Respeta la taxonomía:
   - `shape`: shortboard | fish | hibrida | evolutiva | midlength | longboard | gun.
   - `construction`: pu | epoxy | softboard.
@@ -52,3 +53,33 @@ Header, MobileMenu (panel lateral), SearchBar (segmentos Ubicación / Litros / T
 - Turquesa #087E8B: seleccionado y activo; para enlaces de texto, #07717C.
 - **El amarillo #F4C15A es solo para la acción principal** (Buscar, Contactar, Publicar, Vender gratis, Continuar). No hay etiquetas amarillas.
 - Fondo #EFF6F5; tarjetas y formularios blancos.
+
+## Backend (fases B–G, ver docs/ARCHITECTURE.md, SECURITY.md y DECISIONS.md)
+- **Supabase:** Postgres, Auth y Storage. Un solo proyecto `reboard`, en la UE.
+  - Las migraciones en `supabase/migrations` son la fuente de verdad del esquema. Nunca edites una ya aplicada: crea otra nueva.
+  - Los tests de seguridad pgTAP están en `supabase/tests/database`.
+- **`REBOARD_DATA_SOURCE=mock|supabase`:**
+  - el código de las páginas usa `getRepository()` y nunca sabe de dónde vienen los datos;
+  - las cuentas solo existen con `supabase` (`authEnabled()`).
+- **Seguridad:**
+  - Cada Server Action vuelve a comprobar la sesión con `auth.getUser()` (nunca `getSession()`) y valida la entrada con zod.
+  - **Service role** (`createServiceClient`) solo en el servidor y solo después de comprobar CAPTCHA, sesión y rol.
+  - **Turnstile** se verifica en el servidor (`verifyTurnstile`, falla cerrado).
+  - **No exportes desde un archivo `"use server"` nada que no sea una acción:** todo lo que exporta es invocable desde el cliente.
+- **Caché:**
+  - lecturas con `'use cache'` + `cacheTag('listings' | 'listing:{id}' | 'catalog' | 'shops')`;
+  - tras escribir: `updateTag` en las acciones y `revalidateTag(tag, 'max')` en las rutas.
+- **Sesión:**
+  - el cliente del navegador hace el acceso;
+  - `proxy.ts` refresca la sesión solo en rutas privadas (`/cuenta`, `/panel`, `/entrar`, `/vender/publicar`, `/moderacion`);
+  - los Server Components de páginas públicas no leen cookies.
+- **Fotos de anuncios:**
+  - se recodifican en el navegador (`src/lib/publish/image.ts`) y se suben directamente a Storage;
+  - el servidor solo comprueba las rutas y que el archivo existe.
+- **Fotografía editorial** (`src/lib/photos.ts`, Pexels):
+  - solo en páginas editoriales;
+  - nunca como foto de un anuncio, una marca o un modelo.
+- **Comprueba antes de dar algo por hecho:**
+  - `npm run typecheck`, `npm run lint` y `npm test`;
+  - con Supabase local: `npm run db:test` y `npm run test:integration`;
+  - `REBOARD_DATA_SOURCE=mock npm run build && npm run test:e2e`.

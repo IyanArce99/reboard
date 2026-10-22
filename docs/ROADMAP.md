@@ -117,13 +117,22 @@ Dirección «coastal editorial» con fotografía de Pexels (local, optimizada y 
 | F3 ✅ | Reportar anuncio (con sesión y CAPTCHA), marca automática con 3 reportes, y `/moderacion` mínimo | B3, D2, D5 | Un moderador retira el anuncio y sus fotos desaparecen |
 | F4 ✅ | Estadística real «clics en contactar» en el panel. Ocultar visitas y guardados simulados fuera del DEMO | F1, E5 | El panel en producción no muestra cifras simuladas |
 
-### Fase G: salida a producción
+### Fase G: salida a producción 🟡 preparada en local, el 22-10-2026 (lo remoto requiere al titular: docs/LAUNCH_CHECKLIST.md)
+**Hecho en local:**
+- cabeceras de seguridad (CSP sin nonce, compatible con PPR; HSTS; X-Frame-Options; nosniff; Permissions-Policy);
+- `error.tsx` y `global-error.tsx`;
+- textos legales en borrador (`/legal/*`, noindex) enlazados en el footer;
+- `robots.txt` ampliado;
+- borrar la cuenta (RGPD) en `/cuenta`;
+- `npm audit`: 0 vulnerabilidades en producción; vitest 5 en desarrollo;
+- `docs/LAUNCH_CHECKLIST.md`.
+
 | # | Tarea | Depende de | Hecho cuando |
 |---|---|---|---|
-| G1 | Textos legales: aviso legal, privacidad, cookies y condiciones | Decisión pendiente «Textos legales» | Publicados y enlazados en el footer |
-| G2 | Catálogo verificado contra las tablas del fabricante (`source_note`) en producción | B4 | Sin datos DEMO en producción |
-| G3 | Vercel (Hobby): Production → reboard.es con las claves de Supabase. Preview **sin** claves (`REBOARD_DATA_SOURCE=mock`) | C1 | Los Preview nunca escriben en la base de datos real |
-| G4 | Lista de comprobación de SECURITY §9 y e2e completo contra Supabase local | Todas | Lista completa. Se activa `REBOARD_DATA_SOURCE=supabase` en producción |
+| G1 🟡 | Textos legales: aviso legal, privacidad, cookies y condiciones | Decisión pendiente «Textos legales» | Publicados y enlazados en el footer. **Hecho:** borradores sin datos del titular, enlazados y con noindex. **Pendiente:** revisión profesional |
+| G2 ⚪ | Catálogo verificado contra las tablas del fabricante (`source_note`) en producción | B4 | Sin datos DEMO en producción |
+| G3 ⚪ | Vercel (Hobby → Pro si hay uso comercial): Production → reboard.es con las claves de Supabase. Preview **sin** claves (`REBOARD_DATA_SOURCE=mock`) | C1 | Los Preview nunca escriben en la base de datos real |
+| G4 🟡 | Lista de comprobación de SECURITY §9 y e2e completo contra Supabase local | Todas | Lista completa. Se activa `REBOARD_DATA_SOURCE=supabase` en producción |
 
 ### Decisiones
 **Aprobadas (22-10-2026):**

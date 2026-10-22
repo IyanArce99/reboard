@@ -9,7 +9,21 @@ export default function robots(): MetadataRoute.Robots {
     rules: {
       userAgent: "*",
       allow: "/",
-      disallow: ["/buscar?", "/guardado", "/alertas", "/panel", "/cuenta", "/comparar", "/vender/publicar", "/sistema", "/api/"],
+      disallow: [
+        "/buscar?",
+        "/guardado",
+        "/alertas",
+        "/panel",
+        "/cuenta",
+        "/entrar",
+        "/auth/",
+        "/moderacion",
+        "/comparar",
+        "/vender/publicar",
+        "/sistema",
+        "/legal/",
+        "/api/",
+      ],
     },
     sitemap: absoluteUrl("/sitemap.xml"),
   };

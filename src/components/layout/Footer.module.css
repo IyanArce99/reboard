@@ -72,6 +72,12 @@
   font-size: 13px;
   color: var(--rb-on-petrol-muted);
 }
+.legal {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 18px;
+}
+
 .bottom a {
   color: var(--rb-on-petrol-muted);
   text-decoration: underline;
@@ -104,7 +110,13 @@
   }
   /* Áreas táctiles de 44 px en móvil. */
   .col a,
-  .bottom a {
+  .legal {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 18px;
+}
+
+.bottom a {
     min-height: 44px;
     display: flex;
     align-items: center;

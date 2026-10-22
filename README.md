@@ -11,11 +11,24 @@ Reboard deja buscar tablas usadas por **litros, medidas, tipo, precio y ubicaci�
 
 ## ⚠️ Estado real de este repositorio
 
-Es un proyecto **Next.js 16 (App Router + TypeScript)** que recrea el prototipo aprobado. Ya están implementadas todas las pantallas del prototipo: home, búsqueda, landings, ficha, asistente, publicar, panel, comparador, guardado y alertas, marcas y modelos, tiendas y guías. Ver `docs/ROADMAP.md` y `docs/DECISIONS.md`.
+Es un proyecto **Next.js 16 (App Router + TypeScript)** con **Supabase** (Postgres, Auth y Storage) como backend. Está en la rama `mvp`; **no está desplegado**.
 
-- **Todos los anuncios son datos DEMO** (`src/mocks/`). Mientras lo sean, el sitio muestra un aviso DEMO y va con `noindex`.
-- No hay backend, base de datos, autenticación ni envío de alertas. Guardados, comparación y alertas viven en el navegador.
-- El prototipo HTML (`design/prototype/`) sigue siendo la **fuente de verdad del diseño**.
+- **Dos modos de datos** (`REBOARD_DATA_SOURCE`):
+  - **`mock`** (por defecto):
+    - inventario DEMO en memoria, aviso DEMO y `noindex`;
+    - sin cuentas ni escrituras: publicar y el panel son simulados;
+    - lo usan los e2e y los Preview.
+  - **`supabase`** (base de datos real):
+    - búsqueda en SQL;
+    - cuentas con código por email;
+    - guardados en la nube;
+    - publicar con fotos (sin EXIF ni GPS), editar, panel real;
+    - contacto protegido con Turnstile;
+    - reportes, moderación y caducidad automática.
+- **Probado contra Supabase local** (Docker), con tests de integración y pgTAP.
+- **El proyecto Supabase remoto aún no existe** (tarea B7). Necesita la intervención del titular: ver `docs/LAUNCH_CHECKLIST.md`.
+- **Textos legales:** son **borradores** (`/legal/*`, `noindex`), sin datos del titular. Tiene que revisarlos un profesional.
+- **Diseño:** el prototipo HTML (`design/prototype/`) fue la base. La dirección de arte actual («coastal editorial», con fotografía de Pexels) está en `docs/DESIGN_AUDIT.md` y `docs/DESIGN_SYSTEM.md`.
 
 ```bash
 npm install
@@ -32,7 +45,7 @@ npm run test:visual    # capturas de referencia, solo local (-- --update-snapsho
 npm run db:start       # levanta Supabase local y aplica supabase/migrations
 npm run env:local      # crea .env.local para usar la app con Supabase local (REBOARD_DATA_SOURCE=supabase)
 npm run db:seed-demo   # carga el inventario DEMO SOLO en la base local (para desarrollar)
-npm run test:integration  # paridad mock ↔ Supabase local
+npm run test:integration  # paridad mock ↔ Supabase, cuentas, publicar, contacto y moderación (Supabase local + Mailpit)
 npm run perf:local     # rendimiento con 100, 1.000 y 10.000 anuncios en local
 npm run db:types       # regenera src/lib/supabase/database.types.ts
 npm run db:test        # tests de seguridad pgTAP (RLS, privilegios, Storage, búsqueda)
@@ -41,7 +54,9 @@ npm run db:lint
 npm run db:stop
 ```
 
-Copia `.env.example` a `.env.local` para cambiar las variables. El trabajo en curso está en la rama `mvp`.
+Copia `.env.example` a `.env.local` para cambiar las variables (`npm run env:local` lo genera para Supabase local). Los emails locales (códigos de acceso) se ven en Mailpit: http://127.0.0.1:54324. El trabajo en curso está en la rama `mvp`.
+
+Para salir a producción: **`docs/LAUNCH_CHECKLIST.md`**.
 
 Variables opcionales: `REBOARD_DEMO_INVENTORY` (20 | 100 | 1000, 100 por defecto), `NEXT_PUBLIC_SITE_URL` (para canonical y JSON-LD).
 
@@ -103,13 +118,15 @@ reboard/
 
 ## Stack
 
-| Capa | Hoy (prototipo) | Objetivo (recomendado) |
-|---|---|---|
-| UI | HTML con estilos inline + runtime `support.js` (React por debajo) | **Next.js App Router + TypeScript**, Server Components |
-| Estilos | Inline | CSS Modules o Tailwind sobre `tokens.css` (decisión pendiente) |
-| Datos | Generados en cliente (`build(n)`, semilla fija) | Base de datos real; la elección está **pendiente** |
-| Estado de usuario | `localStorage` (`reboard-proto-v1`): pantalla, perfil de surfista, respuestas del asistente | Cookies/localStorage para invitado y cuenta opcional |
-| Fuentes | Google Fonts | `next/font/google` |
+| Capa | Elección |
+|---|---|
+| UI | **Next.js 16 App Router + TypeScript**, Server Components, Cache Components (PPR) |
+| Estilos | CSS Modules sobre `src/styles/tokens.css` |
+| Datos | **Supabase** (Postgres con RLS, Auth con código por email, Storage para fotos), en la UE. Inventario DEMO en memoria para desarrollo |
+| Anti-robots | Cloudflare Turnstile (gratuito), verificado en el servidor |
+| Email | Resend como SMTP de Supabase Auth (pendiente de cuenta) |
+| Hosting | Vercel (el plan Hobby no permite uso comercial: ver LAUNCH_CHECKLIST) |
+| Fuentes | `next/font/google` |
 
 **Fuentes** (todas en Google Fonts, licencia SIL Open Font License 1.1):
 - **Barlow Condensed** 600/700/800: wordmark, H1, H2 y títulos destacados, siempre en mayúsculas.
@@ -121,29 +138,28 @@ reboard/
 ## Funcionalidades y estado
 
 Leyenda:
-- 🟢 **Prototipo completo**: diseño e interacción finales, con datos simulados.
-- 🟡 **Prototipo parcial**.
-- ⚪ **Pendiente**.
-
-Nada está implementado en producción.
+- ✅ **Implementado y probado en local con Supabase.**
+- 🟢 **Implementado con datos DEMO** (modo `mock`).
+- 🟡 **Parcial o pendiente de un servicio externo.**
+- ⚪ **Pendiente.**
 
 | Funcionalidad | Estado |
 |---|---|
-| Home (hero, buscador, tipos, recién publicadas cerca, recomendador, zonas, vender, marcas, guías) | 🟢 |
-| Hoja de búsqueda de la home (zona, distancia, litros, tipo) | 🟢 |
-| Resultados `/buscar`: filtros básicos y avanzados, chips aplicados, orden, cuadrícula/lista, «litros sin indicar», estado vacío con sugerencias, alerta | 🟢 |
-| Páginas de tipo y zona (reutilizan `/buscar` con su propio encabezado) | 🟢 |
-| Ficha de anuncio: galería, datos con su origen, 5 estados, contacto por WhatsApp, similares | 🟢 |
-| Asistente «¿Qué tabla necesito?» (7 pasos + resultado) | 🟢 lógica **simplificada de demostración** |
-| Perfil de surfista: «Te encaja», «Solo tablas para mí» | 🟢 local |
-| Comparador de 2 a 4 anuncios | 🟢 |
-| Guardado y alertas | 🟢 local |
-| Publicar tabla (5 pasos: fotos, medidas del catálogo, medidas pegadas, confirmación, verificación del teléfono) | 🟢 simulado |
-| Panel del vendedor | 🟢 estadísticas simuladas |
-| Marca, modelo con variantes | 🟢 solo hay datos de algunos modelos |
-| Directorio y perfil de tienda | 🟢 |
-| Plantilla de guía | 🟡 solo existe una guía |
-| Subida real de fotos, autenticación, OTP por SMS, emails de alertas, moderación, importación CSV/feed de tiendas | ⚪ |
+| Home, búsqueda `/buscar` (filtros, orden, recuentos, facetas), landings de tipo y zona | ✅ consultas SQL |
+| Ficha de anuncio (galería, datos con su origen, estados vendida o caducada, similares) | ✅ |
+| Asistente «¿Qué tabla necesito?» | 🟢 lógica **simplificada de demostración** |
+| Comparador y alertas | 🟢 en el dispositivo (las alertas por email están pendientes) |
+| Cuentas: acceso con código de 6 cifras por email, `/cuenta`, borrar la cuenta | ✅ en local con Mailpit. 🟡 Falta el SMTP de Resend en remoto |
+| Guardados sincronizados con la cuenta (fusión al entrar) | ✅ |
+| Publicar: fotos procesadas en el móvil (WebP, sin EXIF ni GPS), borrador en IndexedDB, Turnstile, Storage | ✅ |
+| Editar anuncio y panel del vendedor (confirmar, precio, vendida, retirar, volver a publicar, contactos reales) | ✅ |
+| Contacto: el teléfono no está en el HTML; se revela con Turnstile y límite por IP (HMAC) | ✅ |
+| Reportar (con sesión) y `/moderacion` (retirar, descartar, restaurar, con registro) | ✅ |
+| Caducidad a los 30 días y limpieza de borradores (cron diario) | ✅ ruta y lógica; 🟡 el cron se activa al desplegar |
+| Marcas y modelos, tiendas y guías | 🟢 el catálogo real se carga verificado (G2) |
+| Textos legales | 🟡 borradores pendientes de revisión |
+| Cabeceras de seguridad (CSP, HSTS, X-Frame-Options…), páginas de error | ✅ |
+| Alertas por email, importación de tiendas (CSV o feed), SMS, pagos | ⚪ fuera del MVP |
 
 ---
 
@@ -167,6 +183,9 @@ Las rutas `/...` proceden de la arquitectura SEO aprobada. En el prototipo son p
 | `/vender/publicar` | publicar |
 | `/guardado`, `/alertas` | guardado (pestañas) |
 | `/panel` | panel |
+| `/entrar`, `/cuenta` | acceso con código y cuenta (noindex) |
+| `/moderacion` | cola de moderación (solo moderadores) |
+| `/legal/[doc]`, `/creditos` | textos legales (borradores, noindex) y créditos de fotos |
 | (interna) | sistema (sistema visual, no es ruta pública) |
 
 ---
@@ -184,12 +203,11 @@ Las rutas `/...` proceden de la arquitectura SEO aprobada. En el prototipo son p
 - **Navegación simple:** no hay megamenú. «Comprar tablas» lleva a `/buscar`. En móvil no hay barra inferior fija; la navegación es contextual (cabecera compacta + panel lateral).
 - **Variantes de medida dentro de la ficha del modelo**, sin una página por medida.
 
-## Desconocido / pendiente de decidir
-
-- Backend, base de datos, hosting y autenticación.
-- Proveedor de SMS/OTP, de email y de almacenamiento de imágenes.
-- Fuente real de la geolocalización y del cálculo de distancias. En el prototipo los km son simulados dentro de cada zona.
-- Reglas de indexación por umbral de inventario (ver `docs/SEO.md`).
-- Logotipos de marcas: requieren autorización y son placeholders.
-- Validación técnica del recomendador con surfistas y shapers.
-- Dominio: el prototipo usa `reboard.es` solo como texto de ejemplo.
+## Pendiente de decidir o de hacer fuera del código
+- **Crear y configurar** el proyecto Supabase remoto, Turnstile, Resend, Vercel y el dominio (`docs/LAUNCH_CHECKLIST.md`).
+- **Plan de Vercel:** Hobby no permite uso comercial.
+- **Textos legales:** revisión profesional y datos del titular.
+- **Plazos de conservación:** registro de contactos y anuncios vendidos o caducados.
+- **Catálogo real** verificado (marcas, modelos, medidas) y **logotipos** de marca autorizados.
+- **Recomendador:** validación técnica con surfistas y shapers.
+- **Geolocalización:** hoy la ubicación es provincia o isla + municipio, sin coordenadas.

@@ -83,3 +83,41 @@
 .wrap a:focus-visible {
   outline-color: var(--rb-teal-light);
 }
+
+/* error.tsx: variante sin foto, sobre el fondo general */
+.plain {
+  padding-top: 72px;
+  padding-bottom: 96px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+}
+.plainEyebrow {
+  margin-top: 12px;
+  font-family: var(--rb-font-mono);
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--rb-teal-text);
+}
+.plainTitle {
+  font-family: var(--rb-font-display);
+  font-size: clamp(34px, 4.4vw, 56px);
+  font-weight: 800;
+  text-transform: uppercase;
+  line-height: 0.95;
+  color: var(--rb-petrol);
+}
+.plainLead {
+  max-width: 52ch;
+  font-size: 17px;
+  line-height: 1.5;
+  color: var(--rb-muted);
+}
+.plainActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}

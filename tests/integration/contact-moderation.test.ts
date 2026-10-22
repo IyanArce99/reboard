@@ -5,7 +5,7 @@ import sharp from "sharp";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { supabaseRepository as db } from "@/lib/data/supabase-repository";
-import { dailyMaintenance, moderate, revealContact } from "@/lib/moderation/service";
+import { dailyMaintenance, deleteAccount, moderate, revealContact } from "@/lib/moderation/service";
 import { ListingInput, type ListingInput as Input } from "@/lib/publish/schema";
 import { finalizeListing, saveListing } from "@/lib/publish/save";
 import { ipHash } from "@/lib/security/ip";
@@ -194,5 +194,22 @@ describe("reportes y moderación (F3)", () => {
     // El dueño no puede volver a publicarlo.
     const back = await seller.client.from("listings").update({ status: "published" }).eq("id", listing.id);
     expect(back.error).not.toBeNull();
+  });
+});
+
+describe("borrar la cuenta (RGPD)", () => {
+  it("borra usuario, perfil, anuncios, teléfono, guardados y fotos de Storage", async () => {
+    const listing = await publishOne();
+    await reporters[0].client.from("favorites").insert({ listing_id: listing.id });
+    expect(await storageHas(listing.path)).toBe(true);
+
+    await deleteAccount(sb, seller.userId);
+
+    expect((await sb.auth.admin.getUserById(seller.userId)).data.user).toBeNull();
+    expect((await sb.from("profiles").select("id").eq("id", seller.userId)).data).toEqual([]);
+    expect((await sb.from("listings").select("id").eq("seller_id", seller.userId)).data).toEqual([]);
+    expect((await sb.from("listing_contacts").select("listing_id").eq("listing_id", listing.id)).data).toEqual([]);
+    expect((await sb.from("favorites").select("listing_id").eq("listing_id", listing.id)).data).toEqual([]);
+    expect(await storageHas(listing.path)).toBe(false);
   });
 });

@@ -2,6 +2,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import { authEnabled } from "@/lib/auth/config";
 import { safeNext } from "@/lib/auth/shared";
 import { GUIDES, PENDING_GUIDES } from "@/lib/content/guides";
+import { legalDoc } from "@/lib/content/legal";
 import { catalogSlugs, listingSlug, shopSlugs } from "@/lib/data/lookup";
 import { idFromSlugId } from "@/lib/listing/present";
 import { isLandingForm, isLandingPlace } from "@/lib/search/landings";
@@ -27,6 +28,8 @@ async function isValid(parts: string[]): Promise<boolean> {
       return parts.length === 2 && (await shopSlugs()).has(a);
     case "guias":
       return parts.length === 2 && [...GUIDES, ...PENDING_GUIDES].some((g) => g.slug === a);
+    case "legal":
+      return parts.length === 2 && !!legalDoc(a);
     default:
       return true;
   }
@@ -89,6 +92,7 @@ export const config = {
     "/marcas/:path*",
     "/tiendas/:path+",
     "/guias/:path+",
+    "/legal/:path*",
     "/cuenta/:path*",
     "/panel/:path*",
     "/entrar",

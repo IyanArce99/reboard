@@ -91,9 +91,15 @@ Reglas:
 - `removed` oculta el anuncio, borra sus fotos de Storage y el dueño no puede reabrirlo.
 - Los roles de moderador los asigna un admin por SQL o service role. No hay interfaz para ello en el MVP.
 
-## 8. Cabeceras y otros
+## 8. Cabeceras y otros (✅ fase G: `next.config.ts`)
 - **Cabeceras en `next.config.ts`:**
-  - `Content-Security-Policy`: `img-src` limitado a self, Supabase Storage y Unsplash; `connect-src` limitado a self y Supabase.
+  - `Content-Security-Policy`:
+    - `img-src` limitado a self, data:, blob:, Supabase y Unsplash;
+    - `connect-src` limitado a self, blob:, Supabase y Turnstile;
+    - `script-src` y `frame-src` con Turnstile;
+    - `frame-ancestors 'none'` y `object-src 'none'`.
+    - **Sin nonce:** obligaría a renderizar cada página en cada petición y rompería PPR. Por eso `script-src` incluye `'unsafe-inline'` (lo necesita la hidratación de Next).
+  - `Strict-Transport-Security` (solo en producción) y `X-Frame-Options: DENY`.
   - `X-Content-Type-Options: nosniff`.
   - `Referrer-Policy: strict-origin-when-cross-origin`.
   - `Permissions-Policy`: la cámara solo para self.
@@ -102,8 +108,13 @@ Reglas:
 - **RGPD:**
   - Proyecto Supabase en la UE.
   - Privacidad, cookies y condiciones publicadas **antes** de abrir el registro.
-  - Exportar y borrar la cuenta: la eliminación de `auth.users` borra en cascada perfil, anuncios, fotos (con un job para Storage) y favoritos.
-- **Dependencias:** `npm audit` en CI y Renovate o Dependabot (opcional).
+  - **Borrar la cuenta** (✅ en `/cuenta`):
+    - borra las fotos de Storage y el usuario de Auth;
+    - en cascada se van el perfil, los anuncios, el teléfono, los guardados y los reportes (probado en integración).
+  - **Exportar los datos:** por email al titular (pendiente de automatizar).
+- **Dependencias:** `npm audit --omit=dev` da 0 vulnerabilidades.
+  - En desarrollo quedan avisos «high» en la cadena de `eslint-config-next` (`braces` y `micromatch` a través de `fast-glob`). Solo afectan al linter y no llegan al bundle.
+  - vitest se actualizó a 5.0.3 por avisos críticos.
 
 ## 9. Lista de comprobación antes de producción
 - [ ] RLS activa en todas las tablas (`select relname from pg_class where relrowsecurity = false and relnamespace = 'public'::regnamespace` vacío).

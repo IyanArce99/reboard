@@ -84,3 +84,17 @@ export async function moderate(sb: Sb, moderatorId: string, publicId: string, ac
   const { error: logError } = await sb.from("moderation_actions").insert({ listing_id: id, moderator_id: moderatorId, action, reason });
   if (logError) throw new Error(logError.message);
 }
+
+/**
+ * Borra una cuenta (derecho de supresión): primero las fotos de Storage de todos sus anuncios
+ * (Storage no tiene claves foráneas) y después el usuario de Auth, que borra en cascada perfil,
+ * anuncios, fotos registradas, contacto privado, guardados y reportes.
+ */
+export async function deleteAccount(sb: Sb, userId: string) {
+  const { data: folders } = await sb.storage.from(BUCKET).list(userId, { limit: 1000 });
+  let photos = 0;
+  for (const f of folders ?? []) photos += await removeFolder(sb, `${userId}/${f.name}`);
+  const { error } = await sb.auth.admin.deleteUser(userId);
+  if (error) throw new Error(error.message);
+  return { photosDeleted: photos };
+}

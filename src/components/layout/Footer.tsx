@@ -55,7 +55,13 @@ export function Footer() {
       </div>
       <div className={styles.bottom}>
         <span>Reboard · Hecho para surfistas en España</span>
-        <Link href="/creditos">Créditos de fotografía</Link>
+        <nav className={styles.legal} aria-label="Legal">
+          <Link href="/legal/aviso-legal">Aviso legal</Link>
+          <Link href="/legal/privacidad">Privacidad</Link>
+          <Link href="/legal/cookies">Cookies</Link>
+          <Link href="/legal/condiciones">Condiciones</Link>
+          <Link href="/creditos">Créditos de fotografía</Link>
+        </nav>
       </div>
     </footer>
   );

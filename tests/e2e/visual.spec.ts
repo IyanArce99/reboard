@@ -33,6 +33,13 @@ for (const viewport of [
           await document.fonts.ready;
         });
         await page.waitForLoadState("networkidle");
+        // Los elementos sticky (cabecera, panel de la ficha) se duplican al coser la captura de
+        // página completa según el scroll: se fijan en su sitio para que la referencia sea estable.
+        await page.evaluate(() => {
+          for (const el of document.querySelectorAll<HTMLElement>("body *")) {
+            if (getComputedStyle(el).position === "sticky") el.style.position = "static";
+          }
+        });
         expect(await page.evaluate(() => document.documentElement.scrollWidth - innerWidth), "sin scroll horizontal").toBe(0);
         await expect(page).toHaveScreenshot(`${name}-${viewport.name}.png`, { fullPage: true });
       });

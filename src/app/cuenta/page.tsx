@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Suspense } from "react";
-import { ProfileForm, SignOutButton } from "@/components/auth/AccountIslands";
+import { DeleteAccount, ProfileForm, SignOutButton } from "@/components/auth/AccountIslands";
 import { authEnabled } from "@/lib/auth/config";
 import { noindexRobots } from "@/lib/seo";
 import { createUserClient } from "@/lib/supabase/server";
@@ -55,6 +55,14 @@ async function Account() {
         <h2 id="sesion-title">Sesión</h2>
         <p className={styles.meta}>Al salir, tus guardadas siguen en tu cuenta y desaparecen de este dispositivo.</p>
         <SignOutButton />
+      </section>
+
+      <section className={styles.card} aria-labelledby="borrar-title">
+        <h2 id="borrar-title">Borrar la cuenta</h2>
+        <p className={styles.meta}>
+          Se borran tu perfil, tus anuncios con sus fotos, tu teléfono de contacto y tus guardados. No se puede deshacer.
+        </p>
+        <DeleteAccount />
       </section>
     </>
   );

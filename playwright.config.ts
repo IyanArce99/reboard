@@ -4,6 +4,8 @@ import { defineConfig, devices } from "@playwright/test";
 // - `e2e`: rutas, códigos HTTP y recorridos clave. Se ejecuta en CI.
 // - `visual`: capturas de referencia de las pantallas clave. Solo local (las capturas
 //   dependen del sistema operativo y de las fuentes), para comparar antes y después de un cambio.
+//   Se ejecutan de una en una (npm run test:visual): en paralelo, la carga produce desplazamientos
+//   de subpíxel que no son cambios de diseño.
 const PORT = 3100;
 
 export default defineConfig({

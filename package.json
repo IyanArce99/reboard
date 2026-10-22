@@ -11,7 +11,7 @@
     "test:watch": "vitest",
     "typecheck": "next typegen && tsc --noEmit",
     "test:e2e": "playwright test --project=e2e",
-    "test:visual": "playwright test --project=visual",
+    "test:visual": "playwright test --project=visual --workers=1",
     "db:start": "supabase start -x realtime,edge-runtime,logflare,vector,studio,imgproxy,supavisor,postgres-meta",
     "db:stop": "supabase stop",
     "db:reset": "supabase db reset",
@@ -34,7 +34,7 @@
   },
   "devDependencies": {
     "@playwright/test": "^1.62.1",
-    "@types/node": "^20",
+    "@types/node": "^22",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",
@@ -43,6 +43,6 @@
     "supabase": "^2.121.0",
     "tsx": "^4.23.15",
     "typescript": "^5",
-    "vitest": "^3.2.7"
+    "vitest": "5.0.3"
   }
 }

@@ -1,0 +1,61 @@
+.page {
+  max-width: 760px;
+  padding-top: 32px;
+  padding-bottom: 72px;
+}
+
+.draft {
+  padding: 14px 16px;
+  border-radius: 12px;
+  background: var(--rb-warning-tint);
+  color: var(--rb-warning-ink);
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+.title {
+  margin-top: 24px;
+  font-family: var(--rb-font-display);
+  font-size: clamp(34px, 4vw, 52px);
+  font-weight: 800;
+  text-transform: uppercase;
+  line-height: 0.95;
+  color: var(--rb-petrol);
+}
+
+.intro {
+  margin-top: 12px;
+  font-size: 18px;
+  line-height: 1.5;
+  color: var(--rb-muted);
+}
+
+.section {
+  margin-top: 28px;
+}
+.section h2 {
+  font-size: 20px;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+.section p {
+  font-size: 16px;
+  line-height: 1.6;
+  margin-top: 8px;
+}
+
+.others {
+  margin-top: 40px;
+  padding-top: 18px;
+  border-top: 1px solid var(--rb-line);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 20px;
+}
+.others a {
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  font-weight: 700;
+  color: var(--rb-teal-text);
+}

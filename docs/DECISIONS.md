@@ -377,3 +377,12 @@ Con la caché de páginas (minutos), la mayoría de las visitas no consultan la 
   - el panel cuenta el contacto;
   - `/moderacion` sin rol niega el acceso.
 
+
+## Fase G (preparación de producción, en local)
+- **CSP sin nonce:** un nonce exige render dinámico por petición y anula el prerenderizado parcial. Se acepta `'unsafe-inline'` en `script-src` (lo necesita la hidratación de Next) y el resto de directivas se limitan a orígenes concretos (Supabase, Turnstile, Unsplash para los DEMO). `connect-src` incluye `blob:` para las fotos procesadas en la propia página. Probado con un recorrido completo en modo supabase sin violaciones.
+- **Errores:** `error.tsx` (con `retry()` de Next 16) dentro del layout y `global-error.tsx` con estilos en línea (no recibe los globales).
+- **Legal:** borradores en `src/lib/content/legal.ts`, sin datos del titular (entre corchetes) y sin afirmar cumplimiento. Describen solo lo que la app hace. Llevan `noindex` y aviso visible; `proxy` da 404 real a slugs desconocidos.
+- **Borrar la cuenta:** `/cuenta` exige escribir «BORRAR». El servidor borra las fotos de Storage (no tiene claves foráneas) y el usuario de Auth; la base de datos borra en cascada el resto. Probado en integración. Límite conocido: un moderador con acciones registradas no se puede borrar (`moderation_actions.moderator_id` no tiene cascada, a propósito, para conservar el registro).
+- **Dependencias:** vitest 3 → 5.0.3 por avisos críticos (solo desarrollo). Se eligió una versión publicada hace más de dos semanas. `npm` 10.9.4 falla resolviendo pares (`edgesOut`); la instalación se hizo con `npx npm@11.6.2 install` y se alineó `@types/node` con Node 22 (CI y runtime).
+- **Capturas visuales:** se ejecutan de una en una (`--workers=1`) y con los elementos sticky fijados. En paralelo aparecían desplazamientos de subpíxel que no eran cambios de diseño.
+- **Región de Vercel:** sin fijar hasta crear el proyecto de Supabase (debe coincidir con él).
