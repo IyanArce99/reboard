@@ -55,9 +55,11 @@ interface Props {
   nowIso: string;
   live?: boolean;
   sellerName?: string;
+  /** Contactos reales por anuncio (clics en «Mostrar contacto»). */
+  contacts?: Record<string, number>;
 }
 
-export function SellerPanel({ listings, nowIso, live = false, sellerName }: Props) {
+export function SellerPanel({ listings, nowIso, live = false, sellerName, contacts = {} }: Props) {
   const { toast } = useUserState();
   const router = useRouter();
   const now = useMemo(() => new Date(nowIso), [nowIso]);
@@ -241,6 +243,13 @@ export function SellerPanel({ listings, nowIso, live = false, sellerName }: Prop
                       <span className={`${ui.dot} ${tone}`} style={{ width: 8, height: 8 }} />
                       {statusText(l, t)}
                     </div>
+                    {live && (
+                      <div className={styles.stats}>
+                        <span>
+                          Contacto pedido {contacts[l.id] ?? 0} {contacts[l.id] === 1 ? "vez" : "veces"}
+                        </span>
+                      </div>
+                    )}
                     {!live && (
                       <div className={styles.stats}>
                         <span>{40 + (k % 300)} visitas</span>

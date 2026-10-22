@@ -735,3 +735,45 @@
     border-radius: 20px 20px 0 0;
   }
 }
+
+/* ——— Contacto real y reportes (fase F) ——— */
+.modalError {
+  min-height: 1.3em;
+  font-size: 14px;
+  color: var(--rb-error);
+}
+
+.reportForm {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.reportForm fieldset {
+  border: 0;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.reportForm textarea {
+  display: block;
+  width: 100%;
+  margin-top: 6px;
+  height: auto;
+  padding: 10px 12px;
+  font: inherit;
+}
+
+.reportOption {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 40px;
+  font-size: 15px;
+}
+.reportOption input {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--rb-teal);
+}

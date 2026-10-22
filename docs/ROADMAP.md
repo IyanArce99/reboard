@@ -109,13 +109,13 @@ Dirección «coastal editorial» con fotografía de Pexels (local, optimizada y 
 | E5 ✅ | `/panel` real: anuncios del usuario y acciones (confirmar, bajar precio, marcar vendida, volver a publicar, retirar). `rb-panel-v1` queda solo para la demo | E3 ✅ | E2E: marcar vendida → banner «vendida» en la ficha |
 | E6 ✅ | Editar: `/vender/publicar?editar=` desde la base de datos (solo el dueño), incluidas las fotos | E3 ✅ | E2E: editar el precio → «Ha bajado de X a Y» |
 
-### Fase F: contacto, caducidad y moderación
+### Fase F: contacto, caducidad y moderación ✅ en local, el 22-10-2026
 | # | Tarea | Depende de | Hecho cuando |
 |---|---|---|---|
-| F1 | `revealContact` (Server Action + CAPTCHA + HMAC de IP + `reveal_contact`), sin registro, conectada al modal actual | B6, D5, E3 | E2E: se abre `wa.me` con el número. El número no está en el HTML |
-| F2 | Cron de caducidad (`/api/cron/expirar` con `CRON_SECRET`), «pendiente» calculado (> 14 días) y limpieza de fotos huérfanas | E3 ✅ | Test: un anuncio con `confirmed_at` de hace 31 días pasa a caducado |
-| F3 | Reportar anuncio (con sesión y CAPTCHA), marca automática con 3 reportes, y `/moderacion` mínimo | B3, D2, D5 | Un moderador retira el anuncio y sus fotos desaparecen |
-| F4 | Estadística real «clics en contactar» en el panel. Ocultar visitas y guardados simulados fuera del DEMO | F1, E5 | El panel en producción no muestra cifras simuladas |
+| F1 ✅ | `revealContact` (Server Action + CAPTCHA + HMAC de IP + `reveal_contact`), sin registro, conectada al modal actual | B6, D5, E3 | E2E: se abre `wa.me` con el número. El número no está en el HTML |
+| F2 ✅ | Cron de caducidad (`/api/cron/expirar` con `CRON_SECRET`), «pendiente» calculado (> 14 días) y limpieza de fotos huérfanas | E3 ✅ | Test: un anuncio con `confirmed_at` de hace 31 días pasa a caducado |
+| F3 ✅ | Reportar anuncio (con sesión y CAPTCHA), marca automática con 3 reportes, y `/moderacion` mínimo | B3, D2, D5 | Un moderador retira el anuncio y sus fotos desaparecen |
+| F4 ✅ | Estadística real «clics en contactar» en el panel. Ocultar visitas y guardados simulados fuera del DEMO | F1, E5 | El panel en producción no muestra cifras simuladas |
 
 ### Fase G: salida a producción
 | # | Tarea | Depende de | Hecho cuando |

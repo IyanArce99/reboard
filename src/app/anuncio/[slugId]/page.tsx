@@ -13,6 +13,7 @@ import {
 } from "@/components/listing/Contact";
 import { Gallery } from "@/components/listing/Gallery";
 import { ListingCard } from "@/components/listing/ListingCard";
+import { authEnabled } from "@/lib/auth/config";
 import { Breadcrumbs } from "@/components/seo/Breadcrumbs";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { AlertButton, CompareButton, SaveTextButton } from "@/components/user/islands";
@@ -117,7 +118,9 @@ export default async function FichaPage({ params }: PageProps<"/anuncio/[slugId]
   const url = absoluteUrl(listingPath(l));
 
   return (
-    <ContactProvider data={{ sellerName: l.seller.name, message, phone: l.contact.phone, unavailable: off }}>
+    <ContactProvider
+      data={{ sellerName: l.seller.name, message, phone: l.contact.phone, unavailable: off, listingId: l.id, live: authEnabled() }}
+    >
       <main className={`container ${styles.page}`}>
         <Breadcrumbs
           items={[

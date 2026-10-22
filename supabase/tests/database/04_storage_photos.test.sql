@@ -37,7 +37,7 @@ select throws_ok($$ insert into public.listing_photos (listing_id, storage_path,
   '42501', null, 'la ruta debe estar en la carpeta del dueño');
 insert into public.listing_photos (listing_id, storage_path, position)
 select listing_id, '11111111-1111-1111-1111-111111111111/' || listing_id || '/f' || g || '.webp', g from _paths, generate_series(1, 7) g;
-select is((select count(*) from public.listing_photos), 8::bigint, '8 fotos registradas');
+select is((select count(*) from public.listing_photos where listing_id = (select listing_id from _paths)), 8::bigint, '8 fotos registradas');
 select throws_ok($$
   insert into public.listing_photos (listing_id, storage_path, position)
   select listing_id, '11111111-1111-1111-1111-111111111111/' || listing_id || '/extra.webp', 7 from _paths
@@ -47,24 +47,25 @@ $$, null, null, 'no se admite una novena foto');
 -- (El borrado solo es posible por la API de Storage: Supabase bloquea el DELETE directo en SQL;
 --  la política listing_photos_owner_delete limita el borrado a la carpeta propia.)
 set local request.jwt.claims to '{"sub":"22222222-2222-2222-2222-222222222222","role":"authenticated"}';
-select is((select count(*) from storage.objects where bucket_id = 'listing-photos'), 0::bigint, 'B no lista los objetos de A');
+-- (Los recuentos se limitan a los datos de este test: la base local puede tener otros anuncios.)
+select is((select count(*) from storage.objects where bucket_id = 'listing-photos' and name like '11111111-%'), 0::bigint, 'B no lista los objetos de A');
 -- Intento de mover el objeto de A: la RLS no deja ver la fila, así que no actualiza nada
 -- (se comprueba más abajo, como postgres, que el objeto sigue intacto).
-update storage.objects set name = '22222222-2222-2222-2222-222222222222/x.webp' where bucket_id = 'listing-photos';
-select is((select count(*) from public.listing_photos), 0::bigint, 'B no ve las fotos de un borrador ajeno');
+update storage.objects set name = '22222222-2222-2222-2222-222222222222/x.webp' where bucket_id = 'listing-photos' and name like '11111111-%';
+select is((select count(*) from public.listing_photos where listing_id = (select listing_id from _paths)), 0::bigint, 'B no ve las fotos de un borrador ajeno');
 set local role anon;
 set local request.jwt.claims to '{"role":"anon"}';
 select is((select count(*) from storage.objects where bucket_id = 'listing-photos'), 0::bigint, 'anon no lista el bucket');
 
 reset role;
-select is((select name from storage.objects where bucket_id = 'listing-photos'),
-  (select own_ok from _paths), 'el objeto de A sigue intacto');
+select is((select count(*) from storage.objects where bucket_id = 'listing-photos' and name = (select own_ok from _paths)),
+  1::bigint, 'el objeto de A sigue intacto');
 
 -- Al publicar, las fotos pasan a ser visibles
 update public.listings set status = 'published' where slug = 't-fotos';
 set local role anon;
 set local request.jwt.claims to '{"role":"anon"}';
-select is((select count(*) from public.listing_photos), 8::bigint, 'anon ve las fotos de un anuncio publicado');
+select is((select count(*) from public.listing_photos where listing_id = (select listing_id from _paths)), 8::bigint, 'anon ve las fotos de un anuncio publicado');
 
 select * from finish();
 rollback;

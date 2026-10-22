@@ -311,3 +311,69 @@ Con la caché de páginas (minutos), la mayoría de las visitas no consultan la 
 - **`tests/unit/publish-schema.test.ts`** (15) y **e2e de EXIF** (1).
 - **Prueba de humo en el navegador** (móvil, modo supabase), sin errores de consola: 2 fotos, Shaper local con medidas pegadas, cuenta incrustada, publicado, ficha, `/buscar`, cambio de precio con el anterior tachado y vendida.
 
+## Fase F (contacto, caducidad y moderación, en local)
+### Contacto (F1)
+- **El número no se envía en el HTML.**
+  - La ficha muestra el mensaje sugerido y «Mostrar contacto».
+  - Al pulsarlo, `revealContactAction` hace lo siguiente:
+    1. comprueba Turnstile en el servidor;
+    2. calcula `HMAC-SHA256(IP, CONTACT_IP_SALT)` (`src/lib/security/ip.ts`);
+    3. llama a `reveal_contact` con service role.
+  - La función registra el evento y aplica el límite de 30 por hora y por IP.
+- **Después aparecen los enlaces reales:**
+  - `wa.me/{número}?text=…`;
+  - «Llamar · +{número}».
+  - Se muestran como enlaces, no con `window.open` tras un `await`, para que los navegadores no los bloqueen.
+- **Sin registro** (decisión aprobada). Con sesión, el evento guarda también el usuario.
+- **Fallos:** si falta `CONTACT_IP_SALT`, no se revela nada (falla cerrado).
+
+### Caducidad y limpieza (F2)
+- **`GET /api/cron/expirar`:**
+  - Vercel Cron lo llama a diario a las 04:15 UTC (`vercel.json`).
+  - Se autentica con `Authorization: Bearer $CRON_SECRET`, comparado en tiempo constante; sin secreto, rechaza.
+- **Qué hace:**
+  - `expire_listings()`: lo publicado sin confirmar en 30 días pasa a caducado;
+  - borra los borradores de más de 7 días y sus fotos en Storage.
+- «Pendiente» (más de 14 días) se sigue calculando al leer.
+- **`vercel.json` no fija región:** debe coincidir con la del proyecto de Supabase, que aún no existe (B7). Se fijará entonces.
+
+### Reportes y moderación (F3)
+- **Reportar exige sesión y Turnstile.**
+  - Sin sesión, «Reportar anuncio» lleva a `/entrar` y vuelve a la ficha.
+  - Un reporte por persona y anuncio.
+  - Con 3 reportes abiertos, el anuncio pasa a `flagged`: sigue visible y entra en la cola.
+- **`/moderacion`:**
+  - solo con `is_moderator()`; si no, «No tienes acceso»;
+  - sin sesión, `proxy` pide entrar.
+- **Acciones:** retirar, descartar reportes o restaurar.
+  - Las escrituras usan service role después de comprobar el rol en la base de datos.
+  - Quedan en `moderation_actions`, que la página muestra como registro.
+- **Retirar:**
+  - oculta el anuncio y borra sus fotos de Storage y sus filas;
+  - resuelve los reportes;
+  - el dueño no puede reabrirlo (lo impide el disparador).
+- **Roles:** sin interfaz para darlos. Un admin lo hace por SQL (`update profiles set role = 'moderator' …`).
+- **`currentModerator()` vive en `src/lib/moderation/auth.ts`**, no en un archivo `"use server"`: todo lo que exporta un archivo así es invocable desde el cliente.
+
+### Estadística real (F4)
+- **Con cuenta:** el panel muestra «Contacto pedido N veces», contado en `contact_events` (RLS: solo los de sus anuncios). Cuenta veces, no personas.
+- **Visitas y guardados simulados:** solo en la demo.
+
+### Pruebas
+- **`tests/integration/contact-moderation.test.ts`** (8):
+  - HMAC de la IP;
+  - el teléfono no viaja con el anuncio y anon no puede llamar a `reveal_contact`;
+  - el evento lo ve solo el vendedor;
+  - límite de 30 por hora;
+  - no se revelan anuncios no publicados;
+  - caducidad a 31 días y borrado de borradores con sus fotos;
+  - reportes (sesión, duplicado, marca automática);
+  - moderación (cola solo para moderadores; retirar oculta y borra fotos; registro; el dueño no puede reabrir).
+- **`tests/unit/cron-route.test.ts`** (2): autorización del cron.
+- **Prueba de humo en el navegador** (modo supabase), sin errores de consola:
+  - el número no está en el HTML;
+  - el anónimo lo revela tras Turnstile y obtiene `wa.me/34…`;
+  - reportar sin sesión lleva a `/entrar`;
+  - el panel cuenta el contacto;
+  - `/moderacion` sin rol niega el acceso.
+

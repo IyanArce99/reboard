@@ -41,6 +41,7 @@ const PRIVATE: Record<string, { requireUser: boolean }> = {
   panel: { requireUser: true },
   entrar: { requireUser: false },
   "vender/publicar": { requireUser: false },
+  moderacion: { requireUser: true },
 };
 
 const privateKey = (parts: string[]) => (parts[0] === "vender" && parts[1] === "publicar" ? "vender/publicar" : parts[0]);
@@ -92,5 +93,6 @@ export const config = {
     "/panel/:path*",
     "/entrar",
     "/vender/publicar",
+    "/moderacion/:path*",
   ],
 };

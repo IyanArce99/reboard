@@ -1,0 +1,121 @@
+.page {
+  padding-top: 36px;
+  padding-bottom: 72px;
+  max-width: 960px;
+}
+
+.eyebrow {
+  font-family: var(--rb-font-mono);
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--rb-teal-text);
+}
+
+.title {
+  margin-top: 6px;
+  font-family: var(--rb-font-display);
+  font-size: clamp(34px, 4vw, 48px);
+  font-weight: 800;
+  text-transform: uppercase;
+  line-height: 0.95;
+}
+
+.lead {
+  margin: 12px 0 20px;
+  font-size: 15px;
+  line-height: 1.5;
+  color: var(--rb-muted);
+}
+
+.skeleton {
+  height: 240px;
+  border-radius: 16px;
+  background: var(--rb-line-soft);
+}
+
+.rows {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.row {
+  padding: 18px;
+  border: 1px solid var(--rb-line);
+  border-radius: 16px;
+  background: var(--rb-white);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.rowHead {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.rowTitle {
+  font-weight: 700;
+  color: var(--rb-petrol);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.badge {
+  font-family: var(--rb-font-mono);
+  font-size: 12px;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: var(--rb-line-soft);
+}
+.badge[data-tone="flagged"] {
+  background: var(--rb-warning-tint);
+  color: var(--rb-warning-ink);
+}
+.badge[data-tone="removed"] {
+  background: var(--rb-error-tint);
+  color: var(--rb-error-ink);
+}
+
+.reports {
+  margin: 0;
+  padding-left: 18px;
+  font-size: 14px;
+  line-height: 1.5;
+}
+.reports span {
+  color: var(--rb-faint);
+}
+
+.reasonLabel {
+  font-size: 13px;
+  font-weight: 700;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.h2 {
+  margin: 36px 0 10px;
+  font-family: var(--rb-font-display);
+  font-size: 24px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.log {
+  margin: 0;
+  padding-left: 18px;
+  font-size: 14px;
+  color: var(--rb-muted);
+  line-height: 1.6;
+}

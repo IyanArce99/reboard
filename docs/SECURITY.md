@@ -64,7 +64,7 @@ Reglas:
   - El servidor nunca confía en `seller_id` ni en `status` venidos del cliente. El estado se decide según la acción («publicar», «marcar vendida»…).
 - **Respuestas:** las Server Actions devuelven objetos mínimos (`{ ok, id }` o `{ error }`), nunca filas completas.
 
-## 5. Contacto y anti-scraping
+## 5. Contacto y anti-scraping (✅ fase F: `src/app/anuncio/actions.ts`)
 - El teléfono **no aparece en el HTML ni en el JSON-LD**. Se revela al pulsar «Contactar», con una Server Action que llama a `reveal_contact(public_id, user, ip_hash)`.
 - **Contacto sin registro (aprobado):** CAPTCHA antes de revelar el número y límite de 30 contactos por hora y por IP (aplicado en la función). Con sesión se puede ampliar.
   - `ip_hash` = HMAC-SHA256(IP, `CONTACT_IP_SALT`). La IP nunca se guarda en claro.
@@ -83,9 +83,9 @@ Reglas:
 - **`next/image`:**
   - Se añade el host de Supabase Storage a `images.remotePatterns`, en formato objeto y solo con la ruta `/storage/v1/object/public/listing-photos/**`.
   - Se quitará Unsplash cuando no haya datos DEMO.
-- **Fotos huérfanas:** las de borradores abandonados se limpian con un cron (más de 7 días sin anuncio publicado).
+- **Fotos huérfanas:** las de borradores abandonados se limpian con el cron diario `/api/cron/expirar` (borradores de más de 7 días).
 
-## 7. Moderación básica
+## 7. Moderación básica (✅ fase F: `/moderacion`, `src/lib/moderation/`)
 - **Reportes** (requieren sesión, aprobado): uno por persona y anuncio, con CAPTCHA. Con 3 reportes abiertos, el anuncio pasa automáticamente a `flagged` (sigue visible y aparece en la cola).
 - **Panel de moderación** (`/moderacion`, solo `role in (moderator, admin)`): retirar, restaurar o descartar reportes. Cada acción queda registrada en `moderation_actions`.
 - `removed` oculta el anuncio, borra sus fotos de Storage y el dueño no puede reabrirlo.
