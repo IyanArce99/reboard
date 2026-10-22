@@ -90,14 +90,14 @@ Un único proyecto Supabase (`reboard`, UE, plan gratuito). Todo se ha hecho y p
 ### Diseño: dirección de arte y copy ✅ en local, el 22-10-2026
 Dirección «coastal editorial» con fotografía de Pexels (local, optimizada y acreditada), siluetas SVG de las formas, cabecera de sección única, footer de marca y copy revisado. Rediseñadas la home, `/vender`, `/guias`, la guía, `/tiendas`, marca y modelo, el resultado del asistente, el bloque «Antes de comprar» de la ficha, los estados vacíos y la 404. Nueva página `/creditos`. Detalle, fotos, copy antes/después y pendientes en `docs/DESIGN_AUDIT.md`.
 
-### Fase D: cuentas
+### Fase D: cuentas ✅ en local (salvo D1 remoto), el 22-10-2026
 | # | Tarea | Depende de | Hecho cuando |
 |---|---|---|---|
-| D1 | SMTP propio en Supabase Auth (Resend, remitente en reboard.es) y plantillas en español | B1 | Llega el código a un email real |
-| D2 | `/entrar` (email → código), `/auth/confirm` y refresco de la sesión en `proxy` (solo rutas privadas) | C1, D1 | Se puede entrar y salir. `getUser()` en el servidor |
-| D3 | Cabecera con «Entrar» o el usuario (isla en `<Suspense>`). Nombre visible en el perfil | D2 | Las páginas públicas siguen siendo PPR (sin dinamizarse enteras) |
-| D4 | Guardados en la base de datos para usuarios con sesión y fusión de `rb-usuario-v1.saved` al entrar | D2 | Un guardado aparece en otro dispositivo |
-| D5 | CAPTCHA con **Cloudflare Turnstile (gratuito)**: activarlo en Supabase Auth (acceso) y verificar el token en el servidor para contacto, publicar y reportar | B7 | Sin token válido, el servidor rechaza la acción (probado con las claves de prueba de Turnstile) |
+| D1 🟡 | SMTP propio en Supabase Auth (Resend, remitente en reboard.es) y plantillas en español | B1 | Llega el código a un email real. **Hecho en local:** plantilla en español y código leído en Mailpit. **Pendiente del titular:** cuenta de Resend, dominio verificado y SMTP en el panel. |
+| D2 ✅ | `/entrar` (email → código), `/auth/confirm` y refresco de la sesión en `proxy` (solo rutas privadas) | C1, D1 | Se puede entrar y salir. `getUser()` en el servidor |
+| D3 ✅ | Cabecera con «Entrar» o el usuario (isla en `<Suspense>`). Nombre visible en el perfil | D2 | Las páginas públicas siguen siendo PPR (sin dinamizarse enteras) |
+| D4 ✅ | Guardados en la base de datos para usuarios con sesión y fusión de `rb-usuario-v1.saved` al entrar | D2 | Un guardado aparece en otro dispositivo |
+| D5 🟡 | CAPTCHA con **Cloudflare Turnstile (gratuito)**: activarlo en Supabase Auth (acceso) y verificar el token en el servidor para contacto, publicar y reportar | B7 | Sin token válido, el servidor rechaza la acción (probado con las claves de prueba de Turnstile). **Hecho:** widget, verificación en el servidor con tests y token en el acceso. **Pendiente:** activarlo en Supabase Auth remoto (B7) y usarlo en publicar, contacto y reportar (E y F). |
 
 ### Fase E: publicar y gestionar
 | # | Tarea | Depende de | Hecho cuando |

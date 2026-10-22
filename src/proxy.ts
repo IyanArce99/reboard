@@ -1,8 +1,11 @@
 import { NextResponse, type NextRequest } from "next/server";
+import { authEnabled } from "@/lib/auth/config";
+import { safeNext } from "@/lib/auth/shared";
 import { GUIDES, PENDING_GUIDES } from "@/lib/content/guides";
 import { catalogSlugs, listingSlug, shopSlugs } from "@/lib/data/lookup";
 import { idFromSlugId } from "@/lib/listing/present";
 import { isLandingForm, isLandingPlace } from "@/lib/search/landings";
+import { refreshSession, withSessionCookies } from "@/lib/supabase/proxy-session";
 
 // Con Cache Components, una URL con parámetros desconocidos sirve el shell con 200 antes de
 // que la página llame a notFound(). Para dar códigos HTTP reales (404 y 308), que importan
@@ -29,8 +32,32 @@ async function isValid(parts: string[]): Promise<boolean> {
   }
 }
 
+/** Rutas privadas: se refresca la sesión y, si hace falta cuenta, se pide entrar. */
+const PRIVATE: Record<string, { requireUser: boolean }> = {
+  cuenta: { requireUser: true },
+  // El panel es local (DEMO) hasta la fase E: se refresca la sesión, pero aún no exige cuenta.
+  panel: { requireUser: false },
+  entrar: { requireUser: false },
+};
+
+async function privateRoute(request: NextRequest, section: string) {
+  if (!authEnabled()) return NextResponse.next();
+  const { response, user } = await refreshSession(request);
+  if (user && section === "entrar") {
+    const next = safeNext(request.nextUrl.searchParams.get("siguiente"));
+    return withSessionCookies(response, NextResponse.redirect(new URL(next, request.url)));
+  }
+  if (!user && PRIVATE[section].requireUser) {
+    const login = new URL("/entrar", request.url);
+    login.searchParams.set("siguiente", request.nextUrl.pathname + request.nextUrl.search);
+    return withSessionCookies(response, NextResponse.redirect(login));
+  }
+  return response;
+}
+
 export async function proxy(request: NextRequest) {
   const parts = request.nextUrl.pathname.split("/").filter(Boolean);
+  if (parts[0] && Object.hasOwn(PRIVATE, parts[0])) return privateRoute(request, parts[0]);
 
   if (parts[0] === "anuncio" && parts.length === 2) {
     const id = idFromSlugId(parts[1]);
@@ -49,5 +76,14 @@ export async function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/tablas/:path*", "/anuncio/:path*", "/marcas/:path*", "/tiendas/:path+", "/guias/:path+"],
+  matcher: [
+    "/tablas/:path*",
+    "/anuncio/:path*",
+    "/marcas/:path*",
+    "/tiendas/:path+",
+    "/guias/:path+",
+    "/cuenta/:path*",
+    "/panel/:path*",
+    "/entrar",
+  ],
 };

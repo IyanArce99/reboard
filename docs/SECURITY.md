@@ -22,10 +22,16 @@ Reglas:
 ## 2. Autenticación (Supabase Auth)
 - **Acceso por email con código de un solo uso (OTP), sin contraseña.**
   - **SMTP propio (Resend)** antes de producción: el SMTP por defecto de Supabase tiene límites muy bajos.
-  - Plantillas en español.
+  - Plantillas en español: `supabase/templates/codigo.html`. En remoto se copia en Authentication → Email Templates (Magic Link y Confirm signup).
+  - **Resend como SMTP** (Authentication → SMTP Settings):
+    - host `smtp.resend.com`, puerto 465, usuario `resend`;
+    - la contraseña es la API key de Resend y vive solo en el panel de Supabase, nunca en el repositorio;
+    - remitente en un dominio verificado (p. ej., `no-responder@reboard.es`);
+    - subir el límite de emails por hora (Authentication → Rate Limits) a ~30.
 - **Sesión:**
   - `@supabase/ssr` con cookies HttpOnly.
-  - El refresco se hace en `src/proxy.ts`, ampliando su `matcher` con cuidado, solo a las rutas que lo necesitan, porque `proxy` se ejecuta en cada petición que coincide.
+  - El cliente del navegador (`@supabase/ssr`) hace el acceso y refresca la sesión en las páginas públicas, que siguen siendo estáticas.
+  - `src/proxy.ts` la refresca en las rutas privadas (`/cuenta`, `/panel`, `/entrar`). Un Server Component no puede escribir cookies: si refrescara el token, el refresh token rotado se perdería.
 - **Autorización en cada acción:**
   - En el servidor, la identidad se obtiene siempre con `supabase.auth.getUser()` (que valida el token contra Auth), nunca con `getSession()`.
   - **Cada Server Action y Route Handler vuelve a comprobar la sesión:** la UI no protege nada.

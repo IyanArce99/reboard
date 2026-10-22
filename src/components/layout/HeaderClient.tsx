@@ -38,6 +38,21 @@ export function CompactSearch({ names, className }: { names: CatalogNames; class
   );
 }
 
+/** «Entrar» o el nombre del usuario. Solo con cuentas activas (base de datos real). */
+export function AccountLink({ className }: { className: string }) {
+  const { authEnabled, account } = useUserState();
+  if (!authEnabled) return null;
+  return account ? (
+    <Link href="/cuenta" className={className} title="Mi cuenta">
+      {account.name}
+    </Link>
+  ) : (
+    <Link href="/entrar" className={className}>
+      Entrar
+    </Link>
+  );
+}
+
 export function MobileSavedLink({ className, badgeClassName }: { className: string; badgeClassName: string }) {
   const { saved } = useUserState();
   return (
@@ -51,7 +66,7 @@ export function MobileSavedLink({ className, badgeClassName }: { className: stri
 /** Panel lateral derecho (86 %, o 360 px en tablet). No hay megamenú. */
 export function MobileMenu() {
   const [open, setOpen] = useState(false);
-  const { saved, alerts } = useUserState();
+  const { saved, alerts, authEnabled, account } = useUserState();
   const closeRef = useRef<HTMLButtonElement>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
 
@@ -78,6 +93,7 @@ export function MobileMenu() {
     ["Tiendas y escuelas", "/tiendas", ""],
     ["Mi panel de vendedor", "/panel", ""],
   ];
+  if (authEnabled) items.push(account ? ["Mi cuenta", "/cuenta", ""] : ["Entrar", "/entrar", ""]);
 
   return (
     <>

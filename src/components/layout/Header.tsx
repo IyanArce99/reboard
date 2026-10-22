@@ -3,7 +3,7 @@ import { Suspense } from "react";
 import { Logo } from "@/components/Logo";
 import { SearchIcon } from "@/components/icons";
 import type { CatalogNames } from "@/lib/search/describe";
-import { BuyLink, CompactSearch, MobileMenu, MobileSavedLink } from "./HeaderClient";
+import { AccountLink, BuyLink, CompactSearch, MobileMenu, MobileSavedLink } from "./HeaderClient";
 import { SavedCount } from "@/components/user/islands";
 import styles from "./Header.module.css";
 
@@ -37,6 +37,7 @@ export function Header({ names }: { names: CatalogNames }) {
           <Link href="/guardado" className={styles.navLink}>
             <SavedCount prefix="Guardado · " />
           </Link>
+          <AccountLink className={styles.navLink} />
           <Link href="/vender/publicar" className={styles.sell}>
             Vender gratis
           </Link>

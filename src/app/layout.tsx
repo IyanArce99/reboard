@@ -6,6 +6,7 @@ import { DemoBanner } from "@/components/layout/DemoBanner";
 import { Footer } from "@/components/layout/Footer";
 import { Header } from "@/components/layout/Header";
 import { UserStateProvider } from "@/components/user/UserStateProvider";
+import { authEnabled } from "@/lib/auth/config";
 import { getRepository } from "@/lib/data";
 import { getCatalogNames } from "@/lib/data/names";
 import { SITE_NAME, SITE_URL } from "@/lib/site";
@@ -58,7 +59,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="es" className={`${barlow.variable} ${barlowCondensed.variable} ${plexMono.variable}`}>
       <body>
-        <UserStateProvider>
+        <UserStateProvider authEnabled={authEnabled()}>
           {repo.isDemo && <DemoBanner />}
           <Header names={names} />
           {children}

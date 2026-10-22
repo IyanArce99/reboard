@@ -1,10 +1,13 @@
 "use client";
 
-// Estado del usuario invitado: guardados, comparación, alertas y perfil de surfista.
-// Vive SOLO en este dispositivo (localStorage), como en el prototipo. La cuenta en la nube
-// y el envío real de alertas (email/push) están pendientes (docs/ROADMAP.md).
+// Estado del usuario: guardados, comparación, alertas y perfil de surfista en este dispositivo
+// (localStorage). Con cuenta (fase D, solo con la base de datos real) los guardados viven en la
+// tabla `favorites` (RLS: cada usuario solo ve los suyos) y los del dispositivo se fusionan al entrar.
+// El envío real de alertas (email/push) está pendiente (docs/ROADMAP.md).
 
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
+import { listingDbId } from "@/lib/auth/shared";
+import { getBrowserSupabase } from "@/lib/supabase/browser";
 import styles from "./Toast.module.css";
 
 export interface CompareItem {
@@ -36,8 +39,20 @@ interface Stored {
   profile: SurferProfile | null;
 }
 
+export interface Account {
+  id: string;
+  email: string;
+  name: string;
+}
+
 interface UserState extends Stored {
   ready: boolean;
+  /** Cuentas activas en esta instalación (base de datos real). */
+  authEnabled: boolean;
+  /** Usuario con sesión, o null (también mientras se comprueba). */
+  account: Account | null;
+  setAccountName: (name: string) => void;
+  signOut: () => Promise<void>;
   toggleSaved: (id: string) => void;
   toggleCompare: (item: CompareItem) => void;
   removeCompare: (id: string) => void;
@@ -70,9 +85,16 @@ function load(): Stored {
   }
 }
 
-export function UserStateProvider({ children }: { children: React.ReactNode }) {
+/** Guardados de la cuenta como ids públicos («a123»). */
+async function loadFavorites(): Promise<string[] | null> {
+  const { data, error } = await getBrowserSupabase().from("favorites").select("listing_id").order("created_at", { ascending: false });
+  return error ? null : (data ?? []).map((r) => "a" + r.listing_id);
+}
+
+export function UserStateProvider({ children, authEnabled = false }: { children: React.ReactNode; authEnabled?: boolean }) {
   const [state, setState] = useState<Stored>(EMPTY);
   const [ready, setReady] = useState(false);
+  const [account, setAccount] = useState<Account | null>(null);
   const [toastText, setToastText] = useState("");
   const timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
@@ -104,14 +126,91 @@ export function UserStateProvider({ children }: { children: React.ReactNode }) {
     current.current = state;
   }, [state]);
 
+  const accountRef = useRef<Account | null>(null);
+  useEffect(() => {
+    accountRef.current = account;
+  }, [account]);
+
+  // Sesión: el cliente del navegador lee las cookies, refresca el token y avisa de los cambios.
+  useEffect(() => {
+    if (!authEnabled || !ready) return;
+    const supabase = getBrowserSupabase();
+    let syncedFor: string | null = null;
+
+    async function signedIn(user: { id: string; email?: string | null }) {
+      if (syncedFor === user.id) return;
+      syncedFor = user.id;
+      const { data: profile } = await supabase.from("profiles").select("display_name").eq("id", user.id).maybeSingle();
+      setAccount({ id: user.id, email: user.email ?? "", name: profile?.display_name ?? "Surfista" });
+      // Fusión: los guardados del dispositivo que aún no están en la cuenta se suben una vez.
+      const remote = await loadFavorites();
+      if (!remote) return;
+      const missing = current.current.saved.filter((id) => !remote.includes(id) && listingDbId(id) !== null);
+      if (missing.length) {
+        await supabase
+          .from("favorites")
+          .upsert(
+            missing.map((id) => ({ listing_id: listingDbId(id)! })),
+            { onConflict: "user_id,listing_id", ignoreDuplicates: true },
+          );
+      }
+      setState((s) => ({ ...s, saved: [...new Set([...remote, ...missing])] }));
+    }
+
+    supabase.auth.getUser().then(({ data }) => {
+      if (data.user) void signedIn(data.user);
+    });
+    const { data: sub } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === "SIGNED_IN" && session?.user) {
+        // Fuera del callback: Supabase recomienda no esperar a otras llamadas dentro de él.
+        const user = session.user;
+        setTimeout(() => void signedIn(user), 0);
+      } else if (event === "SIGNED_OUT") {
+        syncedFor = null;
+        setAccount(null);
+      }
+    });
+    return () => sub.subscription.unsubscribe();
+  }, [authEnabled, ready]);
+
   const toggleSaved = useCallback(
     (id: string) => {
       const on = current.current.saved.includes(id);
-      if (!on) toast("Guardada en este dispositivo. Los avisos de bajada de precio aún no están activos.");
+      const acc = accountRef.current;
+      const dbId = listingDbId(id);
       setState((s) => ({ ...s, saved: on ? s.saved.filter((x) => x !== id) : [...s.saved, id] }));
+      if (!acc || dbId === null) {
+        if (!on) toast("Guardada en este dispositivo. Los avisos de bajada de precio aún no están activos.");
+        return;
+      }
+      const table = getBrowserSupabase().from("favorites");
+      const req = on
+        ? table.delete().eq("listing_id", dbId)
+        : table.upsert({ listing_id: dbId }, { onConflict: "user_id,listing_id", ignoreDuplicates: true });
+      void Promise.resolve(req).then(({ error }) => {
+        if (error) {
+          // Se deshace el cambio optimista.
+          setState((s) => ({ ...s, saved: on ? [...s.saved, id] : s.saved.filter((x) => x !== id) }));
+          toast("No se ha podido guardar en tu cuenta. Vuelve a intentarlo.");
+        } else if (!on) {
+          toast("Guardada en tu cuenta.");
+        }
+      });
     },
     [toast],
   );
+
+  const setAccountName = useCallback((name: string) => {
+    setAccount((a) => (a ? { ...a, name } : a));
+  }, []);
+
+  const signOut = useCallback(async () => {
+    if (!authEnabled) return;
+    await getBrowserSupabase().auth.signOut();
+    setAccount(null);
+    // Los guardados quedan en la cuenta; en un dispositivo compartido no deben seguir a la vista.
+    setState((s) => ({ ...s, saved: [] }));
+  }, [authEnabled]);
 
   const toggleCompare = useCallback(
     (item: CompareItem) => {
@@ -155,8 +254,38 @@ export function UserStateProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const value = useMemo(
-    () => ({ ...state, ready, toggleSaved, toggleCompare, removeCompare, addAlert, toggleAlert, removeAlert, setProfile, toast }),
-    [state, ready, toggleSaved, toggleCompare, removeCompare, addAlert, toggleAlert, removeAlert, setProfile, toast],
+    () => ({
+      ...state,
+      ready,
+      authEnabled,
+      account,
+      setAccountName,
+      signOut,
+      toggleSaved,
+      toggleCompare,
+      removeCompare,
+      addAlert,
+      toggleAlert,
+      removeAlert,
+      setProfile,
+      toast,
+    }),
+    [
+      state,
+      ready,
+      authEnabled,
+      account,
+      setAccountName,
+      signOut,
+      toggleSaved,
+      toggleCompare,
+      removeCompare,
+      addAlert,
+      toggleAlert,
+      removeAlert,
+      setProfile,
+      toast,
+    ],
   );
 
   return (
@@ -177,5 +306,5 @@ export function useUserState() {
   // Mientras un componente se hidrata ve el estado vacío, igual que el HTML del servidor.
   // Sin esto, los límites de Suspense que hidratan después de cargar localStorage no coinciden.
   const hydrated = useSyncExternalStore(noop, () => true, () => false);
-  return hydrated ? v : { ...v, ...EMPTY, ready: false };
+  return hydrated ? v : { ...v, ...EMPTY, ready: false, account: null };
 }

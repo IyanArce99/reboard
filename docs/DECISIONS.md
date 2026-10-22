@@ -199,3 +199,60 @@ Con la caché de páginas (minutos), la mayoría de las visitas no consultan la 
 - **e2e:** siguen ligados al modo mock (ids `a1040`, `noindex` DEMO). Con datos reales locales fallan 7 tests por esos ids, como era de esperar; las rutas y el contenido coinciden. Para ejecutarlos con `.env.local` en modo Supabase: `REBOARD_DATA_SOURCE=mock npm run build && npm run test:e2e`.
 - **`tsx`** (dependencia de desarrollo) para los scripts en TypeScript.
 - **Pendiente:** el asistente sigue limitado a los 300 resultados más recientes de `/api/tablas`. Es suficiente para el MVP; con mucho inventario convendrá agregar en SQL.
+
+## Fase D (cuentas, en local)
+### Acceso
+- **Código de 6 cifras por email (OTP), sin contraseña ni enlace mágico.**
+  - Sirve igual en el móvil que en otro dispositivo, y en la PWA no saca al usuario de la app.
+  - Plantilla en español en `supabase/templates/codigo.html` (Magic Link y Confirm signup). Caduca en 15 minutos.
+- **El acceso lo hace el cliente del navegador** (`signInWithOtp` + `verifyOtp` con `@supabase/ssr`):
+  - la sesión queda en cookies y el propio navegador la refresca;
+  - las páginas públicas siguen siendo estáticas (PPR) porque el servidor no lee la sesión en ellas;
+  - con Server Actions habría que leer la sesión en el servidor en cada página para pintar la cabecera.
+- **Refresco en `proxy.ts` solo en rutas privadas** (`/cuenta`, `/panel`, `/entrar`):
+  - un Server Component no puede escribir cookies;
+  - si refrescara un token caducado, el refresh token rotado se perdería y cerraría la sesión;
+  - sin cookie `sb-*` no se llama a Auth.
+- **Redirecciones:**
+  - `/cuenta` sin sesión → `/entrar?siguiente=…`;
+  - `/entrar` con sesión → el destino;
+  - el destino pasa por `safeNext` (solo rutas internas).
+- **`/auth/confirm`:** acepta los enlaces con `token_hash` de otros emails de Auth (cambio de email, invitaciones).
+- **Sin base de datos (modo DEMO) no hay cuentas:**
+  - `authEnabled()` exige `REBOARD_DATA_SOURCE=supabase` y las claves públicas;
+  - `/entrar` explica que los guardados viven en el dispositivo;
+  - la cabecera no muestra «Entrar».
+
+### Guardados
+- **Dónde viven:** en la tabla `favorites`, leídos y escritos desde el navegador bajo RLS (cada usuario solo ve y escribe los suyos; probado). Sin Server Actions: RLS ya protege y se evita un salto.
+- **Al entrar:** los guardados del dispositivo se suben con un upsert idempotente y se unen a los de la cuenta. Así aparecen en otro dispositivo (probado en el navegador).
+- **Al salir:** se vacían del dispositivo (dispositivos compartidos); siguen en la cuenta.
+- **Comparación, alertas y perfil del asistente:** siguen en el dispositivo. Las alertas en la nube llegan con los avisos por email (después del MVP).
+
+### Turnstile
+- **Widget** (`src/components/security/Turnstile.tsx`):
+  - solo se carga si hay `NEXT_PUBLIC_TURNSTILE_SITE_KEY`;
+  - modo `interaction-only`;
+  - el botón espera al token.
+- **Verificación en el servidor** (`src/lib/security/turnstile.ts`):
+  - falla cerrado: sin secreto, sin token, con respuesta negativa o con Cloudflare caído, rechaza;
+  - se usará en publicar, contacto y reportar (fases E y F).
+- **El acceso lo valida Supabase Auth** cuando su CAPTCHA está activo:
+  - en remoto: Authentication → Attack Protection;
+  - en local está desactivado; el widget se muestra con la clave de prueba y Supabase ignora el token.
+
+### Configuración local
+- **Límite de emails:** `auth.rate_limit.email_sent = 30` por hora. Con 2, el valor por defecto, no se puede ni probar. En remoto se ajusta en el panel al activar Resend.
+- **SMTP:** sin Resend en local; los emails se leen en Mailpit (http://127.0.0.1:54324). La configuración de Resend queda documentada en `config.toml` y en SECURITY.md, pendiente de la cuenta del titular.
+
+### Pruebas
+- **`tests/integration/auth-accounts.test.ts`** (5), contra Supabase local y Mailpit:
+  - código por email con asunto en español;
+  - un código inventado o ya usado no sirve;
+  - perfil creado al entrar;
+  - nombre editable, pero no el rol ni el perfil de otro;
+  - guardados idempotentes, privados y no falsificables;
+  - sin sesión no hay acceso.
+- **`tests/unit/auth-security.test.ts`** (20): `safeNext`, ids, nombre visible, mensajes de error y verificación de Turnstile con `fetch` simulado.
+- **Prueba de humo en el navegador** (modo supabase): redirección a `/entrar`, acceso con el código de Mailpit, nombre en `/cuenta` y en la cabecera, fusión del guardado del invitado (comprobada en la base de datos), el mismo guardado en un segundo dispositivo y salida. Sin errores de consola.
+
