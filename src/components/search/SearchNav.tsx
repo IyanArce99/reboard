@@ -9,6 +9,8 @@ import { SORTS, searchHref, type Filters, type Sort, type ViewState } from "@/li
 import styles from "./Search.module.css";
 
 interface Nav {
+  /** Hay km por anuncio (solo DEMO). Sin ellos, «Más cerca» = «Primero mi zona». */
+  supportsDistance: boolean;
   filters: Filters;
   view: ViewState;
   pending: boolean;
@@ -29,12 +31,14 @@ export function SearchNavProvider({
   filters,
   view,
   isSearchPage,
+  supportsDistance = true,
   children,
 }: {
   filters: Filters;
   view: ViewState;
   /** En /buscar se reemplaza la URL; desde una landing se navega a /buscar. */
   isSearchPage: boolean;
+  supportsDistance?: boolean;
   children: React.ReactNode;
 }) {
   const router = useRouter();
@@ -54,8 +58,8 @@ export function SearchNavProvider({
   );
 
   const value = useMemo(
-    () => ({ filters, view, pending, navigate, sheetOpen, setSheetOpen }),
-    [filters, view, pending, navigate, sheetOpen],
+    () => ({ filters, view, pending, navigate, sheetOpen, setSheetOpen, supportsDistance }),
+    [filters, view, pending, navigate, sheetOpen, supportsDistance],
   );
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }
@@ -70,7 +74,7 @@ export function PendingArea({ children, className }: { children: React.ReactNode
 }
 
 export function SortSelect({ className }: { className: string }) {
-  const { filters, view, navigate } = useSearchNav();
+  const { filters, view, navigate, supportsDistance } = useSearchNav();
   return (
     <select
       aria-label="Ordenar"
@@ -80,7 +84,7 @@ export function SortSelect({ className }: { className: string }) {
     >
       {SORTS.map(([v, l]) => (
         <option key={v} value={v}>
-          {l}
+          {v === "distancia" && !supportsDistance ? "Primero mi zona" : l}
         </option>
       ))}
     </select>

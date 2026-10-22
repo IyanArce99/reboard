@@ -1,8 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
-import { getRepository } from "@/lib/data";
 import { GUIDES, PENDING_GUIDES } from "@/lib/content/guides";
-import { slugify } from "@/lib/domain/taxonomy";
-import { idFromSlugId, listingPath } from "@/lib/listing/present";
+import { catalogSlugs, listingSlug, shopSlugs } from "@/lib/data/lookup";
+import { idFromSlugId } from "@/lib/listing/present";
 import { isLandingForm, isLandingPlace } from "@/lib/search/landings";
 
 // Con Cache Components, una URL con parámetros desconocidos sirve el shell con 200 antes de
@@ -13,17 +12,16 @@ const notFound = (request: NextRequest) => NextResponse.rewrite(new URL("/404", 
 
 async function isValid(parts: string[]): Promise<boolean> {
   const [section, a, b] = parts;
-  const repo = getRepository();
   switch (section) {
     case "tablas":
       return parts.length === 2 ? isLandingForm(a) || isLandingPlace(a) : parts.length === 3 && isLandingPlace(a) && isLandingForm(b);
     case "marcas": {
-      const catalog = await repo.catalog();
-      if (parts.length === 2) return catalog.some((m) => slugify(m.brand) === a);
-      return parts.length === 3 && catalog.some((m) => slugify(m.brand) === a && m.slug === b);
+      const models = (await catalogSlugs()).get(a);
+      if (parts.length === 2) return !!models;
+      return parts.length === 3 && !!models?.has(b);
     }
     case "tiendas":
-      return parts.length === 2 && (await repo.shops()).some((s) => s.slug === a);
+      return parts.length === 2 && (await shopSlugs()).has(a);
     case "guias":
       return parts.length === 2 && [...GUIDES, ...PENDING_GUIDES].some((g) => g.slug === a);
     default:
@@ -36,9 +34,9 @@ export async function proxy(request: NextRequest) {
 
   if (parts[0] === "anuncio" && parts.length === 2) {
     const id = idFromSlugId(parts[1]);
-    const listing = id ? await getRepository().byId(id) : null;
-    if (!listing) return notFound(request);
-    const canonical = listingPath(listing);
+    const slug = id ? await listingSlug(id) : null;
+    if (!slug) return notFound(request);
+    const canonical = `/anuncio/${slug}-${id}`;
     if (canonical !== request.nextUrl.pathname) {
       return NextResponse.redirect(new URL(canonical, request.url), 308);
     }

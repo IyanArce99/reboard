@@ -22,7 +22,8 @@ const MAX_CARDS = 8;
 
 export async function generateStaticParams() {
   const names = await getCatalogNames(getRepository());
-  return names.brands.map((b) => ({ marca: b.slug }));
+  // Cache Components exige al menos un parámetro: con el catálogo vacío, un marcador que da 404.
+  return names.brands.length ? names.brands.map((b) => ({ marca: b.slug })) : [{ marca: "sin-marcas" }];
 }
 
 async function brand(slug: string) {
@@ -54,7 +55,7 @@ export default async function BrandPage({ params }: PageProps<"/marcas/[marca]">
     repo.catalog(),
     getCatalogNames(repo),
   ]);
-  const now = repo.now();
+  const now = await repo.now();
 
   const used = usedPage.items;
   const models = catalog.filter((m) => slugify(m.brand) === b.slug);

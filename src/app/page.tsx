@@ -32,8 +32,9 @@ const GUIDES = [
 
 async function HeroSearch() {
   const here = await getHere();
-  const count = await getRepository().count(withFilters({ zone: here }));
-  return <SearchBar here={here} initialCount={count} />;
+  const repo = getRepository();
+  const count = await repo.count(withFilters({ zone: here }));
+  return <SearchBar here={here} initialCount={count} supportsDistance={repo.capabilities.distance} />;
 }
 
 export default async function Home() {

@@ -13,5 +13,5 @@ export default async function PanelPage() {
   const repo = getRepository();
   // DEMO: sin autenticación, el panel muestra los anuncios del vendedor de demostración.
   const own = await repo.sellerListings(null);
-  return <SellerPanel listings={own} nowIso={repo.now().toISOString()} />;
+  return <SellerPanel listings={own} nowIso={(await repo.now()).toISOString()} />;
 }

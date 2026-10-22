@@ -46,7 +46,8 @@ const UNAVAILABLE: Partial<Record<Listing["status"], [string, string]>> = {
 
 export async function generateStaticParams() {
   const params = await getRepository().listingParams();
-  return params.map((l) => ({ slugId: `${l.slug}-${l.id}` }));
+  // Cache Components exige al menos un parámetro: con la base vacía, un marcador que da 404.
+  return params.length ? params.map((l) => ({ slugId: `${l.slug}-${l.id}` })) : [{ slugId: "sin-anuncios-a0" }];
 }
 
 async function load(slugId: string) {
@@ -74,7 +75,7 @@ export default async function FichaPage({ params }: PageProps<"/anuncio/[slugId]
   const l = await load((await params).slugId);
   const repo = getRepository();
   const [names, similar, sameSeller] = await Promise.all([getCatalogNames(repo), repo.similar(l, 4), repo.countBySeller(l)]);
-  const now = repo.now();
+  const now = await repo.now();
 
   const title = listingTitle(l);
   const off = isOff(l);

@@ -66,7 +66,8 @@ function pickOwn(all: Listing[]): Listing[] {
 /** Repositorio DEMO en memoria. Todo lo que devuelve lleva isDemo = true. */
 export const mockRepository: ListingRepository = {
   isDemo: true,
-  now: () => DEMO_REFERENCE_DATE,
+  capabilities: { distance: true },
+  now: async () => DEMO_REFERENCE_DATE,
 
   search: async (f, { limit, offset, ...opts }) => page(query(f, opts), limit, offset),
 

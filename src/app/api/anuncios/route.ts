@@ -8,5 +8,5 @@ export async function GET(request: Request) {
   const ids = (new URL(request.url).searchParams.get("ids") ?? "").split(",").filter(Boolean).slice(0, 100);
   const repo = getRepository();
   const listings = await repo.byIds(ids);
-  return Response.json({ listings, now: repo.now().toISOString() });
+  return Response.json({ listings, now: (await repo.now()).toISOString() });
 }

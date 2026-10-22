@@ -17,7 +17,9 @@ import ui from "@/styles/ui.module.css";
 import styles from "@/components/shops/Shops.module.css";
 
 export async function generateStaticParams() {
-  return (await getRepository().shops()).map((s) => ({ slug: s.slug }));
+  const shops = await getRepository().shops();
+  // Cache Components exige al menos un parámetro: sin tiendas, un marcador que da 404.
+  return shops.length ? shops.map((s) => ({ slug: s.slug })) : [{ slug: "sin-tiendas" }];
 }
 
 async function shop(slug: string) {
@@ -44,7 +46,7 @@ export default async function ShopPage({ params }: PageProps<"/tiendas/[slug]">)
   const s = await shop((await params).slug);
   const repo = getRepository();
   const listings = await repo.shopListings(s.slug);
-  const now = repo.now();
+  const now = await repo.now();
   const lastConfirmed = listings.length ? Math.min(...listings.map((l) => daysBetween(l.confirmedAt, now))) : null;
   const zone = placeName(s.zone) ?? s.zone;
   const label = SHOP_TYPE_LABEL[s.type];

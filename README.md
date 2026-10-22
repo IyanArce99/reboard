@@ -30,6 +30,11 @@ npm run test:visual    # capturas de referencia, solo local (-- --update-snapsho
 
 # Base de datos (Supabase local en Docker; no usa ninguna cuenta)
 npm run db:start       # levanta Supabase local y aplica supabase/migrations
+npm run env:local      # crea .env.local para usar la app con Supabase local (REBOARD_DATA_SOURCE=supabase)
+npm run db:seed-demo   # carga el inventario DEMO SOLO en la base local (para desarrollar)
+npm run test:integration  # paridad mock ↔ Supabase local
+npm run perf:local     # rendimiento con 100, 1.000 y 10.000 anuncios en local
+npm run db:types       # regenera src/lib/supabase/database.types.ts
 npm run db:test        # tests de seguridad pgTAP (RLS, privilegios, Storage, búsqueda)
 npm run db:reset       # reconstruye la base local desde las migraciones
 npm run db:lint

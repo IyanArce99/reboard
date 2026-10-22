@@ -21,7 +21,8 @@ const STOCK_PHOTO = "1621951289270-b942dc5f4320";
 
 export async function generateStaticParams() {
   const catalog = await getRepository().catalog();
-  return catalog.map((m) => ({ marca: slugify(m.brand), modelo: m.slug }));
+  // Cache Components exige al menos un parámetro: con el catálogo vacío, un marcador que da 404.
+  return catalog.length ? catalog.map((m) => ({ marca: slugify(m.brand), modelo: m.slug })) : [{ marca: "sin-marcas", modelo: "sin-modelos" }];
 }
 
 async function model(marca: string, modelo: string) {
@@ -30,7 +31,7 @@ async function model(marca: string, modelo: string) {
   return m;
 }
 
-const vol = (v: number) => `${v.toLocaleString("es-ES")} L`;
+const vol = (v: number | null) => (v == null ? "litros sin publicar" : `${v.toLocaleString("es-ES")} L`);
 
 export async function generateMetadata({ params }: PageProps<"/marcas/[marca]/[modelo]">): Promise<Metadata> {
   const { marca, modelo } = await params;
@@ -53,7 +54,7 @@ export default async function ModelPage({ params }: PageProps<"/marcas/[marca]/[
   const repo = getRepository();
   const brandSlug = slugify(m.brand);
   const used = (await repo.search(withFilters({ brand: brandSlug, model: m.slug }), { sort: "recientes", limit: 1000 })).items;
-  const now = repo.now();
+  const now = await repo.now();
   const desc = m.description ?? `${SHAPE_INFO[m.shape].label} de ${m.brand} en construcción ${CONSTRUCTION_INFO[m.construction].short}.`;
 
   const sizes: ModelSizeView[] = m.sizes.map((s, i) => {

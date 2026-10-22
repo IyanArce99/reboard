@@ -20,12 +20,14 @@ export const modelMeta = (m: CatalogModel) => `${SHAPE_INFO[m.shape].label} · $
 
 /** «5'10"–6'2" · 28,5–32,6 L». */
 export function modelRange(m: CatalogModel) {
-  const vols = m.sizes.map((s) => s.volume);
+  const vols = m.sizes.map((s) => s.volume).filter((v): v is number => v != null);
   const first = m.sizes[0].label;
   const last = m.sizes[m.sizes.length - 1].label;
+  const lens = first === last ? first : `${first}–${last}`;
+  if (!vols.length) return `${lens} · litros sin publicar`;
   const lo = Math.min(...vols).toLocaleString("es-ES");
   const hi = Math.max(...vols).toLocaleString("es-ES");
-  return `${first === last ? first : `${first}–${last}`} · ${lo === hi ? lo : `${lo}–${hi}`} L`;
+  return `${lens} · ${lo === hi ? lo : `${lo}–${hi}`} L`;
 }
 
 export const usedCount = (n: number) => (n ? `${n} usada${n > 1 ? "s" : ""} en venta` : "Sin unidades usadas ahora");

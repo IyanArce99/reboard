@@ -26,6 +26,8 @@ export interface Photo {
 }
 
 export interface Seller {
+  /** Id del perfil (null en los datos DEMO). */
+  id: string | null;
   type: SellerType;
   name: string;
   /** Slug del perfil de tienda o escuela, si tiene. */
@@ -86,7 +88,8 @@ export interface CatalogSize {
   lengthIn: number;
   widthIn: number;
   thickIn: number;
-  volume: number;
+  /** Litros publicados por el fabricante; null si no los publica. */
+  volume: number | null;
 }
 
 export interface CatalogModel {

@@ -75,7 +75,7 @@ function NumField({
 }
 
 export function FilterPanel({ counts, resultCount, brands, models, openAdvanced }: Props) {
-  const { filters, navigate, sheetOpen, setSheetOpen } = useSearchNav();
+  const { filters, navigate, sheetOpen, setSheetOpen, supportsDistance } = useSearchNav();
   const { profile } = useUserState();
   const [draft, setDraft] = useState(filters);
   const [adv, setAdv] = useState(openAdvanced);
@@ -144,7 +144,7 @@ export function FilterPanel({ counts, resultCount, brands, models, openAdvanced 
       <div className={styles.panelBody}>
         <div className={styles.group}>
           <label className={ui.label} htmlFor="f-zona">
-            Ubicación y distancia
+            {supportsDistance ? "Ubicación y distancia" : "Ubicación"}
           </label>
           <select id="f-zona" className={ui.select} value={f.zone} onChange={(e) => set({ zone: e.target.value, ...(e.target.value ? {} : { dist: null }) })}>
             <option value="">Toda España ({counts.total})</option>
@@ -159,6 +159,7 @@ export function FilterPanel({ counts, resultCount, brands, models, openAdvanced 
               </option>
             ))}
           </select>
+          {supportsDistance && (
           <select
             aria-label="Distancia"
             className={`${ui.select} ${styles.selectSm}`}
@@ -172,6 +173,7 @@ export function FilterPanel({ counts, resultCount, brands, models, openAdvanced 
               </option>
             ))}
           </select>
+          )}
         </div>
 
         <div className={styles.group}>

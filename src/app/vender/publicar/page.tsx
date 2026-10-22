@@ -28,7 +28,7 @@ async function Flow({ searchParams }: { searchParams: PageProps<"/vender/publica
     <PublishFlow
       catalog={catalog}
       priceRefs={priceRefs}
-      nowIso={repo.now().toISOString()}
+      nowIso={(await repo.now()).toISOString()}
       dataIsDemo={repo.isDemo}
       initial={editing ? draftFromListing(editing) : null}
       editingId={editing?.id ?? null}

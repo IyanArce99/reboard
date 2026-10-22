@@ -20,7 +20,7 @@ export async function GET(request: Request) {
   return Response.json({
     listings: res.items,
     total: res.total,
-    now: repo.now().toISOString(),
+    now: (await repo.now()).toISOString(),
     here: zoneBySlug(zone) ? zone : DEFAULT_HERE,
   });
 }

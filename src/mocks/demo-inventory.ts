@@ -187,7 +187,7 @@ function mk(h: Hand, i: number): Listing {
     previousPrice: h.old ?? null,
     condition: h.cond,
     repairs,
-    seller: { type: h.seller, name: sname, shopSlug: shop?.slug ?? null },
+    seller: { id: null, type: h.seller, name: sname, shopSlug: shop?.slug ?? null },
     contact: { method: "whatsapp", phone: null },
     status,
     publishedAt: daysBefore(h.post),

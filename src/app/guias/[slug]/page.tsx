@@ -56,7 +56,7 @@ export default async function GuidePage({ params }: PageProps<"/guias/[slug]">) 
   const g = r.guide;
   const repo = getRepository();
   const recent = (await repo.search(emptyFilters(), { sort: "recientes", limit: 4 })).items;
-  const now = repo.now();
+  const now = await repo.now();
   const image = unsplash(g.image.unsplashId, 1400);
 
   return (

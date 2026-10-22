@@ -33,7 +33,7 @@ export default async function SistemaPage() {
     repo.unknownVolume(emptyFilters(), 1),
     repo.search(emptyFilters(), { limit: 1, statuses: ["vendida"] }),
   ]);
-  const now = repo.now();
+  const now = await repo.now();
   const card1 = first.items[0];
   const card2 = noVolume.items[0] ?? card1;
   const card3 = sold.items[0] ?? card1;

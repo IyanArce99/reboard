@@ -54,7 +54,7 @@ export async function SearchResults({ filters: f, view, here, title, intro, crum
   ]);
   // Recuentos de las sugerencias: solo hacen falta en el estado vacío.
   const suggestionCounts = res.total === 0 ? await Promise.all(suggestions.map((s) => repo.count(s.filters))) : [];
-  const now = repo.now();
+  const now = await repo.now();
   const shown = res.items;
   const counts = { total: facets.anyZone, zones: facets.zones, shapes: facets.shapes };
   const applied = appliedChips(f, names);
@@ -81,7 +81,7 @@ export async function SearchResults({ filters: f, view, here, title, intro, crum
         </div>
       )}
 
-      <SearchNavProvider filters={f} view={view} isSearchPage={isSearchPage}>
+      <SearchNavProvider filters={f} view={view} isSearchPage={isSearchPage} supportsDistance={repo.capabilities.distance}>
         <div className={styles.mBar}>
           <OpenFiltersButton count={applied.length} />
           <SortSelect className={styles.mSort} />

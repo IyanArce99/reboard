@@ -29,10 +29,12 @@ export const VOLUME_CHIPS: [number, number | null][] = [
 
 interface Props {
   here: string;
+  /** Hay km por anuncio (solo DEMO): muestra los chips de distancia. */
+  supportsDistance?: boolean;
   initialCount: number;
 }
 
-export function SearchBar({ here, initialCount }: Props) {
+export function SearchBar({ here, initialCount, supportsDistance = true }: Props) {
   const router = useRouter();
   const [zone, setZone] = useState(here);
   const [dist, setDist] = useState<number | null>(null);
@@ -148,6 +150,7 @@ export function SearchBar({ here, initialCount }: Props) {
                 </option>
               ))}
             </select>
+            {supportsDistance && (
             <div className={styles.chips}>
               {DISTANCES.map(([d, l]) => (
                 <button key={l} type="button" className={styles.sheetChip} aria-pressed={dist === d} onClick={() => setDist(d)}>
@@ -155,6 +158,7 @@ export function SearchBar({ here, initialCount }: Props) {
                 </button>
               ))}
             </div>
+            )}
           </div>
           <div className={styles.group}>
             <span className={styles.groupLabel}>Litros</span>

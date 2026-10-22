@@ -17,7 +17,7 @@ export interface ModelSizeView {
   lengthCm: number;
   width: string;
   thick: string;
-  volume: number;
+  volume: number | null;
   volumeText: string;
   /** Unidades usadas en venta de esta medida. */
   count: number;
@@ -42,7 +42,7 @@ export function ModelSizes({ brand, model, intro, photo, sizes, sourceNote, tota
   const [i, setI] = useState(0);
   const { profile } = useUserState();
   const sz = sizes[i];
-  const inRange = (v: number) => profile != null && v >= profile.lo && v <= profile.hi;
+  const inRange = (v: number | null) => profile != null && v != null && v >= profile.lo && v <= profile.hi;
   const anyFits = sizes.some((s) => inRange(s.volume));
   const range = profile ? `${profile.lo}–${profile.hi} L` : "";
 

@@ -36,7 +36,7 @@ export async function NearSection() {
     repo.search(zoneFilters, { sort: "distancia", here, limit: 200 }),
     repo.count(emptyFilters()),
   ]);
-  const now = repo.now();
+  const now = await repo.now();
   const zn = zoneBySlug(here)!.name;
 
   const near = nearPage.items;
@@ -45,7 +45,9 @@ export async function NearSection() {
       ? (await repo.search(emptyFilters(), { sort: "recientes", excludeZone: here, limit: 8 - near.length + 2 })).items
       : [];
   const byKm = byKmPage.items;
-  const groups = BANDS.map(([lo, hi, l]) => ({
+  const groups = !repo.capabilities.distance
+    ? [{ label: `En ${zn}`, items: byKm.slice(0, 12) }].filter((g) => g.items.length)
+    : BANDS.map(([lo, hi, l]) => ({
     label: `${l} · ${zn}`,
     items: byKm.filter((x) => (x.distanceKm ?? 9999) >= lo && (x.distanceKm ?? 9999) < hi).slice(0, 6),
   })).filter((g) => g.items.length);

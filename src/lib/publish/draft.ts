@@ -101,8 +101,8 @@ export function applyCatalogSize(d: PublishDraft, size: CatalogModel["sizes"][nu
     len: d.unit === "ft" ? size.label : formatMeasure("len", size.lengthIn, "cm"),
     width: formatMeasure("width", size.widthIn, d.unit),
     thick: formatMeasure("thick", size.thickIn, d.unit),
-    vol: String(size.volume),
-    src: { len: "cat", width: "cat", thick: "cat", vol: "cat" },
+    vol: size.volume == null ? "" : String(size.volume),
+    src: size.volume == null ? { len: "cat", width: "cat", thick: "cat" } : { len: "cat", width: "cat", thick: "cat", vol: "cat" },
   };
 }
 
@@ -174,7 +174,7 @@ export function previewListing(d: PublishDraft, catalog: CatalogModel[], now: Da
     previousPrice: null,
     condition: d.condition || "buen-estado",
     repairs: d.repairs || null,
-    seller: { type: "particular", name: "Tú", shopSlug: null },
+    seller: { id: null, type: "particular", name: "Tú", shopSlug: null },
     contact: { method: d.contact, phone: null },
     status: "disponible",
     publishedAt: iso,

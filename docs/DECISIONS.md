@@ -153,3 +153,49 @@ Las migraciones son la fuente de verdad; `docs/DATABASE.md` se ha reescrito como
 - **`supabase db lint`:** sin errores. Todas las funciones fijan `search_path`.
 - **Storage:** Supabase bloquea el `DELETE` directo en SQL sobre `storage.objects`; el borrado se prueba por la API en fases posteriores. Un `UPDATE` ajeno no falla, sino que afecta a 0 filas por RLS; se comprueba que el objeto sigue intacto.
 - **CI:** job `database` en `.github/workflows/ci.yml`. No se ha ejecutado en GitHub porque no hay remoto.
+
+## Fase C (datos reales y búsqueda)
+
+### Capa de datos
+- `REBOARD_DATA_SOURCE=supabase` usa `supabaseRepository`. Con `mock` (por defecto) todo sigue igual.
+- **Lecturas públicas** con el cliente anónimo sin cookies dentro de `'use cache'` (`cacheLife('minutes')`), con etiquetas `listings`, `listing:{id}`, `catalog` y `shops`.
+- **`now()` pasa a ser asíncrono y cacheado:** en Next 16 un `new Date()` suelto en el prerender es un error. El mock devuelve la fecha DEMO.
+- **`capabilities.distance`:** Supabase no tiene km, así que la UI oculta la distancia y «Más cerca» pasa a «Primero mi zona». En «Cerca de ti» de la home, una sola franja «En {zona}». ⚠ Es un cambio visible, pero solo con datos reales.
+- **Tipos y volumen:** `Seller.id` añadido. `CatalogSize.volume` admite `null`: si el fabricante no publica litros, se muestra «litros sin publicar» y no se inventan.
+- **Relaciones en PostgREST:** se nombran por su clave foránea (`profiles!listings_seller_id_fkey`), porque hay varios caminos entre `listings` y `profiles`.
+- **`proxy` no puede usar `'use cache'`:** usa consultas ligeras con una caché en memoria de 60 s por instancia (`src/lib/data/lookup.ts`).
+- **`generateStaticParams`:** con la base vacía devuelve un marcador que da 404, porque Cache Components exige al menos un parámetro.
+
+### Migraciones nuevas
+Las anteriores no se modifican.
+- **`…090000_similar_listings`:** «Tablas similares» en SQL. Además, la búsqueda desempata por `id asc`, igual que el mock.
+- **`…090100_listings_guard_import_dates`:** el servidor conserva `confirmed_at` al importar. Lo detectó la paridad: un `INSERT … ON CONFLICT` reescribía la fecha. Los usuarios siguen confirmando siempre «ahora»; lo comprueba un test pgTAP.
+- **`…090200_search_performance`:** `listing_matches` se llamaba una vez por fila (decodificando el JSON en cada una). Se sustituye por `matching_listings`, que decodifica una vez y filtra en una sola consulta. La semántica es la misma: 126 pgTAP y 41 de paridad. Con 10.000 anuncios, la búsqueda pasa de ~600 ms a ~60 ms y las facetas de ~1,8 s a ~150 ms.
+- **`…090300_similar_materialized`:** lee el anuncio de referencia una vez. Con estadísticas desactualizadas tras una carga masiva tardaba más de 150 ms; ahora 12 ms.
+
+### Rendimiento
+Supabase local, sin la caché de Next, p95 en ms:
+
+| Operación | 100 | 1.000 | 10.000 |
+|---|---:|---:|---:|
+| Búsqueda sin filtros (24) | 10 | 13 | 64 |
+| Búsqueda compleja (24) | 8 | 9 | 29 |
+| Página 10 | 8 | 15 | 92 |
+| Facetas sin filtros | 10 | 30 | 159 |
+| Facetas con filtros | 11 | 14 | 134 |
+| Recuento | 6 | 7 | 22 |
+| Ficha | 6 | 4 | 5 |
+| Similares | 6 | 8 | 13 |
+
+Con la caché de páginas (minutos), la mayoría de las visitas no consultan la base de datos.
+
+### Pruebas y herramientas
+- **`npm run test:integration`:**
+  - 41 tests de paridad que cargan el inventario DEMO en Supabase **local**. `local-supabase.ts` se niega a usar una URL no local.
+  - Se comparan conjuntos, recuentos y secuencias de la clave de orden; los empates se ordenan igual gracias al desempate por id.
+- **`npm run perf:local`:** medición con 100, 1.000 y 10.000 anuncios.
+- **`npm run env:local`:** genera `.env.local` para Supabase local, con las claves de prueba públicas de Turnstile.
+- **`npm run db:seed-demo`:** carga el inventario DEMO **solo en local** para desarrollar.
+- **e2e:** siguen ligados al modo mock (ids `a1040`, `noindex` DEMO). Con datos reales locales fallan 7 tests por esos ids, como era de esperar; las rutas y el contenido coinciden. Para ejecutarlos con `.env.local` en modo Supabase: `REBOARD_DATA_SOURCE=mock npm run build && npm run test:e2e`.
+- **`tsx`** (dependencia de desarrollo) para los scripts en TypeScript.
+- **Pendiente:** el asistente sigue limitado a los 300 resultados más recientes de `/api/tablas`. Es suficiente para el MVP; con mucho inventario convendrá agregar en SQL.

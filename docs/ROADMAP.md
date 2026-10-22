@@ -77,14 +77,15 @@ Un único proyecto Supabase (`reboard`, UE, plan gratuito). Todo se ha hecho y p
 | B7 | **Proyecto remoto:** crear `reboard` (UE, Free) y aplicar las migraciones con `npx supabase db push` | B1–B6, **autorización** | `db:test` en local y `db push` sin errores; las tablas existen en el proyecto |
 | B8 | CI: job `database` (Supabase local en GitHub Actions: `db:lint` y `db:test`) | B3 | Pendiente de un remoto en GitHub para ejecutarse |
 
-### Fase C: lectura real (sin login)
+### Fase C: lectura real (sin login) ✅ en local
 | # | Tarea | Depende de | Hecho cuando |
 |---|---|---|---|
-| C1 | `src/lib/supabase/{public,server,browser,service}.ts` + `@supabase/ssr`, `@supabase/supabase-js` y `zod` | B1, A5 | Typecheck. `service.ts` es `server-only` |
-| C2 | `supabaseRepository` (mapeo de filas a `Listing`, usando `search_listings`, `count_listings` y `listing_facets`), con `'use cache'` y `cacheTag` | A6, B6, C1 | Los tests de contrato pasan contra Supabase local cargado con el inventario DEMO (solo en local) |
-| C3 | Paridad `search`/`facets`: el test carga el inventario DEMO en Supabase **local** y compara con el mock | B6, C2 | Sin diferencias (u órdenes con empate documentados) |
-| C4 | `/anuncio`: `generateStaticParams` con los N recientes y `proxy` con una búsqueda ligera por `public_id` | C2 | 404/308 siguen correctos |
-| C5 | `next.config` con el host de Storage en `remotePatterns`, y cabeceras de seguridad (CSP…) | C1 | Sin errores de CSP en consola |
+| C1 ✅ | Clientes `src/lib/supabase/{public,server,browser,service}.ts`, tipos generados (`npm run db:types`), `@supabase/supabase-js`, `@supabase/ssr` y `zod` | B1 | Typecheck; `service.ts` es `server-only` |
+| C2 ✅ | `supabaseRepository` con `'use cache'` y etiquetas (`listings`, `listing:{id}`, `catalog`, `shops`); `REBOARD_DATA_SOURCE=supabase` | A6, B6 | La app funciona con datos de Supabase local |
+| C3 ✅ | Paridad mock ↔ Supabase (`npm run test:integration`): búsqueda, orden, paginación, facetas, fichas, similares, tiendas, catálogo | C2 | 41 tests en verde |
+| C4 ✅ | `/anuncio` con los N recientes prerenderizados, marcadores con la base vacía, y `proxy` con consultas ligeras (`src/lib/data/lookup.ts`) | C2 | 404/308 correctos contra la base de datos |
+| C5 ✅ | `next.config`: host de Storage en `remotePatterns`; `dangerouslyAllowLocalIP` solo con Supabase local. (Cabeceras de seguridad y CSP: fase G) | C1 | Fotos de Storage servidas por `next/image` |
+| C6 ✅ | Rendimiento con 100, 1.000 y 10.000 anuncios (`npm run perf:local`) y optimización de la búsqueda en SQL | C2 | p95 < 25 ms con 1.000 y < 160 ms con 10.000 (sin caché) |
 
 ### Fase D: cuentas
 | # | Tarea | Depende de | Hecho cuando |

@@ -44,8 +44,13 @@ export interface Facets {
 export interface ListingRepository {
   /** true si los datos son simulados. La UI muestra el aviso DEMO y el sitio va con noindex. */
   readonly isDemo: boolean;
-  /** Fecha respecto a la que se calculan «hace N días». */
-  now(): Date;
+  /**
+   * Capacidades de la fuente de datos. `distance`: hay km por anuncio (solo el mock DEMO).
+   * Sin coordenadas (Supabase), la UI oculta la distancia y «Más cerca» ordena primero la zona.
+   */
+  readonly capabilities: { distance: boolean };
+  /** Fecha respecto a la que se calculan «hace N días» (cacheada junto a los datos). */
+  now(): Promise<Date>;
 
   /** Búsqueda paginada. Con filtro de litros, los anuncios sin litros no coinciden (ver unknownVolume). */
   search(f: Filters, opts: SearchOptions): Promise<SearchPage>;

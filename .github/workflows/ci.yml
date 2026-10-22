@@ -88,6 +88,9 @@ jobs:
       - name: Tests de seguridad (pgTAP)
         run: npm run db:test
 
+      - name: Paridad mock ↔ Supabase (local)
+        run: npm run test:integration
+
       - name: Parar Supabase
         if: always()
         run: npm run db:stop
