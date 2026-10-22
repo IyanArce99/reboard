@@ -11,7 +11,7 @@ import { alertText } from "@/lib/search/describe";
 import { toQuery, withFilters } from "@/lib/search/filters";
 import { brandSlugOf, countMatches } from "@/lib/search/match";
 import { formFilters, landingPath, type LandingForm } from "@/lib/search/landings";
-import { unsplash } from "@/mocks/demo-inventory";
+import { unsplash } from "@/lib/images";
 import styles from "@/components/home/Home.module.css";
 
 const CATEGORIES: [string, LandingForm][] = [

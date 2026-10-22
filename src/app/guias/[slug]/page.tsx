@@ -9,7 +9,7 @@ import { JsonLd } from "@/components/seo/JsonLd";
 import { GUIDES, PENDING_GUIDES, guideBySlug, guideDate, type Guide } from "@/lib/content/guides";
 import { getRepository } from "@/lib/data";
 import { absoluteUrl, SITE_NAME } from "@/lib/site";
-import { unsplash } from "@/mocks/demo-inventory";
+import { unsplash } from "@/lib/images";
 import ui from "@/styles/ui.module.css";
 import styles from "@/components/guides/Guides.module.css";
 

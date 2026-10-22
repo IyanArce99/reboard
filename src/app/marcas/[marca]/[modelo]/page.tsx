@@ -12,7 +12,7 @@ import { fmtIn, inToCm } from "@/lib/domain/format";
 import { listingPath, listingTitle } from "@/lib/listing/present";
 import { searchHref, toQuery, withFilters } from "@/lib/search/filters";
 import { absoluteUrl } from "@/lib/site";
-import { unsplash } from "@/mocks/demo-inventory";
+import { unsplash } from "@/lib/images";
 import ui from "@/styles/ui.module.css";
 import styles from "@/components/catalog/Catalog.module.css";
 

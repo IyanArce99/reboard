@@ -4,6 +4,7 @@
 // Módulo puro: sin React ni servidor, lo usan la isla del asistente y el contenido SEO.
 
 import type { Shape } from "@/lib/domain/taxonomy";
+import { unsplash } from "@/lib/images";
 
 export type LevelKey = "learn" | "ride" | "turn" | "pro";
 export type FreqKey = "low" | "mid" | "high";
@@ -139,7 +140,7 @@ export const TYPE_INFO: Record<FinderType, TypeInfo> = {
 };
 
 export const typeImage = (t: FinderType, w = 700) =>
-  `https://images.unsplash.com/photo-${TYPE_INFO[t].img}?auto=format&fit=crop&w=${w}&q=70`;
+  unsplash(TYPE_INFO[t].img, w);
 
 /** Factor de litros por kg según el nivel (REC del prototipo). */
 const FACTORS: Record<LevelKey, [number, number]> = {

@@ -12,7 +12,7 @@ import { ago, daysBetween } from "@/lib/domain/format";
 import { placeName } from "@/lib/domain/taxonomy";
 import { toQuery, withFilters } from "@/lib/search/filters";
 import { absoluteUrl } from "@/lib/site";
-import { unsplash } from "@/mocks/demo-inventory";
+import { unsplash } from "@/lib/images";
 import ui from "@/styles/ui.module.css";
 import styles from "@/components/shops/Shops.module.css";
 

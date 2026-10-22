@@ -7,12 +7,10 @@ import type { CatalogModel, Listing, Shop } from "@/lib/domain/types";
 import type { Condition, Construction, SellerType, Shape } from "@/lib/domain/taxonomy";
 import { ZONES, slugify } from "@/lib/domain/taxonomy";
 import { DAY_MS } from "@/lib/domain/format";
+import { unsplash } from "@/lib/images";
 
 /** Fecha de referencia de la demo: las antigüedades se calculan respecto a ella. */
 export const DEMO_REFERENCE_DATE = new Date("2026-10-22T10:00:00.000Z");
-
-export const unsplash = (id: string, w = 1400) =>
-  `https://images.unsplash.com/photo-${id}?auto=format&fit=crop&w=${w}&q=70`;
 
 const rng = (seed: number) => () => {
   seed |= 0;

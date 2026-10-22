@@ -3,7 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { Breadcrumbs } from "@/components/seo/Breadcrumbs";
 import { GUIDES, guideDate } from "@/lib/content/guides";
-import { unsplash } from "@/mocks/demo-inventory";
+import { unsplash } from "@/lib/images";
 import ui from "@/styles/ui.module.css";
 import styles from "@/components/guides/Guides.module.css";
 

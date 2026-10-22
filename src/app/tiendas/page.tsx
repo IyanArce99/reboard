@@ -5,7 +5,7 @@ import { Breadcrumbs } from "@/components/seo/Breadcrumbs";
 import { ShopDirectory, ToastButton } from "@/components/shops/ShopIslands";
 import { SHOP_TYPE_LABEL, isOfShop, shopPath, shopPlace, usedBoards } from "@/components/shops/shops";
 import { getRepository } from "@/lib/data";
-import { unsplash } from "@/mocks/demo-inventory";
+import { unsplash } from "@/lib/images";
 import ui from "@/styles/ui.module.css";
 import styles from "@/components/shops/Shops.module.css";
 
