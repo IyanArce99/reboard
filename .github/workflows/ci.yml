@@ -1,0 +1,65 @@
+name: CI
+
+on:
+  push:
+    branches: [master, main, mvp]
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      # Fase A: sin backend. Los datos son el inventario DEMO en memoria.
+      REBOARD_DATA_SOURCE: mock
+      NEXT_TELEMETRY_DISABLED: "1"
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - name: TypeScript
+        run: npm run typecheck
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Tests unitarios
+        run: npm test
+
+      - name: Build
+        run: npm run build
+
+      - name: Sin claves de servidor en el bundle del cliente
+        run: |
+          if grep -rIl -E "SERVICE_ROLE|service_role|CONTACT_IP_SALT|CRON_SECRET" .next/static; then
+            echo "::error::Hay referencias a secretos de servidor en .next/static"
+            exit 1
+          fi
+
+      - name: Navegador de Playwright
+        run: npx playwright install --with-deps chromium
+
+      - name: Tests e2e
+        run: npm run test:e2e
+
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-report
+          path: |
+            playwright-report/
+            test-results/
+          retention-days: 7
