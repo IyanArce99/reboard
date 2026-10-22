@@ -58,7 +58,7 @@ Registro de decisiones tomadas al recrear el prototipo en Next.js. Las que cambi
 - Hay contenido SEO visible bajo el asistente. No hay FAQPage porque no hay FAQ real.
 
 ### Publicar `/vender/publicar` y panel `/panel`
-- **Stub** `PublishService` / `demoPublishService` (`src/lib/publish/service.ts`): no verifica el teléfono, no guarda nada y devuelve `persisted: false`.
+- **Stub** `PublishService` / `demoPublishService` (`src/lib/publish/service.ts`): no verifica el teléfono, no guarda nada y devuelve `persisted: false`. *(Sustituido en la fase E: ver más abajo.)*
 - ⚠ La pantalla final dice «Anuncio listo (demo)» y explica que no se ha publicado. Las fotos se ven con `URL.createObjectURL` y no salen del dispositivo.
 - El parser de medidas pegadas está en `src/lib/publish/parse.ts`. ⚠ Al cambiar pies/cm se convierten los valores, no solo el placeholder.
 - «Editar» abre `/vender/publicar?editar=<id>`.
@@ -255,4 +255,59 @@ Con la caché de páginas (minutos), la mayoría de las visitas no consultan la 
   - sin sesión no hay acceso.
 - **`tests/unit/auth-security.test.ts`** (20): `safeNext`, ids, nombre visible, mensajes de error y verificación de Turnstile con `fetch` simulado.
 - **Prueba de humo en el navegador** (modo supabase): redirección a `/entrar`, acceso con el código de Mailpit, nombre en `/cuenta` y en la cabecera, fusión del guardado del invitado (comprobada en la base de datos), el mismo guardado en un segundo dispositivo y salida. Sin errores de consola.
+
+## Fase E (publicar y gestionar, en local)
+### Flujo
+- **Paso 1 (cliente):** cada foto se abre con `createImageBitmap` (orientación EXIF aplicada), se reduce a un máximo de **1600 px** y se recodifica en un canvas a **WebP** (o JPEG si el navegador no codifica WebP).
+  - Al recodificar se pierden **todos** los metadatos (EXIF, GPS, cámara).
+  - Probado en e2e con un JPEG con GPS: el resultado es WebP de 1600 px sin bloque EXIF.
+- **Borrador en IndexedDB** (`src/lib/publish/draft-store.ts`):
+  - guarda los datos y las fotos ya procesadas;
+  - al volver se recupera, con aviso y opción «Empezar de cero»;
+  - se borra al publicar.
+- **Cuenta al final:** si no hay sesión, el paso 5 incrusta el acceso con código (`LoginForm` con `onDone`), sin salir del formulario.
+- **Publicar** (`src/lib/publish/client-publish.ts`):
+  1. `saveListingAction`:
+     - valida con zod, comprueba la sesión con `getUser()` y Turnstile (falla cerrado);
+     - crea el anuncio como `draft` o guarda los cambios;
+     - guarda el teléfono en `listing_contacts`, la tabla privada.
+  2. **El navegador sube las fotos nuevas directamente a Storage** (`{uid}/{listing_id}/{uuid}.webp`). No pasan por una función de Vercel, que limita el cuerpo a 4,5 MB.
+  3. `finalizeListingAction`:
+     - comprueba rutas y que cada archivo existe;
+     - reescribe `listing_photos` en el orden elegido y borra de Storage las que se han quitado;
+     - publica si era borrador;
+     - `updateTag('listings')` y `updateTag('listing:{id}')`: se ve al momento en `/buscar`, landings, home y ficha (E4).
+- **Si algo falla a mitad:** el borrador sigue en el dispositivo y el reintento actualiza el mismo anuncio (no lo duplica). Las fotos ya subidas no se vuelven a subir.
+
+### Datos
+- **Origen de las medidas:**
+  - medida del catálogo sin tocar → `manufacturer`, con `model_size_id`;
+  - escrita, pegada o confirmada por el vendedor → `seller`;
+  - sin valor, sin origen.
+- **Esquema compartido:** `src/lib/publish/schema.ts` usa los límites de los CHECK y lo usan el cliente (aviso previo) y el servidor.
+- **Teléfono:** se normaliza a E.164 (sin prefijo se asume +34). Sin verificación por SMS (decisión aprobada).
+- **Contacto:** solo WhatsApp o llamada; se quita «Email» del formulario porque la base de datos y el producto no lo contemplan.
+- **Slug:** «marca-modelo-medida-zona», como los DEMO: `shaper-local-6-4-cantabria` o `fish-artesanal-6-4-cantabria`.
+
+### Panel y edición
+- **`/panel` con cuenta:**
+  - anuncios propios en cualquier estado salvo borrador;
+  - acciones (`panelActionServer`): confirmar, cambiar precio (en línea), marcar vendida, retirar y volver a publicar;
+  - las transiciones y las fechas las impone el disparador `listings_guard`;
+  - los errores llegan en español.
+- **Sin cuenta, con base de datos:** `proxy` pide entrar.
+- **En la demo:** sigue el panel simulado con `rb-panel-v1` (se quitó `pickOwn` en la fase C).
+- **Editar:** `/vender/publicar?editar=aN` lee el anuncio con la sesión del dueño (RLS), con sus fotos y su teléfono. Si no es suyo, avisa sin revelar nada. Al bajar el precio, la ficha muestra «Ha bajado de X a Y».
+
+### Pruebas
+- **`tests/integration/publish.test.ts`** (8), contra Supabase local con usuarios reales:
+  - borrador privado y teléfono invisible para otros;
+  - Storage solo en la carpeta propia;
+  - no se publica sin fotos subidas ni con rutas ajenas;
+  - publicado y visible en la búsqueda filtrando por zona, marca, litros y precio;
+  - edición con reordenación, borrado en Storage y bajada de precio;
+  - otro usuario no puede editar;
+  - acciones del panel y transiciones inválidas.
+- **`tests/unit/publish-schema.test.ts`** (15) y **e2e de EXIF** (1).
+- **Prueba de humo en el navegador** (móvil, modo supabase), sin errores de consola: 2 fotos, Shaper local con medidas pegadas, cuenta incrustada, publicado, ficha, `/buscar`, cambio de precio con el anterior tachado y vendida.
 

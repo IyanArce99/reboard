@@ -13,7 +13,8 @@ import styles from "./Auth.module.css";
 
 const RESEND_AFTER = 60;
 
-export function LoginForm() {
+/** `onDone`: acceso incrustado (p. ej., al final de publicar); sin él, se navega a `siguiente`. */
+export function LoginForm({ onDone }: { onDone?: () => void } = {}) {
   const router = useRouter();
   const params = useSearchParams();
   const next = safeNext(params.get("siguiente"));
@@ -74,6 +75,11 @@ export function LoginForm() {
       setError(authErrorText(err));
       return;
     }
+    if (onDone) {
+      setBusy(false);
+      onDone();
+      return;
+    }
     router.replace(next);
     router.refresh();
   }
@@ -81,7 +87,7 @@ export function LoginForm() {
   return (
     <div className={styles.form}>
       {step === "email" ? (
-        <form onSubmit={sendCode} noValidate={false}>
+        <form onSubmit={sendCode}>
           <label htmlFor="login-email" className={ui.label}>
             Email
           </label>

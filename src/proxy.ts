@@ -32,13 +32,18 @@ async function isValid(parts: string[]): Promise<boolean> {
   }
 }
 
-/** Rutas privadas: se refresca la sesión y, si hace falta cuenta, se pide entrar. */
+/**
+ * Rutas privadas: se refresca la sesión y, si hace falta cuenta, se pide entrar.
+ * Publicar no exige cuenta al empezar: se pide al final (decisión aprobada).
+ */
 const PRIVATE: Record<string, { requireUser: boolean }> = {
   cuenta: { requireUser: true },
-  // El panel es local (DEMO) hasta la fase E: se refresca la sesión, pero aún no exige cuenta.
-  panel: { requireUser: false },
+  panel: { requireUser: true },
   entrar: { requireUser: false },
+  "vender/publicar": { requireUser: false },
 };
+
+const privateKey = (parts: string[]) => (parts[0] === "vender" && parts[1] === "publicar" ? "vender/publicar" : parts[0]);
 
 async function privateRoute(request: NextRequest, section: string) {
   if (!authEnabled()) return NextResponse.next();
@@ -57,7 +62,8 @@ async function privateRoute(request: NextRequest, section: string) {
 
 export async function proxy(request: NextRequest) {
   const parts = request.nextUrl.pathname.split("/").filter(Boolean);
-  if (parts[0] && Object.hasOwn(PRIVATE, parts[0])) return privateRoute(request, parts[0]);
+  const key = privateKey(parts);
+  if (key && Object.hasOwn(PRIVATE, key)) return privateRoute(request, key);
 
   if (parts[0] === "anuncio" && parts.length === 2) {
     const id = idFromSlugId(parts[1]);
@@ -85,5 +91,6 @@ export const config = {
     "/cuenta/:path*",
     "/panel/:path*",
     "/entrar",
+    "/vender/publicar",
   ],
 };

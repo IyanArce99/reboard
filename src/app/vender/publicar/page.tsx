@@ -1,10 +1,15 @@
 import type { Metadata } from "next";
+import Link from "next/link";
+import { redirect } from "next/navigation";
 import { Suspense } from "react";
 import { PublishFlow } from "@/components/publish/PublishFlow";
+import { authEnabled } from "@/lib/auth/config";
 import { getRepository } from "@/lib/data";
-import { draftFromListing } from "@/lib/publish/draft";
-import styles from "@/components/publish/Publish.module.css";
+import { draftFromListing, type PublishDraft } from "@/lib/publish/draft";
+import { loadOwnDraft } from "@/lib/publish/edit-load";
 import { noindexRobots } from "@/lib/seo";
+import ui from "@/styles/ui.module.css";
+import styles from "@/components/publish/Publish.module.css";
 
 // Formulario privado: noindex (docs/SEO.md).
 export const metadata: Metadata = {
@@ -16,22 +21,48 @@ export const metadata: Metadata = {
 async function Flow({ searchParams }: { searchParams: PageProps<"/vender/publicar">["searchParams"] }) {
   const raw = await searchParams;
   const editId = typeof raw.editar === "string" ? raw.editar : null;
+  const live = authEnabled();
   const repo = getRepository();
   // Referencia de precio: solo anuncios existentes del mismo modelo de catálogo.
-  const [catalog, priceRefs, editing] = await Promise.all([
-    repo.catalog(),
-    repo.modelPrices(),
-    editId ? repo.byId(editId) : Promise.resolve(null),
-  ]);
+  const [catalog, priceRefs, now] = await Promise.all([repo.catalog(), repo.modelPrices(), repo.now()]);
+
+  let initial: PublishDraft | null = null;
+  let editingId: string | null = null;
+  if (editId && live) {
+    // Editar exige ser el dueño: se lee con la sesión del usuario (RLS).
+    const own = await loadOwnDraft(editId);
+    if (own === null) redirect(`/entrar?siguiente=${encodeURIComponent(`/vender/publicar?editar=${editId}`)}`);
+    if (own === "ajeno") {
+      return (
+        <main className={styles.page}>
+          <h1 className={ui.h1}>No puedes editar este anuncio</h1>
+          <p className={styles.lead}>No existe o no es de tu cuenta.</p>
+          <Link href="/panel" className={ui.btnPrimary}>
+            Ir a mi panel
+          </Link>
+        </main>
+      );
+    }
+    initial = own.draft;
+    editingId = own.id;
+  } else if (editId) {
+    // DEMO: se edita el anuncio simulado y los cambios no se guardan.
+    const l = await repo.byId(editId);
+    if (l) {
+      initial = draftFromListing(l);
+      editingId = l.id;
+    }
+  }
 
   return (
     <PublishFlow
       catalog={catalog}
       priceRefs={priceRefs}
-      nowIso={(await repo.now()).toISOString()}
+      nowIso={now.toISOString()}
       dataIsDemo={repo.isDemo}
-      initial={editing ? draftFromListing(editing) : null}
-      editingId={editing?.id ?? null}
+      initial={initial}
+      editingId={editingId}
+      live={live}
     />
   );
 }

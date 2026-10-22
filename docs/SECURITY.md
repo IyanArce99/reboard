@@ -72,13 +72,14 @@ Reglas:
 - **Riesgo aceptado en el MVP:** el teléfono del vendedor no se verifica (no hay SMS en esta fase). Se mitiga con el email verificado, los reportes y la moderación.
 
 ## 6. Subida de imágenes
-- El cliente redimensiona a un máximo de 1600 px y **recodifica a WebP en un canvas**.
+- El cliente redimensiona a un máximo de 1600 px y **recodifica a WebP en un canvas** (`src/lib/publish/image.ts`; JPEG si el navegador no codifica WebP).
   - Esto **elimina los metadatos EXIF, incluida la ubicación GPS** de las fotos hechas con el móvil. Es crítico para la privacidad del vendedor.
 - **Bucket:**
   - Acepta solo `image/webp` e `image/jpeg`, con un máximo de 5 MB.
   - Políticas por carpeta `{auth.uid()}/…`.
   - Máximo 8 fotos por anuncio (disparador).
-- **Verificación en el servidor:** antes de publicar, la Server Action comprueba que cada `storage_path` pertenece al usuario y al anuncio, y que el archivo existe.
+- **Verificación en el servidor:** antes de publicar, la Server Action comprueba que cada `storage_path` pertenece al usuario y al anuncio, y que el archivo existe (`finalizeListing`, probado en `tests/integration/publish.test.ts`).
+- **Subida directa del navegador a Storage** con la sesión del usuario: las fotos no pasan por funciones de Vercel (límite de 4,5 MB por petición).
 - **`next/image`:**
   - Se añade el host de Supabase Storage a `images.remotePatterns`, en formato objeto y solo con la ruta `/storage/v1/object/public/listing-photos/**`.
   - Se quitará Unsplash cuando no haya datos DEMO.

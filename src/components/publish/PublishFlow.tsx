@@ -2,14 +2,18 @@
 
 // Publicación guiada en 5 pasos (design/prototype/Reboard.dc.html, pantalla «publicar»,
 // y moreVals() en design/source/prototype-logic.js).
-// ⚠️ DEMO: no hay backend. Las fotos se quedan en el dispositivo (URL blob: locales) y
-// demoPublishService no guarda nada ni envía SMS (src/lib/publish/service.ts).
+// - Con la base de datos real (`live`): fotos procesadas en el navegador (sin EXIF ni GPS),
+//   borrador en IndexedDB, cuenta con código por email al final, Turnstile y publicación real
+//   (src/lib/publish/client-publish.ts).
+// - En la demo: las fotos se procesan igual, pero nada sale del dispositivo ni se publica.
 
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { LoginForm } from "@/components/auth/LoginForm";
 import { ListingCard } from "@/components/listing/ListingCard";
 import { readPanelState } from "@/components/panel/panelStore";
+import { Turnstile, TURNSTILE_SITE_KEY, type TurnstileHandle } from "@/components/security/Turnstile";
 import { useUserState } from "@/components/user/UserStateProvider";
 import {
   CONDITIONS,
@@ -23,6 +27,7 @@ import {
 } from "@/lib/domain/taxonomy";
 import type { CatalogModel } from "@/lib/domain/types";
 import { eur } from "@/lib/domain/format";
+import { publishDraft } from "@/lib/publish/client-publish";
 import {
   NO_BRAND_OPTION,
   OTHER_MODEL,
@@ -37,8 +42,10 @@ import {
   type FieldSource,
   type PublishDraft,
 } from "@/lib/publish/draft";
+import { clearStoredDraft, loadStoredDraft, saveStoredDraft } from "@/lib/publish/draft-store";
+import { processPhoto } from "@/lib/publish/image";
 import { parseMeasures, type MeasureKey } from "@/lib/publish/parse";
-import { getPublishService, isPlausiblePhone, type PublishResult } from "@/lib/publish/service";
+import { ListingInput, draftToInput, firstIssueText, toE164 } from "@/lib/publish/schema";
 import ui from "@/styles/ui.module.css";
 import styles from "./Publish.module.css";
 
@@ -54,17 +61,17 @@ const SRC_LABEL: Record<FieldSource, { text: string; tone: string; needs: boolea
   "": { text: "Opcional, pero ayuda a que te encuentren", tone: "none", needs: false },
 };
 
+// Contacto directo por WhatsApp o teléfono (decisión aprobada; la base de datos solo admite estos dos).
 const CONTACTS: [ContactMethod, string][] = [
   ["whatsapp", "WhatsApp"],
-  ["phone", "Teléfono"],
-  ["email", "Email"],
+  ["phone", "Llamada"],
 ];
 
 const NEXT_ERROR: Record<number, string> = {
   1: "Añade al menos una foto",
   2: "Indica al menos la longitud",
   3: "Elige forma, construcción y estado",
-  4: "Indica un precio",
+  4: "Indica un precio y la localidad",
 };
 
 interface Props {
@@ -76,6 +83,13 @@ interface Props {
   dataIsDemo: boolean;
   initial: PublishDraft | null;
   editingId: string | null;
+  /** Publicación real (base de datos y cuentas activas). */
+  live: boolean;
+}
+
+interface Done {
+  path: string | null;
+  persisted: boolean;
 }
 
 function Chip({ on, onClick, children, mono }: { on: boolean; onClick: () => void; children: React.ReactNode; mono?: boolean }) {
@@ -86,13 +100,21 @@ function Chip({ on, onClick, children, mono }: { on: boolean; onClick: () => voi
   );
 }
 
-export function PublishFlow({ catalog, priceRefs, nowIso, dataIsDemo, initial, editingId }: Props) {
-  const { toast } = useUserState();
+export function PublishFlow({ catalog, priceRefs, nowIso, dataIsDemo, initial, editingId, live }: Props) {
+  const { toast, account } = useUserState();
   const [d, setD] = useState<PublishDraft>(() => initial ?? emptyDraft());
   const [step, setStep] = useState(initial ? 2 : 1);
   const [paste, setPaste] = useState("");
   const [busy, setBusy] = useState(false);
-  const [result, setResult] = useState<PublishResult | null>(null);
+  const [progress, setProgress] = useState("");
+  const [processing, setProcessing] = useState(0);
+  const [error, setError] = useState("");
+  const [done, setDone] = useState<Done | null>(null);
+  const [restored, setRestored] = useState(false);
+  const [captcha, setCaptcha] = useState<string | null>(null);
+  // Anuncio ya creado en un intento anterior que falló a mitad (para no duplicarlo al reintentar).
+  const [createdId, setCreatedId] = useState<string | null>(null);
+  const turnstile = useRef<TurnstileHandle>(null);
   const headingRef = useRef<HTMLHeadingElement>(null);
   const cameraRef = useRef<HTMLInputElement>(null);
   const galleryRef = useRef<HTMLInputElement>(null);
@@ -100,13 +122,46 @@ export function PublishFlow({ catalog, priceRefs, nowIso, dataIsDemo, initial, e
 
   const set = (p: Partial<PublishDraft>) => setD((x) => ({ ...x, ...p }));
 
-  // «Editar» desde el panel: el precio puede haberse bajado en este dispositivo (rb-panel-v1).
+  // «Editar» desde el panel DEMO: el precio puede haberse bajado en este dispositivo (rb-panel-v1).
   useEffect(() => {
-    if (!editingId) return;
+    if (!editingId || live) return;
     const price = readPanelState()[editingId]?.price;
     // eslint-disable-next-line react-hooks/set-state-in-effect
     if (price != null) setD((x) => ({ ...x, price: String(price) }));
-  }, [editingId]);
+  }, [editingId, live]);
+
+  // Borrador en IndexedDB (solo anuncios nuevos): se recupera al volver y se guarda al cambiar.
+  const loaded = useRef(!!initial);
+  useEffect(() => {
+    if (initial) return;
+    let cancelled = false;
+    loadStoredDraft().then((s) => {
+      if (cancelled) return;
+      loaded.current = true;
+      if (!s) return;
+      const photos: DraftPhoto[] = s.photos.map((p) => ({ url: URL.createObjectURL(p.blob), local: true, blob: p.blob, width: p.width, height: p.height }));
+      setD({ ...emptyDraft(), ...s.draft, photos });
+      setStep(Math.min(Math.max(s.step, 1), 5));
+      setRestored(true);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [initial]);
+
+  useEffect(() => {
+    if (initial || !loaded.current || done) return;
+    const t = setTimeout(() => {
+      const { photos, ...rest } = d;
+      void saveStoredDraft({
+        draft: rest,
+        photos: photos.filter((p) => p.blob).map((p) => ({ blob: p.blob!, width: p.width ?? 1, height: p.height ?? 1 })),
+        step,
+        savedAt: new Date().toISOString(),
+      });
+    }, 400);
+    return () => clearTimeout(t);
+  }, [d, step, initial, done]);
 
   // Libera las URL blob: de las fotos locales al salir de la pantalla.
   const photosRef = useRef(d.photos);
@@ -122,6 +177,7 @@ export function PublishFlow({ catalog, priceRefs, nowIso, dataIsDemo, initial, e
 
   const goTo = (n: number) => {
     setStep(n);
+    setError("");
     window.scrollTo({ top: 0 });
     requestAnimationFrame(() => headingRef.current?.focus({ preventScroll: true }));
   };
@@ -133,34 +189,55 @@ export function PublishFlow({ catalog, priceRefs, nowIso, dataIsDemo, initial, e
   const refs = pm ? (priceRefs[pm.slug] ?? []) : [];
 
   const canNext: Record<number, boolean> = {
-    1: d.photos.length > 0,
+    1: d.photos.length > 0 && processing === 0,
     2: !!d.len.trim(),
     3: !!(d.shape && d.construction && d.condition),
-    4: Number(d.price) > 0,
+    4: Number(d.price) > 0 && d.town.trim().length >= 2,
     5: true,
   };
 
   const next = () => {
     if (!canNext[step]) {
-      toast(NEXT_ERROR[step]);
+      toast(step === 1 && processing ? "Espera a que terminen de prepararse las fotos" : NEXT_ERROR[step]);
       return;
     }
     goTo(step + 1);
   };
 
   // ——— Fotos ———
-  const addFiles = (files: FileList | null) => {
+  const addFiles = async (files: FileList | null) => {
     if (!files?.length) return;
     const room = MAX_PHOTOS - d.photos.length;
-    const picked = [...files].filter((f) => f.type.startsWith("image/"));
+    const picked = [...files].filter((f) => f.type.startsWith("image/") || /\.(heic|heif)$/i.test(f.name));
     if (picked.length > room) toast(`Puedes añadir hasta ${MAX_PHOTOS} fotos`);
-    const added: DraftPhoto[] = picked.slice(0, Math.max(0, room)).map((f) => ({ url: URL.createObjectURL(f), local: true }));
-    if (added.length) set({ photos: [...d.photos, ...added] });
+    const batch = picked.slice(0, Math.max(0, room));
+    if (!batch.length) return;
+    setProcessing((n) => n + batch.length);
+    let failed = 0;
+    for (const f of batch) {
+      try {
+        const p = await processPhoto(f);
+        const photo: DraftPhoto = { url: URL.createObjectURL(p.blob), local: true, blob: p.blob, width: p.width, height: p.height };
+        setD((x) => (x.photos.length >= MAX_PHOTOS ? x : { ...x, photos: [...x.photos, photo] }));
+      } catch {
+        failed += 1;
+      } finally {
+        setProcessing((n) => n - 1);
+      }
+    }
+    if (failed) toast(`No hemos podido abrir ${failed === 1 ? "una foto" : `${failed} fotos`}. Prueba con JPG o PNG.`);
   };
   const removePhoto = (i: number) => {
     const p = d.photos[i];
     if (p?.local) URL.revokeObjectURL(p.url);
     set({ photos: d.photos.filter((_, k) => k !== i) });
+  };
+  const movePhoto = (i: number, dir: -1 | 1) => {
+    const j = i + dir;
+    if (j < 0 || j >= d.photos.length) return;
+    const photos = [...d.photos];
+    [photos[i], photos[j]] = [photos[j], photos[i]];
+    set({ photos });
   };
   const openPicker = (ref: React.RefObject<HTMLInputElement | null>) => {
     if (d.photos.length >= MAX_PHOTOS) {
@@ -199,34 +276,75 @@ export function PublishFlow({ catalog, priceRefs, nowIso, dataIsDemo, initial, e
 
   const pending = pendingCount(d);
 
-  // ——— Publicar (STUB) ———
+  // ——— Publicar ———
+  const validate = useCallback(() => {
+    const parsed = ListingInput.safeParse(draftToInput(d, catalog));
+    return parsed.success ? "" : firstIssueText(parsed.error);
+  }, [d, catalog]);
+
   const publish = async () => {
-    if (!isPlausiblePhone(d.phone)) {
-      toast("Introduce tu teléfono para verificar la publicación");
+    setError("");
+    if (!toE164(d.phone)) {
+      setError("Indica tu teléfono: es como te contactarán (no aparece en el anuncio).");
+      return;
+    }
+    const invalid = validate();
+    if (invalid) {
+      setError(invalid);
+      return;
+    }
+    if (!live) {
+      setDone({ path: null, persisted: false });
+      window.scrollTo({ top: 0 });
+      return;
+    }
+    if (TURNSTILE_SITE_KEY && !captcha) {
+      setError("Espera un momento: estamos comprobando que no eres un robot.");
       return;
     }
     setBusy(true);
     try {
-      const svc = getPublishService();
-      await svc.verifyPhone(d.phone);
-      setResult(await svc.publish(d, { phone: d.phone, editingId }));
-      window.scrollTo({ top: 0 });
+      const r = await publishDraft({
+        draft: d,
+        catalog,
+        editingId: editingId ?? createdId,
+        isNew: !editingId,
+        turnstileToken: captcha,
+        onProgress: setProgress,
+      });
+      if (r.ok) {
+        if (!editingId) await clearStoredDraft();
+        setDone({ path: r.path, persisted: true });
+        window.scrollTo({ top: 0 });
+      } else {
+        if (r.publicId && !editingId) setCreatedId(r.publicId);
+        setError(r.message);
+      }
+    } catch {
+      setError("Se ha cortado la conexión. Tu anuncio sigue guardado en este dispositivo: vuelve a intentarlo.");
     } finally {
+      // El token de Turnstile es de un solo uso.
+      turnstile.current?.reset();
       setBusy(false);
+      setProgress("");
     }
   };
 
-  const restart = () => {
+  const restart = async () => {
     for (const p of d.photos) if (p.local) URL.revokeObjectURL(p.url);
+    await clearStoredDraft();
     setD(emptyDraft(d.zone));
     setPaste("");
-    setResult(null);
+    setDone(null);
+    setRestored(false);
+    setCreatedId(null);
     goTo(1);
   };
 
-  if (result) return <Done result={result} editing={!!editingId} onAgain={restart} />;
+  if (done) return <DoneScreen done={done} editing={!!editingId} onAgain={restart} />;
 
   const zone = zoneBySlug(d.zone);
+  const needsLogin = live && !account;
 
   return (
     <main className={styles.page}>
@@ -236,6 +354,15 @@ export function PublishFlow({ catalog, priceRefs, nowIso, dataIsDemo, initial, e
         </h1>
         <span className={styles.stepCount}>Paso {step} de 5</span>
       </div>
+
+      {restored && (
+        <div className={styles.restored} role="status">
+          <span>Hemos recuperado el anuncio que dejaste a medias en este dispositivo.</span>
+          <button type="button" className={styles.linkBtn} onClick={() => void restart()}>
+            Empezar de cero
+          </button>
+        </div>
+      )}
 
       <ol className={styles.progress} aria-label="Pasos">
         {STEPS.map((l, i) => {
@@ -263,19 +390,40 @@ export function PublishFlow({ catalog, priceRefs, nowIso, dataIsDemo, initial, e
         <section className={styles.section} style={{ gap: 14 }}>
           <h2 className={styles.h2}>Fotos de la tabla</h2>
           <p className={styles.lead}>
-            Cubierta, fondo, cola con quillas y cualquier golpe o reparación. Con luz natural y la tabla entera.
+            Cubierta, fondo, cola con quillas y cualquier golpe o reparación. Con luz natural y la tabla entera. La primera es la
+            portada.
           </p>
           <div className={styles.photos}>
             {d.photos.map((p, i) => (
               <div key={p.url} className={styles.photo}>
-                <Image src={p.url} alt={`Foto ${i + 1}: ${PHOTO_LABELS[i]}`} fill sizes="120px" className={styles.photoImg} />
+                <Image src={p.url} alt={`Foto ${i + 1}: ${PHOTO_LABELS[i]}`} fill sizes="120px" className={styles.photoImg} unoptimized={p.local} />
                 <span className={styles.photoLabel}>{PHOTO_LABELS[i]}</span>
                 <button type="button" aria-label={`Quitar la foto ${i + 1}`} className={styles.photoRm} onClick={() => removePhoto(i)}>
                   ✕
                 </button>
+                {d.photos.length > 1 && (
+                  <span className={styles.photoMove}>
+                    <button type="button" aria-label={`Mover la foto ${i + 1} antes`} disabled={i === 0} onClick={() => movePhoto(i, -1)}>
+                      ‹
+                    </button>
+                    <button
+                      type="button"
+                      aria-label={`Mover la foto ${i + 1} después`}
+                      disabled={i === d.photos.length - 1}
+                      onClick={() => movePhoto(i, 1)}
+                    >
+                      ›
+                    </button>
+                  </span>
+                )}
               </div>
             ))}
-            {SLOT_LABELS.slice(d.photos.length).map((l) => (
+            {Array.from({ length: processing }, (_, i) => (
+              <div key={`p${i}`} className={styles.slot} aria-hidden="true">
+                Preparando…
+              </div>
+            ))}
+            {SLOT_LABELS.slice(d.photos.length + processing).map((l) => (
               <div key={l} className={styles.slot} aria-hidden="true">
                 {l}
               </div>
@@ -295,8 +443,9 @@ export function PublishFlow({ catalog, priceRefs, nowIso, dataIsDemo, initial, e
             accept="image/*"
             capture="environment"
             hidden
+            data-testid="foto-camara"
             onChange={(e) => {
-              addFiles(e.target.files);
+              void addFiles(e.target.files);
               e.target.value = "";
             }}
           />
@@ -306,13 +455,18 @@ export function PublishFlow({ catalog, priceRefs, nowIso, dataIsDemo, initial, e
             accept="image/*"
             multiple
             hidden
+            data-testid="foto-galeria"
             onChange={(e) => {
-              addFiles(e.target.files);
+              void addFiles(e.target.files);
               e.target.value = "";
             }}
           />
-          <p className={styles.small}>
-            {d.photos.length} de {MAX_PHOTOS} fotos. Demo: las fotos solo se ven en este dispositivo; no se suben a ningún sitio.
+          <p className={styles.small} role="status">
+            {processing > 0 ? `Preparando ${processing === 1 ? "1 foto" : `${processing} fotos`}… · ` : ""}
+            {d.photos.length} de {MAX_PHOTOS} fotos.{" "}
+            {live
+              ? "Las reducimos en tu móvil y les quitamos los datos de ubicación y de la cámara antes de subirlas."
+              : "Demo: las fotos se preparan en tu dispositivo y no se suben a ningún sitio."}
           </p>
         </section>
       )}
@@ -477,6 +631,7 @@ export function PublishFlow({ catalog, priceRefs, nowIso, dataIsDemo, initial, e
             <textarea
               className={styles.textarea}
               placeholder="p. ej. golpe en la cola reparado, estanco"
+              maxLength={600}
               value={d.repairs}
               onChange={(e) => set({ repairs: e.target.value })}
             />
@@ -521,6 +676,7 @@ export function PublishFlow({ catalog, priceRefs, nowIso, dataIsDemo, initial, e
                 placeholder={zone?.towns[0] ?? "Las Palmas"}
                 list="pub-towns"
                 autoComplete="address-level2"
+                maxLength={80}
                 value={d.town}
                 onChange={(e) => set({ town: e.target.value })}
               />
@@ -531,6 +687,7 @@ export function PublishFlow({ catalog, priceRefs, nowIso, dataIsDemo, initial, e
               </datalist>
             </label>
           </div>
+          <p className={styles.small}>Solo mostramos la localidad, nunca una dirección exacta.</p>
           <div className={styles.group} role="group" aria-labelledby="pub-contact">
             <span id="pub-contact" className={styles.fieldLabel}>
               ¿Cómo quieres que te contacten?
@@ -549,6 +706,7 @@ export function PublishFlow({ catalog, priceRefs, nowIso, dataIsDemo, initial, e
               className={styles.textarea}
               style={{ minHeight: 96 }}
               placeholder="Uso, olas en las que funciona, qué incluye…"
+              maxLength={2000}
               value={d.description}
               onChange={(e) => set({ description: e.target.value })}
             />
@@ -564,43 +722,72 @@ export function PublishFlow({ catalog, priceRefs, nowIso, dataIsDemo, initial, e
             </div>
             {/* Vista previa con la tarjeta real; inert: no es un anuncio, no se puede abrir ni guardar. */}
             <div inert className={styles.preview}>
-              <ListingCard listing={previewListing(d, catalog, now)} now={now} hereZone={d.zone} layout="vertical" />
+              <ListingCard listing={previewListing(d, catalog, now)} now={now} hereZone={d.zone} layout="vertical" preview />
             </div>
             <p className={styles.small} style={{ marginTop: 8 }}>
               Vista previa. No aparece en búsquedas.
             </p>
           </div>
           <div className={styles.reviewSide}>
-            <h2 className={styles.h2}>Revisa y publica</h2>
+            <h2 className={styles.h2}>{editingId ? "Revisa y guarda" : "Revisa y publica"}</h2>
             {(pending > 0 || !d.vol.trim()) && (
               <div className={styles.warn} role="note">
                 {pending > 0
-                  ? `Tienes ${pending} dato${pending > 1 ? "s" : ""} sin confirmar. Solo publicaremos como verificados los que confirmes.`
+                  ? `Tienes ${pending} dato${pending > 1 ? "s" : ""} sin confirmar. Los del catálogo se mostrarán «según fabricante»; revisa que coinciden con tu tabla.`
                   : "No has indicado los litros. El anuncio aparecerá como «litros sin indicar» y saldrá en menos búsquedas."}
               </div>
             )}
             <div className={styles.box}>
               <label htmlFor="pub-phone" className={styles.boxTitle} style={{ fontSize: 15 }}>
-                Verifica tu teléfono para publicar
+                Tu teléfono de contacto
               </label>
-              <span className={styles.sub}>Solo lo pedimos ahora, al final. No se muestra en el anuncio si eliges WhatsApp.</span>
+              <span className={styles.sub}>
+                No aparece en el anuncio. Se muestra a quien pulse «Contactar», con protección contra robots.
+              </span>
               <input
                 id="pub-phone"
                 type="tel"
                 inputMode="tel"
                 autoComplete="tel"
-                placeholder="+34 600 000 000"
+                placeholder="600 000 000"
                 className={styles.phoneInput}
                 value={d.phone}
                 onChange={(e) => set({ phone: e.target.value })}
               />
-              <span className={styles.demoNote}>
-                <span className={ui.demoTag}>DEMO</span> No se envía ningún SMS ni se guarda el número.
-              </span>
+              {!live && (
+                <span className={styles.demoNote}>
+                  <span className={ui.demoTag}>DEMO</span> No se guarda el número ni se publica nada.
+                </span>
+              )}
             </div>
-            <button type="button" className={styles.publishBtn} onClick={publish} disabled={busy} aria-busy={busy || undefined}>
-              {editingId ? "Guardar cambios" : "Publicar gratis"}
-            </button>
+
+            {needsLogin ? (
+              <div className={styles.box}>
+                <span className={styles.boxTitle} style={{ fontSize: 15 }}>
+                  Confirma tu email para publicar
+                </span>
+                <span className={styles.sub}>
+                  Te enviamos un código de 6 cifras. Es tu cuenta para gestionar el anuncio: confirmar, bajar precio o marcarlo
+                  vendido. Tu anuncio se queda guardado mientras tanto.
+                </span>
+                <LoginForm onDone={() => toast("Email confirmado. Ya puedes publicar.")} />
+              </div>
+            ) : (
+              <>
+                {live && account && (
+                  <p className={styles.small}>
+                    Publicas como <strong>{account.name}</strong> ({account.email}).
+                  </p>
+                )}
+                {live && <Turnstile ref={turnstile} action="publicar" onToken={setCaptcha} />}
+                <button type="button" className={styles.publishBtn} onClick={publish} disabled={busy} aria-busy={busy || undefined}>
+                  {busy ? progress || "Publicando…" : editingId ? "Guardar cambios" : "Publicar gratis"}
+                </button>
+              </>
+            )}
+            <p className={styles.error} role="alert">
+              {error}
+            </p>
           </div>
         </section>
       )}
@@ -625,10 +812,10 @@ export function PublishFlow({ catalog, priceRefs, nowIso, dataIsDemo, initial, e
   );
 }
 
-function Done({ result, editing, onAgain }: { result: PublishResult; editing: boolean; onAgain: () => void }) {
+function DoneScreen({ done, editing, onAgain }: { done: Done; editing: boolean; onAgain: () => void }) {
   const ref = useRef<HTMLHeadingElement>(null);
   useEffect(() => ref.current?.focus(), []);
-  const real = result.persisted;
+  const real = done.persisted;
   return (
     <main className={`${styles.page} ${styles.donePage}`}>
       <section className={styles.done}>
@@ -636,35 +823,35 @@ function Done({ result, editing, onAgain }: { result: PublishResult; editing: bo
           {real ? "✓" : "i"}
         </span>
         <h1 ref={ref} tabIndex={-1} className={styles.doneH1}>
-          {real ? "Tu tabla está publicada" : editing ? "Cambios revisados (demo)" : "Anuncio listo (demo)"}
+          {real ? (editing ? "Cambios guardados" : "Tu tabla está publicada") : editing ? "Cambios revisados (demo)" : "Anuncio listo (demo)"}
         </h1>
         <div className={styles.doneKicker}>Reboard · su próxima vida empieza aquí</div>
         {real ? (
           <p className={styles.doneText}>
-            Ya aparece en búsquedas por sus medidas. Cada 14 días te pediremos que confirmes que sigue disponible.
+            {editing
+              ? "Los cambios ya se ven en el anuncio y en las búsquedas."
+              : "Ya aparece en las búsquedas por sus medidas. Cada 14 días te pediremos que confirmes que sigue disponible; si no, caduca a los 30."}
           </p>
         ) : (
-          <>
-            <p className={styles.doneText}>
-              {editing
-                ? "Esto es una demostración: los cambios no se han guardado en el anuncio."
-                : "Esto es una demostración: el anuncio no se ha publicado de verdad."}{" "}
-              Reboard aún no tiene base de datos ni verificación por SMS, así que no aparece en búsquedas, no se ha enviado
-              ningún aviso y las fotos no han salido de tu dispositivo.
-            </p>
-            <p className={styles.doneText}>
-              Cuando el servicio esté activo, tu anuncio aparecerá en búsquedas por sus medidas y cada 14 días te pediremos
-              que confirmes que sigue disponible.
-            </p>
-          </>
+          <p className={styles.doneText}>
+            Esto es una demostración: el anuncio no se ha publicado y las fotos no han salido de tu dispositivo. Con el servicio
+            activo, aparecería en las búsquedas por sus medidas.
+          </p>
         )}
         <div className={styles.doneBtns}>
-          <Link href="/panel" className={styles.btnPetrol}>
+          {real && done.path && (
+            <Link href={done.path} className={styles.btnPetrol}>
+              Ver mi anuncio
+            </Link>
+          )}
+          <Link href="/panel" className={real && done.path ? styles.btnWhite : styles.btnPetrol}>
             Ir a mi panel
           </Link>
-          <button type="button" className={styles.btnWhite} onClick={onAgain}>
-            Publicar otra tabla
-          </button>
+          {!editing && (
+            <button type="button" className={styles.btnWhite} onClick={onAgain}>
+              Publicar otra tabla
+            </button>
+          )}
         </div>
       </section>
     </main>

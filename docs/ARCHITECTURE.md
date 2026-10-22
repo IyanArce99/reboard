@@ -56,10 +56,10 @@ Estado: **aprobada** (22-10-2026), con las decisiones de producto de §7. La fas
 | `src/lib/data/mock-repository.ts` | Repositorio DEMO | Se mantiene con `REBOARD_DATA_SOURCE=mock` (desarrollo sin red, tests) |
 | Páginas que importan `@/mocks`: `page.tsx`, `guias/*`, `marcas/[marca]/[modelo]`, `tiendas/*` | Fotos de stock por id | Imágenes estáticas propias o de Storage |
 | `localStorage rb-usuario-v1` | Guardados, comparación, alertas y perfil de surfista | Guardados → tabla `favorites` si hay sesión (se fusionan al iniciar sesión). La comparación y el perfil siguen locales. Las alertas siguen locales hasta que haya emails |
-| `localStorage rb-panel-v1` | Cambios del panel DEMO | Se elimina: el panel lee y escribe en la base de datos |
+| `localStorage rb-panel-v1` | Cambios del panel DEMO | ✅ Con cuenta, el panel lee y escribe en la base de datos. `rb-panel-v1` solo se usa en la demo |
 | `localStorage rb-asistente-v1` | Respuestas del asistente | Se mantiene (es útil y no es sensible) |
 | Cookie `rb_zona` | Zona «cerca de ti» | Se mantiene hasta que haya geolocalización |
-| `src/lib/publish/service.ts` | Stub `demoPublishService` | Implementación real con Server Actions y Storage |
+| ~~`src/lib/publish/service.ts`~~ | Stub `demoPublishService` | ✅ Fase E: `src/app/vender/actions.ts` + `src/lib/publish/{save,client-publish}.ts` y Storage. En la demo, el flujo no envía nada |
 | `src/app/panel/page.tsx` (`pickOwn`) | Anuncios «propios» elegidos del inventario | Anuncios de `auth.uid()` |
 | `src/lib/content/brands.ts`, `guides.ts` | Textos editoriales (los de marca, DEMO) | Siguen siendo contenido en el código. Los textos de marca se revisan antes de producción |
 

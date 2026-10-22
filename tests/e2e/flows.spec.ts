@@ -107,3 +107,33 @@ test("sin errores de hidratación con estado guardado", async ({ page }) => {
     page.removeAllListeners("console");
   }
 });
+
+test("publicar: la foto se recodifica a WebP ≤ 1600 px y sin EXIF ni GPS", async ({ page }) => {
+  const errors = trackErrors(page);
+  const sharp = (await import("sharp")).default;
+  const jpeg = await sharp({ create: { width: 3000, height: 2000, channels: 3, background: "#336699" } })
+    .jpeg()
+    .withExif({
+      IFD0: { Make: "CamaraDePrueba" },
+      IFD3: { GPSLatitudeRef: "N", GPSLatitude: "43/1 33/1 0/1", GPSLongitudeRef: "W", GPSLongitude: "5/1 55/1 0/1" },
+    })
+    .toBuffer();
+  expect(jpeg.includes(Buffer.from("Exif")), "la foto de partida lleva EXIF").toBe(true);
+
+  await page.goto("/vender/publicar");
+  await page.getByTestId("foto-galeria").setInputFiles({ name: "con-gps.jpg", mimeType: "image/jpeg", buffer: jpeg });
+  const img = page.getByRole("img", { name: /Foto 1/ });
+  await expect(img).toBeVisible();
+  const out = await img.evaluate(async (el) => {
+    const blob = await (await fetch((el as HTMLImageElement).currentSrc || (el as HTMLImageElement).src)).blob();
+    const bytes = new Uint8Array(await blob.arrayBuffer());
+    const bitmap = await createImageBitmap(blob);
+    const text = new TextDecoder("latin1").decode(bytes);
+    return { type: blob.type, width: bitmap.width, height: bitmap.height, exif: text.includes("Exif") || text.includes("EXIF"), gps: text.includes("CamaraDePrueba") };
+  });
+  expect(out.type).toBe("image/webp");
+  expect(Math.max(out.width, out.height)).toBe(1600);
+  expect(out.exif).toBe(false);
+  expect(out.gps).toBe(false);
+  expect(errors).toEqual([]);
+});

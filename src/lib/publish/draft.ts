@@ -23,8 +23,14 @@ export type ContactMethod = "whatsapp" | "phone" | "email";
 
 export interface DraftPhoto {
   url: string;
-  /** true si es una foto elegida en este dispositivo (URL blob: local, nunca subida). */
+  /** true si es una foto elegida en este dispositivo (URL blob: local, aún sin subir). */
   local: boolean;
+  /** Foto ya procesada (WebP/JPEG sin metadatos), lista para subir. */
+  blob?: Blob;
+  width?: number;
+  height?: number;
+  /** Ruta en Storage de una foto ya subida (al editar). */
+  path?: string;
 }
 
 export interface PublishDraft {

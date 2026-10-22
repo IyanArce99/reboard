@@ -99,21 +99,21 @@ Dirección «coastal editorial» con fotografía de Pexels (local, optimizada y 
 | D4 ✅ | Guardados en la base de datos para usuarios con sesión y fusión de `rb-usuario-v1.saved` al entrar | D2 | Un guardado aparece en otro dispositivo |
 | D5 🟡 | CAPTCHA con **Cloudflare Turnstile (gratuito)**: activarlo en Supabase Auth (acceso) y verificar el token en el servidor para contacto, publicar y reportar | B7 | Sin token válido, el servidor rechaza la acción (probado con las claves de prueba de Turnstile). **Hecho:** widget, verificación en el servidor con tests y token en el acceso. **Pendiente:** activarlo en Supabase Auth remoto (B7) y usarlo en publicar, contacto y reportar (E y F). |
 
-### Fase E: publicar y gestionar
+### Fase E: publicar y gestionar ✅ en local, el 22-10-2026
 | # | Tarea | Depende de | Hecho cuando |
 |---|---|---|---|
-| E1 | Esquemas zod del borrador (con los mismos límites que los CHECK) | C1 | Tests de validación |
-| E2 | Fotos en el cliente: redimensionado y WebP (quita EXIF), y persistencia del borrador en IndexedDB | — | Test: la foto resultante no tiene EXIF ni GPS |
-| E3 | Server Actions `createListingDraft` y `publishListing`, y subida a Storage desde `PublishFlow` (el paso 5 abre el acceso si no hay sesión) | B5, D2, D5, E1, E2 | E2E: publicar con 2 fotos → la ficha existe |
-| E4 | `updateTag` y aparición inmediata en `/buscar`, landings y home | E3, C2 | E2E: se ve en `/buscar` filtrando por sus litros, precio, marca y zona |
-| E5 | `/panel` real: anuncios del usuario y acciones (confirmar, bajar precio, marcar vendida, volver a publicar, retirar). Se quitan `pickOwn` y `rb-panel-v1` | E3 | E2E: marcar vendida → banner «vendida» en la ficha |
-| E6 | Editar: `/vender/publicar?editar=` desde la base de datos (solo el dueño), incluidas las fotos | E3 | E2E: editar el precio → «Ha bajado de X a Y» |
+| E1 ✅ | Esquemas zod del borrador (con los mismos límites que los CHECK) | C1 | Tests de validación |
+| E2 ✅ | Fotos en el cliente: redimensionado y WebP (quita EXIF), y persistencia del borrador en IndexedDB | — | Test: la foto resultante no tiene EXIF ni GPS |
+| E3 ✅ | Server Actions `createListingDraft` y `publishListing`, y subida a Storage desde `PublishFlow` (el paso 5 abre el acceso si no hay sesión) | B5, D2, D5, E1, E2 | E2E: publicar con 2 fotos → la ficha existe |
+| E4 ✅ | `updateTag` y aparición inmediata en `/buscar`, landings y home | E3, C2 | E2E: se ve en `/buscar` filtrando por sus litros, precio, marca y zona |
+| E5 ✅ | `/panel` real: anuncios del usuario y acciones (confirmar, bajar precio, marcar vendida, volver a publicar, retirar). `rb-panel-v1` queda solo para la demo | E3 ✅ | E2E: marcar vendida → banner «vendida» en la ficha |
+| E6 ✅ | Editar: `/vender/publicar?editar=` desde la base de datos (solo el dueño), incluidas las fotos | E3 ✅ | E2E: editar el precio → «Ha bajado de X a Y» |
 
 ### Fase F: contacto, caducidad y moderación
 | # | Tarea | Depende de | Hecho cuando |
 |---|---|---|---|
 | F1 | `revealContact` (Server Action + CAPTCHA + HMAC de IP + `reveal_contact`), sin registro, conectada al modal actual | B6, D5, E3 | E2E: se abre `wa.me` con el número. El número no está en el HTML |
-| F2 | Cron de caducidad (`/api/cron/expirar` con `CRON_SECRET`), «pendiente» calculado (> 14 días) y limpieza de fotos huérfanas | E3 | Test: un anuncio con `confirmed_at` de hace 31 días pasa a caducado |
+| F2 | Cron de caducidad (`/api/cron/expirar` con `CRON_SECRET`), «pendiente» calculado (> 14 días) y limpieza de fotos huérfanas | E3 ✅ | Test: un anuncio con `confirmed_at` de hace 31 días pasa a caducado |
 | F3 | Reportar anuncio (con sesión y CAPTCHA), marca automática con 3 reportes, y `/moderacion` mínimo | B3, D2, D5 | Un moderador retira el anuncio y sus fotos desaparecen |
 | F4 | Estadística real «clics en contactar» en el panel. Ocultar visitas y guardados simulados fuera del DEMO | F1, E5 | El panel en producción no muestra cifras simuladas |
 

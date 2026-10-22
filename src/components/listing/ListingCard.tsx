@@ -29,6 +29,8 @@ interface Props {
   layout?: "vertical" | "horizontal" | "responsive";
   /** Solo para la imagen LCP (primera tarjeta). */
   preload?: boolean;
+  /** Vista previa al publicar: el anuncio aún no existe y sus enlaces no se precargan. */
+  preview?: boolean;
 }
 
 export function ListingCard(props: Props) {
@@ -47,9 +49,10 @@ export function ListingCard(props: Props) {
   return <Card {...props} />;
 }
 
-function Card({ listing: l, now, hereZone, layout = "vertical", preload = false }: Props) {
+function Card({ listing: l, now, hereZone, layout = "vertical", preload = false, preview = false }: Props) {
   const title = listingTitle(l);
   const href = listingPath(l);
+  const prefetch = preview ? false : undefined;
   const off = isOff(l);
   const pro = l.seller.type !== "particular";
   const near = l.zone === hereZone && l.distanceKm != null;
@@ -59,7 +62,7 @@ function Card({ listing: l, now, hereZone, layout = "vertical", preload = false 
   if (layout === "horizontal") {
     return (
       <article className={styles.h}>
-        <Link href={href} className={styles.hPhoto} tabIndex={-1} aria-hidden="true">
+        <Link href={href} prefetch={prefetch} className={styles.hPhoto} tabIndex={-1} aria-hidden="true">
           {photo && (
             <Image src={photo.url} alt="" fill sizes="116px" className={styles.img} data-off={off || undefined} />
           )}
@@ -74,7 +77,7 @@ function Card({ listing: l, now, hereZone, layout = "vertical", preload = false 
             </div>
             <SaveButton id={l.id} className={styles.hSave} />
           </div>
-          <Link href={href} className={styles.hTitle}>
+          <Link href={href} prefetch={prefetch} className={styles.hTitle}>
             {title}
           </Link>
           <div className={styles.hSpec}>
@@ -102,7 +105,7 @@ function Card({ listing: l, now, hereZone, layout = "vertical", preload = false 
 
   return (
     <article className={styles.v}>
-      <Link href={href} className={styles.vPhoto} tabIndex={-1} aria-hidden="true">
+      <Link href={href} prefetch={prefetch} className={styles.vPhoto} tabIndex={-1} aria-hidden="true">
         {photo && (
           <Image
             src={photo.url}
@@ -132,7 +135,7 @@ function Card({ listing: l, now, hereZone, layout = "vertical", preload = false 
           <span className={styles.vPrice}>{eur(l.price)}</span>
           {l.previousPrice && <s className={styles.vOld}>{eur(l.previousPrice)}</s>}
         </div>
-        <Link href={href} className={styles.vTitle}>
+        <Link href={href} prefetch={prefetch} className={styles.vTitle}>
           {title}
         </Link>
         <div className={styles.vSpec}>
