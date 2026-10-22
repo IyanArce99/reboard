@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import { notFound } from "next/navigation";
-import { brandPath, isOfModel, modelPath, sizeIndexOf } from "@/components/catalog/catalog";
+import { brandPath, modelPath, sizeIndexOf } from "@/components/catalog/catalog";
 import { ModelSizes, type ModelSizeView } from "@/components/catalog/ModelSizes";
 import { ListingCard } from "@/components/listing/ListingCard";
 import { Breadcrumbs } from "@/components/seo/Breadcrumbs";
@@ -51,11 +51,9 @@ export default async function ModelPage({ params }: PageProps<"/marcas/[marca]/[
   const { marca, modelo } = await params;
   const m = await model(marca, modelo);
   const repo = getRepository();
-  const active = await repo.active();
-  const now = repo.now();
-
-  const used = active.filter((l) => isOfModel(l, m)).sort((a, b) => +new Date(b.publishedAt) - +new Date(a.publishedAt));
   const brandSlug = slugify(m.brand);
+  const used = (await repo.search(withFilters({ brand: brandSlug, model: m.slug }), { sort: "recientes", limit: 1000 })).items;
+  const now = repo.now();
   const desc = m.description ?? `${SHAPE_INFO[m.shape].label} de ${m.brand} en construcción ${CONSTRUCTION_INFO[m.construction].short}.`;
 
   const sizes: ModelSizeView[] = m.sizes.map((s, i) => {

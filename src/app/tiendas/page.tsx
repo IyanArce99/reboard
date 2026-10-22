@@ -3,7 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { Breadcrumbs } from "@/components/seo/Breadcrumbs";
 import { ShopDirectory, ToastButton } from "@/components/shops/ShopIslands";
-import { SHOP_TYPE_LABEL, isOfShop, shopPath, shopPlace, usedBoards } from "@/components/shops/shops";
+import { SHOP_TYPE_LABEL, shopPath, shopPlace, usedBoards } from "@/components/shops/shops";
 import { getRepository } from "@/lib/data";
 import { unsplash } from "@/lib/images";
 import ui from "@/styles/ui.module.css";
@@ -22,9 +22,10 @@ export const metadata: Metadata = {
 
 export default async function ShopsPage() {
   const repo = getRepository();
-  const [shops, active] = await Promise.all([repo.shops(), repo.active()]);
+  const shops = await repo.shops();
+  const shopCounts = await Promise.all(shops.map(async (s) => (await repo.shopListings(s.slug)).length));
 
-  const cards = shops.map((s) => ({
+  const cards = shops.map((s, i) => ({
     key: s.slug,
     type: s.type,
     node: (
@@ -37,7 +38,7 @@ export default async function ShopsPage() {
           <span className={styles.cardName}>{s.name}</span>
           <span className={styles.cardMeta}>{shopPlace(s)}</span>
           <span className={styles.cardMeta}>{s.hours}</span>
-          <span className={styles.cardCount}>{usedBoards(active.filter((l) => isOfShop(l, s)).length)}</span>
+          <span className={styles.cardCount}>{usedBoards(shopCounts[i])}</span>
         </div>
       </Link>
     ),

@@ -17,15 +17,12 @@ async function Flow({ searchParams }: { searchParams: PageProps<"/vender/publica
   const raw = await searchParams;
   const editId = typeof raw.editar === "string" ? raw.editar : null;
   const repo = getRepository();
-  const [catalog, active, editing] = await Promise.all([
+  // Referencia de precio: solo anuncios existentes del mismo modelo de catálogo.
+  const [catalog, priceRefs, editing] = await Promise.all([
     repo.catalog(),
-    repo.active(),
+    repo.modelPrices(),
     editId ? repo.byId(editId) : Promise.resolve(null),
   ]);
-
-  // Referencia de precio: solo anuncios existentes del mismo modelo de catálogo.
-  const priceRefs: Record<string, number[]> = {};
-  for (const l of active) if (l.modelSlug) (priceRefs[l.modelSlug] ??= []).push(l.price);
 
   return (
     <PublishFlow

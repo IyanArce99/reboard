@@ -17,7 +17,6 @@ import {
   landingTitle,
   type LandingForm,
 } from "@/lib/search/landings";
-import { countMatches } from "@/lib/search/match";
 import { noindexRobots } from "@/lib/seo";
 
 /** Interpreta los segmentos de /tablas/[segmento]/[forma]. */
@@ -39,7 +38,7 @@ async function titleFor(place: string | null, form: LandingForm | null) {
 export async function landingMetadata(place: string | null, form: LandingForm | null): Promise<Metadata> {
   const title = await titleFor(place, form);
   const path = landingPath(place, form);
-  const n = countMatches(await getRepository().active(), landingFilters(place, form));
+  const n = await getRepository().count(landingFilters(place, form));
   const intro = landingIntro(place, form);
   return {
     title,

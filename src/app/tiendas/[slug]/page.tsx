@@ -5,7 +5,7 @@ import { ListingCard } from "@/components/listing/ListingCard";
 import { Breadcrumbs } from "@/components/seo/Breadcrumbs";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { ToastButton } from "@/components/shops/ShopIslands";
-import { SHOP_TYPE_LABEL, isOfShop, shopPath, shopPlace } from "@/components/shops/shops";
+import { SHOP_TYPE_LABEL, shopPath, shopPlace } from "@/components/shops/shops";
 import { AlertButton } from "@/components/user/islands";
 import { getRepository } from "@/lib/data";
 import { ago, daysBetween } from "@/lib/domain/format";
@@ -43,12 +43,8 @@ export async function generateMetadata({ params }: PageProps<"/tiendas/[slug]">)
 export default async function ShopPage({ params }: PageProps<"/tiendas/[slug]">) {
   const s = await shop((await params).slug);
   const repo = getRepository();
-  const active = await repo.active();
+  const listings = await repo.shopListings(s.slug);
   const now = repo.now();
-
-  const listings = active
-    .filter((l) => isOfShop(l, s))
-    .sort((a, b) => +new Date(b.publishedAt) - +new Date(a.publishedAt));
   const lastConfirmed = listings.length ? Math.min(...listings.map((l) => daysBetween(l.confirmedAt, now))) : null;
   const zone = placeName(s.zone) ?? s.zone;
   const label = SHOP_TYPE_LABEL[s.type];

@@ -7,7 +7,6 @@ import { getRepository } from "@/lib/data";
 export async function GET(request: Request) {
   const ids = (new URL(request.url).searchParams.get("ids") ?? "").split(",").filter(Boolean).slice(0, 100);
   const repo = getRepository();
-  const all = await repo.all();
-  const listings = ids.map((id) => all.find((l) => l.id === id)).filter(Boolean);
+  const listings = await repo.byIds(ids);
   return Response.json({ listings, now: repo.now().toISOString() });
 }

@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { brandPath, isOfModel, modelMeta, modelPath, modelRange, usedCount } from "@/components/catalog/catalog";
+import { brandPath, modelMeta, modelPath, modelRange, usedCount } from "@/components/catalog/catalog";
 import { ListingCard } from "@/components/listing/ListingCard";
 import { Breadcrumbs } from "@/components/seo/Breadcrumbs";
 import { JsonLd } from "@/components/seo/JsonLd";
@@ -13,7 +13,6 @@ import { slugify } from "@/lib/domain/taxonomy";
 import { listingPath, listingTitle } from "@/lib/listing/present";
 import { alertText } from "@/lib/search/describe";
 import { searchHref, toQuery, withFilters } from "@/lib/search/filters";
-import { brandSlugOf } from "@/lib/search/match";
 import { absoluteUrl } from "@/lib/site";
 import ui from "@/styles/ui.module.css";
 import styles from "@/components/catalog/Catalog.module.css";
@@ -49,15 +48,18 @@ export async function generateMetadata({ params }: PageProps<"/marcas/[marca]">)
 export default async function BrandPage({ params }: PageProps<"/marcas/[marca]">) {
   const b = await brand((await params).marca);
   const repo = getRepository();
-  const [active, catalog, names] = await Promise.all([repo.active(), repo.catalog(), getCatalogNames(repo)]);
+  const f = withFilters({ brand: b.slug });
+  const [usedPage, catalog, names] = await Promise.all([
+    repo.search(f, { sort: "recientes", limit: MAX_CARDS }),
+    repo.catalog(),
+    getCatalogNames(repo),
+  ]);
   const now = repo.now();
 
-  const used = active
-    .filter((l) => brandSlugOf(l) === b.slug)
-    .sort((a, b2) => +new Date(b2.publishedAt) - +new Date(a.publishedAt));
+  const used = usedPage.items;
   const models = catalog.filter((m) => slugify(m.brand) === b.slug);
+  const modelCounts = await Promise.all(models.map((m) => repo.count(withFilters({ brand: b.slug, model: m.slug }))));
   const content = brandContent(b.name);
-  const f = withFilters({ brand: b.slug });
 
   return (
     <main className={`container ${styles.page}`}>
@@ -84,18 +86,18 @@ export default async function BrandPage({ params }: PageProps<"/marcas/[marca]">
 
       <section className={styles.section} aria-labelledby="usadas-title">
         <h2 id="usadas-title" className={styles.h2}>
-          {b.name} de segunda mano · {used.length}
+          {b.name} de segunda mano · {usedPage.total}
         </h2>
         {used.length > 0 ? (
           <>
             <div className={styles.grid}>
-              {used.slice(0, MAX_CARDS).map((l) => (
+              {used.map((l) => (
                 <ListingCard key={l.id} listing={l} now={now} hereZone="" layout="responsive" />
               ))}
             </div>
-            {used.length > MAX_CARDS && (
+            {usedPage.total > MAX_CARDS && (
               <Link href={searchHref(f)} className={styles.more}>
-                Ver las {used.length} {b.name} usadas →
+                Ver las {usedPage.total} {b.name} usadas →
               </Link>
             )}
           </>
@@ -110,8 +112,8 @@ export default async function BrandPage({ params }: PageProps<"/marcas/[marca]">
             Modelos del catálogo
           </h2>
           <div className={styles.models}>
-            {models.map((m) => {
-              const n = used.filter((l) => isOfModel(l, m)).length;
+            {models.map((m, i) => {
+              const n = modelCounts[i];
               return (
                 <Link key={m.slug} href={modelPath(m)} className={styles.modelCard}>
                   <span className={styles.modelName}>{m.model}</span>
@@ -133,7 +135,7 @@ export default async function BrandPage({ params }: PageProps<"/marcas/[marca]">
             "@context": "https://schema.org",
             "@type": "ItemList",
             name: `Tablas ${b.name} de segunda mano`,
-            itemListElement: used.slice(0, MAX_CARDS).map((l, i) => ({
+            itemListElement: used.map((l, i) => ({
               "@type": "ListItem",
               position: i + 1,
               url: absoluteUrl(listingPath(l)),

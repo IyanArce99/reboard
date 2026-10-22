@@ -8,8 +8,7 @@ import { getRepository } from "@/lib/data";
 import { getCatalogNames } from "@/lib/data/names";
 import { NO_BRAND, ZONES, slugify } from "@/lib/domain/taxonomy";
 import { alertText } from "@/lib/search/describe";
-import { toQuery, withFilters } from "@/lib/search/filters";
-import { brandSlugOf, countMatches } from "@/lib/search/match";
+import { emptyFilters, toQuery, withFilters } from "@/lib/search/filters";
 import { formFilters, landingPath, type LandingForm } from "@/lib/search/landings";
 import { unsplash } from "@/lib/images";
 import styles from "@/components/home/Home.module.css";
@@ -33,23 +32,25 @@ const GUIDES = [
 
 async function HeroSearch() {
   const here = await getHere();
-  const active = await getRepository().active();
-  return <SearchBar here={here} initialCount={countMatches(active, withFilters({ zone: here }))} />;
+  const count = await getRepository().count(withFilters({ zone: here }));
+  return <SearchBar here={here} initialCount={count} />;
 }
 
 export default async function Home() {
   const repo = getRepository();
-  const [active, names] = await Promise.all([repo.active(), getCatalogNames(repo)]);
+  const catFilters = CATEGORIES.map(([label, form]) => ({ label, form, f: withFilters(formFilters(form)) }));
+  const [names, facets, catCounts] = await Promise.all([
+    getCatalogNames(repo),
+    repo.facets(emptyFilters()),
+    Promise.all(catFilters.map((c) => repo.count(c.f))),
+  ]);
 
-  const cats = CATEGORIES.map(([label, form]) => {
-    const f = withFilters(formFilters(form));
-    return { label, form, f, n: countMatches(active, f) };
-  }).sort((a, b) => Number(b.n > 0) - Number(a.n > 0));
+  const cats = catFilters.map((c, i) => ({ ...c, n: catCounts[i] })).sort((a, b) => Number(b.n > 0) - Number(a.n > 0));
 
-  const zones = ZONES.map((z) => ({ ...z, n: active.filter((l) => l.zone === z.slug).length })).sort((a, b) => b.n - a.n);
+  const zones = ZONES.map((z) => ({ ...z, n: facets.zones[z.slug] ?? 0 })).sort((a, b) => b.n - a.n);
   const brands = [...names.brands, { slug: NO_BRAND.slug, name: NO_BRAND.short }].map((b) => ({
     ...b,
-    n: active.filter((l) => brandSlugOf(l) === b.slug).length,
+    n: facets.brands[b.slug] ?? 0,
   }));
 
   return (

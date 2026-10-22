@@ -8,6 +8,7 @@ import { Breadcrumbs } from "@/components/seo/Breadcrumbs";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { GUIDES, PENDING_GUIDES, guideBySlug, guideDate, type Guide } from "@/lib/content/guides";
 import { getRepository } from "@/lib/data";
+import { emptyFilters } from "@/lib/search/filters";
 import { absoluteUrl, SITE_NAME } from "@/lib/site";
 import { unsplash } from "@/lib/images";
 import ui from "@/styles/ui.module.css";
@@ -54,9 +55,8 @@ export default async function GuidePage({ params }: PageProps<"/guias/[slug]">) 
   }
   const g = r.guide;
   const repo = getRepository();
-  const active = await repo.active();
+  const recent = (await repo.search(emptyFilters(), { sort: "recientes", limit: 4 })).items;
   const now = repo.now();
-  const recent = [...active].sort((a, b) => +new Date(b.publishedAt) - +new Date(a.publishedAt)).slice(0, 4);
   const image = unsplash(g.image.unsplashId, 1400);
 
   return (

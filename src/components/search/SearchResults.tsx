@@ -5,7 +5,6 @@ import { JsonLd } from "@/components/seo/JsonLd";
 import { AlertButton } from "@/components/user/islands";
 import { getRepository } from "@/lib/data";
 import { brandOptions, getCatalogNames } from "@/lib/data/names";
-import { REGIONS, SHAPES, ZONES } from "@/lib/domain/taxonomy";
 import { num } from "@/lib/domain/format";
 import { listingPath, listingTitle } from "@/lib/listing/present";
 import { absoluteUrl } from "@/lib/site";
@@ -19,7 +18,6 @@ import {
   type Filters,
   type ViewState,
 } from "@/lib/search/filters";
-import { countMatches, matches, sortListings } from "@/lib/search/match";
 import { FilterPanel } from "./FilterPanel";
 import { OpenFiltersButton, PendingArea, SearchNavProvider, SortSelect, ViewToggle } from "./SearchNav";
 import ui from "@/styles/ui.module.css";
@@ -47,23 +45,18 @@ interface Props {
 
 export async function SearchResults({ filters: f, view, here, title, intro, crumbs, current, isSearchPage, openAdvanced = false }: Props) {
   const repo = getRepository();
-  const [active, names] = await Promise.all([repo.active(), getCatalogNames(repo)]);
+  const suggestions = emptySuggestions(f);
+  const [names, res, unknown, facets] = await Promise.all([
+    getCatalogNames(repo),
+    repo.search(f, { sort: view.sort, limit: view.limit, here }),
+    hasVolumeFilter(f) ? repo.unknownVolume(f, 12) : Promise.resolve({ items: [], total: 0 }),
+    repo.facets(f),
+  ]);
+  // Recuentos de las sugerencias: solo hacen falta en el estado vacío.
+  const suggestionCounts = res.total === 0 ? await Promise.all(suggestions.map((s) => repo.count(s.filters))) : [];
   const now = repo.now();
-
-  const res = sortListings(
-    active.filter((l) => matches(l, f)),
-    view.sort,
-    here,
-  );
-  const unknown = hasVolumeFilter(f) ? active.filter((l) => l.volume.value == null && matches(l, f, true)) : [];
-  const shown = res.slice(0, view.limit);
-  const count = (p: Partial<Filters>) => countMatches(active, { ...f, ...p });
-
-  const counts = {
-    total: count({ zone: "", dist: null }),
-    zones: Object.fromEntries([...REGIONS, ...ZONES].map((z) => [z.slug, count({ zone: z.slug, dist: null })])),
-    shapes: Object.fromEntries(SHAPES.map((s) => [s, count({ shapes: [s] })])),
-  };
+  const shown = res.items;
+  const counts = { total: facets.anyZone, zones: facets.zones, shapes: facets.shapes };
   const applied = appliedChips(f, names);
   const alert = { text: alertText(f, names), query: toQuery(f) };
   const viewKeep = { sort: view.sort, view: view.view };
@@ -98,7 +91,7 @@ export async function SearchResults({ filters: f, view, here, title, intro, crum
         <div className={styles.layout}>
           <FilterPanel
             counts={counts}
-            resultCount={res.length}
+            resultCount={res.total}
             brands={brandOptions(names)}
             models={names.models}
             openAdvanced={openAdvanced}
@@ -107,7 +100,7 @@ export async function SearchResults({ filters: f, view, here, title, intro, crum
           <PendingArea className={styles.results}>
             <div className={styles.resultsHead}>
               <div className={styles.count} aria-live="polite">
-                <strong>{num(res.length)}</strong> {res.length === 1 ? "tabla coincide" : "tablas coinciden"}
+                <strong>{num(res.total)}</strong> {res.total === 1 ? "tabla coincide" : "tablas coinciden"}
               </div>
               <div className={styles.dControls}>
                 <SortSelect className={styles.dSort} />
@@ -129,10 +122,10 @@ export async function SearchResults({ filters: f, view, here, title, intro, crum
               </div>
             )}
 
-            {unknown.length > 0 && (
+            {unknown.total > 0 && (
               <div className={styles.unknown}>
                 <span>
-                  También hay {unknown.length} tabla{unknown.length > 1 ? "s" : ""} con estas medidas cuyos litros no están indicados.
+                  También hay {unknown.total} tabla{unknown.total > 1 ? "s" : ""} con estas medidas cuyos litros no están indicados.
                 </span>
                 <Link href={searchHref(f, { ...view, showUnknown: !view.showUnknown })} scroll={false}>
                   {view.showUnknown ? "Ocultarlas" : "Verlas"}
@@ -140,21 +133,21 @@ export async function SearchResults({ filters: f, view, here, title, intro, crum
               </div>
             )}
 
-            {res.length > 0 ? (
+            {res.total > 0 ? (
               <>
                 <div className={gridClass}>
                   {shown.map((l, i) => (
                     <ListingCard key={l.id} listing={l} now={now} hereZone={here} layout={cardLayout} preload={i === 0} />
                   ))}
                 </div>
-                {view.showUnknown && unknown.length > 0 && (
+                {view.showUnknown && unknown.total > 0 && (
                   <>
                     <div className={styles.unknownHead}>
                       <span>Mismas medidas · litros sin indicar</span>
                       <span className={styles.rule} />
                     </div>
                     <div className={gridClass}>
-                      {unknown.slice(0, 12).map((l) => (
+                      {unknown.items.map((l) => (
                         <ListingCard key={l.id} listing={l} now={now} hereZone={here} layout={cardLayout} />
                       ))}
                     </div>
@@ -162,9 +155,9 @@ export async function SearchResults({ filters: f, view, here, title, intro, crum
                 )}
                 <div className={styles.more}>
                   <span>
-                    Mostrando {Math.min(view.limit, res.length)} de {num(res.length)}
+                    Mostrando {Math.min(view.limit, res.total)} de {num(res.total)}
                   </span>
-                  {res.length > view.limit && (
+                  {res.total > view.limit && (
                     <Link href={searchHref(f, { ...view, limit: view.limit + PAGE_SIZE })} scroll={false} className={ui.btnOutline}>
                       Ver más tablas
                     </Link>
@@ -184,9 +177,9 @@ export async function SearchResults({ filters: f, view, here, title, intro, crum
                 <div className={styles.emptyTag}>Tu próxima tabla ya existe; puede que aún no esté publicada.</div>
                 <p className={styles.emptyText}>Prueba a ampliar la búsqueda. Entre paréntesis, cuántas tablas aparecerían.</p>
                 <div className={styles.suggestions}>
-                  {emptySuggestions(f).map((s) => (
+                  {suggestions.map((s, i) => (
                     <Link key={s.label} href={searchHref(s.filters, viewKeep)} scroll={false} className={ui.btnNeutral}>
-                      {s.label} ({countMatches(active, s.filters)})
+                      {s.label} ({suggestionCounts[i]})
                     </Link>
                   ))}
                 </div>
@@ -210,7 +203,7 @@ export async function SearchResults({ filters: f, view, here, title, intro, crum
             "@context": "https://schema.org",
             "@type": "ItemList",
             name: title,
-            numberOfItems: res.length,
+            numberOfItems: res.total,
             itemListElement: shown.map((l, i) => ({
               "@type": "ListItem",
               position: i + 1,

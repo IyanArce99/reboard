@@ -5,10 +5,9 @@ import { AlertButton } from "@/components/user/islands";
 import { getRepository } from "@/lib/data";
 import { getCatalogNames } from "@/lib/data/names";
 import { zoneBySlug } from "@/lib/domain/taxonomy";
-import type { Listing } from "@/lib/domain/types";
 import { DEFAULT_HERE, HERE_COOKIE } from "@/lib/here";
 import { alertText } from "@/lib/search/describe";
-import { toQuery, withFilters } from "@/lib/search/filters";
+import { emptyFilters, toQuery, withFilters } from "@/lib/search/filters";
 import { landingPath } from "@/lib/search/landings";
 import { NearSwitcher } from "./NearSwitcher";
 import styles from "./Home.module.css";
@@ -20,8 +19,6 @@ const BANDS: [number, number, string][] = [
   [30, 9999, "A más de 30 km"],
 ];
 
-const recent = (a: Listing, b: Listing) => +new Date(b.publishedAt) - +new Date(a.publishedAt);
-
 export async function getHere() {
   const v = (await cookies()).get(HERE_COOKIE)?.value ?? "";
   return zoneBySlug(v) ? v : DEFAULT_HERE;
@@ -31,28 +28,36 @@ export async function getHere() {
 export async function NearSection() {
   const here = await getHere();
   const repo = getRepository();
-  const [active, names] = await Promise.all([repo.active(), getCatalogNames(repo)]);
+  const zoneFilters = withFilters({ zone: here });
+  const [names, nearPage, byKmPage, totalActive] = await Promise.all([
+    getCatalogNames(repo),
+    repo.search(zoneFilters, { sort: "recientes", limit: 12 }),
+    // La lista por distancia muestra hasta 6 por franja: se piden los de la zona ordenados por km.
+    repo.search(zoneFilters, { sort: "distancia", here, limit: 200 }),
+    repo.count(emptyFilters()),
+  ]);
   const now = repo.now();
   const zn = zoneBySlug(here)!.name;
 
-  const inZone = active.filter((l) => l.zone === here);
-  const near = [...inZone].sort(recent).slice(0, 12);
-  const other = near.length < 8 ? active.filter((l) => l.zone !== here).sort(recent).slice(0, 8 - near.length + 2) : [];
-  const byKm = [...inZone].sort((a, b) => (a.distanceKm ?? 9999) - (b.distanceKm ?? 9999));
+  const near = nearPage.items;
+  const other =
+    near.length < 8
+      ? (await repo.search(emptyFilters(), { sort: "recientes", excludeZone: here, limit: 8 - near.length + 2 })).items
+      : [];
+  const byKm = byKmPage.items;
   const groups = BANDS.map(([lo, hi, l]) => ({
     label: `${l} · ${zn}`,
     items: byKm.filter((x) => (x.distanceKm ?? 9999) >= lo && (x.distanceKm ?? 9999) < hi).slice(0, 6),
   })).filter((g) => g.items.length);
   if (other.length) groups.push({ label: "Otras zonas", items: other });
 
-  const lowInv = active.length < 60 || near.length < 8;
+  const lowInv = totalActive < 60 || near.length < 8;
   const lowText =
-    active.length < 60
-      ? `Hay ${active.length} tablas publicadas en toda España, la mayoría en Canarias. Crea una alerta con tus medidas y te avisamos cuando aparezca una cerca.`
+    totalActive < 60
+      ? `Hay ${totalActive} tablas publicadas en toda España, la mayoría en Canarias. Crea una alerta con tus medidas y te avisamos cuando aparezca una cerca.`
       : `Todavía hay pocas tablas en ${zn}. Crea una alerta y te avisamos en cuanto se publique una.`;
-  const allText = `Ver ${inZone.length} en ${zn} →`;
+  const allText = `Ver ${nearPage.total} en ${zn} →`;
   const zoneHref = landingPath(here, null);
-  const zoneFilters = withFilters({ zone: here });
 
   return (
     <section className={`container ${styles.near}`} aria-labelledby="near-title">

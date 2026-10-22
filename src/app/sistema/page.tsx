@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Logo } from "@/components/Logo";
 import { ListingCard } from "@/components/listing/ListingCard";
 import { getRepository } from "@/lib/data";
+import { emptyFilters } from "@/lib/search/filters";
 import ui from "@/styles/ui.module.css";
 import styles from "./Sistema.module.css";
 
@@ -27,11 +28,15 @@ const SWATCHES: [string, string, string][] = [
 
 export default async function SistemaPage() {
   const repo = getRepository();
-  const all = await repo.all();
+  const [first, noVolume, sold] = await Promise.all([
+    repo.search(emptyFilters(), { limit: 1 }),
+    repo.unknownVolume(emptyFilters(), 1),
+    repo.search(emptyFilters(), { limit: 1, statuses: ["vendida"] }),
+  ]);
   const now = repo.now();
-  const card1 = all[0];
-  const card2 = all.find((l) => l.volume.value == null) ?? all[1];
-  const card3 = all.find((l) => l.status === "vendida") ?? all[2];
+  const card1 = first.items[0];
+  const card2 = noVolume.items[0] ?? card1;
+  const card3 = sold.items[0] ?? card1;
 
   return (
     <main className={`container ${styles.page}`}>

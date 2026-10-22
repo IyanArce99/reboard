@@ -45,8 +45,8 @@ const UNAVAILABLE: Partial<Record<Listing["status"], [string, string]>> = {
 };
 
 export async function generateStaticParams() {
-  const all = await getRepository().all();
-  return all.map((l) => ({ slugId: `${l.slug}-${l.id}` }));
+  const params = await getRepository().listingParams();
+  return params.map((l) => ({ slugId: `${l.slug}-${l.id}` }));
 }
 
 async function load(slugId: string) {
@@ -73,7 +73,7 @@ export async function generateMetadata({ params }: PageProps<"/anuncio/[slugId]"
 export default async function FichaPage({ params }: PageProps<"/anuncio/[slugId]">) {
   const l = await load((await params).slugId);
   const repo = getRepository();
-  const [active, names] = await Promise.all([repo.active(), getCatalogNames(repo)]);
+  const [names, similar, sameSeller] = await Promise.all([getCatalogNames(repo), repo.similar(l, 4), repo.countBySeller(l)]);
   const now = repo.now();
 
   const title = listingTitle(l);
@@ -84,13 +84,8 @@ export default async function FichaPage({ params }: PageProps<"/anuncio/[slugId]
   const len = l.length.value;
   const width = l.width.value;
   const thick = l.thickness.value;
-  const sameSeller = active.filter((x) => x.seller.name === l.seller.name).length;
   const isModel = Boolean(l.brand && l.modelSlug);
 
-  const similar = active
-    .filter((x) => x.id !== l.id && (x.shape === l.shape || (vol != null && x.volume.value != null && Math.abs(x.volume.value - vol) <= 8)))
-    .sort((a, b) => Number(b.zone === l.zone) - Number(a.zone === l.zone) || +new Date(b.publishedAt) - +new Date(a.publishedAt))
-    .slice(0, 4);
 
   const similarFilters = withFilters({
     shapes: [l.shape],
