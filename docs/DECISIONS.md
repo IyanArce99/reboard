@@ -122,3 +122,34 @@ Registro de decisiones tomadas al recrear el prototipo en Next.js. Las que cambi
 ### Otros
 - `unsplash()` pasa a `src/lib/images.ts`: las páginas ya no importan `src/mocks`.
 - `.env.example` documenta las variables actuales y las previstas, sin valores.
+
+## Fase B (base de datos, en local)
+
+### Infraestructura
+- **Un único proyecto Supabase** (`reboard`, UE, plan gratuito), sin staging. Las pruebas se hacen en Supabase local con Docker (`npm run db:start`), también en CI. Los Preview de Vercel no tendrán claves de Supabase.
+- **Supabase CLI** como dependencia de desarrollo (`supabase`, sin cuenta).
+- **Servicios desactivados en local:** Realtime, Studio, Edge Functions, analítica, vector storage, pooler e imgproxy. Reboard no los usa y así el entorno local pesa menos.
+- **Turnstile:** preparado en `config.toml` (comentado). En el proyecto remoto se activará en Authentication → Attack Protection.
+
+### Esquema
+Las migraciones son la fuente de verdad; `docs/DATABASE.md` se ha reescrito como guía.
+- **Sin columnas `is_demo`:** los datos DEMO nunca entran en Supabase.
+- **`flagged` sigue visible.** Las políticas y la búsqueda solo ocultan `removed`, para que 3 reportes malintencionados no puedan tumbar un anuncio. En el diseño inicial ocultaban todo lo que no fuera `visible`.
+- **El límite de `confirmed_at` = `now()`** solo se aplica a usuarios (`authenticated`). El servidor y el cron pueden fijar fechas.
+- **Reglas del dueño en `listings_guard`:** se aplican cuando `current_user = 'authenticated'`. Las funciones del sistema (`security definer`) y el service role no están sujetas a ellas.
+- **Un único predicado de búsqueda** (`listing_matches`) para `search_listings`, `count_listings` y `listing_facets`. Así la búsqueda y los recuentos no pueden divergir.
+  - Sin distancia (no hay coordenadas).
+  - «Más cerca» ordena primero la zona del usuario.
+- **`board_models.slug` es único global,** porque el filtro `modelo` de las URLs usa el slug sin la marca.
+- **Restricción nueva:** un modelo de catálogo implica su marca (`model_needs_brand`).
+- **Índice añadido:** `reports(reporter_id)`, que el asesor de claves foráneas sin índice detectó.
+- **`contact_method`** solo admite `whatsapp` y `phone`. La opción «Email» del formulario se retirará al conectarlo (E3).
+- **Columnas de `profiles`:** anon y authenticated solo pueden leer algunas, así que las consultas deben pedir columnas explícitas (no `select=*`).
+
+### Pruebas
+- **pgTAP:** 120 tests en `supabase/tests/database/` (`npm run db:test`) sobre privilegios, anuncios, privacidad, reportes, Storage y búsqueda.
+  - Crean sus datos en una transacción que se deshace al terminar.
+  - **Comprobado que detectan fallos:** al conceder a propósito permisos indebidos en la base local fallan 5 tests; tras `db:reset` vuelven a pasar.
+- **`supabase db lint`:** sin errores. Todas las funciones fijan `search_path`.
+- **Storage:** Supabase bloquea el `DELETE` directo en SQL sobre `storage.objects`; el borrado se prueba por la API en fases posteriores. Un `UPDATE` ajeno no falla, sino que afecta a 0 filas por RLS; se comprueba que el objeto sigue intacto.
+- **CI:** job `database` en `.github/workflows/ci.yml`. No se ha ejecutado en GitHub porque no hay remoto.

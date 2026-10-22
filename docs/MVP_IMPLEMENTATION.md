@@ -68,7 +68,7 @@ Se mantiene `PublishFlow` (5 pasos). Los cambios:
 - **«Litros sin indicar»:** una segunda consulta con `volume_l is null` y el resto de filtros.
 - **Recuentos del panel:** la RPC `listing_facets(p jsonb)`.
 - **Ubicación:** provincia o isla + municipio, sin coordenadas (decisión aprobada). El selector de distancia se oculta con datos reales y «Más cerca» pasa a «Primero mi zona».
-- **Paridad:** tests que comparan `search()` y `facets()` contra `matches()` del mock con el mismo inventario sembrado en staging.
+- **Paridad:** tests que cargan el inventario DEMO en el Supabase **local** (dentro del test) y comparan `search()` y `facets()` contra `matches()` del mock.
 
 ## 6. Contactar con el vendedor
 - Se mantienen `ContactButton`, `ContactBar` y el modal de `Contact.tsx`.
@@ -95,12 +95,12 @@ Se mantiene `PublishFlow` (5 pasos). Los cambios:
 | Tipo | Herramienta | Qué |
 |---|---|---|
 | Unitarias | Vitest | Lógica pura, mapeo de filas a `Listing` y esquemas zod |
-| RLS | Vitest + supabase-js contra Supabase local (`supabase start`) | Anon no ve borradores, teléfonos ni anuncios retirados. El usuario B no edita los de A. Transiciones inválidas fallan |
+| RLS | pgTAP contra Supabase local (`npm run db:test`) | ✅ Fase B: privilegios, anuncios, privacidad, Storage y búsqueda |
 | Paridad | Vitest | `search` y `facets` frente a `matches()` con el seed DEMO |
 | E2E | Playwright | Entrar, publicar con 2 fotos, verlo en `/buscar` filtrado, ficha, contactar (sale el número), editar el precio, marcar vendida (banner de vendida) |
 | CI | GitHub Actions | `tsc`, `eslint`, `vitest`, `next build` y Playwright contra el Supabase local |
 
 ## 10. Definición de «MVP listo»
-- El recorrido e2e pasa en staging.
+- El recorrido e2e pasa contra Supabase local.
 - La lista de comprobación de SECURITY §9 está completa.
-- Producción sin datos DEMO, con catálogo verificado y textos legales publicados.
+- El proyecto Supabase sin datos DEMO, con catálogo verificado y textos legales publicados.

@@ -52,7 +52,7 @@ Estado: **aprobada** (22-10-2026), con las decisiones de producto de §7. La fas
 ### 1.4 Dónde hay datos mock o almacenamiento local
 | Lugar | Qué guarda | Destino en el MVP |
 |---|---|---|
-| `src/mocks/demo-inventory.ts` | Anuncios, catálogo y tiendas DEMO, y el helper `unsplash()` | Seed de *staging* (§6). El helper `unsplash()` pasa a `src/lib/images.ts` |
+| `src/mocks/demo-inventory.ts` | Anuncios, catálogo y tiendas DEMO | Solo desarrollo local y tests (§6). **Nunca se cargan en Supabase.** (`unsplash()` ya está en `src/lib/images.ts`) |
 | `src/lib/data/mock-repository.ts` | Repositorio DEMO | Se mantiene con `REBOARD_DATA_SOURCE=mock` (desarrollo sin red, tests) |
 | Páginas que importan `@/mocks`: `page.tsx`, `guias/*`, `marcas/[marca]/[modelo]`, `tiendas/*` | Fotos de stock por id | Imágenes estáticas propias o de Storage |
 | `localStorage rb-usuario-v1` | Guardados, comparación, alertas y perfil de surfista | Guardados → tabla `favorites` si hay sesión (se fusionan al iniciar sesión). La comparación y el perfil siguen locales. Las alertas siguen locales hasta que haya emails |
@@ -89,7 +89,7 @@ Se **acepta la arquitectura propuesta** (Next.js + Supabase Postgres, Auth y Sto
 
 1. **Resend es necesario desde el MVP, no solo «para futuros emails».** Supabase Auth envía los emails de acceso (código o enlace) y su SMTP por defecto tiene límites muy bajos y no sirve para producción. Hay que configurar un SMTP propio en Supabase Auth: Resend es el candidato natural. Sin eso, el registro no es fiable.
 2. **Acceso por email con código (OTP) y sin contraseña** como único método del MVP. Encaja con «registro al final», no exige gestionar contraseñas y evita SMS. Google OAuth es opcional y posterior.
-3. **Dos proyectos Supabase: *staging* (con seed DEMO) y *production* (sin datos DEMO).** Así los datos simulados nunca pueden mezclarse con los reales, sin filtros frágiles en RLS.
+3. **Un único proyecto Supabase (`reboard`, UE, plan gratuito).** No hay staging: las pruebas se hacen contra Supabase local en Docker. Los datos DEMO nunca entran en Supabase.
 4. **Búsqueda en Postgres puro (B-tree y consultas parametrizadas) más una función RPC para los recuentos de facetas.** No hace falta motor de búsqueda externo (Algolia, Meilisearch) con el volumen previsto (miles de anuncios).
 5. **Sin PostGIS ni coordenadas.** La ubicación es provincia/isla + municipio (§4).
 
@@ -168,27 +168,35 @@ interface ListingRepository {
   - Con datos DEMO todo sigue como ahora.
 - «Cerca de ti» sigue usando la cookie `rb_zona` (provincia o isla elegida por el usuario).
 
-## 5. Despliegue
-- **Vercel:**
-  - Un proyecto con entornos *Preview* (apunta a Supabase staging) y *Production*.
-  - Variables por entorno (§SECURITY).
-  - Vercel Cron llama a `/api/cron/expirar` con `CRON_SECRET`. Alternativa: `pg_cron` en Supabase.
-- **Migraciones:** en `supabase/migrations/*.sql`, versionadas en git y aplicadas con Supabase CLI. **Nunca cambios a mano en producción.**
-- **CI (GitHub Actions):** `tsc`, `eslint`, tests unitarios, build y tests e2e contra staging.
+## 5. Entornos y despliegue (mínimo coste)
+| Entorno | App | Datos |
+|---|---|---|
+| Desarrollo | `npm run dev` | `REBOARD_DATA_SOURCE=mock` (DEMO en memoria) o Supabase **local** en Docker |
+| Tests y CI | `npm test`, `npm run db:test` y e2e | Mock y Supabase **local** (GitHub Actions tiene Docker). **Nunca el proyecto remoto** |
+| Producción | Vercel (plan Hobby) en reboard.es | El proyecto Supabase `reboard` |
 
-## 6. Datos de demostración: plan de migración (sin borrar nada)
-1. Se mantiene `src/mocks` y `REBOARD_DATA_SOURCE=mock` para el desarrollo local y los tests.
-2. `supabase/seed/demo.sql`, generado desde `buildDemoInventory(100)` con un script, carga el catálogo, las tiendas y los anuncios DEMO **solo en staging** (`is_demo = true`).
-3. **Producción:**
-   - Arranca con el catálogo revisado (las medidas de fabricante se verifican antes; hoy son datos demo) y sin anuncios ni tiendas DEMO.
-   - El banner DEMO y el `noindex` global dependen de `repo.isDemo`. En producción, `REBOARD_DATA_SOURCE=supabase` y `isDemo=false`.
-4. El modo mock solo se elimina cuando los tests de paridad estén cubiertos por fixtures propios.
+- **Migraciones:**
+  - Viven en `supabase/migrations/*.sql`, versionadas en git, y se prueban en local con `npm run db:reset` y `npm run db:test`.
+  - Se aplican al proyecto remoto con `npx supabase db push`, **solo con autorización**.
+  - **Nunca cambios a mano en el panel de Supabase.**
+- **Riesgo de tener un solo proyecto:** no hay un entorno intermedio, así que una migración errónea afecta directamente a los datos reales. Mitigaciones:
+  - Toda migración pasa antes `db:reset` y `db:test` en local.
+  - Se revisa el SQL antes de `db push`.
+  - Se hace una copia (`npx supabase db dump`) antes de cada migración en remoto, porque el plan gratuito no incluye copias de seguridad automáticas restaurables.
+- **Despliegues de Preview en Vercel:** **no** llevan las claves de Supabase y funcionan con `REBOARD_DATA_SOURCE=mock`. Así una rama en pruebas nunca escribe en la base de datos real.
+- **Cron de caducidad:** Vercel Cron (incluido en Hobby) llama a `/api/cron/expirar` con `CRON_SECRET`.
+
+## 6. Datos de demostración (sin borrar nada)
+1. `src/mocks` y `REBOARD_DATA_SOURCE=mock` se mantienen para el desarrollo local, los tests (caracterización y contrato) y los Preview de Vercel.
+2. **Supabase nunca contiene anuncios, tiendas ni catálogo DEMO.** Solo datos de referencia reales (zonas) y, más adelante, el catálogo verificado (G2).
+3. **Paridad (C3):** los tests cargan el inventario DEMO en el Supabase **local** dentro de la ejecución del test y comparan `search` y `facets` con el mock. Nunca en el proyecto remoto.
+4. El banner DEMO y el `noindex` global dependen de `repo.isDemo`. Con `REBOARD_DATA_SOURCE=supabase`, `isDemo = false`.
 
 ## 7. Decisiones de producto (aprobadas el 22-10-2026)
 | Decisión | Aprobado | Efecto técnico |
 |---|---|---|
 | Dominio | **reboard.es** | `NEXT_PUBLIC_SITE_URL=https://reboard.es` en producción; remitente de los emails en ese dominio |
-| Región | **Supabase en la UE** | Proyectos staging y production en la UE |
+| Supabase | **Un único proyecto `reboard` en la UE, plan gratuito** | §5. Pruebas en Supabase local (Docker) |
 | Acceso | **Email con código OTP** | Supabase Auth OTP + SMTP de Resend. Sin contraseñas ni SMS |
 | Registro | **Al final de publicar** | El borrador y las fotos viven en el cliente hasta el paso 5 (MVP_IMPLEMENTATION §2) |
 | Ubicación | **Municipio y provincia, sin coordenadas** | §4 |
@@ -196,14 +204,13 @@ interface ListingRepository {
 | Reportes | **Requieren sesión** | RLS `reports_insert` solo para `authenticated` |
 | Vendidos y caducados | **Se mantienen sus URLs** | 200 + `noindex` + alternativas, como ahora. Sin 410 |
 | Teléfonos | **Sin verificar al principio** | Riesgo aceptado, con las mitigaciones de SECURITY §5 |
-| CAPTCHA | **En acciones sensibles** | Acceso, contacto, publicar y reportar. El proveedor está pendiente (se recomienda Cloudflare Turnstile, integrable en Supabase Auth) |
+| CAPTCHA | **Cloudflare Turnstile, modalidad gratuita** | Acceso (nativo en Supabase Auth), contacto, publicar y reportar. El token se valida siempre en el servidor |
 | Emails | **Resend** (transaccionales) | SMTP de Supabase Auth. Más adelante, avisos de alertas |
 | Pagos y mensajería | **Fuera del MVP** | Sin chat propio ni pasarela de pago |
 
 **Siguen pendientes:**
 - **Textos legales** (aviso legal, privacidad, cookies y condiciones): bloquean abrir el registro en producción.
-- **Proveedor de CAPTCHA.**
-- **Plan de Supabase:** se recomienda Pro en producción por las copias de seguridad.
+- **Copias de seguridad:** el plan gratuito no incluye copias restaurables. Se hace `db dump` manual antes de cada migración y periódicamente (§5).
 - **Fuente de municipios:** dataset del INE.
 
 La tabla con las tareas a las que afectan está en [ROADMAP.md](ROADMAP.md#decisiones).

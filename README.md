@@ -27,6 +27,13 @@ npm run typecheck      # TypeScript
 npm run lint
 npm run test:e2e       # Playwright (requiere npm run build): rutas, SEO y recorridos
 npm run test:visual    # capturas de referencia, solo local (-- --update-snapshots para regenerarlas)
+
+# Base de datos (Supabase local en Docker; no usa ninguna cuenta)
+npm run db:start       # levanta Supabase local y aplica supabase/migrations
+npm run db:test        # tests de seguridad pgTAP (RLS, privilegios, Storage, búsqueda)
+npm run db:reset       # reconstruye la base local desde las migraciones
+npm run db:lint
+npm run db:stop
 ```
 
 Copia `.env.example` a `.env.local` para cambiar las variables. El trabajo en curso está en la rama `mvp`.

@@ -17,7 +17,7 @@ Estado: **requisitos para la implementación**. Nada de esto está hecho todaví
 Reglas:
 - **Las claves secretas nunca llevan `NEXT_PUBLIC_`.** El cliente de service role vive en un módulo con `import "server-only"`. Una comprobación de CI falla si `SERVICE_ROLE` aparece en `.next/static`.
 - Habrá `.env.example` sin valores. Los `.env*` ya están en `.gitignore`.
-- Cada entorno (staging y producción) tiene su proyecto Supabase y sus propias claves.
+- Hay un único proyecto Supabase (`reboard`). Sus claves solo se configuran en Vercel Production y en `.env.local` de quien lo necesite. **Los Preview y el CI no las tienen** (usan el mock o Supabase local).
 
 ## 2. Autenticación (Supabase Auth)
 - **Acceso por email con código de un solo uso (OTP), sin contraseña.**
@@ -32,11 +32,14 @@ Reglas:
 - **Redirecciones tras el acceso:** solo a rutas internas (comprueba que la ruta empieza por `/` y no por `//`). Así se evitan las redirecciones abiertas.
 - **Límites:**
   - Los de Supabase Auth: envíos de OTP por hora y por email.
-  - **CAPTCHA (aprobado) en acciones sensibles:** solicitar el código de acceso, revelar el contacto, publicar y reportar. El token se verifica en el servidor (Server Action o Supabase Auth). El proveedor está pendiente; se recomienda Cloudflare Turnstile, que Supabase Auth admite de forma nativa.
+  - **CAPTCHA: Cloudflare Turnstile (gratuito)** en acciones sensibles: solicitar el código de acceso, revelar el contacto, publicar y reportar.
+    - **Acceso:** Supabase Auth valida el token de forma nativa (Authentication → Attack Protection, con la clave secreta de Turnstile).
+    - **Contacto, publicar y reportar:** la Server Action valida el token en `https://challenges.cloudflare.com/turnstile/v0/siteverify` con `TURNSTILE_SECRET_KEY` antes de hacer nada. Sin token válido, se rechaza.
+    - **En desarrollo y en los tests** se usan las claves de prueba públicas de Turnstile («siempre pasa» y «siempre falla»), sin cuenta.
 
 ## 3. Datos y RLS
 - **RLS en todas las tablas de `public`.** Una tabla sin políticas no es accesible para `anon` ni `authenticated`.
-- **Privilegios por columna:** `seller_id`, `moderation`, `is_demo`, las fechas de estado y `role` no se pueden escribir desde el cliente (ver DATABASE.md).
+- **Privilegios por columna:** `seller_id`, `moderation`, las fechas de estado, `previous_price_eur`, `role` y `seller_type` no se pueden escribir desde el cliente (ver DATABASE.md y las migraciones).
 - **Las transiciones de estado se validan en un disparador** (`listings_guard`), además de en la Server Action.
 - **Teléfonos:** viven en `listing_contacts`, sin lectura pública. Solo se obtienen con `reveal_contact`, ejecutada por el servidor con service role, que registra el evento y aplica el límite.
 - **Funciones `security definer`:** llevan `set search_path = ''` y se les revoca `execute` a `public`, `anon` y `authenticated` salvo que deban ser públicas.
@@ -101,5 +104,5 @@ Reglas:
 - [ ] Service role ausente del bundle cliente.
 - [ ] SMTP propio en Auth y plantillas revisadas.
 - [ ] Textos legales publicados.
-- [ ] Sin datos DEMO en el proyecto de producción. `isDemo = false` comprobado (sin banner DEMO y con indexación activa).
-- [ ] Copias de seguridad diarias activas (plan de Supabase) y restauración probada en staging.
+- [ ] Sin datos DEMO en Supabase (el test `01_schema_privileges` comprueba que no hay anuncios ni tiendas precargados). `isDemo = false` comprobado en producción (sin banner DEMO y con indexación activa).
+- [ ] `npx supabase db dump` antes de cada migración en remoto, y restauración probada en Supabase local.

@@ -63,22 +63,26 @@ Cada tarea es pequeña (de medio día a dos días), deja el build en verde y no 
 | A5 ✅ | `.env.example` y mover `unsplash()` de `src/mocks` a `src/lib/images.ts` | A1 | Ninguna página importa `@/mocks` salvo el repositorio mock |
 | A6 ✅ | **Interfaz de repositorio por consultas** (`search`, `facets`, `count`, `byPublicId`, `byIds`, `similar`, `recent`), implementada en `mockRepository` y usada en todas las páginas, en `/api/*` y en `proxy` | A2, A3 | Capturas y estados HTTP idénticos. El filtrado en memoria queda solo dentro del mock |
 
-### Fase B: Supabase (base de datos)
+### Fase B: Supabase (base de datos) ✅ en local, el 22-10-2026
+Un único proyecto Supabase (`reboard`, UE, plan gratuito). Todo se ha hecho y probado en **Supabase local (Docker)**: aún no se ha tocado ningún proyecto remoto.
+
 | # | Tarea | Depende de | Hecho cuando |
 |---|---|---|---|
-| B1 | Crear los proyectos Supabase *staging* y *production* (región UE). Supabase CLI y `supabase/` en el repo | — | `supabase start` funciona en local |
-| B2 | Migración `0001_init.sql`: tipos, tablas, CHECK e índices | B1 | Se aplica en local y en staging |
-| B3 | Migración `0002_rls.sql`: RLS, privilegios por columna y funciones (`is_moderator`, `listings_guard`, `photos_limit`, `handle_new_user`) | B2 | Tests de RLS (anon / usuario A / usuario B) en verde |
-| B4 | Seeds: `zones.sql`, `catalog.sql` (catálogo DEMO en staging) y `demo.sql` (generado desde `buildDemoInventory`, `is_demo = true`, solo staging) | B2 | Staging tiene los mismos 100 anuncios que el mock |
-| B5 | Bucket `listing-photos` y sus políticas de Storage | B1 | Tests: subir en la carpeta propia sí, en la ajena no |
-| B6 | RPC `listing_facets(jsonb)` y función `reveal_contact` | B3 | Tests de paridad frente a `matches()` |
+| B1 ✅ | Supabase CLI (dependencia de desarrollo), `supabase/config.toml` y scripts `db:*` | — | `npm run db:start` levanta Supabase local |
+| B2 ✅ | Migración del esquema: tipos, tablas, CHECK e índices (sin columnas `is_demo`) | B1 | Se aplica en local (`db:reset`) |
+| B3 ✅ | Migraciones de funciones, disparadores, RLS y privilegios por columna | B2 | 120 tests pgTAP en verde (`db:test`) y linter sin errores |
+| B4 ✅ | Datos de referencia: las 9 zonas. **Sin anuncios, tiendas ni catálogo ficticios** (`seed.sql` vacío) | B2 | Lo comprueba un test |
+| B5 ✅ | Bucket `listing-photos` y políticas de Storage | B1 | Tests: subir a la carpeta propia sí, a la ajena no |
+| B6 ✅ | Búsqueda en SQL: `listing_matches` (un único predicado), `search_listings`, `count_listings`, `listing_facets` y `reveal_contact` | B3 | Tests pgTAP de semántica. La paridad completa con el inventario DEMO pasa a C3 |
+| B7 | **Proyecto remoto:** crear `reboard` (UE, Free) y aplicar las migraciones con `npx supabase db push` | B1–B6, **autorización** | `db:test` en local y `db push` sin errores; las tablas existen en el proyecto |
+| B8 | CI: job `database` (Supabase local en GitHub Actions: `db:lint` y `db:test`) | B3 | Pendiente de un remoto en GitHub para ejecutarse |
 
 ### Fase C: lectura real (sin login)
 | # | Tarea | Depende de | Hecho cuando |
 |---|---|---|---|
 | C1 | `src/lib/supabase/{public,server,browser,service}.ts` + `@supabase/ssr`, `@supabase/supabase-js` y `zod` | B1, A5 | Typecheck. `service.ts` es `server-only` |
-| C2 | `supabaseRepository` (mapeo de filas a `Listing`), con `'use cache'` y `cacheTag` | A6, B4, C1 | Con `REBOARD_DATA_SOURCE=supabase` contra staging, las capturas coinciden con el mock |
-| C3 | Tests de paridad `search`/`facets` (Supabase frente al mock) | B6, C2 | Sin diferencias con el seed DEMO |
+| C2 | `supabaseRepository` (mapeo de filas a `Listing`, usando `search_listings`, `count_listings` y `listing_facets`), con `'use cache'` y `cacheTag` | A6, B6, C1 | Los tests de contrato pasan contra Supabase local cargado con el inventario DEMO (solo en local) |
+| C3 | Paridad `search`/`facets`: el test carga el inventario DEMO en Supabase **local** y compara con el mock | B6, C2 | Sin diferencias (u órdenes con empate documentados) |
 | C4 | `/anuncio`: `generateStaticParams` con los N recientes y `proxy` con una búsqueda ligera por `public_id` | C2 | 404/308 siguen correctos |
 | C5 | `next.config` con el host de Storage en `remotePatterns`, y cabeceras de seguridad (CSP…) | C1 | Sin errores de CSP en consola |
 
@@ -89,7 +93,7 @@ Cada tarea es pequeña (de medio día a dos días), deja el build en verde y no 
 | D2 | `/entrar` (email → código), `/auth/confirm` y refresco de la sesión en `proxy` (solo rutas privadas) | C1, D1 | Se puede entrar y salir. `getUser()` en el servidor |
 | D3 | Cabecera con «Entrar» o el usuario (isla en `<Suspense>`). Nombre visible en el perfil | D2 | Las páginas públicas siguen siendo PPR (sin dinamizarse enteras) |
 | D4 | Guardados en la base de datos para usuarios con sesión y fusión de `rb-usuario-v1.saved` al entrar | D2 | Un guardado aparece en otro dispositivo |
-| D5 | CAPTCHA: proveedor configurado en Supabase Auth (acceso) y verificación en el servidor para contacto, publicar y reportar | B1, proveedor elegido | Sin token válido, el servidor rechaza la acción |
+| D5 | CAPTCHA con **Cloudflare Turnstile (gratuito)**: activarlo en Supabase Auth (acceso) y verificar el token en el servidor para contacto, publicar y reportar | B7 | Sin token válido, el servidor rechaza la acción (probado con las claves de prueba de Turnstile) |
 
 ### Fase E: publicar y gestionar
 | # | Tarea | Depende de | Hecho cuando |
@@ -114,8 +118,8 @@ Cada tarea es pequeña (de medio día a dos días), deja el build en verde y no 
 |---|---|---|---|
 | G1 | Textos legales: aviso legal, privacidad, cookies y condiciones | Decisión pendiente «Textos legales» | Publicados y enlazados en el footer |
 | G2 | Catálogo verificado contra las tablas del fabricante (`source_note`) en producción | B4 | Sin datos DEMO en producción |
-| G3 | Vercel: entornos Preview → staging y Production → production (reboard.es), con variables por entorno | C1 | El despliegue de Preview funciona |
-| G4 | Lista de comprobación de SECURITY §9 y e2e completo en staging | Todas | Lista completa. Se activa `REBOARD_DATA_SOURCE=supabase` en producción |
+| G3 | Vercel (Hobby): Production → reboard.es con las claves de Supabase. Preview **sin** claves (`REBOARD_DATA_SOURCE=mock`) | C1 | Los Preview nunca escriben en la base de datos real |
+| G4 | Lista de comprobación de SECURITY §9 y e2e completo contra Supabase local | Todas | Lista completa. Se activa `REBOARD_DATA_SOURCE=supabase` en producción |
 
 ### Decisiones
 **Aprobadas (22-10-2026):**
@@ -125,7 +129,8 @@ Cada tarea es pequeña (de medio día a dos días), deja el build en verde y no 
 - Contacto sin registro, con límites y protección contra abuso. Reportar requiere sesión.
 - Se mantienen las URLs de los anuncios vendidos y caducados.
 - Teléfonos sin verificar al principio.
-- CAPTCHA en acciones sensibles.
+- CAPTCHA en acciones sensibles: Cloudflare Turnstile, modalidad gratuita.
+- Un único proyecto Supabase (`reboard`, UE, plan gratuito); los datos DEMO solo en local.
 - Resend para los emails transaccionales.
 - Sin pagos ni mensajería en el MVP.
 
@@ -134,8 +139,7 @@ Detalle y efecto técnico en [ARCHITECTURE.md §7](ARCHITECTURE.md).
 **Pendientes:**
 | Decisión | Recomendación | Bloquea |
 |---|---|---|
-| Proveedor de CAPTCHA | Cloudflare Turnstile (integración nativa en Supabase Auth) | D5 → E3, F1, F3 |
-| Plan de Supabase | Free para staging; Pro para producción (copias de seguridad) | G4 |
+| Copias de seguridad en el plan gratuito | `npx supabase db dump` antes de cada migración en remoto | B7 y siguientes migraciones |
 | Textos legales | Asesoría externa | G1 (y abrir el registro en producción) |
 | Fuente de municipios | Dataset oficial del INE | Validar `town` con una lista (opcional en el MVP) |
 
