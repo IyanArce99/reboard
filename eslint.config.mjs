@@ -12,6 +12,8 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Copias de trabajo de agentes (git worktree): tienen su propio .next.
+    ".claude/**",
     // Prototipo HTML de referencia (fuente de verdad del diseño, no es código de la app).
     "design/**",
     // Salidas de Playwright.

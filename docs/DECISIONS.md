@@ -386,3 +386,9 @@ Con la caché de páginas (minutos), la mayoría de las visitas no consultan la 
 - **Dependencias:** vitest 3 → 5.0.3 por avisos críticos (solo desarrollo). Se eligió una versión publicada hace más de dos semanas. `npm` 10.9.4 falla resolviendo pares (`edgesOut`); la instalación se hizo con `npx npm@11.6.2 install` y se alineó `@types/node` con Node 22 (CI y runtime).
 - **Capturas visuales:** se ejecutan de una en una (`--workers=1`) y con los elementos sticky fijados. En paralelo aparecían desplazamientos de subpíxel que no eran cambios de diseño.
 - **Región de Vercel:** sin fijar hasta crear el proyecto de Supabase (debe coincidir con él).
+
+## Publicar: rediseño del asistente
+- **Mismos 5 pasos y la misma lógica** (borrador en IndexedDB, procesado de fotos, validación, publicación, edición, demo/real, reintento sin duplicar). Solo cambia la interfaz: `PublishFlow` orquesta y cada paso es un componente (`StepPhotos`, `StepBoard`, `StepCondition`, `StepPrice`, `StepReview`), con `LivePreview` y `DoneScreen`.
+- **Tipo y construcción pasan al paso 2** («La tabla») y la descripción al paso 3; el teléfono pasa al paso 4, junto al método de contacto. El servidor exige lo mismo que antes; solo cambia en qué paso se pide cada dato.
+- **Vista previa propia (`LivePreview`) en lugar de `ListingCard`:** la tarjeta real incluye guardar, comparar y enlaces que no tienen sentido en un anuncio que no existe; sin fotos, muestra la silueta de la forma, nunca una foto de stock.
+- **Estado de la tabla: solo los 4 valores del enum `board_condition`** (`como-nueva`, `muy-buen-estado`, `buen-estado`, `con-reparaciones`). Lo decidió el usuario: sin migración ni valores nuevos; se explican con texto llano en cada tarjeta.

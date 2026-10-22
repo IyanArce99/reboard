@@ -165,7 +165,7 @@ Pero **parece un prototipo** por estos problemas, ordenados por impacto.
   - `prefers-reduced-motion` desactiva el zoom.
 
 ### Pendiente
-- **Publicar (`/vender/publicar`):** el flujo pide verificar el teléfono. Pasa a email en la fase E, con la publicación real.
+- ~~**Publicar (`/vender/publicar`):** el flujo pide verificar el teléfono.~~ Hecho: desde la fase E la cuenta se confirma con el email al final. El rediseño del asistente está en §8.
 - **Asistente:** faltan las siluetas en las opciones de «tabla actual». No se han hecho para no tocar la lógica del wizard.
 - **Fichas de tienda:** siguen con fotos de stock (datos DEMO). Con datos reales, cada tienda sube la suya; si no lo hace, se usa `tablas-alquiler`.
 - **Anuncios DEMO:** siguen con fotos de Unsplash en remoto. Solo afecta a los datos de demostración.
@@ -207,3 +207,73 @@ En `/buscar`, las etiquetas son las mismas (Zona, Litros, Tipo de tabla), los ch
 - **Tests e2e:** textos, rutas, `aria-current`, contador y menú móvil (Escape devuelve el foco).
 - **TablaFinder:** es el nombre de la herramienta en la navegación. La URL `/calculadora-litros`, su título y su H1 («¿Qué tabla necesito?») no cambian, para no perder SEO.
 
+## 8. Publicar: rediseño del asistente
+Ruta: `/vender/publicar`. Código: `src/components/publish/` (`PublishFlow` orquesta; un componente por paso, más `LivePreview` y `DoneScreen`). La lógica no cambia: publicación, validación, borrador en IndexedDB, acceso con código por email, procesado de fotos, edición (`?editar=`), demo/real y reintento sin duplicar (`createdId`).
+
+### Problemas encontrados
+- **Parecía un formulario administrativo:** el título «VENDE TU TABLA» se repetía en cada paso y el progreso usaba 5 barras con etiqueta (unos 80 px solo de navegación).
+- **Escritorio:** una columna de 760 px con dos o tres campos y mucho espacio vacío; no se veía el anuncio hasta el último paso.
+- **Botones desproporcionados:** «Continuar» ocupaba todo el ancho en escritorio, y «Hacer foto», en petróleo de 56 px, competía con él.
+- **Fotos:** no se distinguía la portada (solo la etiqueta «cubierta»); las flechas de ordenar medían 32 px.
+- **Pasos desequilibrados:** el paso 3 mezclaba forma, construcción y estado en chips iguales, y el paso 4 tenía precio, zona en un `<select>`, localidad, contacto y descripción. El teléfono aparecía por sorpresa en la revisión.
+- **Estado:** cuatro chips sin explicación; no quedaba claro qué diferencia hay entre «muy buen estado» y «buen estado».
+- **Revisión:** solo la tarjeta y el teléfono; para corregir algo había que retroceder paso a paso.
+- **Errores:** el botón gris solo mostraba un toast que desaparecía. Al guardar el borrador no había ninguna señal.
+
+### Decisiones
+- **Progreso compacto:** «PASO 2 DE 5 · La tabla», con 5 segmentos finos (los anteriores son pulsables y tienen un área táctil de 44 px) y «✓ Borrador guardado» cuando IndexedDB confirma la escritura.
+- **Un titular natural por paso:** Barlow Condensed en mayúsculas, 42 / 32 px, con una línea de contexto debajo.
+- **Escritorio (≥ 1024 px):** el formulario va en una tarjeta blanca y, al lado, una columna de 320 px con la **vista previa en vivo**, fija al hacer scroll. Muestra la portada, el precio, el título, los litros, el tipo, la zona y el estado. Sin fotos, enseña la silueta de la forma elegida (`BoardShape`), nunca una foto de stock. «Atrás» va a la izquierda y «Continuar» a la derecha (220 px).
+- **Móvil:** una columna sin tarjeta envolvente y la barra Atrás / Continuar fija abajo (los campos enfocados dejan 110 px de margen para que no los tape). En los pasos 2–4, la vista previa se resume en una línea plegable (miniatura, título y precio · «Ver»); en la revisión va completa arriba.
+- **Paso 1:** sin fotos, una zona de carga con «Hacer foto» y «Elegir de la galería» (y arrastrar en escritorio). Con fotos, una cuadrícula con la portada a doble tamaño, borde turquesa y la etiqueta «Portada». Las demás llevan su número, ✕ para quitarlas y flechas de 44 px; en la segunda foto, la flecha se anuncia «Usar la foto 2 como portada». Los huecos sugeridos («Fondo», «Cola y quillas», «Golpes o reparaciones») son botones para añadir foto.
+- **Paso 2:** marca → modelo → medida, como antes, pero el pegado de medidas queda dentro del bloque «Medidas». El tipo de tabla va con silueta y la construcción en chips. Se mantienen las etiquetas de origen (catálogo / automática / confirmada) y «Confirmar».
+- **Paso 3:** 4 tarjetas con un medidor de 4 niveles y una explicación; debajo, reparaciones y «Algo más que contar» (antes, la descripción del paso 4).
+- **Paso 4:** el precio es el protagonista (80 px, cifra condensada y «€»). La referencia de precios del mismo modelo se mantiene; si no hay, se lee «Sin comisiones: lo que pongas es lo que cobras». Zonas en chips agrupados por Canarias y Península; localidad con `datalist` y chips con las localidades de la zona (si cambias de zona, se borra la sugerencia anterior). Selector WhatsApp / Llamada y el teléfono, que se explica como privado.
+- **Paso 5:** vista previa, aviso de datos sin confirmar con el enlace «Revisar medidas» y un resumen por secciones, cada una con «Editar». Al editar, el botón principal pasa a «Volver a revisar» y no se pierde nada. Un bloque «Publicar tu anuncio» explica qué pasa: en real, búsquedas, privacidad del teléfono y caducidad; en demo, que no se publica nada. Si no hay sesión, aparece «Último paso: confirma tu email» con el `LoginForm` incrustado; si la hay, Turnstile y «Publicar gratis».
+- **Validación por paso:** el mensaje aparece en la barra inferior (`role="alert"`, tinte de error) en lugar de un toast. El teléfono ya se valida en el paso 4.
+- **Accesibilidad:**
+  - `aria-pressed` en chips, tarjetas de estado, tipos, zonas, localidades, unidades y contacto;
+  - etiquetas visibles en todos los campos;
+  - foco en el titular al cambiar de paso, con scroll instantáneo arriba;
+  - áreas táctiles de 44 px;
+  - texto secundario en #4A6670;
+  - amarillo solo en «Continuar», «Revisar anuncio» y «Publicar gratis».
+
+### Copy (antes → después)
+| Dónde | Antes | Después |
+|---|---|---|
+| Titular, todos los pasos | «Vende tu tabla» | Paso 1 «Enséñanos tu tabla» · 2 «Cuéntanos qué tabla es» · 3 «¿En qué estado está?» · 4 «¿Por cuánto la vendes?» · 5 «Así quedará tu anuncio» (al editar, «Revisa los cambios») |
+| Subtítulos | «Fotos de la tabla», «¿Qué tabla es?», «Tipo y estado», «Precio, ubicación y contacto», «Revisa y publica» | Una línea de contexto por paso, p. ej. «Marca, medidas y tipo: así te encuentra quien busca por litros.» |
+| Fotos, vacío | Huecos discontinuos y dos botones | «Añade hasta 8 fotos» + qué fotografiar + «o arrastra aquí las fotos desde tu ordenador» |
+| Fotos, ayuda | «La primera es la portada» dentro de un párrafo largo | Etiqueta «Portada» en la foto y «Usa las flechas para ordenarlas: la primera es la portada.» |
+| Medidas | «¿Tienes las medidas escritas? Pégalas» · «Interpretar» | «¿Las tienes escritas en la tabla? Cópialas tal cual» · «Rellenar» |
+| Medidas, toast | «Hemos interpretado las medidas…» | «Medidas rellenadas. Revísalas y confírmalas.» |
+| Medidas, sin origen | «Opcional, pero ayuda a que te encuentren» bajo cada campo | Nada bajo cada campo; si faltan los litros: «Los litros son opcionales, pero sin ellos tu tabla sale en menos búsquedas.» |
+| Volumen | «Volumen (L)» | «Litros» |
+| Estado | Chips «Como nueva», «Muy buen estado»… | Tarjetas: «Sin golpes ni reparaciones. Apenas se ha usado.» · «Marcas de uso leves, como presiones en la cubierta. Sin reparaciones importantes.» · «Marcas visibles o algún golpe ya reparado. Lista para surfear.» · «Reparaciones importantes o algún golpe que necesita arreglo.» |
+| Reparaciones | «Reparaciones o golpes (si los hay)» | «Golpes o reparaciones · si los hay» (con «Buen estado» o «Con reparaciones»: «¿Qué golpes o reparaciones tiene?») |
+| Descripción | «Descripción · opcional» | «Algo más que contar · opcional»: «En qué olas funciona, si lleva quillas o funda, por qué la vendes…» |
+| Localidad | «Solo mostramos la localidad, nunca una dirección exacta.» | «Solo mostramos la localidad, nunca tu dirección.» |
+| Teléfono | En la revisión: «Tu teléfono de contacto» | En el paso 4: «Tu teléfono». «Es privado: no aparece en el anuncio. Solo lo ve quien pulsa «Mostrar contacto», con protección contra robots.» |
+| Errores al continuar | Toast «Indica un precio y la localidad» | Mensaje fijo y concreto: «Pon un precio para continuar.» · «Indica la localidad donde está la tabla.» · «Elige el tipo de tabla.»… |
+| Datos sin confirmar | «Tienes N datos sin confirmar. Los del catálogo…» (también con medidas pegadas) | Distingue catálogo de rellenado automático + enlace «Revisar medidas» |
+| Acceso | «Confirma tu email para publicar» | «Último paso: confirma tu email» |
+| Demo | «DEMO No se guarda el número ni se publica nada.» | «DEMO Esto es una demostración: al pulsar no se publica nada, no se guarda tu número y las fotos no salen de tu dispositivo.» |
+
+### Validación
+- **Capturas:** antes y después de los 5 pasos (y de la pantalla final) a 1440 y 375 px; después, también a 768 px y en la edición (`?editar=a1040`). No se versionan. Sin scroll horizontal ni errores de consola o de hidratación.
+- **Tests e2e nuevos (modo mock):**
+  - los 5 pasos en escritorio, con la vista previa en vivo;
+  - los 5 pasos en móvil, sin desbordamiento;
+  - ordenar y quitar fotos, con la portada;
+  - editar una sección desde la revisión sin perder datos;
+  - recuperar el borrador al recargar y «Empezar de cero».
+- El test de EXIF y GPS sigue pasando.
+
+### Decisión del usuario: estados de la tabla
+- El usuario mencionó «nuevas, seminuevas, en buen estado, con marcas de uso o que necesiten reparación». **Decidió mantener solo los 4 valores existentes** del enum `board_condition`: `como-nueva`, `muy-buen-estado`, `buen-estado` y `con-reparaciones`.
+- No hay migración ni valores nuevos. Los matices («marcas de uso», «necesita arreglo») se cubren con la explicación de cada tarjeta y el campo de reparaciones.
+
+### Pendiente
+- **Modo real:** el recorrido con Supabase (acceso con código, Turnstile, subida y reintento) no se ha vuelto a probar a mano tras el rediseño. La lógica no ha cambiado, solo dónde se muestra.
+- **Arrastrar para ordenar fotos:** no está implementado (exigiría una librería o bastante código táctil propio); de momento se ordena con flechas.
