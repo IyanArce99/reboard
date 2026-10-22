@@ -203,6 +203,15 @@ async function catalogCached() {
   return (data ?? []).map((m) => rowToCatalogModel(m as Parameters<typeof rowToCatalogModel>[0]));
 }
 
+async function brandsCached() {
+  "use cache";
+  cacheLife("hours");
+  cacheTag("catalog");
+  const { data, error } = await createPublicClient().from("brands").select("slug, name").order("name");
+  fail("brands", error);
+  return (data ?? []).map((b) => ({ slug: b.slug as string, name: b.name as string }));
+}
+
 async function shopsCached() {
   "use cache";
   cacheLife("hours");
@@ -259,5 +268,6 @@ export const supabaseRepository: ListingRepository = {
 
   listingParams: (limit = 200) => listingParamsCached(limit),
   catalog: catalogCached,
+  brands: () => brandsCached(),
   shops: shopsCached,
 };

@@ -18,7 +18,7 @@ test("buscador: filtrar por forma y litros, y quitar un filtro", async ({ page }
   await page.goto("/buscar");
   await expect(count(page)).toHaveText("100 tablas coinciden");
 
-  await page.getByRole("button", { name: /^Fish · / }).click();
+  await page.getByRole("button", { name: /^Fish \d/ }).click();
   await page.waitForURL(/forma=fish/);
   await expect(count(page)).toHaveText("13 tablas coinciden");
 
@@ -37,16 +37,16 @@ test("buscador: filtrar por marca con chips y elegir modelo", async ({ page }) =
   const errors = trackErrors(page);
   await page.goto("/buscar");
   const panel = page.locator("#filtros");
-  await expect(panel.getByRole("button", { name: /^Sin marca · \d+$/ })).toBeVisible();
+  await expect(panel.getByRole("button", { name: /^Sin marca \d+$/ })).toBeVisible();
   await expect(panel.getByRole("combobox").filter({ hasText: "Cualquier modelo" })).toHaveCount(0);
 
-  await panel.getByRole("button", { name: /^Torq · / }).click();
+  await panel.getByRole("button", { name: /^Torq \d/ }).click();
   await page.waitForURL(/marca=torq/);
   await expect(count(page)).toHaveText("26 tablas coinciden");
-  await expect(panel.getByRole("button", { name: /^Torq · / })).toHaveAttribute("aria-pressed", "true");
+  await expect(panel.getByRole("button", { name: /^Torq \d/ })).toHaveAttribute("aria-pressed", "true");
   await expect(panel.getByRole("combobox").filter({ hasText: "Cualquier modelo" })).toBeVisible();
 
-  await panel.getByRole("button", { name: /^Torq · / }).click();
+  await panel.getByRole("button", { name: /^Torq \d/ }).click();
   await page.waitForURL((u) => !u.search.includes("marca="));
   await expect(count(page)).toHaveText("100 tablas coinciden");
   expect(errors).toEqual([]);

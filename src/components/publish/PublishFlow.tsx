@@ -16,7 +16,7 @@ import { TURNSTILE_SITE_KEY, type TurnstileHandle } from "@/components/security/
 import { useUserState } from "@/components/user/UserStateProvider";
 import type { CatalogModel } from "@/lib/domain/types";
 import { publishDraft } from "@/lib/publish/client-publish";
-import { emptyDraft, pendingCount, type DraftPhoto, type PublishDraft } from "@/lib/publish/draft";
+import { OTHER_BRAND, emptyDraft, pendingCount, type DraftPhoto, type PublishDraft } from "@/lib/publish/draft";
 import { clearStoredDraft, loadStoredDraft, saveStoredDraft } from "@/lib/publish/draft-store";
 import { processPhoto } from "@/lib/publish/image";
 import { ListingInput, draftToInput, firstIssueText, toE164 } from "@/lib/publish/schema";
@@ -32,6 +32,8 @@ import styles from "./Publish.module.css";
 
 interface Props {
   catalog: CatalogModel[];
+  /** Marcas conocidas (tengan o no modelos en el catálogo). */
+  brands: string[];
   /** Precios de los anuncios activos por modelo de catálogo (slug → precios). Solo datos existentes. */
   priceRefs: Record<string, number[]>;
   nowIso: string;
@@ -50,6 +52,7 @@ function stepIssue(step: number, d: PublishDraft, processing: number): string {
       if (processing > 0) return "Espera a que terminen de prepararse las fotos.";
       return d.photos.length ? "" : "Añade al menos una foto para continuar.";
     case 2:
+      if (d.brand === OTHER_BRAND && !d.brandOther.trim()) return "Escribe la marca o elige «Sin marca».";
       if (!d.len.trim()) return "Indica al menos la longitud de la tabla.";
       if (!d.shape) return "Elige el tipo de tabla.";
       return d.construction ? "" : "Elige la construcción.";
@@ -64,7 +67,7 @@ function stepIssue(step: number, d: PublishDraft, processing: number): string {
   }
 }
 
-export function PublishFlow({ catalog, priceRefs, nowIso, dataIsDemo, initial, editingId, live }: Props) {
+export function PublishFlow({ catalog, brands, priceRefs, nowIso, dataIsDemo, initial, editingId, live }: Props) {
   const { toast, account } = useUserState();
   const [d, setD] = useState<PublishDraft>(() => initial ?? emptyDraft());
   const [step, setStep] = useState(initial ? 2 : 1);
@@ -384,7 +387,7 @@ export function PublishFlow({ catalog, priceRefs, nowIso, dataIsDemo, initial, e
                 onLimit={() => toast(`Puedes añadir hasta ${MAX_PHOTOS} fotos.`)}
               />
             )}
-            {step === 2 && <StepBoard d={d} set={set} setD={setD} catalog={catalog} toast={toast} />}
+            {step === 2 && <StepBoard d={d} set={set} setD={setD} catalog={catalog} brands={brands} toast={toast} />}
             {step === 3 && <StepCondition d={d} set={set} setD={setD} />}
             {step === 4 && <StepPrice d={d} set={set} setD={setD} model={pm} refs={refs} dataIsDemo={dataIsDemo} live={live} />}
             {step === 5 && (

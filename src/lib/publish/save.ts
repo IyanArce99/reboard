@@ -35,7 +35,11 @@ export const photoPathOk = (path: string, userId: string, listingId: number) =>
 async function resolveCatalog(sb: Sb, v: ListingData) {
   if (!v.brandSlug) return { brandId: null, modelId: null, sizeId: null, brandName: null, modelName: null };
   const { data: brand } = await sb.from("brands").select("id, name").eq("slug", v.brandSlug).maybeSingle();
-  if (!brand) throw new PublishError("catalog", "La marca no está en el catálogo.");
+  // Marca que no está en la tabla: sin modelo, se guarda como texto (brand_text) en lugar de fallar.
+  if (!brand) {
+    if (v.modelSlug) throw new PublishError("catalog", "La marca no está en el catálogo.");
+    return { brandId: null, modelId: null, sizeId: null, brandName: null, modelName: null };
+  }
   if (!v.modelSlug) return { brandId: brand.id, modelId: null, sizeId: null, brandName: brand.name, modelName: null };
   const { data: model } = await sb.from("board_models").select("id, name").eq("slug", v.modelSlug).eq("brand_id", brand.id).maybeSingle();
   if (!model) throw new PublishError("catalog", "El modelo no está en el catálogo.");

@@ -152,6 +152,7 @@ export function FilterPanel({ counts, resultCount, brands, models, openAdvanced 
     .sort((a, b) => b.n - a.n || a.name.localeCompare(b.name, "es"));
   const shownBrands = allBrands ? brandChips : brandChips.filter((b, i) => i < TOP_BRANDS || b.slug === f.brand);
   const noBrandCount = counts.brands[NO_BRAND.slug] ?? 0;
+  const hasFilters = toQuery(f) !== toQuery(emptyFilters());
   const lens = LENGTH_STEPS.map((i) => ({ v: String(i), l: `${ftLabel(i)} · ${inToCm(i)} cm` }));
 
   return (
@@ -168,9 +169,11 @@ export function FilterPanel({ counts, resultCount, brands, models, openAdvanced 
       <div className={styles.panelHead}>
         <span className={styles.panelTitle}>Filtros</span>
         <div className={styles.panelHeadActions}>
-          <button type="button" className={`${styles.linkBtn} ${styles.dOnly}`} onClick={() => commit(emptyFilters(), 0)}>
-            Limpiar
-          </button>
+          {hasFilters && (
+            <button type="button" className={`${styles.linkBtn} ${styles.dOnly}`} onClick={() => commit(emptyFilters(), 0)}>
+              Limpiar
+            </button>
+          )}
           <button type="button" aria-label="Cerrar" className={`${styles.closeBtn} ${styles.mOnly}`} onClick={() => setSheetOpen(false)}>
             ✕
           </button>
@@ -304,8 +307,14 @@ export function FilterPanel({ counts, resultCount, brands, models, openAdvanced 
           <span className={ui.label}>Tipo de tabla</span>
           <div className={styles.chips}>
             {SHAPES.map((s) => (
-              <button key={s} type="button" className={ui.chip} aria-pressed={f.shapes.includes(s)} onClick={() => set({ shapes: toggle(f.shapes, s) })}>
-                {SHAPE_INFO[s].label} · {counts.shapes[s] ?? 0}
+              <button
+                key={s}
+                type="button"
+                className={`${ui.chip} ${counts.shapes[s] ? "" : styles.empty}`}
+                aria-pressed={f.shapes.includes(s)}
+                onClick={() => set({ shapes: toggle(f.shapes, s) })}
+              >
+                {SHAPE_INFO[s].label} <span className={styles.count}>{counts.shapes[s] ?? 0}</span>
               </button>
             ))}
           </div>
@@ -324,17 +333,17 @@ export function FilterPanel({ counts, resultCount, brands, models, openAdvanced 
                 aria-pressed={f.brand === b.slug}
                 onClick={() => set({ brand: f.brand === b.slug ? "" : b.slug, model: "" })}
               >
-                {b.name} · {b.n}
+                {b.name} <span className={styles.count}>{b.n}</span>
               </button>
             ))}
             {(noBrandCount > 0 || f.brand === NO_BRAND.slug) && (
               <button
                 type="button"
-                className={ui.chip}
+                className={`${ui.chip} ${noBrandCount ? "" : styles.empty}`}
                 aria-pressed={f.brand === NO_BRAND.slug}
                 onClick={() => set({ brand: f.brand === NO_BRAND.slug ? "" : NO_BRAND.slug, model: "" })}
               >
-                {NO_BRAND.label} · {noBrandCount}
+                {NO_BRAND.label} <span className={styles.count}>{noBrandCount}</span>
               </button>
             )}
           </div>

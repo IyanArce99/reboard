@@ -90,19 +90,13 @@ export function StepPrice({ d, set, model, refs, dataIsDemo, live }: Props) {
         <input
           id="pub-town"
           className={styles.text}
-          placeholder={zone?.towns[0] ?? "Tu localidad"}
-          list="pub-towns"
+          placeholder="Escribe tu pueblo o ciudad"
           autoComplete="address-level2"
           maxLength={80}
           value={d.town}
           aria-describedby="pub-town-help"
           onChange={(e) => set({ town: e.target.value })}
         />
-        <datalist id="pub-towns">
-          {zone?.towns.map((t) => (
-            <option key={t} value={t} />
-          ))}
-        </datalist>
         {zone && (
           <div className={styles.chips} role="group" aria-label={`Localidades de ${zone.name}`}>
             {zone.towns.map((t) => (
@@ -113,7 +107,7 @@ export function StepPrice({ d, set, model, refs, dataIsDemo, live }: Props) {
           </div>
         )}
         <span id="pub-town-help" className={styles.small}>
-          Solo mostramos la localidad, nunca tu dirección.
+          Escríbela o elige una de las habituales. Solo mostramos la localidad, nunca tu dirección.
         </span>
       </div>
 

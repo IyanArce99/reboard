@@ -24,7 +24,7 @@ async function Flow({ searchParams }: { searchParams: PageProps<"/vender/publica
   const live = authEnabled();
   const repo = getRepository();
   // Referencia de precio: solo anuncios existentes del mismo modelo de catálogo.
-  const [catalog, priceRefs, now] = await Promise.all([repo.catalog(), repo.modelPrices(), repo.now()]);
+  const [catalog, brandList, priceRefs, now] = await Promise.all([repo.catalog(), repo.brands(), repo.modelPrices(), repo.now()]);
 
   let initial: PublishDraft | null = null;
   let editingId: string | null = null;
@@ -57,6 +57,7 @@ async function Flow({ searchParams }: { searchParams: PageProps<"/vender/publica
   return (
     <PublishFlow
       catalog={catalog}
+      brands={brandList.map((b) => b.name)}
       priceRefs={priceRefs}
       nowIso={now.toISOString()}
       dataIsDemo={repo.isDemo}

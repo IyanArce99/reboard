@@ -9,6 +9,7 @@ import { BoardShape } from "@/components/brand/BoardShape";
 import { CONSTRUCTIONS, CONSTRUCTION_INFO, SHAPES, SHAPE_INFO } from "@/lib/domain/taxonomy";
 import {
   NO_BRAND_OPTION,
+  OTHER_BRAND,
   OTHER_MODEL,
   SHAPER_LOCAL,
   applyCatalogSize,
@@ -28,14 +29,30 @@ const SRC_LABEL: Record<FieldSource, { text: string; tone: string; needs: boolea
 };
 
 interface Props extends StepProps, CatalogProps {
+  /** Marcas conocidas (tengan o no modelos en el catálogo). */
+  brands: string[];
   toast: (text: string) => void;
 }
 
-export function StepBoard({ d, set, setD, catalog, toast }: Props) {
+/** Marcas visibles antes de «Ver todas»: primero las que tienen modelos en el catálogo. */
+const TOP_BRANDS = 12;
+
+export function StepBoard({ d, set, setD, catalog, brands: known, toast }: Props) {
   const [paste, setPaste] = useState("");
   // Error fijo bajo el campo (no un toast que desaparece): DESIGN_AUDIT §8.
   const [pasteError, setPasteError] = useState("");
-  const brands = useMemo(() => [...new Set(catalog.map((m) => m.brand))], [catalog]);
+  const [allBrands, setAllBrands] = useState(false);
+  const brands = useMemo(() => {
+    const withModels = [...new Set(catalog.map((m) => m.brand))];
+    const rest = known.filter((b) => !withModels.includes(b)).sort((a, b) => a.localeCompare(b, "es"));
+    return [...withModels, ...rest];
+  }, [catalog, known]);
+  // Al editar un anuncio con una marca escrita a mano que no está en la lista, se muestra igual.
+  const special = [SHAPER_LOCAL, NO_BRAND_OPTION, OTHER_BRAND];
+  const shownBrands = [
+    ...(allBrands ? brands : brands.filter((b, i) => i < TOP_BRANDS || b === d.brand)),
+    ...(d.brand && !brands.includes(d.brand) && !special.includes(d.brand) ? [d.brand] : []),
+  ];
   const models = catalog.filter((m) => m.brand === d.brand);
   const pm = catalog.find((m) => m.brand === d.brand && m.model === d.model);
 
@@ -68,14 +85,33 @@ export function StepBoard({ d, set, setD, catalog, toast }: Props) {
 
   return (
     <div className={styles.stepBody}>
-      <Group id="pub-brand" title="Marca" hint="¿Sin marca o no la sabes? Elige «Shaper local» o «Sin marca».">
+      <Group id="pub-brand" title="Marca" hint="¿No está en la lista? Elige «Otra marca» y escríbela. Sin marca: «Shaper local» o «Sin marca».">
         <div className={styles.chips}>
-          {[...brands, SHAPER_LOCAL, NO_BRAND_OPTION].map((b) => (
+          {[...shownBrands, SHAPER_LOCAL, NO_BRAND_OPTION, OTHER_BRAND].map((b) => (
             <Chip key={b} on={d.brand === b} onClick={() => set({ brand: b, model: "", size: "" })}>
               {b}
             </Chip>
           ))}
         </div>
+        {brands.length > TOP_BRANDS && (
+          <button type="button" className={styles.moreBrands} aria-expanded={allBrands} onClick={() => setAllBrands((a) => !a)}>
+            {allBrands ? "Ver menos marcas" : `Ver todas las marcas (${brands.length})`}
+          </button>
+        )}
+        {d.brand === OTHER_BRAND && (
+          <div className={styles.labelField}>
+            <label htmlFor="pub-brand-other">¿Qué marca es?</label>
+            <input
+              id="pub-brand-other"
+              className={styles.text}
+              maxLength={60}
+              autoComplete="off"
+              placeholder="Escribe la marca"
+              value={d.brandOther}
+              onChange={(e) => set({ brandOther: e.target.value })}
+            />
+          </div>
+        )}
       </Group>
 
       {models.length > 0 && (

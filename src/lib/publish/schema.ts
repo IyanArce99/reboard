@@ -6,7 +6,7 @@ import { z } from "zod";
 import { CONDITIONS, CONSTRUCTIONS, SHAPES, ZONES, slugify, type Shape } from "@/lib/domain/taxonomy";
 import type { CatalogModel } from "@/lib/domain/types";
 import { ftLabel } from "@/lib/domain/format";
-import { NO_BRAND_OPTION, OTHER_MODEL, SHAPER_LOCAL, type FieldSource, type PublishDraft } from "./draft";
+import { OTHER_MODEL, SHAPER_LOCAL, type FieldSource, type PublishDraft, OTHER_BRAND, isListedBrand } from "./draft";
 import { fieldToInches, parseLitres, type MeasureKey } from "./parse";
 
 // En el navegador, sin compilación con `new Function`: la CSP lo bloquea y zod lo detectaba con una
@@ -119,7 +119,7 @@ const isCatalogValue = (s: FieldSource | undefined) => s === "cat";
  * pegado o confirmado el vendedor → 'seller'. Sin valor, sin origen (nunca se inventan medidas).
  */
 export function draftToInput(d: PublishDraft, catalog: CatalogModel[]): ListingInput {
-  const catalogBrand = d.brand && d.brand !== SHAPER_LOCAL && d.brand !== NO_BRAND_OPTION ? d.brand : null;
+  const catalogBrand = isListedBrand(d.brand) ? d.brand : null;
   const cm = catalogBrand && d.model && d.model !== OTHER_MODEL ? catalog.find((m) => m.brand === catalogBrand && m.model === d.model) : undefined;
   const size = cm?.sizes.find((s) => s.label === d.size);
   const inches = (k: Exclude<MeasureKey, "vol">) => fieldToInches(k, d[k], d.unit);
@@ -136,7 +136,9 @@ export function draftToInput(d: PublishDraft, catalog: CatalogModel[]): ListingI
     brandSlug: catalogBrand ? slugify(catalogBrand) : null,
     modelSlug: cm?.slug ?? null,
     catalogSize: size?.label ?? null,
-    brandText: d.brand === SHAPER_LOCAL ? SHAPER_LOCAL : null,
+    // Texto de marca: «Shaper local», la que escribe el vendedor en «Otra marca» o, como respaldo, el
+    // nombre de una marca de la lista (si el servidor no la encuentra, la guarda como texto).
+    brandText: d.brand === SHAPER_LOCAL ? SHAPER_LOCAL : d.brand === OTHER_BRAND ? d.brandOther.trim().slice(0, 60) || null : catalogBrand,
     modelText: null,
     sizeLabel: size?.label ?? (lengthIn != null ? ftLabel(Math.round(lengthIn)) : d.len.trim().slice(0, 20)),
     lengthIn: lengthIn ?? 0,

@@ -121,5 +121,8 @@ export const mockRepository: ListingRepository = {
   listingParams: async (limit) => inventory().slice(0, limit).map((l) => ({ slug: l.slug, id: l.id })),
 
   catalog: async () => DEMO_CATALOG,
+
+  brands: async () =>
+    [...new Set(DEMO_CATALOG.map((m) => m.brand))].sort((a, b) => a.localeCompare(b, "es")).map((name) => ({ slug: slugify(name), name })),
   shops: async () => DEMO_SHOPS,
 };

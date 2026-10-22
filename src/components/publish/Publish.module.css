@@ -1401,3 +1401,18 @@ button.slot:hover {
     padding-bottom: 40px;
   }
 }
+
+/* «Ver todas las marcas» (paso 2): enlace de texto con área táctil de 44 px. */
+.moreBrands {
+  align-self: flex-start;
+  border: 0;
+  background: transparent;
+  padding: 0;
+  min-height: 44px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--rb-teal-text);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}

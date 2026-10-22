@@ -60,9 +60,10 @@
 }
 .mSort {
   border: 1px solid var(--rb-line-strong);
-  background: var(--rb-white);
+  background-color: var(--rb-white);
   font-weight: 600;
-  padding: 0 8px;
+  padding: 0 30px 0 10px;
+  background-position: right 10px center;
 }
 .mAlert {
   border: 1px solid var(--rb-line-strong);
@@ -71,33 +72,31 @@
 
 .layout {
   display: grid;
-  grid-template-columns: 280px minmax(0, 1fr);
+  grid-template-columns: 300px minmax(0, 1fr);
   gap: 28px;
   margin-top: 18px;
   align-items: start;
 }
 
 /* ——— Panel de filtros ——— */
+/* Escritorio: tarjeta blanca que fluye con la página (sin scroll interno, que cortaba el panel y
+   recortaba el anillo de foco). Cada grupo va separado por una línea fina. */
 .panel {
   display: flex;
   flex-direction: column;
-  position: sticky;
-  top: 84px;
-  max-height: calc(100vh - 100px);
-  overflow: auto;
-  background: transparent;
+  background: var(--rb-white);
+  border: 1px solid var(--rb-line);
+  border-radius: 16px;
+  padding: 0 20px 8px;
   outline: none;
 }
 
 .panelHead {
-  position: sticky;
-  top: 0;
-  z-index: 2;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 0 0 10px;
-  background: var(--rb-water);
+  min-height: 60px;
+  padding: 8px 0;
   border-bottom: 1px solid var(--rb-line);
 }
 
@@ -134,9 +133,31 @@
 .panelBody {
   display: flex;
   flex-direction: column;
-  gap: 22px;
-  padding: 16px 2px 24px 0;
+  padding: 0 0 12px;
   flex: 1;
+}
+.panelBody > * {
+  padding: 18px 0;
+}
+.panelBody > * + * {
+  border-top: 1px solid var(--rb-line);
+}
+.panelBody > .advToggle {
+  padding: 8px 0;
+}
+
+/* Recuento en las opciones: discreto, y atenuado si no hay ninguna tabla. */
+.count {
+  font-size: 12px;
+  color: var(--rb-muted);
+  font-variant-numeric: tabular-nums;
+}
+[aria-pressed="true"] > .count {
+  color: inherit;
+  opacity: 0.85;
+}
+.empty {
+  opacity: 0.55;
 }
 
 .group {
@@ -153,7 +174,8 @@
 .selectMono {
   height: 46px;
   font-size: 14px;
-  padding: 0 8px;
+  padding: 0 32px 0 10px;
+  background-position: right 10px center;
   font-family: var(--rb-font-mono);
 }
 
@@ -370,9 +392,9 @@
   height: 44px;
   border: 1px solid var(--rb-line-strong);
   border-radius: 9px;
-  background: var(--rb-white);
+  background-color: var(--rb-white);
   font-size: 14px;
-  padding: 0 10px;
+  padding: 0 36px 0 12px;
 }
 
 .viewToggle {
@@ -584,15 +606,21 @@
     position: fixed;
     inset: 0;
     z-index: 60;
-    max-height: none;
+    overflow: auto;
+    border: 0;
+    border-radius: 0;
+    padding: 0;
     background: var(--rb-white);
   }
   .panel[data-open] .panelHead {
+    position: sticky;
+    top: 0;
+    z-index: 2;
     padding: 10px 16px;
     background: var(--rb-white);
   }
   .panel[data-open] .panelBody {
-    padding: 18px 16px 24px;
+    padding: 0 16px 24px;
   }
   .panel[data-open] .panelFoot {
     display: grid;

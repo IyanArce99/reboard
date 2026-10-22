@@ -360,12 +360,12 @@ button.seg::after {
   width: 100%;
   border: 1px solid var(--rb-line-strong);
   border-radius: 10px;
-  background: var(--rb-white);
+  background-color: var(--rb-white);
   color: var(--rb-petrol);
   font-family: var(--rb-font-mono);
 }
 .select {
-  padding: 0 8px;
+  padding: 0 36px 0 12px;
   font-size: 15px;
 }
 .textInput {

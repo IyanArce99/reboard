@@ -80,5 +80,7 @@ export interface ListingRepository {
   listingParams(limit?: number): Promise<{ slug: string; id: string }[]>;
 
   catalog(): Promise<CatalogModel[]>;
+  /** Marcas conocidas (tengan o no modelos en el catálogo), por nombre. */
+  brands(): Promise<{ slug: string; name: string }[]>;
   shops(): Promise<Shop[]>;
 }

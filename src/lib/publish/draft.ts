@@ -18,6 +18,10 @@ export type FieldSource = "cat" | "ai" | "ok" | "";
 export const SHAPER_LOCAL = "Shaper local";
 export const NO_BRAND_OPTION = "Sin marca";
 export const OTHER_MODEL = "Otro";
+/** Marca que no está en la lista: el vendedor la escribe (se guarda como texto). */
+export const OTHER_BRAND = "Otra marca";
+/** Opciones de marca que no son una marca de la lista. */
+export const isListedBrand = (b: string) => Boolean(b) && b !== SHAPER_LOCAL && b !== NO_BRAND_OPTION && b !== OTHER_BRAND;
 
 export type ContactMethod = "whatsapp" | "phone" | "email";
 
@@ -36,6 +40,8 @@ export interface DraftPhoto {
 export interface PublishDraft {
   photos: DraftPhoto[];
   brand: string;
+  /** Texto de «Otra marca». */
+  brandOther: string;
   model: string;
   size: string;
   unit: Unit;
@@ -59,6 +65,7 @@ export interface PublishDraft {
 export const emptyDraft = (zone = "gran-canaria"): PublishDraft => ({
   photos: [],
   brand: "",
+  brandOther: "",
   model: "",
   size: "",
   unit: "ft",
@@ -149,7 +156,7 @@ const seller = <T,>(value: T | null): Measured<T> => (value == null ? { value: n
  * isDemo = true y origen 'seller': nunca se guarda ni aparece en búsquedas.
  */
 export function previewListing(d: PublishDraft, catalog: CatalogModel[], now: Date): Listing {
-  const brand = d.brand && d.brand !== SHAPER_LOCAL && d.brand !== NO_BRAND_OPTION ? d.brand : null;
+  const brand = d.brand === OTHER_BRAND ? d.brandOther.trim() || null : isListedBrand(d.brand) ? d.brand : null;
   const model = brand && d.model && d.model !== OTHER_MODEL ? d.model : null;
   const cm = brand && model ? catalog.find((m) => m.brand === brand && m.model === model) : undefined;
   const lenIn = fieldToInches("len", d.len, d.unit);

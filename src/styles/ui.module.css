@@ -149,14 +149,14 @@
   border-radius: 10px;
   padding: 0 12px;
   font-size: 16px;
-  background: var(--rb-white);
+  background-color: var(--rb-white);
 }
 .select {
-  padding: 0 10px;
+  padding: 0 36px 0 12px;
 }
 .input:disabled,
 .select:disabled {
-  background: var(--rb-line-soft);
+  background-color: var(--rb-line-soft);
   color: var(--rb-faint);
 }
 .input::placeholder {
