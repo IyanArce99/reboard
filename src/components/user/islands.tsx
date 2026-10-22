@@ -74,13 +74,3 @@ export function AlertButton({
     </button>
   );
 }
-
-export function SavedCount({ prefix = "" }: { prefix?: string }) {
-  const { saved } = useUserState();
-  return (
-    <>
-      {prefix}
-      {saved.length}
-    </>
-  );
-}

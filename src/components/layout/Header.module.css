@@ -1,3 +1,5 @@
+/* Cabecera ligera: explorar, encontrar mi tabla y publicar. */
+
 .header {
   position: sticky;
   top: 0;
@@ -13,85 +15,67 @@
   height: var(--rb-header-h);
   display: flex;
   align-items: center;
-  gap: 20px;
+  gap: 28px;
 }
 
 .logoLink {
   display: flex;
   align-items: center;
+  flex: none;
+  border-radius: 8px;
 }
 
-.logoM,
-.navM {
+.logoM {
   display: none;
 }
 
-.navD {
+/* ——— Navegación principal (≥ 1024 px) ——— */
+.nav {
   display: flex;
   align-items: center;
   gap: 4px;
   flex: 1;
+  min-width: 0;
 }
 
 .navLink {
-  border-radius: 8px;
-  padding: 10px 12px;
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  height: 40px;
+  padding: 0 12px;
+  border-radius: 10px;
   font-size: 15px;
   font-weight: 600;
   color: var(--rb-petrol);
   white-space: nowrap;
-  transition: background 0.15s ease;
+  transition: background 0.15s ease, color 0.15s ease;
 }
-.navLink:hover,
+.navLink:hover {
+  background: var(--rb-hover);
+}
+/* Activo: subrayado turquesa bajo el texto, sin bloque de color. */
 .navLink[data-active] {
-  background: var(--rb-hover);
+  color: var(--rb-teal-text);
+}
+.navLink[data-active]::after {
+  content: "";
+  position: absolute;
+  left: 12px;
+  right: 12px;
+  bottom: 2px;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--rb-teal);
 }
 
-.spacer {
-  flex: 1;
-}
-
-.compact {
-  display: none;
+/* ——— Acciones ——— */
+.actions {
+  display: flex;
   align-items: center;
-  gap: 8px;
-  height: 40px;
-  min-width: 220px;
-  max-width: 320px;
-  background: var(--rb-hover);
-  border-radius: 10px;
-  padding: 0 12px;
-  font-size: 14px;
-  color: var(--rb-muted);
-  white-space: nowrap;
-  overflow: hidden;
-}
-.compact span {
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-@media (min-width: 1180px) {
-  .compact {
-    display: flex;
-  }
-}
-
-.sell {
-  background: var(--rb-sand);
-  border-radius: 10px;
-  padding: 10px 16px;
-  font-size: 15px;
-  font-weight: 700;
-  color: var(--rb-petrol);
-  white-space: nowrap;
-  transition: background 0.15s ease;
-}
-.sell:hover {
-  background: var(--rb-sand-hover);
-}
-.sell:active {
-  background: var(--rb-sand-active);
+  gap: 4px;
+  margin-left: auto;
+  flex: none;
 }
 
 .iconBtn {
@@ -99,45 +83,197 @@
   width: 44px;
   height: 44px;
   border: 0;
+  border-radius: 999px;
   background: transparent;
   display: flex;
   align-items: center;
   justify-content: center;
   color: var(--rb-petrol);
+  transition: background 0.15s ease;
+}
+.iconBtn:hover,
+.iconBtn[aria-expanded="true"] {
+  background: var(--rb-hover);
+}
+.iconBtn[data-active] {
+  color: var(--rb-teal);
+}
+
+/* Tooltip: al pasar el ratón o con foco de teclado (el nombre accesible ya va en aria-label). */
+.iconBtn[data-tip]::after {
+  content: attr(data-tip);
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 50%;
+  transform: translate(-50%, -2px);
+  padding: 5px 8px;
+  border-radius: 6px;
+  background: var(--rb-petrol);
+  color: var(--rb-white);
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.12s ease, transform 0.12s ease;
+  z-index: 2;
+}
+.iconBtn[data-tip]:hover::after,
+.iconBtn[data-tip]:focus-visible::after {
+  opacity: 1;
+  transform: translate(-50%, 0);
+}
+@media (hover: none) {
+  .iconBtn[data-tip]:hover::after {
+    opacity: 0;
+  }
 }
 
 .badge {
   position: absolute;
-  top: 6px;
-  right: 4px;
-  min-width: 18px;
-  height: 18px;
-  padding: 0 4px;
+  top: 3px;
+  right: 1px;
+  min-width: 14px;
+  height: 16px;
+  padding: 0 3px;
   border-radius: 999px;
-  background: var(--rb-sand);
-  color: var(--rb-petrol);
-  font-size: 11px;
-  font-weight: 700;
+  border: 2px solid var(--rb-white);
+  background: var(--rb-teal);
+  color: var(--rb-white);
+  font-family: var(--rb-font-ui);
+  font-size: 10px;
+  font-weight: 800;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: content-box;
+}
+
+.avatar {
+  width: 30px;
+  height: 30px;
+  border-radius: 999px;
+  background: var(--rb-petrol);
+  color: var(--rb-teal-light);
+  font-family: var(--rb-font-display);
+  font-size: 16px;
+  font-weight: 800;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
+.publish {
+  margin-left: 8px;
+  height: 42px;
+  padding: 0 18px;
+  border-radius: 10px;
+  background: var(--rb-sand);
+  color: var(--rb-petrol);
+  font-size: 15px;
+  font-weight: 800;
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  transition: background 0.15s ease;
+}
+.publish:hover {
+  background: var(--rb-sand-hover);
+}
+.publish:active {
+  background: var(--rb-sand-active);
+}
+.publish:focus-visible {
+  outline-color: var(--rb-petrol);
+}
+
+/* ——— Menú de cuenta (con sesión) ——— */
+.accountWrap {
+  position: relative;
+}
+
+.accountMenu {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  z-index: 40;
+  width: 240px;
+  padding: 6px;
+  border-radius: 14px;
+  background: var(--rb-white);
+  box-shadow: 0 18px 40px -18px rgba(16, 45, 59, 0.5), 0 0 0 1px rgba(16, 45, 59, 0.08);
+  display: flex;
+  flex-direction: column;
+}
+
+.accountHead {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 10px 12px 12px;
+  margin-bottom: 4px;
+  border-bottom: 1px solid var(--rb-line-soft);
+  font-size: 15px;
+}
+.accountHead span {
+  font-size: 13px;
+  color: var(--rb-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.accountItem {
+  display: flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 12px;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--rb-petrol);
+  text-align: left;
+}
+.accountItem:hover {
+  background: var(--rb-hover);
+}
+
+.menuBtn {
+  display: none;
+}
+
+/* ——— Tablet y móvil ——— */
 @media (max-width: 1023px) {
-  .navD,
+  .nav {
+    display: none;
+  }
+  .menuBtn {
+    display: flex;
+  }
+  .inner {
+    gap: 12px;
+  }
+}
+
+@media (max-width: 759px) {
   .logoD {
     display: none;
   }
   .logoM {
     display: inline-flex;
   }
-  .navM {
-    display: flex;
-    margin-left: auto;
+  .actions {
+    gap: 0;
+  }
+  /* En móvil, «Publicar tabla» vive en el menú: así no se satura la barra. */
+  .publish {
+    display: none;
   }
 }
 
-/* Menú lateral */
+/* ——— Menú lateral ——— */
 .menuOverlay {
   position: fixed;
   inset: 0;
@@ -156,6 +292,7 @@
   background: var(--rb-white);
   display: flex;
   flex-direction: column;
+  overflow-y: auto;
   box-shadow: -12px 0 40px -20px rgba(16, 45, 59, 0.5);
 }
 
@@ -172,6 +309,7 @@
   height: 64px;
   padding: 0 16px;
   border-bottom: 1px solid var(--rb-line);
+  flex: none;
 }
 
 .menuClose {
@@ -189,29 +327,65 @@
   display: flex;
   flex-direction: column;
 }
+.menuList + .menuList {
+  border-top: 1px solid var(--rb-line);
+}
+
+.menuMain {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-height: 56px;
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 1.15;
+  color: var(--rb-petrol);
+}
+.menuMain span {
+  margin-top: 2px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--rb-muted);
+}
+.menuMain[data-active] {
+  color: var(--rb-teal-text);
+}
 
 .menuItem {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  height: 56px;
-  border-bottom: 1px solid var(--rb-line-soft);
-  font-size: 17px;
+  min-height: 48px;
+  font-size: 16px;
   font-weight: 600;
   color: var(--rb-petrol);
 }
-.menuItem span {
-  font-size: 13px;
-  color: var(--rb-faint);
-  font-weight: 500;
+.menuItem:hover,
+.menuMain:hover {
+  color: var(--rb-teal-text);
+}
+
+.menuCount {
+  min-width: 22px;
+  height: 22px;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: var(--rb-teal-tint);
+  color: var(--rb-teal-ink);
+  font-size: 12px;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .menuFoot {
   margin-top: auto;
   padding: 16px;
+  flex: none;
 }
 
-.menuSell {
+.menuPublish {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -222,4 +396,7 @@
   color: var(--rb-petrol);
   font-size: 16px;
   font-weight: 800;
+}
+.menuPublish:hover {
+  background: var(--rb-sand-hover);
 }

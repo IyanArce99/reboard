@@ -1,13 +1,13 @@
 import Link from "next/link";
 import { Suspense } from "react";
 import { Logo } from "@/components/Logo";
-import { SearchIcon } from "@/components/icons";
-import type { CatalogNames } from "@/lib/search/describe";
-import { AccountLink, BuyLink, CompactSearch, MobileMenu, MobileSavedLink } from "./HeaderClient";
-import { SavedCount } from "@/components/user/islands";
+import { AccountButton, MainNav, MobileMenu, SavedButton } from "./HeaderClient";
 import styles from "./Header.module.css";
 
-export function Header({ names }: { names: CatalogNames }) {
+// Cabecera: explorar, encontrar mi tabla y publicar. Sin buscador (el completo está en /buscar).
+// Escritorio: logo · Explorar tablas · TablaFinder · Guías | guardadas · cuenta · Publicar tabla.
+// Tablet: logo | guardadas · cuenta · Publicar tabla · menú. Móvil: logo | guardadas · cuenta · menú.
+export function Header() {
   return (
     <header className={styles.header}>
       <div className={styles.inner}>
@@ -20,34 +20,16 @@ export function Header({ names }: { names: CatalogNames }) {
           </span>
         </Link>
 
-        <nav className={styles.navD} aria-label="Principal">
-          <Suspense fallback={<Link href="/buscar" className={styles.navLink}>Comprar tablas</Link>}>
-            <BuyLink className={styles.navLink} />
-          </Suspense>
-          <Link href="/calculadora-litros" className={styles.navLink}>
-            ¿Qué tabla necesito?
-          </Link>
-          <Link href="/guias" className={styles.navLink}>
-            Guías
-          </Link>
-          <span className={styles.spacer} />
-          <Suspense fallback={null}>
-            <CompactSearch names={names} className={styles.compact} />
-          </Suspense>
-          <Link href="/guardado" className={styles.navLink}>
-            <SavedCount prefix="Guardado · " />
-          </Link>
-          <AccountLink className={styles.navLink} />
-          <Link href="/vender/publicar" className={styles.sell}>
-            Vender gratis
-          </Link>
-        </nav>
+        <Suspense fallback={<nav className={styles.nav} aria-label="Principal" />}>
+          <MainNav className={styles.nav} linkClassName={styles.navLink} />
+        </Suspense>
 
-        <div className={styles.navM}>
-          <Link href="/buscar" aria-label="Buscar" className={styles.iconBtn}>
-            <SearchIcon />
+        <div className={styles.actions}>
+          <SavedButton />
+          <AccountButton />
+          <Link href="/vender/publicar" className={styles.publish}>
+            Publicar tabla
           </Link>
-          <MobileSavedLink className={styles.iconBtn} badgeClassName={styles.badge} />
           <MobileMenu />
         </div>
       </div>

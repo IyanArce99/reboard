@@ -8,7 +8,6 @@ import { Header } from "@/components/layout/Header";
 import { UserStateProvider } from "@/components/user/UserStateProvider";
 import { authEnabled } from "@/lib/auth/config";
 import { getRepository } from "@/lib/data";
-import { getCatalogNames } from "@/lib/data/names";
 import { SITE_NAME, SITE_URL } from "@/lib/site";
 import "./globals.css";
 
@@ -55,13 +54,12 @@ export const viewport: Viewport = {
 
 export default async function RootLayout({ children }: LayoutProps<"/">) {
   const repo = getRepository();
-  const names = await getCatalogNames(repo);
   return (
     <html lang="es" className={`${barlow.variable} ${barlowCondensed.variable} ${plexMono.variable}`}>
       <body>
         <UserStateProvider authEnabled={authEnabled()}>
           {repo.isDemo && <DemoBanner />}
-          <Header names={names} />
+          <Header />
           {children}
           <Footer />
           <Suspense fallback={null}>

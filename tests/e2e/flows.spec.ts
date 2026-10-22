@@ -161,3 +161,59 @@ test("publicar: la foto se recodifica a WebP ≤ 1600 px y sin EXIF ni GPS", asy
   expect(out.gps).toBe(false);
   expect(errors).toEqual([]);
 });
+
+test("cabecera (escritorio): explorar, TablaFinder, guías, iconos y publicar", async ({ page }) => {
+  const errors = trackErrors(page);
+  await page.goto("/buscar");
+  const header = page.locator("header");
+  const nav = header.getByRole("navigation", { name: "Principal" });
+  await expect(nav.getByRole("link", { name: "Explorar tablas" })).toHaveAttribute("aria-current", "page");
+  await expect(nav.getByRole("link", { name: "TablaFinder" })).toHaveAttribute("href", "/calculadora-litros");
+  await expect(nav.getByRole("link", { name: "Guías" })).toHaveAttribute("href", "/guias");
+  // Sin buscador en la cabecera; sin contador si no hay guardadas.
+  await expect(header.getByRole("searchbox")).toHaveCount(0);
+  await expect(header.getByText(/Buscar tablas por litros/)).toHaveCount(0);
+  await expect(header.getByRole("link", { name: "Guardadas", exact: true })).toHaveAttribute("href", "/guardado");
+  await expect(header.getByRole("link", { name: "Entrar" })).toHaveAttribute("href", "/entrar");
+  await header.getByRole("link", { name: "Publicar tabla" }).click();
+  await expect(page).toHaveURL(/\/vender\/publicar$/);
+  await page.goto("/calculadora-litros");
+  await expect(page.locator("header").getByRole("link", { name: "TablaFinder" })).toHaveAttribute("aria-current", "page");
+  expect(errors).toEqual([]);
+});
+
+test("cabecera: el corazón muestra el contador solo con guardadas", async ({ page }) => {
+  await page.addInitScript(
+    ([k, v]) => localStorage.setItem(k, v),
+    [STATE_KEY, JSON.stringify({ saved: ["a1040", "a1096"], compare: [], alerts: [], profile: null })] as const,
+  );
+  await page.goto("/guias");
+  await expect(page.locator("header").getByRole("link", { name: "Guardadas (2)" })).toBeVisible();
+});
+
+for (const width of [375, 768, 1024, 1440]) {
+  test(`cabecera sin desbordamiento a ${width} px`, async ({ browser }) => {
+    const ctx = await browser.newContext({ viewport: { width, height: 800 }, isMobile: width < 760, hasTouch: width < 760 });
+    const page = await ctx.newPage();
+    await page.goto("/");
+    expect(await page.evaluate(() => document.documentElement.scrollWidth - innerWidth)).toBe(0);
+    const header = page.locator("header");
+    const box = await header.boundingBox();
+    expect(box!.height).toBeLessThanOrEqual(66);
+    // «Publicar tabla» está en la barra desde tablet; en móvil, dentro del menú.
+    await expect(header.getByRole("link", { name: "Publicar tabla" })).toBeVisible({ visible: width >= 760 });
+    if (width < 1024) {
+      await header.getByRole("button", { name: "Menú" }).click();
+      const menu = page.getByRole("dialog", { name: "Menú" });
+      await expect(menu.getByRole("link", { name: "Explorar tablas" })).toBeVisible();
+      await expect(menu.getByRole("link", { name: /TablaFinder/ })).toHaveAttribute("href", "/calculadora-litros");
+      await expect(menu.getByRole("link", { name: "Publicar tabla" })).toBeVisible();
+      await page.keyboard.press("Escape");
+      await expect(menu).toHaveCount(0);
+      await expect(header.getByRole("button", { name: "Menú" })).toBeFocused();
+    } else {
+      await expect(header.getByRole("button", { name: "Menú" })).toBeHidden();
+    }
+    await ctx.close();
+  });
+}
