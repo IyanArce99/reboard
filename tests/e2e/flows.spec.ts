@@ -39,15 +39,39 @@ test("buscador: estado vacío con sugerencias", async ({ page }) => {
   await expect(page.getByRole("link", { name: /Quitar todos los filtros \(100\)/ })).toBeVisible();
 });
 
-test("home: la hoja de búsqueda actualiza el recuento", async ({ page }) => {
+test("home (escritorio): cada segmento abre su panel y el botón actualiza el recuento", async ({ page }) => {
+  const errors = trackErrors(page);
   await page.goto("/");
   await expect(page.getByRole("link", { name: "Buscar 27 tablas" })).toBeVisible();
   await page.getByRole("button", { name: /Litros/ }).click();
-  await page.getByRole("dialog").getByRole("button", { name: "45–60 L" }).click();
-  await expect(page.getByRole("dialog").getByRole("link", { name: "Buscar 8 tablas" })).toHaveAttribute(
+  const panel = page.getByRole("dialog", { name: "Litros" });
+  await panel.getByRole("button", { name: /45–60 L/ }).click();
+  await expect(page.getByRole("link", { name: "Buscar 8 tablas" })).toHaveAttribute(
     "href",
     "/buscar?zona=gran-canaria&litros-min=45&litros-max=60",
   );
+  // Otro segmento cambia de panel; Escape lo cierra.
+  await page.getByRole("button", { name: /Tipo de tabla/ }).click();
+  await page.getByRole("dialog", { name: "Tipo de tabla" }).getByRole("button", { name: /^Evolutiva/ }).click();
+  await expect(page.getByRole("link", { name: /^Buscar \d+ tablas?$/ })).toHaveAttribute("href", /forma=evolutiva/);
+  await page.keyboard.press("Escape");
+  await expect(page.getByRole("dialog")).toHaveCount(0);
+  expect(errors).toEqual([]);
+});
+
+test("home (móvil): la hoja abre en la sección tocada y no roba el foco al escribir", async ({ browser }) => {
+  const ctx = await browser.newContext({ viewport: { width: 375, height: 812 }, isMobile: true, hasTouch: true });
+  const page = await ctx.newPage();
+  await page.goto("/");
+  await page.getByRole("button", { name: /Litros/ }).click();
+  const sheet = page.getByRole("dialog", { name: "Buscar tablas" });
+  await expect(sheet.getByRole("heading", { name: "¿Cuántos litros?" })).toBeInViewport();
+  const min = sheet.getByLabel("Mínimo");
+  await min.click();
+  await page.keyboard.type("40");
+  await expect(min).toHaveValue("40");
+  await expect(min).toBeFocused();
+  await ctx.close();
 });
 
 test("calculadora de litros: recorrido completo y perfil guardado", async ({ page }) => {

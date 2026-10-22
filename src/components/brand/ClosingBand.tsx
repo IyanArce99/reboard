@@ -12,7 +12,7 @@ export function ClosingBand() {
         <h2 id="closing-title" className={styles.title}>
           Tu próxima tabla ya existe.
           <br />
-          <span>La que tienes parada, también es la de alguien.</span>
+          <span>Y la que tienes parada, alguien la está buscando.</span>
         </h2>
         <div className={styles.actions}>
           <Link href="/buscar" className={styles.primary}>

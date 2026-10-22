@@ -37,7 +37,6 @@ export function Footer() {
       <div className={styles.inner}>
         <div className={styles.brand}>
           <Logo size={30} tone="dark" />
-          <p className={styles.tagline}>Tu próxima tabla ya existe.</p>
           <p className={styles.muted}>
             Tablas de surf de segunda mano en España. Sin pagos ni comisiones: compradores y vendedores hablan directamente.
           </p>

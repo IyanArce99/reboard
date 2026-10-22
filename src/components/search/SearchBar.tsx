@@ -1,14 +1,17 @@
 "use client";
 
-// Buscador del hero: Ubicación | Litros | Tipo | Filtros + «Buscar N tablas».
-// Cada segmento abre la SearchSheet (hoja inferior en móvil, modal de 540 px en escritorio).
+// Buscador del hero: Zona | Litros | Tipo | Más filtros + «Buscar N tablas».
+// - Escritorio (≥ 760 px): cada segmento abre SU panel justo debajo de la barra; el botón amarillo
+//   de la barra sigue a la vista y actualiza el recuento en directo.
+// - Móvil: los segmentos abren la hoja inferior con las tres secciones.
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
+import { BoardShape } from "@/components/brand/BoardShape";
 import { SlidersIcon } from "@/components/icons";
-import { SHAPES, SHAPE_INFO, ZONES, zoneBySlug, type Shape } from "@/lib/domain/taxonomy";
+import { REGIONS, SHAPES, SHAPE_INFO, ZONES, zoneBySlug, type Shape } from "@/lib/domain/taxonomy";
 import { num } from "@/lib/domain/format";
 import { HERE_COOKIE } from "@/lib/here";
 import { searchHref, toQuery, withFilters, type Filters } from "@/lib/search/filters";
@@ -26,15 +29,38 @@ export const VOLUME_CHIPS: [number, number | null][] = [
   [45, 60],
   [60, null],
 ];
+/** Para quién suele ser cada rango, con unos 75 kg (los mismos ejemplos que la calculadora). */
+const VOLUME_HINT: Record<number, string> = {
+  25: "Nivel avanzado",
+  35: "Para maniobrar",
+  45: "Ya coges olas",
+  60: "Para aprender",
+};
+const SHAPE_HINT: Record<Shape, string> = {
+  shortboard: "Olas con fuerza",
+  fish: "Olas pequeñas, rápida",
+  hibrida: "Para progresar",
+  evolutiva: "Salir de la espuma",
+  midlength: "Remada fácil",
+  longboard: "Olas pequeñas, estilo",
+  gun: "Olas grandes",
+};
+const CANARIAS = REGIONS.find((r) => r.slug === "canarias")?.zones ?? [];
+
+type Panel = "zona" | "litros" | "tipo";
+const PANEL_WIDTH: Record<Panel, number> = { zona: 560, litros: 520, tipo: 700 };
 
 interface Props {
   here: string;
   /** Hay km por anuncio (solo DEMO): muestra los chips de distancia. */
   supportsDistance?: boolean;
   initialCount: number;
+  /** Tablas publicadas por zona y en total, para orientar al elegir dónde buscar. */
+  zoneCounts?: Record<string, number>;
+  totalCount?: number;
 }
 
-export function SearchBar({ here, initialCount, supportsDistance = true }: Props) {
+export function SearchBar({ here, initialCount, supportsDistance = true, zoneCounts = {}, totalCount }: Props) {
   const router = useRouter();
   const [zone, setZone] = useState(here);
   const [dist, setDist] = useState<number | null>(null);
@@ -42,12 +68,16 @@ export function SearchBar({ here, initialCount, supportsDistance = true }: Props
   const [volMax, setVolMax] = useState("");
   const [shapes, setShapes] = useState<Shape[]>([]);
   const [count, setCount] = useState(initialCount);
-  const [open, setOpen] = useState(false);
-  const [zoneTouched, setZoneTouched] = useState(false);
+  const [panel, setPanel] = useState<Panel | null>(null);
+  const [left, setLeft] = useState(0);
+  /** Hoja de móvil abierta, con la sección que se ha tocado. */
+  const [sheet, setSheet] = useState<Panel | null>(null);
+  const wrapRef = useRef<HTMLDivElement>(null);
+  const segRefs = useRef<Record<Panel, HTMLButtonElement | null>>({ zona: null, litros: null, tipo: null });
 
   const filters: Filters = withFilters({
     zone,
-    dist,
+    dist: zone ? dist : null,
     volMin: volMin ? Number(volMin.replace(",", ".")) : null,
     volMax: volMax ? Number(volMax.replace(",", ".")) : null,
     shapes,
@@ -73,152 +103,305 @@ export function SearchBar({ here, initialCount, supportsDistance = true }: Props
     };
   }, [query]);
 
-  const zn = zoneBySlug(zone)?.name ?? zone;
+  // Panel de escritorio: se cierra con Escape (devolviendo el foco) o al pulsar fuera.
+  useEffect(() => {
+    if (!panel) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== "Escape") return;
+      segRefs.current[panel]?.focus();
+      setPanel(null);
+    };
+    const onDown = (e: PointerEvent) => {
+      if (!wrapRef.current?.contains(e.target as Node)) setPanel(null);
+    };
+    document.addEventListener("keydown", onKey);
+    document.addEventListener("pointerdown", onDown);
+    return () => {
+      document.removeEventListener("keydown", onKey);
+      document.removeEventListener("pointerdown", onDown);
+    };
+  }, [panel]);
+
+  const zn = zone ? (zoneBySlug(zone)?.name ?? zone) : "Toda España";
   const hasVol = Boolean(volMin || volMax);
-  const where = `${zoneTouched ? zn : `Cerca de ti · ${zn}`}${dist ? ` · ${dist} km` : ""}`;
-  const whereM = `${zn}${dist ? ` · ${dist} km` : ""}`;
+  const where = `${zn}${zone && dist ? ` · < ${dist} km` : ""}`;
   const vol = hasVol ? `${volMin || "0"}–${volMax || "∞"} L` : null;
   const type = shapes.length ? shapes.map((s) => SHAPE_INFO[s].label).join(", ") : null;
-  const goText = `Buscar ${num(count)} tablas`;
+  const goText = count === 0 ? "Ver alternativas" : `Buscar ${num(count)} ${count === 1 ? "tabla" : "tablas"}`;
   const href = searchHref(filters);
+
+  const open = (p: Panel) => {
+    if (window.matchMedia("(max-width: 759px)").matches) {
+      setSheet(p);
+      return;
+    }
+    const bar = wrapRef.current?.getBoundingClientRect();
+    const seg = segRefs.current[p]?.getBoundingClientRect();
+    if (bar && seg) setLeft(Math.max(0, Math.min(seg.left - bar.left, bar.width - PANEL_WIDTH[p])));
+    setPanel((cur) => (cur === p ? null : p));
+  };
 
   const pickZone = (z: string) => {
     setZone(z);
-    setZoneTouched(true);
-    try {
-      document.cookie = `${HERE_COOKIE}=${z}; path=/; max-age=31536000; samesite=lax`;
-    } catch {}
-    router.refresh();
+    if (!z) setDist(null);
+    if (z) {
+      try {
+        document.cookie = `${HERE_COOKIE}=${z}; path=/; max-age=31536000; samesite=lax`;
+      } catch {}
+      // La sección «Cerca de ti» de la home usa esta zona.
+      router.refresh();
+    }
   };
   const toggleShape = (s: Shape) => setShapes((a) => (a.includes(s) ? a.filter((x) => x !== s) : [...a, s]));
-  const clear = () => {
+  const pickVolume = (a: number, b: number | null) => {
+    const on = volMin === String(a) && volMax === (b == null ? "" : String(b));
+    setVolMin(on ? "" : String(a));
+    setVolMax(on || b == null ? "" : String(b));
+  };
+  const clearAll = () => {
     setDist(null);
     setVolMin("");
     setVolMax("");
     setShapes([]);
   };
+  const clearPanel = (p: Panel) => {
+    if (p === "zona") {
+      pickZone(here);
+      setDist(null);
+    } else if (p === "litros") {
+      setVolMin("");
+      setVolMax("");
+    } else setShapes([]);
+  };
+
+  const sections: Record<Panel, React.ReactNode> = {
+    zona: (
+      <ZoneOptions
+        zone={zone}
+        dist={dist}
+        counts={zoneCounts}
+        total={totalCount}
+        supportsDistance={supportsDistance}
+        onZone={pickZone}
+        onDist={setDist}
+      />
+    ),
+    litros: <VolumeOptions volMin={volMin} volMax={volMax} onPick={pickVolume} onMin={setVolMin} onMax={setVolMax} />,
+    tipo: <ShapeOptions shapes={shapes} onToggle={toggleShape} />,
+  };
+
+  const seg = (p: Panel, label: string, value: string | null, placeholder: string, extra = "") => (
+    <button
+      ref={(el) => {
+        segRefs.current[p] = el;
+      }}
+      type="button"
+      data-seg={p}
+      className={`${styles.seg} ${extra}`}
+      aria-expanded={panel === p}
+      aria-controls={panel === p ? "hero-panel" : undefined}
+      data-active={panel === p || undefined}
+      onClick={() => open(p)}
+    >
+      <span className={styles.segLabel}>{label}</span>
+      <span className={styles.segValue} data-set={value ? true : undefined}>
+        {value && <span className={styles.segDot} />}
+        <span>{value ?? placeholder}</span>
+      </span>
+    </button>
+  );
 
   return (
-    <>
-      <div className={styles.bar}>
-        <button type="button" className={styles.seg} onClick={() => setOpen(true)}>
-          <span className={styles.segLabel}>Ubicación</span>
-          <span className={styles.segValue} data-set>
-            <span className={styles.segDot} />
-            <span className={styles.d}>{where}</span>
-            <span className={styles.m}>{whereM}</span>
-          </span>
-        </button>
+    <div ref={wrapRef} className={styles.wrap}>
+      <div className={styles.bar} data-open={panel ? true : undefined}>
+        {seg("zona", "Zona", where, "")}
         <span className={styles.sep} />
-        <button type="button" className={styles.seg} onClick={() => setOpen(true)}>
-          <span className={styles.segLabel}>Litros</span>
-          <span className={styles.segValue} data-set={vol ? true : undefined}>
-            {vol && <span className={styles.segDot} />}
-            {vol ?? (
-              <>
-                <span className={styles.d}>Cualquier volumen</span>
-                <span className={styles.m}>Cualquiera</span>
-              </>
-            )}
-          </span>
-        </button>
+        {seg("litros", "Litros", vol, "¿Cuántos litros?")}
         <span className={`${styles.sep} ${styles.dOnly}`} />
-        <button type="button" className={`${styles.seg} ${styles.dOnly}`} onClick={() => setOpen(true)}>
-          <span className={styles.segLabel}>Tipo de tabla</span>
-          <span className={styles.segValue} data-set={type ? true : undefined}>
-            {type && <span className={styles.segDot} />}
-            {type ?? "Cualquier tipo"}
-          </span>
-        </button>
+        {seg("tipo", "Tipo de tabla", type, "Cualquier forma", styles.dOnly)}
         <Link href={`${href}${href.includes("?") ? "&" : "?"}avanzados=1`} className={`${styles.filters} ${styles.dOnly}`}>
           <SlidersIcon />
-          Filtros
+          Más filtros
         </Link>
         <Link href={href} className={styles.go}>
           {goText}
         </Link>
       </div>
 
-      {open && (
-        <SearchSheet onClose={() => setOpen(false)} goText={goText} href={href} onClear={clear}>
-          <div className={styles.group}>
-            <span className={styles.groupLabel}>Dónde</span>
-            <select className={styles.zoneSelect} value={zone} onChange={(e) => pickZone(e.target.value)} aria-label="Zona">
-              {ZONES.map((z) => (
-                <option key={z.slug} value={z.slug}>
-                  {z.name}
-                </option>
-              ))}
-            </select>
-            {supportsDistance && (
-            <div className={styles.chips}>
-              {DISTANCES.map(([d, l]) => (
-                <button key={l} type="button" className={styles.sheetChip} aria-pressed={dist === d} onClick={() => setDist(d)}>
-                  {l}
-                </button>
-              ))}
-            </div>
-            )}
+      {panel && (
+        <div
+          id="hero-panel"
+          role="dialog"
+          aria-label={panel === "zona" ? "Zona" : panel === "litros" ? "Litros" : "Tipo de tabla"}
+          className={styles.panel}
+          style={{ left, width: PANEL_WIDTH[panel] }}
+        >
+          {sections[panel]}
+          <div className={styles.panelFoot}>
+            <button type="button" className={styles.textBtn} onClick={() => clearPanel(panel)}>
+              Borrar
+            </button>
+            <button type="button" className={styles.doneBtn} onClick={() => setPanel(null)}>
+              Hecho
+            </button>
           </div>
-          <div className={styles.group}>
-            <span className={styles.groupLabel}>Litros</span>
-            <div className={styles.chips}>
-              <button type="button" className={styles.modeChip} aria-pressed="true">
-                Sé los litros
-              </button>
-              <Link href="/calculadora-litros" className={styles.modeChip}>
-                No sé: ¿qué tabla necesito? →
-              </Link>
-            </div>
-            <div className={styles.chips}>
-              {VOLUME_CHIPS.map(([a, b]) => {
-                const on = volMin === String(a) && volMax === (b == null ? "" : String(b));
-                return (
-                  <button
-                    key={a}
-                    type="button"
-                    className={`${styles.sheetChip} ${styles.mono}`}
-                    aria-pressed={on}
-                    onClick={() => {
-                      setVolMin(String(a));
-                      setVolMax(b == null ? "" : String(b));
-                    }}
-                  >
-                    {a}
-                    {b ? `–${b}` : "+"} L
-                  </button>
-                );
-              })}
-            </div>
-            <div className={styles.range}>
-              <input inputMode="decimal" placeholder="mín." aria-label="Litros mínimos" value={volMin} onChange={(e) => setVolMin(e.target.value)} />
-              <span aria-hidden="true">–</span>
-              <input inputMode="decimal" placeholder="máx." aria-label="Litros máximos" value={volMax} onChange={(e) => setVolMax(e.target.value)} />
-            </div>
-          </div>
-          <div className={styles.group}>
-            <span className={styles.groupLabel}>Tipo</span>
-            <div className={styles.chips}>
-              {SHAPES.map((s) => (
-                <button key={s} type="button" className={styles.sheetChip} aria-pressed={shapes.includes(s)} onClick={() => toggleShape(s)}>
-                  {SHAPE_INFO[s].label}
-                </button>
-              ))}
-            </div>
-          </div>
+        </div>
+      )}
+
+      {sheet && (
+        <SearchSheet focus={sheet} onClose={() => setSheet(null)} goText={goText} href={href} onClear={clearAll}>
+          {sections.zona}
+          {sections.litros}
+          {sections.tipo}
         </SearchSheet>
       )}
-    </>
+    </div>
+  );
+}
+
+function ZoneOptions({
+  zone,
+  dist,
+  counts,
+  total,
+  supportsDistance,
+  onZone,
+  onDist,
+}: {
+  zone: string;
+  dist: number | null;
+  counts: Record<string, number>;
+  total?: number;
+  supportsDistance: boolean;
+  onZone: (z: string) => void;
+  onDist: (d: number | null) => void;
+}) {
+  const option = (slug: string, name: string, n?: number) => (
+    <button key={slug || "todas"} type="button" className={styles.zoneOpt} aria-pressed={zone === slug} onClick={() => onZone(slug)}>
+      <span>{name}</span>
+      {n != null && <span className={styles.zoneCount}>{n ? num(n) : "—"}</span>}
+    </button>
+  );
+  const group = (title: string, list: typeof ZONES) => (
+    <div className={styles.zoneGroup}>
+      <span className={styles.zoneGroupTitle}>{title}</span>
+      {list.map((z) => option(z.slug, z.name, counts[z.slug] ?? 0))}
+    </div>
+  );
+  return (
+    <section className={styles.group} aria-labelledby="sb-zona">
+      <h3 id="sb-zona" className={styles.groupTitle}>
+        ¿Dónde buscas?
+      </h3>
+      <p className={styles.groupHint}>Por isla o provincia. Cada anuncio indica su municipio. El número es de tablas publicadas.</p>
+      {option("", "Toda España", total)}
+      <div className={styles.zoneCols}>
+        {group(
+          "Canarias",
+          ZONES.filter((z) => CANARIAS.includes(z.slug)),
+        )}
+        {group(
+          "Península",
+          ZONES.filter((z) => !CANARIAS.includes(z.slug)),
+        )}
+      </div>
+      {supportsDistance && zone && (
+        <div className={styles.chips} role="group" aria-label="Distancia">
+          {DISTANCES.map(([d, l]) => (
+            <button key={l} type="button" className={styles.sheetChip} aria-pressed={dist === d} onClick={() => onDist(d)}>
+              {l}
+            </button>
+          ))}
+        </div>
+      )}
+    </section>
+  );
+}
+
+function VolumeOptions({
+  volMin,
+  volMax,
+  onPick,
+  onMin,
+  onMax,
+}: {
+  volMin: string;
+  volMax: string;
+  onPick: (a: number, b: number | null) => void;
+  onMin: (v: string) => void;
+  onMax: (v: string) => void;
+}) {
+  return (
+    <section className={styles.group} aria-labelledby="sb-litros">
+      <h3 id="sb-litros" className={styles.groupTitle}>
+        ¿Cuántos litros?
+      </h3>
+      <div className={styles.volGrid}>
+        {VOLUME_CHIPS.map(([a, b]) => {
+          const on = volMin === String(a) && volMax === (b == null ? "" : String(b));
+          return (
+            <button key={a} type="button" className={styles.volOpt} aria-pressed={on} onClick={() => onPick(a, b)}>
+              <span className={styles.volValue}>
+                {a}
+                {b ? `–${b}` : "+"} L
+              </span>
+              <span className={styles.volHint}>{VOLUME_HINT[a]}</span>
+            </button>
+          );
+        })}
+      </div>
+      <div className={styles.range}>
+        <label>
+          <span>Mínimo</span>
+          <input inputMode="decimal" placeholder="—" value={volMin} onChange={(e) => onMin(e.target.value.replace(/[^\d.,]/g, ""))} />
+        </label>
+        <span aria-hidden="true">–</span>
+        <label>
+          <span>Máximo</span>
+          <input inputMode="decimal" placeholder="—" value={volMax} onChange={(e) => onMax(e.target.value.replace(/[^\d.,]/g, ""))} />
+        </label>
+        <span className={styles.rangeUnit}>L</span>
+      </div>
+      <p className={styles.groupHint}>
+        Orientativo para unos 75 kg: depende de tu peso y tu nivel.{" "}
+        <Link href="/calculadora-litros" className={styles.inlineLink}>
+          Calcula los tuyos en 7 preguntas →
+        </Link>
+      </p>
+    </section>
+  );
+}
+
+function ShapeOptions({ shapes, onToggle }: { shapes: Shape[]; onToggle: (s: Shape) => void }) {
+  return (
+    <section className={styles.group} aria-labelledby="sb-tipo">
+      <h3 id="sb-tipo" className={styles.groupTitle}>
+        ¿Qué forma buscas? <span className={styles.groupNote}>Puedes elegir varias</span>
+      </h3>
+      <div className={styles.shapeGrid}>
+        {SHAPES.map((s) => (
+          <button key={s} type="button" className={styles.shapeOpt} aria-pressed={shapes.includes(s)} onClick={() => onToggle(s)}>
+            <span className={styles.shapeSil}>
+              <BoardShape shape={s} size={80} tone={shapes.includes(s) ? "soft" : "light"} />
+            </span>
+            <span className={styles.shapeName}>{SHAPE_INFO[s].label}</span>
+            <span className={styles.shapeHint}>{SHAPE_HINT[s]}</span>
+          </button>
+        ))}
+      </div>
+    </section>
   );
 }
 
 function SearchSheet({
+  focus,
   children,
   onClose,
   onClear,
   goText,
   href,
 }: {
+  focus: Panel;
   children: React.ReactNode;
   onClose: () => void;
   onClear: () => void;
@@ -226,16 +409,26 @@ function SearchSheet({
   href: string;
 }) {
   const closeRef = useRef<HTMLButtonElement>(null);
+  // onClose cambia en cada render del buscador: se guarda en una ref para que el efecto solo
+  // se ejecute al abrir (si no, cada tecla en «Mínimo» devolvía el foco al botón de cerrar).
+  const onCloseRef = useRef(onClose);
+  useEffect(() => {
+    onCloseRef.current = onClose;
+  }, [onClose]);
+  const initialFocus = useRef(focus);
+
   useEffect(() => {
     closeRef.current?.focus();
-    const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
+    // Se abre en la sección que se ha tocado (Zona, Litros o Tipo).
+    if (initialFocus.current !== "zona") document.getElementById(`sb-${initialFocus.current}`)?.scrollIntoView({ block: "start" });
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && onCloseRef.current();
     document.addEventListener("keydown", onKey);
     document.body.style.overflow = "hidden";
     return () => {
       document.removeEventListener("keydown", onKey);
       document.body.style.overflow = "";
     };
-  }, [onClose]);
+  }, []);
 
   return createPortal(
     <>

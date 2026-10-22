@@ -21,15 +21,6 @@
   gap: 10px;
 }
 
-.tagline {
-  margin-top: 6px;
-  font-family: var(--rb-font-display);
-  font-size: 24px;
-  font-weight: 800;
-  text-transform: uppercase;
-  color: var(--rb-teal-light);
-}
-
 .muted {
   color: var(--rb-on-petrol-muted);
   line-height: 1.5;

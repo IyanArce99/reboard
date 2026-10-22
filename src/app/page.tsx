@@ -31,8 +31,8 @@ const CATEGORIES: { label: string; form: LandingForm; shape: Shape; soft?: boole
 
 const STEPS = [
   { n: "01", t: "Busca por lo que importa", d: "Litros, largo, tipo, precio y zona. Cada medida dice de dónde sale: del vendedor, del fabricante o sin indicar." },
-  { n: "02", t: "Habla directamente con quien vende", d: "Un mensaje de WhatsApp o una llamada. Sin intermediarios ni comisiones: Reboard no cobra nada." },
-  { n: "03", t: "Pruébala y paga al recogerla", d: "Quedad en un sitio público, revisa cantos, fondo y quillas, y paga en mano. Nunca por adelantado." },
+  { n: "02", t: "Habla directamente con quien vende", d: "Un mensaje de WhatsApp o una llamada, sin intermediarios. Reboard no cobra comisión." },
+  { n: "03", t: "Mírala en persona y paga al recogerla", d: "Queda en un sitio público, revisa cantos, fondo y quillas, y paga en mano. Nunca por adelantado." },
 ];
 
 const GUIDES: { t: string; d: string; href: string; photo: PhotoSlug }[] = [
@@ -59,8 +59,16 @@ const GUIDES: { t: string; d: string; href: string; photo: PhotoSlug }[] = [
 async function HeroSearch() {
   const here = await getHere();
   const repo = getRepository();
-  const count = await repo.count(withFilters({ zone: here }));
-  return <SearchBar here={here} initialCount={count} supportsDistance={repo.capabilities.distance} />;
+  const [count, facets] = await Promise.all([repo.count(withFilters({ zone: here })), repo.facets(emptyFilters())]);
+  return (
+    <SearchBar
+      here={here}
+      initialCount={count}
+      supportsDistance={repo.capabilities.distance}
+      zoneCounts={facets.zones}
+      totalCount={facets.anyZone}
+    />
+  );
 }
 
 export default async function Home() {
@@ -87,7 +95,7 @@ export default async function Home() {
           <Photo slug="hero-surfistas-orilla" sizes="100vw" preload position="62% 55%" decorative />
         </div>
         <section className={`container ${styles.hero}`}>
-          <p className={styles.kicker}>Tu próxima tabla ya existe</p>
+          <p className={styles.kicker}>Compraventa entre surfistas · España</p>
           <h1 className={styles.h1}>
             Tablas de surf
             <br />
@@ -162,7 +170,7 @@ export default async function Home() {
               id="como-title"
               eyebrow="Cómo funciona"
               title="Compra como entre surfistas"
-              lead="Reboard es el sitio donde encontrar la tabla. El trato es entre tú y quien la vende."
+              lead="Reboard te ayuda a encontrar la tabla; el trato es directo entre tú y quien la vende."
             />
             <ol className={styles.steps}>
               {STEPS.map((s) => (

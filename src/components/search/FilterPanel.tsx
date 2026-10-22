@@ -144,7 +144,7 @@ export function FilterPanel({ counts, resultCount, brands, models, openAdvanced 
       <div className={styles.panelBody}>
         <div className={styles.group}>
           <label className={ui.label} htmlFor="f-zona">
-            {supportsDistance ? "Ubicación y distancia" : "Ubicación"}
+            Zona
           </label>
           <select id="f-zona" className={ui.select} value={f.zone} onChange={(e) => set({ zone: e.target.value, ...(e.target.value ? {} : { dist: null }) })}>
             <option value="">Toda España ({counts.total})</option>
@@ -178,7 +178,7 @@ export function FilterPanel({ counts, resultCount, brands, models, openAdvanced 
 
         <div className={styles.group}>
           <span className={ui.label} id="f-litros">
-            Volumen (litros)
+            Litros
           </span>
           <div className={styles.range}>
             <NumField
@@ -199,7 +199,7 @@ export function FilterPanel({ counts, resultCount, brands, models, openAdvanced 
               onValue={(v) => setTyped({ volMax: v })}
             />
           </div>
-          <div className={styles.chips} aria-labelledby="f-litros">
+          <div className={styles.volChips} aria-labelledby="f-litros">
             {VOLUME_CHIPS.map(([a, b]) => (
               <button
                 key={a}
@@ -265,7 +265,7 @@ export function FilterPanel({ counts, resultCount, brands, models, openAdvanced 
         </div>
 
         <div className={styles.group}>
-          <span className={ui.label}>Forma</span>
+          <span className={ui.label}>Tipo de tabla</span>
           <div className={styles.chips}>
             {SHAPES.map((s) => (
               <button key={s} type="button" className={ui.chip} aria-pressed={f.shapes.includes(s)} onClick={() => set({ shapes: toggle(f.shapes, s) })}>
@@ -303,6 +303,7 @@ export function FilterPanel({ counts, resultCount, brands, models, openAdvanced 
             step={10}
             aria-label="Precio máximo"
             className={styles.slider}
+            style={{ "--p": `${(((f.priceMax ?? 600) - 50) / 550) * 100}%` } as React.CSSProperties}
             value={f.priceMax ?? 600}
             onChange={(e) => setTyped({ priceMax: e.target.value === "600" ? null : Number(e.target.value) })}
           />

@@ -11,8 +11,9 @@
 /* ───────── Hero: foto a sangre con velo petróleo ───────── */
 .heroWrap {
   position: relative;
+  /* Sin overflow: hidden, para que los paneles del buscador salgan del hero; la foto se recorta sola. */
+  z-index: 5;
   isolation: isolate;
-  overflow: hidden;
   background: var(--rb-petrol);
   color: var(--rb-warm-white);
   border-radius: 0 0 32px 32px;
@@ -22,6 +23,8 @@
   position: absolute;
   inset: 0;
   z-index: -1;
+  overflow: hidden;
+  border-radius: inherit;
 }
 .heroPhoto::after {
   content: "";
@@ -72,7 +75,7 @@
 
 .searchSkeleton {
   margin-top: 28px;
-  height: 70px;
+  height: 72px;
   border-radius: 18px;
   background: var(--rb-white);
   box-shadow: var(--rb-shadow-search);
