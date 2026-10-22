@@ -170,3 +170,40 @@ Pero **parece un prototipo** por estos problemas, ordenados por impacto.
 - **Fichas de tienda:** siguen con fotos de stock (datos DEMO). Con datos reales, cada tienda sube la suya; si no lo hace, se usa `tablas-alquiler`.
 - **Anuncios DEMO:** siguen con fotos de Unsplash en remoto. Solo afecta a los datos de demostración.
 - **Fotos propias:** cuando haya fotos de la comunidad o encargadas, se sustituyen en `scripts/photos.mjs` sin tocar componentes.
+
+## 7. Segunda revisión: buscador de la home, copy y cabecera (2026-10)
+### Buscador de la home (escritorio)
+| Problema | Cambio |
+|---|---|
+| Ubicación, Litros y Tipo abrían el mismo modal centrado con todo, que tapaba el hero | Un panel por segmento bajo la barra, con el recuento en directo en el botón amarillo |
+| «Sé los litros» parecía seleccionado y no hacía nada | Eliminado. Rangos con su uso orientativo (para unos 75 kg, los mismos ejemplos que la calculadora) y enlace a calcularlos |
+| «Cerca de ti · Gran Canaria» prometía una ubicación que no conocemos | «Zona» con el nombre; zonas agrupadas (Canarias / Península) con su número de tablas y «Toda España» |
+| Tipos solo en texto | Siluetas con pista breve, selección múltiple |
+| «Buscar 0 tablas» | «Ver alternativas» (lleva al estado vacío con sugerencias) y «Buscar 1 tabla» |
+| Móvil: al escribir en Mínimo/Máximo el foco saltaba al botón de cerrar en cada tecla (efecto que se reejecutaba en cada render) | Corregido, con test e2e |
+
+En `/buscar`, las etiquetas son las mismas (Zona, Litros, Tipo de tabla), los chips de litros van en 2 × 2 y el deslizador de precio pasa de barra petróleo maciza a pista fina turquesa.
+
+### Copy
+| Antes | Después |
+|---|---|
+| Kicker del hero «Tu próxima tabla ya existe» (repetido en el cierre y en el footer) | «Compraventa entre surfistas · España». El footer ya no repite el lema |
+| «Reboard es el sitio donde encontrar la tabla. El trato es entre tú y quien la vende.» | «Reboard te ayuda a encontrar la tabla; el trato es directo entre tú y quien la vende.» |
+| «Sin intermediarios ni comisiones: Reboard no cobra nada.» | «Un mensaje de WhatsApp o una llamada, sin intermediarios. Reboard no cobra comisión.» |
+| «Pruébala y paga al recogerla» · «Quedad en un sitio público…» | «Mírala en persona y paga al recogerla» · «Queda en un sitio público…» |
+| «La que tienes parada, también es la de alguien.» | «Y la que tienes parada, alguien la está buscando.» |
+
+### Cabecera
+| Antes | Después |
+|---|---|
+| Comprar tablas · ¿Qué tabla necesito? · Guías · buscador · Guardado · N · Entrar · Vender gratis | Explorar tablas · TablaFinder · Guías · ♡ · usuario · Publicar tabla |
+| Activo con bloque de fondo | Texto turquesa + subrayado de 2 px y `aria-current` |
+| «Guardado · 0» siempre visible | Corazón; contador solo con guardadas; tooltip y nombre accesible |
+| «Entrar» en texto (solo con cuentas) | Icono de usuario; con sesión, inicial y menú (Mis anuncios, Guardadas, Mi cuenta, Salir) |
+| Móvil: buscar + corazón + menú; el menú repetía todo en una lista larga | Corazón + usuario + menú; secciones principales destacadas y «Publicar tabla» fijo al pie |
+
+- **Validado:** 375, 768, 1024 y 1440 px, sin desbordamiento y con la cabecera de 64 px; estado activo, hover, tooltip y foco de teclado.
+- **Menú de cuenta:** probado con una sesión real en Supabase local.
+- **Tests e2e:** textos, rutas, `aria-current`, contador y menú móvil (Escape devuelve el foco).
+- **TablaFinder:** es el nombre de la herramienta en la navegación. La URL `/calculadora-litros`, su título y su H1 («¿Qué tabla necesito?») no cambian, para no perder SEO.
+

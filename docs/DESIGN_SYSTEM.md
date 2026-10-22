@@ -151,3 +151,25 @@ Detalle y justificación en `docs/DESIGN_AUDIT.md`.
 - **Separación entre secciones:** 64px en escritorio y 44px en móvil. Bloque «arena» con 64px de padding.
 - **Cabeceras de color:** hero petróleo con radio inferior de 32px en home y vender; cabecera arena en guías y tiendas.
 - **Footer:** petróleo con tres columnas (Comprar · Elegir bien · Vender) y una fila inferior con los créditos.
+
+### Cabecera (2026-10)
+- **Jerarquía:** explorar, encontrar mi tabla y publicar.
+  - Escritorio: logo · «Explorar tablas» (`/buscar`) · «TablaFinder» (`/calculadora-litros`) · «Guías» | corazón · cuenta · «Publicar tabla».
+  - Sin buscador en la cabecera: el completo está en `/buscar` y en el hero de la home.
+- **Activo:** texto turquesa y subrayado de 2 px bajo el enlace, con `aria-current="page"`. Hover: fondo `--rb-hover`. Foco: el anillo global de 2 px.
+- **Iconos** (44 × 44, redondos):
+  - el corazón lleva el contador (turquesa con borde blanco) solo si hay guardadas;
+  - la cuenta es el icono de usuario (a `/entrar`) o, con sesión, la inicial y un menú breve (Mis anuncios, Guardadas, Mi cuenta, Salir).
+  - Tooltip propio al pasar el ratón o con foco de teclado; el nombre accesible va en `aria-label` («Guardadas (3)»).
+- **«Publicar tabla»:** amarillo, la única acción principal de la cabecera.
+- **Tablet (< 1024 px):** iconos + «Publicar tabla» + menú.
+- **Móvil (< 760 px):** iconos + menú. «Publicar tabla» está fijo al pie del menú. El menú separa las tres secciones principales (más grandes) de «Tu actividad».
+
+### Buscador del hero (2026-10)
+- **Escritorio:** cada segmento (Zona, Litros, Tipo de tabla) abre su propio panel bajo la barra.
+  - La barra se atenúa y el segmento activo se eleva en blanco.
+  - El botón amarillo de la barra sigue a la vista y actualiza el recuento.
+  - Se cierra con Escape o con un clic fuera.
+- **Móvil:** hoja inferior con las tres secciones, abierta en la sección tocada.
+- **Etiquetas comunes con `/buscar`:** Zona, Litros y Tipo de tabla.
+
