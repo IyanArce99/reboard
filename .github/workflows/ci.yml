@@ -63,3 +63,31 @@ jobs:
             playwright-report/
             test-results/
           retention-days: 7
+
+  database:
+    # Migraciones y tests de seguridad (RLS, privilegios, Storage, búsqueda) contra Supabase LOCAL
+    # en Docker. Nunca usa el proyecto remoto ni sus claves.
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - name: Supabase local
+        run: npm run db:start
+
+      - name: Lint de la base de datos
+        run: npm run db:lint
+
+      - name: Tests de seguridad (pgTAP)
+        run: npm run db:test
+
+      - name: Parar Supabase
+        if: always()
+        run: npm run db:stop

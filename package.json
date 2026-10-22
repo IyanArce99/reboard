@@ -11,7 +11,12 @@
     "test:watch": "vitest",
     "typecheck": "next typegen && tsc --noEmit",
     "test:e2e": "playwright test --project=e2e",
-    "test:visual": "playwright test --project=visual"
+    "test:visual": "playwright test --project=visual",
+    "db:start": "supabase start -x realtime,edge-runtime,logflare,vector,studio,imgproxy,supavisor,postgres-meta,mailpit",
+    "db:stop": "supabase stop",
+    "db:reset": "supabase db reset",
+    "db:test": "supabase test db",
+    "db:lint": "supabase db lint --level warning"
   },
   "dependencies": {
     "next": "16.4.2",
@@ -26,6 +31,7 @@
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "16.4.2",
+    "supabase": "^2.121.0",
     "typescript": "^5",
     "vitest": "^3.2.7"
   }

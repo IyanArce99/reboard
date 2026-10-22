@@ -1,0 +1,6 @@
+-- Reboard · seed local (`supabase db reset`).
+-- Intencionadamente vacío: no se cargan anuncios, tiendas ni catálogo ficticios en Supabase.
+-- Los datos de demostración viven solo en src/mocks (REBOARD_DATA_SOURCE=mock).
+-- Los datos de referencia reales (zonas) están en las migraciones.
+-- Los tests de seguridad (supabase/tests) crean sus propios datos dentro de una transacción
+-- que se deshace al terminar.
