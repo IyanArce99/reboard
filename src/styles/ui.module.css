@@ -1,0 +1,236 @@
+/* Piezas de interfaz compartidas: botones, chips, campos y etiquetas (docs/DESIGN_SYSTEM.md). */
+
+.btnPrimary,
+.btnStrong,
+.btnNeutral,
+.btnOutline {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 700;
+  padding: 0 16px;
+  height: 44px;
+  white-space: nowrap;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+/* Amarillo: SOLO la acción principal. */
+.btnPrimary {
+  border: 0;
+  background: var(--rb-sand);
+  color: var(--rb-petrol);
+  font-weight: 800;
+}
+.btnPrimary:hover {
+  background: var(--rb-sand-hover);
+}
+.btnPrimary:active {
+  background: var(--rb-sand-active);
+}
+.btnPrimary:focus-visible {
+  outline-color: var(--rb-petrol);
+}
+.btnPrimary:disabled {
+  background: var(--rb-line-strong);
+  color: var(--rb-muted);
+}
+
+.btnStrong {
+  border: 0;
+  background: var(--rb-petrol);
+  color: var(--rb-white);
+}
+.btnStrong:hover {
+  background: var(--rb-petrol-2);
+}
+
+.btnNeutral {
+  border: 1px solid var(--rb-line-strong);
+  background: var(--rb-white);
+  color: var(--rb-petrol);
+  font-weight: 600;
+}
+.btnNeutral:hover {
+  border-color: var(--rb-teal);
+}
+
+.btnOutline {
+  border: 1px solid var(--rb-petrol);
+  background: var(--rb-white);
+  color: var(--rb-petrol);
+}
+.btnOutline:hover {
+  background: var(--rb-hover);
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 38px;
+  padding: 0 12px;
+  border-radius: 999px;
+  border: 1px solid var(--rb-line-strong);
+  background: var(--rb-white);
+  color: var(--rb-petrol);
+  font-size: 14px;
+  white-space: nowrap;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+.chip:hover {
+  border-color: var(--rb-teal);
+}
+.chip[aria-pressed="true"] {
+  background: var(--rb-teal);
+  border-color: var(--rb-teal);
+  color: var(--rb-white);
+}
+
+.chipSm {
+  height: 34px;
+  font-size: 13px;
+  padding: 0 10px;
+}
+
+.chipMono {
+  font-family: var(--rb-font-mono);
+}
+
+/* Filtro aplicado: tinte turquesa con ✕. */
+.chipApplied {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 34px;
+  padding: 0 10px 0 12px;
+  border-radius: 999px;
+  border: 1px solid var(--rb-teal);
+  background: var(--rb-teal-tint);
+  color: var(--rb-teal-ink);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.label {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--rb-muted);
+}
+
+.input,
+.select {
+  height: 48px;
+  min-width: 0;
+  width: 100%;
+  border: 1px solid var(--rb-line-strong);
+  border-radius: 10px;
+  padding: 0 12px;
+  font-size: 16px;
+  background: var(--rb-white);
+}
+.select {
+  padding: 0 10px;
+}
+.input:disabled,
+.select:disabled {
+  background: var(--rb-line-soft);
+  color: var(--rb-faint);
+}
+.input::placeholder {
+  color: var(--rb-faint);
+}
+
+.mono {
+  font-family: var(--rb-font-mono);
+}
+
+.demoTag {
+  font-family: var(--rb-font-mono);
+  font-size: 11px;
+  background: var(--rb-warning-tint);
+  color: #8a5a12;
+  padding: 2px 6px;
+  border-radius: 4px;
+  letter-spacing: 0.02em;
+}
+
+.dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 999px;
+  flex: none;
+  display: inline-block;
+}
+.dotSuccess {
+  background: var(--rb-success);
+}
+.dotWarning {
+  background: var(--rb-warning);
+}
+.dotError {
+  background: var(--rb-error);
+}
+
+.proBadge {
+  background: var(--rb-petrol);
+  color: var(--rb-white);
+  font-size: 11px;
+  font-weight: 700;
+  padding: 4px 8px;
+  border-radius: 6px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.offBadge {
+  background: var(--rb-error);
+  color: var(--rb-white);
+  font-size: 11px;
+  font-weight: 700;
+  padding: 4px 8px;
+  border-radius: 6px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.fitBadge {
+  align-self: flex-start;
+  background: var(--rb-teal-tint);
+  color: var(--rb-teal-ink);
+  font-size: 12px;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 6px;
+}
+
+.h1 {
+  font-family: var(--rb-font-display);
+  font-weight: 800;
+  text-transform: uppercase;
+  line-height: 1.08;
+  font-size: 38px;
+  text-wrap: balance;
+}
+
+.h2 {
+  font-family: var(--rb-font-display);
+  font-weight: 800;
+  text-transform: uppercase;
+  line-height: 1;
+  font-size: 36px;
+}
+
+@media (max-width: 759px) {
+  .h1 {
+    font-size: 26px;
+  }
+  .h2 {
+    font-size: 26px;
+  }
+}

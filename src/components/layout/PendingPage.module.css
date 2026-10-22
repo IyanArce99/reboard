@@ -1,0 +1,33 @@
+.page {
+  padding-top: 40px;
+  padding-bottom: 64px;
+  max-width: 760px;
+}
+
+.text {
+  margin-top: 12px;
+  font-size: 17px;
+  line-height: 1.5;
+}
+
+.note {
+  margin-top: 12px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: var(--rb-white);
+  border: 1px dashed #a9c4c3;
+  font-size: 14px;
+  color: var(--rb-muted);
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 20px;
+}
+.actions a {
+  height: 50px;
+  font-size: 15px;
+  padding: 0 20px;
+}

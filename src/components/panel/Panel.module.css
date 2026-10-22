@@ -1,0 +1,258 @@
+/* Panel del vendedor. Valores de design/prototype/Reboard.dc.html (líneas 956–983). */
+
+.page {
+  max-width: 1080px;
+  padding-top: 22px;
+  padding-bottom: 64px;
+}
+
+.head {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 12px;
+}
+
+.who {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--rb-muted);
+}
+
+.h1 {
+  margin-top: 4px;
+}
+
+.newBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 46px;
+  border-radius: 10px;
+  background: var(--rb-petrol);
+  color: var(--rb-white);
+  font-size: 15px;
+  font-weight: 800;
+  padding: 0 18px;
+  white-space: nowrap;
+}
+.newBtn:hover {
+  background: var(--rb-petrol-2);
+}
+
+.need {
+  margin-top: 16px;
+  padding: 14px 16px;
+  border-radius: 12px;
+  background: var(--rb-warning-tint);
+  color: var(--rb-warning-ink);
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+  line-height: 1.45;
+}
+
+.needBtn {
+  height: 44px;
+  border: 0;
+  border-radius: 9px;
+  background: var(--rb-petrol);
+  color: var(--rb-white);
+  font-size: 14px;
+  font-weight: 700;
+  padding: 0 14px;
+}
+
+.tabs {
+  display: flex;
+  gap: 6px;
+  border-bottom: 1px solid var(--rb-line);
+  margin: 18px 0 16px;
+  overflow-x: auto;
+}
+
+.tab {
+  height: 46px;
+  border: 0;
+  border-bottom: 2.5px solid transparent;
+  background: transparent;
+  padding: 0 12px;
+  font-size: 15px;
+  font-weight: 700;
+  /* #617C82 en el prototipo; #4A6670 para contraste AA (CLAUDE.md). */
+  color: var(--rb-muted);
+  white-space: nowrap;
+}
+.tab[aria-selected="true"] {
+  border-bottom-color: var(--rb-petrol);
+  color: var(--rb-petrol);
+}
+.tab:focus-visible {
+  outline-offset: -2px;
+}
+
+.rows {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.row {
+  display: grid;
+  grid-template-columns: 96px minmax(0, 1fr) auto;
+  gap: 14px;
+  align-items: center;
+  padding: 12px;
+  border: 1px solid var(--rb-line);
+  border-radius: 14px;
+  background: var(--rb-white);
+}
+
+.thumb {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1;
+  border-radius: 10px;
+  overflow: hidden;
+  background: #dde9e8;
+}
+.thumbImg {
+  object-fit: cover;
+}
+.thumb[data-off] .thumbImg {
+  filter: grayscale(1);
+}
+
+.info {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.titleRow {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.price {
+  font-size: 19px;
+  font-weight: 800;
+}
+
+.title {
+  font-size: 15px;
+  font-weight: 600;
+}
+.title:hover {
+  color: var(--rb-teal-text);
+  text-decoration: underline;
+}
+
+.spec {
+  font-family: var(--rb-font-mono);
+  font-size: 13px;
+}
+
+.status {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--rb-muted);
+}
+
+.stats {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 14px;
+  font-size: 12px;
+  color: var(--rb-muted);
+  margin-top: 2px;
+  font-family: var(--rb-font-mono);
+}
+
+.simTag {
+  font-size: 11px;
+  background: var(--rb-warning-tint);
+  color: #8a5a12;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  justify-content: flex-end;
+}
+
+/* 40 px en el prototipo; 44 px por el mínimo de área táctil (CLAUDE.md). */
+.act {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 44px;
+  border: 1px solid var(--rb-line-strong);
+  border-radius: 9px;
+  background: var(--rb-white);
+  color: var(--rb-petrol);
+  font-size: 13px;
+  font-weight: 700;
+  padding: 0 12px;
+  white-space: nowrap;
+}
+.act:hover {
+  border-color: var(--rb-teal);
+}
+.act[data-primary] {
+  background: var(--rb-petrol);
+  border-color: var(--rb-petrol);
+  color: var(--rb-white);
+}
+.act:disabled {
+  color: var(--rb-faint);
+  background: var(--rb-line-soft);
+}
+
+.empty {
+  padding: 22px;
+  border: 1px dashed #a9c4c3;
+  border-radius: 14px;
+  font-size: 15px;
+}
+
+.foot {
+  margin-top: 18px;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--rb-muted);
+}
+
+/* Panel apilado < 1100 px (DESIGN_SYSTEM.md). */
+@media (max-width: 1099px) {
+  .row {
+    grid-template-columns: 72px minmax(0, 1fr);
+  }
+  .actions {
+    grid-column: 1 / -1;
+    justify-content: flex-start;
+  }
+}
+
+@media (max-width: 759px) {
+  .page {
+    padding-top: 14px;
+    padding-bottom: 40px;
+  }
+}

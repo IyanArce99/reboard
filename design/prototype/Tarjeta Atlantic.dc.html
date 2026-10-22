@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<sc-if value="{{ vertical }}" hint-placeholder-val="{{ true }}">
+<article style="background:#FFFFFF;border:1px solid #D6E4E3;border-radius:16px;overflow:hidden;display:flex;flex-direction:column;height:100%;font-family:'Barlow',sans-serif;color:#102D3B;transition:border-color .15s ease, box-shadow .15s ease;" style-hover="border-color:#9CC7C6;box-shadow:0 8px 24px -16px rgba(16,45,59,.35)">
+  <div onClick="{{ it.open }}" style="position:relative;aspect-ratio:4 / 5;cursor:pointer;background:#DDE9E8;">
+    <sc-if value="{{ it.hasImg }}"><div role="img" aria-label="{{ it.title }}" style="position:absolute;inset:0;background-image:url({{ it.img }});background-size:cover;background-position:center;filter:{{ it.imgFilter }};"></div></sc-if>
+    <div style="position:absolute;left:10px;top:10px;display:flex;gap:6px;flex-wrap:wrap;">
+      <sc-if value="{{ it.pro }}"><span style="background:#102D3B;color:#FFFFFF;font-size:11px;font-weight:700;padding:4px 8px;border-radius:6px;letter-spacing:.05em;text-transform:uppercase;">{{ it.seller }}</span></sc-if>
+      <sc-if value="{{ it.isOff }}"><span style="background:#A23A2C;color:#FFFFFF;font-size:11px;font-weight:700;padding:4px 8px;border-radius:6px;text-transform:uppercase;letter-spacing:.05em;">{{ it.offText }}</span></sc-if>
+    </div>
+    <button onClick="{{ it.save }}" aria-label="Guardar" style="position:absolute;right:10px;top:10px;width:40px;height:40px;border-radius:999px;border:0;background:rgba(255,255,255,.94);display:flex;align-items:center;justify-content:center;cursor:pointer;color:{{ it.heartColor }};" style-hover="background:#FFFFFF">
+      <svg width="19" height="19" viewBox="0 0 24 24" fill="{{ it.heartFill }}" stroke="currentColor" stroke-width="2"><path d="M12 20s-7-4.4-9.2-8.6A4.8 4.8 0 0 1 12 6.2a4.8 4.8 0 0 1 9.2 5.2C19 15.6 12 20 12 20z"></path></svg>
+    </button>
+    <div style="position:absolute;left:10px;bottom:10px;right:10px;display:flex;justify-content:space-between;align-items:flex-end;gap:6px;">
+      <span style="display:flex;align-items:center;gap:5px;background:rgba(255,255,255,.94);color:#102D3B;font-size:12px;font-weight:700;padding:4px 8px;border-radius:999px;"><span style="width:6px;height:6px;border-radius:999px;background:#087E8B;"></span>{{ it.kmText }}</span>
+      <span style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:#FFFFFF;background:rgba(16,45,59,.6);padding:2px 6px;border-radius:4px;">{{ it.photoCount }}</span>
+    </div>
+  </div>
+  <div style="padding:12px 14px;display:flex;flex-direction:column;gap:3px;flex:1;">
+    <div style="display:flex;align-items:baseline;gap:8px;">
+      <span style="font-size:24px;font-weight:700;letter-spacing:-.01em;line-height:1.1;">{{ it.priceText }}</span>
+      <sc-if value="{{ it.hasOld }}"><span style="font-size:13px;color:#617C82;text-decoration:line-through;">{{ it.oldPriceText }}</span></sc-if>
+    </div>
+    <div onClick="{{ it.open }}" style="font-size:16px;font-weight:600;line-height:1.25;cursor:pointer;">{{ it.title }}</div>
+    <div style="font-size:14px;line-height:1.35;"><strong style="font-weight:700;">{{ it.volShort }}</strong><span style="color:#4A6670;"> · {{ it.typeShort }} · {{ it.consShort }}</span></div>
+    <div style="font-size:13px;color:#4A6670;">{{ it.zoneShort }} · {{ it.cond }}</div>
+    <div style="display:flex;align-items:center;gap:6px;font-size:12px;color:#4A6670;margin-top:2px;"><span style="width:7px;height:7px;border-radius:999px;background:{{ it.availColor }};flex:none;"></span>{{ it.availText }}</div>
+    <sc-if value="{{ it.fit }}"><div style="align-self:flex-start;margin-top:4px;background:#DDF1F0;color:#0A4F57;font-size:12px;font-weight:700;padding:3px 8px;border-radius:6px;">Te encaja · en tu rango de litros</div></sc-if>
+    <div style="margin-top:auto;padding-top:10px;display:flex;justify-content:space-between;align-items:center;gap:8px;border-top:1px solid #E6EFEE;">
+      <button onClick="{{ it.cmp }}" style="font-family:inherit;font-size:13px;font-weight:600;padding:6px 10px;border-radius:8px;cursor:pointer;border:1px solid {{ it.cmpBd }};background:{{ it.cmpBg }};color:{{ it.cmpFg }};white-space:nowrap;" style-hover="border-color:#087E8B">{{ it.cmpText }}</button>
+      <span style="font-size:12px;color:#617C82;">{{ it.postText }}</span>
+    </div>
+  </div>
+</article>
+</sc-if>
+<sc-if value="{{ horizontal }}" hint-placeholder-val="{{ false }}">
+<article style="background:#FFFFFF;border:1px solid #D6E4E3;border-radius:14px;overflow:hidden;display:grid;grid-template-columns:116px minmax(0,1fr);font-family:'Barlow',sans-serif;color:#102D3B;" style-hover="border-color:#9CC7C6">
+  <div onClick="{{ it.open }}" style="position:relative;min-height:156px;cursor:pointer;background:#DDE9E8;">
+    <sc-if value="{{ it.hasImg }}"><div role="img" aria-label="{{ it.title }}" style="position:absolute;inset:0;background-image:url({{ it.img }});background-size:cover;background-position:center;filter:{{ it.imgFilter }};"></div></sc-if>
+    <sc-if value="{{ it.pro }}"><span style="position:absolute;left:6px;top:6px;background:#102D3B;color:#FFFFFF;font-size:10px;font-weight:700;padding:3px 6px;border-radius:5px;text-transform:uppercase;letter-spacing:.04em;">{{ it.seller }}</span></sc-if>
+    <sc-if value="{{ it.isOff }}"><span style="position:absolute;left:6px;bottom:6px;background:#A23A2C;color:#FFFFFF;font-size:10px;font-weight:700;padding:3px 6px;border-radius:5px;text-transform:uppercase;">{{ it.offText }}</span></sc-if>
+  </div>
+  <div style="padding:10px 10px 10px 12px;display:flex;flex-direction:column;gap:2px;min-width:0;">
+    <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:6px;">
+      <div style="display:flex;align-items:baseline;gap:6px;flex-wrap:wrap;"><span style="font-size:21px;font-weight:700;line-height:1.1;">{{ it.priceText }}</span><sc-if value="{{ it.hasOld }}"><span style="font-size:12px;color:#617C82;text-decoration:line-through;">{{ it.oldPriceText }}</span></sc-if></div>
+      <button onClick="{{ it.save }}" aria-label="Guardar" style="width:44px;height:44px;margin:-10px -8px 0 0;border:0;background:transparent;display:flex;align-items:center;justify-content:center;cursor:pointer;color:{{ it.heartColor }};flex:none;">
+        <svg width="19" height="19" viewBox="0 0 24 24" fill="{{ it.heartFill }}" stroke="currentColor" stroke-width="2"><path d="M12 20s-7-4.4-9.2-8.6A4.8 4.8 0 0 1 12 6.2a4.8 4.8 0 0 1 9.2 5.2C19 15.6 12 20 12 20z"></path></svg>
+      </button>
+    </div>
+    <div onClick="{{ it.open }}" style="font-size:15px;font-weight:600;line-height:1.2;cursor:pointer;">{{ it.title }}</div>
+    <div style="font-size:13.5px;"><strong style="font-weight:700;">{{ it.volShort }}</strong><span style="color:#4A6670;"> · {{ it.typeShort }} · {{ it.consShort }}</span></div>
+    <div style="font-size:12.5px;color:#4A6670;">{{ it.locText }} · {{ it.cond }}</div>
+    <div style="display:flex;align-items:center;gap:6px;font-size:12px;color:#4A6670;"><span style="width:7px;height:7px;border-radius:999px;background:{{ it.availColor }};flex:none;"></span>{{ it.availText }}</div>
+    <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-top:4px;">
+      <sc-if value="{{ it.fit }}"><span style="background:#DDF1F0;color:#0A4F57;font-size:11px;font-weight:700;padding:3px 7px;border-radius:6px;">Te encaja</span></sc-if>
+      <button onClick="{{ it.cmp }}" style="font-family:inherit;font-size:12px;font-weight:600;padding:5px 9px;border-radius:8px;cursor:pointer;border:1px solid {{ it.cmpBd }};background:{{ it.cmpBg }};color:{{ it.cmpFg }};white-space:nowrap;">{{ it.cmpText }}</button>
+    </div>
+  </div>
+</article>
+</sc-if>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:290,&quot;height&quot;:540},&quot;it&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;object&quot;},&quot;vertical&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;},&quot;horizontal&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;}}"></script>
+</body>
+</html>

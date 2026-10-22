@@ -1,16 +1,14 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
   cacheComponents: true,
   partialPrefetching: true,
-  turbopack: {
-    rules: {
-      "*.css": {
-        loaders: ["@tailwindcss/turbopack"],
-        as: "*.css",
-      },
-    },
+  images: {
+    // Fotos de stock de los datos DEMO (ver public/images/IMAGE_SOURCES.md).
+    // En producción se sustituirá por el almacenamiento de imágenes real (pendiente).
+    // Formato objeto sin `search`: las URLs de Unsplash llevan query (?auto=format&w=…).
+    remotePatterns: [{ protocol: "https", hostname: "images.unsplash.com", pathname: "/**" }],
+    qualities: [70, 75],
   },
 };
 

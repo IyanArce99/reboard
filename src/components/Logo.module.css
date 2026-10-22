@@ -1,0 +1,13 @@
+.logo {
+  display: inline-flex;
+  align-items: center;
+  vertical-align: middle;
+}
+
+.word {
+  font-family: var(--rb-font-display);
+  font-weight: 800;
+  letter-spacing: 0.035em;
+  line-height: 1;
+  white-space: nowrap;
+}

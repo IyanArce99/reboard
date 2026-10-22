@@ -1,0 +1,251 @@
+/* Tiendas y escuelas (prototipo: Reboard.dc.html, isTiendas / isTienda). */
+
+.page {
+  padding-top: 22px;
+  padding-bottom: 64px;
+}
+
+.head {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 14px;
+}
+
+.intro {
+  margin-top: 8px;
+  font-size: 15px;
+  color: var(--rb-muted);
+  max-width: 62ch;
+  line-height: 1.5;
+}
+
+.joinBtn {
+  height: 46px;
+}
+
+.filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 18px;
+}
+
+/* Chip del prototipo (38 px) con área táctil de 44 px. */
+.filter {
+  height: 44px;
+  padding: 0 14px;
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 14px;
+  margin-top: 16px;
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--rb-line);
+  border-radius: 14px;
+  background: var(--rb-white);
+  overflow: hidden;
+  transition: border-color 0.15s ease;
+}
+.card:hover {
+  border-color: var(--rb-petrol);
+}
+
+.cardImg {
+  position: relative;
+  height: 140px;
+  width: 100%;
+  background: #dde9e8;
+}
+.cardImg img {
+  object-fit: cover;
+}
+
+.typeBadge {
+  position: absolute;
+  left: 10px;
+  top: 10px;
+}
+
+.cardBody {
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.cardName {
+  font-size: 17px;
+  font-weight: 800;
+  color: var(--rb-petrol);
+}
+
+.cardMeta {
+  font-size: 13px;
+  color: var(--rb-muted);
+}
+
+.cardCount {
+  font-family: var(--rb-font-mono);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--rb-petrol);
+  margin-top: 6px;
+}
+
+/* ——— Perfil ——— */
+.profile {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 24px;
+  align-items: stretch;
+}
+
+.hero {
+  position: relative;
+  min-height: 240px;
+  border-radius: 16px;
+  overflow: hidden;
+  background: #dde9e8;
+}
+.hero img {
+  object-fit: cover;
+}
+
+.stockTag {
+  position: absolute;
+  right: 12px;
+  bottom: 12px;
+  font-family: var(--rb-font-mono);
+  font-size: 12px;
+  color: var(--rb-white);
+  background: rgba(18, 23, 26, 0.55);
+  padding: 3px 6px;
+  border-radius: 4px;
+}
+
+.panel {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  background: var(--rb-white);
+  border: 1px solid var(--rb-line);
+  border-radius: 16px;
+  padding: 22px;
+}
+
+.badgeRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+
+.badgeNote {
+  font-size: 13px;
+  color: var(--rb-muted);
+  font-weight: 700;
+}
+
+.facts {
+  display: grid;
+  gap: 8px;
+  font-size: 15px;
+  line-height: 1.45;
+}
+
+.factK {
+  color: var(--rb-muted);
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: auto;
+}
+
+.contactBtn {
+  height: 48px;
+  font-size: 15px;
+  font-weight: 800;
+  padding: 0 18px;
+}
+
+.secondaryBtn {
+  height: 48px;
+  padding: 0 14px;
+  font-weight: 700;
+}
+
+.inventory {
+  margin-top: 32px;
+}
+
+.invHead {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.h2 {
+  font-size: 32px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+.textBtn {
+  min-height: 44px;
+  border: 0;
+  background: transparent;
+  padding: 0;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--rb-petrol);
+  text-align: left;
+}
+.textBtn:hover {
+  text-decoration: underline;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+  gap: 16px;
+}
+
+.empty {
+  padding: 22px;
+  border: 1px dashed #a9c4c3;
+  border-radius: 14px;
+  font-size: 15px;
+}
+
+@media (max-width: 759px) {
+  .cards {
+    grid-template-columns: 1fr;
+  }
+  .profile {
+    grid-template-columns: 1fr;
+  }
+  .panel {
+    padding: 16px;
+  }
+  .h2 {
+    font-size: 24px;
+  }
+  .grid {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+}

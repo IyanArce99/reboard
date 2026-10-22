@@ -1,0 +1,331 @@
+/* Valores de design/prototype/Tarjeta Atlantic.dc.html */
+
+.onlyM {
+  display: none;
+}
+@media (max-width: 759px) {
+  .onlyD {
+    display: none;
+  }
+  .onlyM {
+    display: block;
+  }
+}
+
+.img {
+  object-fit: cover;
+}
+.img[data-off] {
+  filter: grayscale(1);
+}
+
+.priceRow {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.avail {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--rb-muted);
+}
+
+/* ——— Vertical ——— */
+.v {
+  position: relative;
+  background: var(--rb-white);
+  border: 1px solid var(--rb-line);
+  border-radius: 16px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  color: var(--rb-petrol);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+.v:hover {
+  border-color: #9cc7c6;
+  box-shadow: var(--rb-shadow-card-hover);
+}
+
+.vPhoto {
+  position: relative;
+  display: block;
+  aspect-ratio: 4 / 5;
+  background: #dde9e8;
+}
+
+.vBadges {
+  position: absolute;
+  left: 10px;
+  top: 10px;
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.vSave {
+  position: absolute;
+  right: 10px;
+  top: 10px;
+  width: 44px;
+  height: 44px;
+  border-radius: 999px;
+  border: 0;
+  background: rgba(255, 255, 255, 0.94);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.vSave:hover {
+  background: var(--rb-white);
+}
+
+.vBottom {
+  position: absolute;
+  left: 10px;
+  bottom: 10px;
+  right: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 6px;
+}
+
+.km {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  background: rgba(255, 255, 255, 0.94);
+  color: var(--rb-petrol);
+  font-size: 12px;
+  font-weight: 700;
+  padding: 4px 8px;
+  border-radius: 999px;
+}
+
+.kmDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: var(--rb-teal);
+}
+
+.count {
+  font-family: var(--rb-font-mono);
+  font-size: 12px;
+  color: var(--rb-white);
+  background: rgba(16, 45, 59, 0.6);
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.vBody {
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  flex: 1;
+}
+
+.vPrice {
+  font-size: 24px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  line-height: 1.1;
+}
+
+.vOld,
+.hOld {
+  font-size: 13px;
+  color: var(--rb-faint);
+}
+
+.vTitle {
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1.25;
+}
+.vTitle:hover,
+.hTitle:hover {
+  text-decoration: underline;
+}
+
+.vSpec {
+  font-size: 14px;
+  line-height: 1.35;
+}
+.vSpec strong,
+.hSpec strong {
+  font-weight: 700;
+}
+.vSpec span,
+.hSpec span {
+  color: var(--rb-muted);
+}
+
+.vMeta {
+  font-size: 13px;
+  color: var(--rb-muted);
+}
+
+.vMeta + .avail {
+  margin-top: 2px;
+}
+
+.vFit {
+  margin-top: 4px;
+}
+
+.vFoot {
+  margin-top: auto;
+  padding-top: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  border-top: 1px solid var(--rb-line-soft);
+  font-size: 12px;
+  color: var(--rb-faint);
+}
+
+.vCmp,
+.hCmp {
+  font-size: 13px;
+  font-weight: 600;
+  padding: 0 10px;
+  min-height: 32px;
+  border-radius: 8px;
+  border: 1px solid var(--rb-line-strong);
+  background: var(--rb-white);
+  color: var(--rb-petrol);
+  white-space: nowrap;
+}
+.vCmp:hover,
+.hCmp:hover {
+  border-color: var(--rb-teal);
+}
+.vCmp[data-on],
+.hCmp[data-on] {
+  background: var(--rb-teal-tint);
+  border-color: var(--rb-teal);
+  color: var(--rb-teal-ink);
+}
+
+/* ——— Horizontal ——— */
+.h {
+  background: var(--rb-white);
+  border: 1px solid var(--rb-line);
+  border-radius: 14px;
+  overflow: hidden;
+  display: grid;
+  grid-template-columns: 116px minmax(0, 1fr);
+  color: var(--rb-petrol);
+  transition: border-color 0.15s ease;
+}
+.h:hover {
+  border-color: #9cc7c6;
+}
+
+.hPhoto {
+  position: relative;
+  display: block;
+  min-height: 156px;
+  background: #dde9e8;
+}
+
+.hPro {
+  position: absolute;
+  left: 6px;
+  top: 6px;
+  font-size: 10px;
+  padding: 3px 6px;
+  border-radius: 5px;
+  letter-spacing: 0.04em;
+}
+
+.hOff {
+  position: absolute;
+  left: 6px;
+  bottom: 6px;
+  font-size: 10px;
+  padding: 3px 6px;
+  border-radius: 5px;
+}
+
+.hBody {
+  padding: 10px 10px 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.hTop {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 6px;
+}
+
+.hPrice {
+  font-size: 21px;
+  font-weight: 700;
+  line-height: 1.1;
+}
+
+.hOld {
+  font-size: 12px;
+}
+
+.hSave {
+  width: 44px;
+  height: 44px;
+  margin: -10px -8px 0 0;
+  border: 0;
+  background: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+}
+
+.hTitle {
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.hSpec {
+  font-size: 13.5px;
+}
+
+.hMeta {
+  font-size: 12.5px;
+  color: var(--rb-muted);
+}
+
+.hFoot {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-top: 4px;
+}
+
+.hFit {
+  background: var(--rb-teal-tint);
+  color: var(--rb-teal-ink);
+  font-size: 12px;
+  font-weight: 700;
+  padding: 3px 7px;
+  border-radius: 6px;
+}
+
+.hCmp {
+  font-size: 12px;
+}

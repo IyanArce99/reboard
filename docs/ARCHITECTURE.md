@@ -1,0 +1,199 @@
+# Arquitectura — Reboard MVP
+
+Estado: **propuesta** (22-10-2026). No hay nada de esto implementado todavía. Documentos relacionados: [DATABASE.md](DATABASE.md), [SECURITY.md](SECURITY.md), [MVP_IMPLEMENTATION.md](MVP_IMPLEMENTATION.md) y el plan por tareas de [ROADMAP.md](ROADMAP.md).
+
+---
+
+## 1. Auditoría del estado actual
+
+### 1.1 Stack y dependencias
+| Pieza | Estado |
+|---|---|
+| Next.js 16.4.2 (App Router), React 19.3, TypeScript 5 | `cacheComponents` y `partialPrefetching` activos |
+| Dependencias de producción | Solo `next`, `react`, `react-dom` y `server-only` |
+| Estilos | CSS Modules sobre `src/styles/tokens.css`. Sin librería de UI |
+| Tests | **Ninguno**: no hay Vitest, Jest ni Playwright en el proyecto |
+| CI / despliegue | **Nada configurado**: no hay `.github/`, `vercel.json` ni `.env.example` |
+| Git | **Todo el trabajo está sin commitear**: solo existe el commit inicial de create-next-app |
+| Server Actions | **Ninguna**: hoy toda la escritura es local al navegador |
+
+### 1.2 Rutas (28 entradas)
+- **Indexables (SSG/PPR):**
+  - `/`
+  - `/tablas/[segmento]`, `/tablas/[segmento]/[forma]` (110 landings)
+  - `/anuncio/[slugId]`
+  - `/marcas/[marca]`, `/marcas/[marca]/[modelo]`
+  - `/tiendas`, `/tiendas/[slug]`
+  - `/guias`, `/guias/[slug]`
+  - `/calculadora-litros`
+  - `/vender`
+- **noindex:** `/buscar`, `/comparar`, `/guardado`, `/alertas`, `/panel`, `/vender/publicar` y `/sistema`.
+- **Route Handlers:**
+  - `GET /api/tablas/recuento`: recuento para el «Buscar N tablas» de la home.
+  - `GET /api/tablas`: resultado del asistente.
+  - `GET /api/anuncios?ids=`: guardado y comparador.
+- **Proxy (`src/proxy.ts`):** devuelve 404 reales y redirige con 308 al slug canónico. Funciona sobre `/tablas`, `/anuncio`, `/marcas`, `/tiendas` y `/guias`.
+- **SEO:** metadatos por página con canonical y hreflang es-ES, y JSON-LD (Product/Offer, ItemList, BreadcrumbList, Article y LocalBusiness si no es demo). También `robots.ts` y `sitemap.ts`. Con datos DEMO todo va con `noindex, nofollow`.
+
+### 1.3 Capa de datos
+- **Interfaz:** `ListingRepository` (`src/lib/data/repository.ts`). Única implementación: `mockRepository`, en memoria, con `isDemo = true`.
+- **Problema principal:** la interfaz devuelve **colecciones completas** (`all()`, `active()`). Todo el filtrado, la ordenación y los recuentos se hacen en JS sobre el inventario entero:
+  - `src/lib/search/match.ts`
+  - `src/components/search/SearchResults.tsx`
+  - `src/components/home/NearSection.tsx`
+  - `src/app/page.tsx`
+  - las páginas de marca, modelo y tienda
+  - `src/app/api/tablas/route.ts`
+  - `src/proxy.ts`
+
+  Con una base de datos real esto tiene que pasar a SQL.
+- **Modelo:** `src/lib/domain/types.ts` (`Listing`, `Measured<T>`, `CatalogModel`, `Shop`) es correcto y se mantiene como contrato de la UI. La base de datos se mapea a este tipo.
+
+### 1.4 Dónde hay datos mock o almacenamiento local
+| Lugar | Qué guarda | Destino en el MVP |
+|---|---|---|
+| `src/mocks/demo-inventory.ts` | Anuncios, catálogo y tiendas DEMO, y el helper `unsplash()` | Seed de *staging* (§6). El helper `unsplash()` pasa a `src/lib/images.ts` |
+| `src/lib/data/mock-repository.ts` | Repositorio DEMO | Se mantiene con `REBOARD_DATA_SOURCE=mock` (desarrollo sin red, tests) |
+| Páginas que importan `@/mocks`: `page.tsx`, `guias/*`, `marcas/[marca]/[modelo]`, `tiendas/*` | Fotos de stock por id | Imágenes estáticas propias o de Storage |
+| `localStorage rb-usuario-v1` | Guardados, comparación, alertas y perfil de surfista | Guardados → tabla `favorites` si hay sesión (se fusionan al iniciar sesión). La comparación y el perfil siguen locales. Las alertas siguen locales hasta que haya emails |
+| `localStorage rb-panel-v1` | Cambios del panel DEMO | Se elimina: el panel lee y escribe en la base de datos |
+| `localStorage rb-asistente-v1` | Respuestas del asistente | Se mantiene (es útil y no es sensible) |
+| Cookie `rb_zona` | Zona «cerca de ti» | Se mantiene hasta que haya geolocalización |
+| `src/lib/publish/service.ts` | Stub `demoPublishService` | Implementación real con Server Actions y Storage |
+| `src/app/panel/page.tsx` (`pickOwn`) | Anuncios «propios» elegidos del inventario | Anuncios de `auth.uid()` |
+| `src/lib/content/brands.ts`, `guides.ts` | Textos editoriales (los de marca, DEMO) | Siguen siendo contenido en el código. Los textos de marca se revisan antes de producción |
+
+### 1.5 Lo que se reutiliza sin rediseñar
+Toda la UI se mantiene. Lo que cambia es de dónde vienen los datos y adónde van las escrituras.
+- **Sin cambios:**
+  - `ListingCard`, `Gallery`, `Breadcrumbs`, `JsonLd`, `Header`, `Footer`, `CompareTray`, `SearchBar`, `FilterPanel`
+  - Asistente: `FinderWizard` y `recommend.ts`
+  - Comparador: `Comparator`
+  - Publicar: `PublishFlow` (sus 5 pasos), `parse.ts` y `draft.ts`
+  - Panel: `SellerPanel` (visual)
+  - Catálogo: `ModelSizes`
+- **Lógica pura que se reutiliza tal cual:**
+  - `filters.ts`: el estado en la URL y su serialización. **Las URLs de búsqueda no cambian.**
+  - `describe.ts`, `landings.ts`, `present.ts` y `format.ts`.
+  - `taxonomy.ts`: sus slugs coinciden con los enums de la base de datos.
+- **A adaptar:**
+  - `match.ts`: deja de usarse para buscar y se queda como referencia y para tests de paridad.
+  - `PublishFlow`: el paso 5 cambia el OTP por SMS por el inicio de sesión por email, y las fotos se suben.
+  - `SellerPanel`: pasa a usar acciones reales.
+
+---
+
+## 2. Arquitectura recomendada
+
+Se **acepta la arquitectura propuesta** (Next.js + Supabase Postgres, Auth y Storage, Vercel y Resend), con estos ajustes técnicos:
+
+1. **Resend es necesario desde el MVP, no solo «para futuros emails».** Supabase Auth envía los emails de acceso (código o enlace) y su SMTP por defecto tiene límites muy bajos y no sirve para producción. Hay que configurar un SMTP propio en Supabase Auth: Resend es el candidato natural. Sin eso, el registro no es fiable.
+2. **Acceso por email con código (OTP) y sin contraseña** como único método del MVP. Encaja con «registro al final», no exige gestionar contraseñas y evita SMS. Google OAuth es opcional y posterior.
+3. **Dos proyectos Supabase: *staging* (con seed DEMO) y *production* (sin datos DEMO).** Así los datos simulados nunca pueden mezclarse con los reales, sin filtros frágiles en RLS.
+4. **Búsqueda en Postgres puro (B-tree y consultas parametrizadas) más una función RPC para los recuentos de facetas.** No hace falta motor de búsqueda externo (Algolia, Meilisearch) con el volumen previsto (miles de anuncios).
+5. **Sin PostGIS en el MVP.** La ubicación sigue siendo zona + localidad, y el filtro de distancia solo funciona con coordenadas (§4).
+
+```
+Navegador ──► Vercel (Next.js 16)
+               ├─ Server Components (lectura): cliente Supabase ANÓNIMO sin cookies
+               │    dentro de 'use cache' + cacheTag → prerender / ISR
+               ├─ Server Actions (escritura): cliente Supabase de USUARIO (cookies, RLS)
+               │    → updateTag() para refrescar
+               ├─ Route Handlers: recuentos, contacto, cron (CRON_SECRET)
+               └─ proxy.ts: 404/308 + refresco de la sesión de Supabase
+                     │
+                     ▼
+          Supabase: Postgres (RLS) · Auth (email OTP, SMTP de Resend) · Storage (fotos)
+```
+
+### 2.1 Clientes de Supabase (`@supabase/ssr` + `@supabase/supabase-js`)
+| Cliente | Dónde | Clave | Para qué |
+|---|---|---|---|
+| `createPublicClient()` | Servidor, **sin cookies** | anon (pública) | Lecturas públicas cacheadas: anuncios publicados, catálogo y tiendas. Se puede usar dentro de `'use cache'` porque no lee la petición |
+| `createUserClient()` | Servidor (Server Actions, páginas privadas) | anon + cookies de sesión | Todo lo que hace el usuario, con RLS como `authenticated` |
+| `createBrowserClient()` | Cliente | anon | Solo Auth (enviar y verificar el código) y la subida a Storage con la sesión del usuario |
+| `createServiceClient()` | Servidor, `server-only` | **service role** | Solo cron de caducidad, revelar contacto, moderación y seeds. Nunca en código que llegue al cliente |
+
+### 2.2 Cache Components y datos reales
+- **Lecturas públicas:** funciones de la capa de datos con `'use cache'`, `cacheLife('minutes')` y etiquetas: `listings`, `listing:{id}`, `catalog` y `zone:{slug}`.
+  - Las landings y las fichas siguen prerenderizándose.
+  - `generateStaticParams` de `/anuncio` devuelve solo los N anuncios más recientes (con Cache Components tiene que devolver al menos uno). El resto se genera bajo demanda y queda en caché.
+- **Escrituras:** Server Actions que, tras guardar, llaman a `updateTag('listing:{id}')` y `updateTag('listings')`. El usuario ve su cambio al instante (*read-your-own-writes*). El cron usa `revalidateTag(tag, 'max')`.
+- **Sesión:** la del usuario se lee con `'use cache: private'` o detrás de `<Suspense>`, nunca dentro de un `'use cache'` normal. Ver `node_modules/next/dist/docs/01-app/02-guides/authentication-with-cache-components.md`.
+- **Riesgo:** el `use cache` normal es memoria por instancia en serverless. Si la tasa de aciertos es mala en Vercel, se evalúa `'use cache: remote'`.
+
+### 2.3 Nueva capa de datos (sustituye a `all()` / `active()`)
+```ts
+interface ListingRepository {
+  readonly isDemo: boolean;
+  now(): Date;
+  search(f: Filters, v: ViewState, ctx: { here: string }): Promise<{ items: Listing[]; total: number; unknownVolume: Listing[] }>;
+  facets(f: Filters): Promise<{ total: number; zones: Record<string, number>; shapes: Record<string, number> }>;
+  count(f: Filters): Promise<number>;
+  byPublicId(id: string): Promise<Listing | null>;
+  similar(l: Listing, limit: number): Promise<Listing[]>;
+  recent(opts: { zone?: string; limit: number }): Promise<Listing[]>;
+  byIds(ids: string[]): Promise<Listing[]>;
+  catalog(): Promise<CatalogModel[]>;
+  shops(): Promise<Shop[]>;
+}
+```
+- `mockRepository` implementa esta misma interfaz reutilizando `matches()`. Así sirve de **oráculo para tests de paridad** frente a la implementación de Supabase.
+- Las escrituras van aparte: `listings.actions.ts` y `favorites.actions.ts`, todas Server Actions.
+
+### 2.4 Lo que no se propone (y por qué)
+- **ORM (Prisma o Drizzle):** el cliente de Supabase y SQL en migraciones bastan, y las RLS viven en SQL igualmente. Se puede reconsiderar si las consultas crecen.
+- **Librería de formularios (react-hook-form):** `PublishFlow` ya gestiona su estado. Solo se añade validación de servidor.
+- **Validación:** se añade `zod` (una dependencia pequeña y justificada) para validar en las Server Actions. Es la única librería nueva además de las de Supabase.
+
+---
+
+## 3. Mapeo de URLs (se conservan)
+| URL | Antes | Después |
+|---|---|---|
+| `/anuncio/{slug}-a{id}` | id `a1040` del mock | `public_id = 'a' + id` (una secuencia que empieza en 100000, para no chocar con los ids DEMO). Se conserva `idFromSlugId` |
+| `/tablas/*`, `/buscar?…` | Igual | Igual: `filters.ts` no cambia |
+| `/marcas/{marca}/{modelo}` | Slug del catálogo DEMO | Slugs de la tabla `board_models` |
+| `/panel`, `/vender/publicar` | Públicas (demo) | Requieren sesión en el último paso de publicar y para el panel |
+| Nueva: `/entrar` | — | Acceso por email (noindex) |
+| Nueva: `/auth/confirm` | — | Route Handler que verifica el enlace o el código de Supabase |
+
+---
+
+## 4. Ubicación y distancia
+Hoy los km son simulados. Opciones:
+1. **MVP (recomendado):** solo zona + localidad (texto con sugerencias por zona).
+   - El selector de distancia se oculta cuando no hay coordenadas.
+   - La ordenación «Más cerca» se convierte en «Primero mi zona».
+2. **Después:** tabla `towns` con lat/lng (seed propio de localidades costeras) y distancia aproximada con la fórmula de Haversine en SQL. Sin PostGIS mientras no haga falta.
+
+Es una **decisión pendiente** (ver ROADMAP).
+
+---
+
+## 5. Despliegue
+- **Vercel:**
+  - Un proyecto con entornos *Preview* (apunta a Supabase staging) y *Production*.
+  - Variables por entorno (§SECURITY).
+  - Vercel Cron llama a `/api/cron/expirar` con `CRON_SECRET`. Alternativa: `pg_cron` en Supabase.
+- **Migraciones:** en `supabase/migrations/*.sql`, versionadas en git y aplicadas con Supabase CLI. **Nunca cambios a mano en producción.**
+- **CI (GitHub Actions):** `tsc`, `eslint`, tests unitarios, build y tests e2e contra staging.
+
+## 6. Datos de demostración: plan de migración (sin borrar nada)
+1. Se mantiene `src/mocks` y `REBOARD_DATA_SOURCE=mock` para el desarrollo local y los tests.
+2. `supabase/seed/demo.sql`, generado desde `buildDemoInventory(100)` con un script, carga el catálogo, las tiendas y los anuncios DEMO **solo en staging** (`is_demo = true`).
+3. **Producción:**
+   - Arranca con el catálogo revisado (las medidas de fabricante se verifican antes; hoy son datos demo) y sin anuncios ni tiendas DEMO.
+   - El banner DEMO y el `noindex` global dependen de `repo.isDemo`. En producción, `REBOARD_DATA_SOURCE=supabase` y `isDemo=false`.
+4. El modo mock solo se elimina cuando los tests de paridad estén cubiertos por fixtures propios.
+
+## 7. Decisiones pendientes (para el equipo)
+La tabla con identificadores, recomendación y tareas bloqueadas está en [ROADMAP.md](ROADMAP.md#decisiones-pendientes).
+1. **Ubicación:** solo zona, o zona + coordenadas de localidad (§4).
+2. **Contacto:** ¿se puede contactar sin sesión? Recomendado: **sí**, para no añadir fricción, con límite por IP (SECURITY §5).
+3. **Reportes:** con o sin sesión. Recomendado: con sesión en el MVP.
+4. **Anuncios vendidos o caducados:** ¿mantener la URL con 200 + noindex, o 410? SEO.md lo deja pendiente.
+5. **Verificación del teléfono:** sin SMS en esta fase, el teléfono de contacto no se verifica. ¿Aceptamos el riesgo en el MVP? Recomendado: sí, con email verificado y reportes.
+6. **Dominio y región:** proyecto de Supabase en la UE (Frankfurt o París) por RGPD. El dominio está sin decidir.
+7. **Textos legales:** privacidad, cookies y condiciones son **bloqueantes** antes de abrir el registro en producción.
+8. **Captcha** en el acceso (Cloudflare Turnstile, integrable en Supabase Auth): recomendable contra bots. Sería un servicio externo nuevo, así que hay que decidirlo.

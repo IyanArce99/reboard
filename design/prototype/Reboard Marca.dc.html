@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&amp;family=Barlow+Condensed:wght@600;700;800&amp;family=IBM+Plex+Mono:wght@400;500&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#DCE8E7;font-family:'Barlow',sans-serif;color:#102D3B;-webkit-font-smoothing:antialiased}
+*{box-sizing:border-box}
+a{color:#07717C;text-decoration:none}
+a:hover{color:#102D3B;text-decoration:underline}
+</style>
+</helmet>
+<section style="padding:48px 48px 24px;max-width:1440px;">
+  <div style="font-family:'IBM Plex Mono',monospace;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:#4A6670;">Rebranding · Litros → Reboard</div>
+  <h1 style="margin:10px 0 0;font-family:'Barlow Condensed',sans-serif;font-size:64px;font-weight:800;text-transform:uppercase;line-height:.92;">Tu próxima tabla<br><span style="color:#087E8B;">ya existe.</span></h1>
+  <p style="margin:14px 0 0;font-size:18px;line-height:1.5;color:#4A6670;max-width:66ch;">Tres propuestas de logo, la elegida refinada y una guía corta para usarla. La paleta Atlantic Blue y la arquitectura no cambian: esto es un rebranding, no un rediseño.</p>
+</section>
+
+<section style="padding:24px 48px;">
+  <h2 style="margin:0 0 18px;font-family:'Barlow Condensed',sans-serif;font-size:32px;font-weight:800;text-transform:uppercase;">1 · Propuestas de logo</h2>
+  <div style="display:flex;flex-wrap:wrap;gap:24px;">
+    <div id="1a" style="width:420px;background:#FFFFFF;border:2px solid #087E8B;border-radius:20px;overflow:hidden;">
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:14px 18px;border-bottom:1px solid #D6E4E3;"><span style="display:flex;gap:8px;align-items:center;"><span style="font-family:'IBM Plex Mono',monospace;font-size:12px;font-weight:600;background:#102D3B;color:#FFFFFF;padding:3px 7px;border-radius:5px;">1a</span><strong style="font-size:16px;">R + tabla</strong></span><span style="font-size:12px;font-weight:700;color:#FFFFFF;background:#087E8B;padding:4px 8px;border-radius:999px;">Elegida</span></div>
+      <div style="height:180px;display:flex;align-items:center;justify-content:center;background:#EFF6F5;"><dc-import name="Logo Reboard" variant="horizontal" concept="A" size="64" hint-size="300px,64px"></dc-import></div>
+      <div style="height:120px;display:flex;align-items:center;justify-content:center;gap:24px;background:#102D3B;"><dc-import name="Logo Reboard" variant="iso" concept="A" tone="dark" size="64" hint-size="64px,64px"></dc-import><dc-import name="Logo Reboard" variant="app" concept="A" size="72" appBg="#087E8B" hint-size="72px,72px"></dc-import></div>
+      <p style="margin:0;padding:16px 18px;font-size:14px;line-height:1.5;color:#4A6670;">El palo de la R es una tabla vista desde arriba, con su stringer. La pierna en turquesa sale como un trazo de ola. Se lee como inicial y como tabla a la vez.</p>
+    </div>
+    <div id="1b" style="width:420px;background:#FFFFFF;border:1px solid #D6E4E3;border-radius:20px;overflow:hidden;">
+      <div style="display:flex;align-items:center;gap:8px;padding:14px 18px;border-bottom:1px solid #D6E4E3;"><span style="font-family:'IBM Plex Mono',monospace;font-size:12px;font-weight:600;background:#102D3B;color:#FFFFFF;padding:3px 7px;border-radius:5px;">1b</span><strong style="font-size:16px;">Tabla minimalista</strong></div>
+      <div style="height:180px;display:flex;align-items:center;justify-content:center;background:#EFF6F5;"><dc-import name="Logo Reboard" variant="horizontal" concept="B" size="64" hint-size="300px,64px"></dc-import></div>
+      <div style="height:120px;display:flex;align-items:center;justify-content:center;gap:24px;background:#102D3B;"><dc-import name="Logo Reboard" variant="iso" concept="B" tone="dark" size="64" hint-size="64px,64px"></dc-import><dc-import name="Logo Reboard" variant="app" concept="B" size="72" appBg="#087E8B" hint-size="72px,72px"></dc-import></div>
+      <p style="margin:0;padding:16px 18px;font-size:14px;line-height:1.5;color:#4A6670;">Una tabla en diagonal, con stringer y quilla. Es clara y amable, pero muchas marcas de surf usan una tabla suelta, así que cuesta más que se reconozca.</p>
+    </div>
+    <div id="1c" style="width:420px;background:#FFFFFF;border:1px solid #D6E4E3;border-radius:20px;overflow:hidden;">
+      <div style="display:flex;align-items:center;gap:8px;padding:14px 18px;border-bottom:1px solid #D6E4E3;"><span style="font-family:'IBM Plex Mono',monospace;font-size:12px;font-weight:600;background:#102D3B;color:#FFFFFF;padding:3px 7px;border-radius:5px;">1c</span><strong style="font-size:16px;">Segunda vida</strong></div>
+      <div style="height:180px;display:flex;align-items:center;justify-content:center;background:#EFF6F5;"><dc-import name="Logo Reboard" variant="horizontal" concept="C" size="64" hint-size="300px,64px"></dc-import></div>
+      <div style="height:120px;display:flex;align-items:center;justify-content:center;gap:24px;background:#102D3B;"><dc-import name="Logo Reboard" variant="iso" concept="C" tone="dark" size="64" hint-size="64px,64px"></dc-import><dc-import name="Logo Reboard" variant="app" concept="C" size="72" appBg="#087E8B" hint-size="72px,72px"></dc-import></div>
+      <p style="margin:0;padding:16px 18px;font-size:14px;line-height:1.5;color:#4A6670;">Una tabla dentro de un círculo abierto: algo que vuelve a empezar, sin la flecha de reciclaje. Transmite bien la idea de «re», pero de pequeño se parece a un icono de carga.</p>
+    </div>
+  </div>
+  <div style="margin-top:20px;max-width:1300px;padding:18px 22px;border-radius:16px;background:#102D3B;color:#F4F1EA;font-size:16px;line-height:1.55;"><strong style="color:#7AD1CE;">Recomendación: <a href="#1a" style="color:#7AD1CE;text-decoration:underline;">1a</a>.</strong> Es la única que es a la vez letra y tabla, y eso la hace propia. Aguanta a 16 px: el palo y la pierna siguen leyéndose. El trazo turquesa conecta con el «RE» del wordmark, y no recurre a olas ni a iconos ecológicos.</div>
+</section>
+
+<section style="padding:32px 48px;">
+  <h2 style="margin:0 0 18px;font-family:'Barlow Condensed',sans-serif;font-size:32px;font-weight:800;text-transform:uppercase;">2 · Logo final</h2>
+  <div style="display:grid;grid-template-columns:repeat(4,minmax(0,300px));gap:16px;">
+    <div style="background:#FFFFFF;border:1px solid #D6E4E3;border-radius:18px;padding:22px;display:flex;flex-direction:column;gap:18px;"><span style="font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#4A6670;">Horizontal · header</span><div style="height:90px;display:flex;align-items:center;"><dc-import name="Logo Reboard" variant="horizontal" size="44" hint-size="220px,44px"></dc-import></div></div>
+    <div style="background:#FFFFFF;border:1px solid #D6E4E3;border-radius:18px;padding:22px;display:flex;flex-direction:column;gap:18px;"><span style="font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#4A6670;">Compacta · apilada</span><div style="height:90px;display:flex;align-items:center;justify-content:center;"><dc-import name="Logo Reboard" variant="stacked" size="52" hint-size="120px,90px"></dc-import></div></div>
+    <div style="background:#FFFFFF;border:1px solid #D6E4E3;border-radius:18px;padding:22px;display:flex;flex-direction:column;gap:18px;"><span style="font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#4A6670;">Isotipo</span><div style="height:90px;display:flex;align-items:center;justify-content:center;gap:22px;"><dc-import name="Logo Reboard" variant="iso" size="72" hint-size="72px,72px"></dc-import><dc-import name="Logo Reboard" variant="iso" size="32" hint-size="32px,32px"></dc-import><dc-import name="Logo Reboard" variant="iso" size="16" hint-size="16px,16px"></dc-import></div></div>
+    <div style="background:#FFFFFF;border:1px solid #D6E4E3;border-radius:18px;padding:22px;display:flex;flex-direction:column;gap:18px;"><span style="font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#4A6670;">App icon · favicon · avatar</span><div style="height:90px;display:flex;align-items:center;justify-content:center;gap:16px;"><dc-import name="Logo Reboard" variant="app" size="84" hint-size="84px,84px"></dc-import><dc-import name="Logo Reboard" variant="app" size="40" appBg="#087E8B" hint-size="40px,40px"></dc-import><dc-import name="Logo Reboard" variant="app" size="20" hint-size="20px,20px"></dc-import><div style="width:64px;height:64px;border-radius:999px;background:#102D3B;display:flex;align-items:center;justify-content:center;"><dc-import name="Logo Reboard" variant="iso" tone="dark" size="36" hint-size="36px,36px"></dc-import></div></div></div>
+  </div>
+  <div style="display:grid;grid-template-columns:repeat(2,minmax(0,600px));gap:16px;margin-top:16px;">
+    <div style="height:150px;border-radius:18px;background:#102D3B;display:flex;align-items:center;justify-content:center;"><dc-import name="Logo Reboard" variant="horizontal" tone="dark" size="56" hint-size="280px,56px"></dc-import></div>
+    <div style="height:150px;border-radius:18px;background:#EFF6F5;border:1px solid #D6E4E3;display:flex;align-items:center;justify-content:center;"><dc-import name="Logo Reboard" variant="horizontal" size="56" hint-size="280px,56px"></dc-import></div>
+  </div>
+</section>
+
+<section style="padding:32px 48px;">
+  <h2 style="margin:0 0 18px;font-family:'Barlow Condensed',sans-serif;font-size:32px;font-weight:800;text-transform:uppercase;">3 · Mini guía</h2>
+  <div style="display:grid;grid-template-columns:repeat(3,minmax(0,410px));gap:16px;">
+    <div style="background:#FFFFFF;border:1px solid #D6E4E3;border-radius:18px;padding:22px;display:flex;flex-direction:column;gap:12px;">
+      <strong style="font-size:17px;">Colores</strong>
+      <sc-for list="{{ colors }}" as="c" hint-placeholder-count="7"><div style="display:grid;grid-template-columns:40px 1fr auto;gap:12px;align-items:center;"><span style="width:40px;height:40px;border-radius:10px;background:{{ c.hex }};border:1px solid #D6E4E3;"></span><span style="font-size:14px;"><strong>{{ c.n }}</strong><br><span style="color:#4A6670;">{{ c.u }}</span></span><span style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:#4A6670;">{{ c.hex }}</span></div></sc-for>
+    </div>
+    <div style="background:#FFFFFF;border:1px solid #D6E4E3;border-radius:18px;padding:22px;display:flex;flex-direction:column;gap:14px;">
+      <strong style="font-size:17px;">Tipografía</strong>
+      <div style="font-family:'Barlow Condensed',sans-serif;font-size:40px;font-weight:800;text-transform:uppercase;line-height:.95;">Barlow Condensed 800</div>
+      <div style="font-size:14px;color:#4A6670;line-height:1.5;">Para el wordmark, los titulares y las secciones destacadas. Siempre en mayúsculas.</div>
+      <div style="font-size:22px;font-weight:700;">190 € · Torq Fun 7'2"</div>
+      <div style="font-size:14px;color:#4A6670;line-height:1.5;">Barlow 400–700 para texto, filtros, precios y litros. Nunca la condensada en datos.</div>
+      <div style="font-family:'IBM Plex Mono',monospace;font-size:16px;">21 1/2" · 2 7/8" · 47 L</div>
+      <div style="font-size:14px;color:#4A6670;">IBM Plex Mono para las medidas técnicas.</div>
+    </div>
+    <div style="background:#FFFFFF;border:1px solid #D6E4E3;border-radius:18px;padding:22px;display:flex;flex-direction:column;gap:14px;">
+      <strong style="font-size:17px;">Espacio y tamaños</strong>
+      <div style="align-self:flex-start;padding:22px;border:1.5px dashed #7AD1CE;border-radius:8px;"><dc-import name="Logo Reboard" variant="horizontal" size="40" hint-size="200px,40px"></dc-import></div>
+      <div style="font-size:14px;color:#4A6670;line-height:1.5;">Margen mínimo alrededor del logo: la mitad de la altura del isotipo. Tamaño mínimo: 24 px de alto para el horizontal y 16 px para el isotipo solo.</div>
+      <div style="font-size:14px;color:#4A6670;line-height:1.5;"><strong style="color:#102D3B;">Fondos:</strong> blanco, blanco agua o petróleo. Sobre fotos, solo el isotipo dentro del app icon.</div>
+    </div>
+  </div>
+  <div style="display:grid;grid-template-columns:repeat(4,minmax(0,300px));gap:16px;margin-top:16px;">
+    <div style="border-radius:16px;overflow:hidden;border:1px solid #D6E4E3;background:#FFFFFF;"><div style="height:110px;display:flex;align-items:center;justify-content:center;background:#EFF6F5;"><dc-import name="Logo Reboard" variant="horizontal" size="36" hint-size="180px,36px"></dc-import></div><div style="padding:10px 14px;font-size:13px;"><strong style="color:#1E6A47;">Sí ·</strong> Bicolor sobre claro</div></div>
+    <div style="border-radius:16px;overflow:hidden;border:1px solid #D6E4E3;background:#FFFFFF;"><div style="height:110px;display:flex;align-items:center;justify-content:center;background:#102D3B;"><dc-import name="Logo Reboard" variant="horizontal" tone="dark" size="36" hint-size="180px,36px"></dc-import></div><div style="padding:10px 14px;font-size:13px;"><strong style="color:#1E6A47;">Sí ·</strong> Versión clara sobre petróleo</div></div>
+    <div style="border-radius:16px;overflow:hidden;border:1px solid #D6E4E3;background:#FFFFFF;"><div style="height:110px;display:flex;align-items:center;justify-content:center;background:#F4C15A;"><dc-import name="Logo Reboard" variant="horizontal" size="36" hint-size="180px,36px"></dc-import></div><div style="padding:10px 14px;font-size:13px;"><strong style="color:#A23A2C;">No ·</strong> Sobre amarillo: el amarillo es solo para las acciones</div></div>
+    <div style="border-radius:16px;overflow:hidden;border:1px solid #D6E4E3;background:#FFFFFF;"><div style="height:110px;display:flex;align-items:center;justify-content:center;background:#EFF6F5;"><div style="transform:scaleX(1.35);"><dc-import name="Logo Reboard" variant="horizontal" size="30" hint-size="160px,30px"></dc-import></div></div><div style="padding:10px 14px;font-size:13px;"><strong style="color:#A23A2C;">No ·</strong> Deformar, girar ni cambiar los colores del isotipo</div></div>
+  </div>
+</section>
+
+<section style="padding:32px 48px 64px;">
+  <h2 style="margin:0 0 18px;font-family:'Barlow Condensed',sans-serif;font-size:32px;font-weight:800;text-transform:uppercase;">4 · Aplicación</h2>
+  <div style="display:grid;grid-template-columns:minmax(0,820px) minmax(0,300px);gap:16px;align-items:start;">
+    <div style="border-radius:18px;overflow:hidden;border:1px solid #D6E4E3;">
+      <div style="height:64px;background:#FFFFFF;border-bottom:1px solid #D6E4E3;display:flex;align-items:center;gap:22px;padding:0 24px;font-size:15px;font-weight:600;"><dc-import name="Logo Reboard" variant="horizontal" size="30" hint-size="150px,30px"></dc-import><span>Comprar tablas ▾</span><span>¿Qué tabla necesito?</span><span>Guías</span><span style="flex:1;"></span><span style="background:#F4C15A;padding:9px 14px;border-radius:10px;font-weight:700;">Vender gratis</span></div>
+      <div style="background:#102D3B;color:#F4F1EA;padding:34px 24px 28px;border-radius:0 0 28px 28px;">
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:#7AD1CE;">Reboard · Tu próxima tabla ya existe</div>
+        <div style="margin-top:10px;font-family:'Barlow Condensed',sans-serif;font-size:56px;font-weight:800;text-transform:uppercase;line-height:.92;">Tablas de surf<br><span style="color:#7AD1CE;">de segunda mano</span></div>
+        <div style="margin-top:18px;height:58px;background:#FFFFFF;border-radius:16px;display:flex;align-items:center;justify-content:space-between;padding:0 6px 0 18px;color:#102D3B;font-size:15px;"><span><strong>Cerca de ti · Gran Canaria</strong> <span style="color:#617C82;">· Cualquier volumen · Cualquier tipo</span></span><span style="height:46px;display:flex;align-items:center;background:#F4C15A;border-radius:12px;padding:0 18px;font-weight:700;">Buscar tablas</span></div>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:12px;align-items:center;padding:20px;border-radius:18px;background:#FFFFFF;border:1px solid #D6E4E3;">
+      <span style="font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#4A6670;">Pantalla de inicio · app</span>
+      <div style="display:grid;grid-template-columns:repeat(4,56px);gap:14px;padding:18px;border-radius:22px;background:linear-gradient(160deg,#1B4252,#102D3B);">
+        <dc-import name="Logo Reboard" variant="app" size="56" appBg="#F4F1EA" hint-size="56px,56px"></dc-import>
+        <span style="width:56px;height:56px;border-radius:13px;background:rgba(255,255,255,.12);"></span><span style="width:56px;height:56px;border-radius:13px;background:rgba(255,255,255,.12);"></span><span style="width:56px;height:56px;border-radius:13px;background:rgba(255,255,255,.12);"></span>
+      </div>
+      <span style="font-size:13px;color:#4A6670;text-align:center;">En la app y en las redes sociales, el isotipo va solo, sin la palabra.</span>
+    </div>
+  </div>
+  <p style="margin:18px 0 0;font-size:15px;color:#4A6670;">El prototipo completo con la marca nueva está en <a href="Reboard.dc.html" style="font-weight:700;text-decoration:underline;">Reboard.dc.html</a>.</p>
+</section>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  renderVals(){return {colors:[['Azul petróleo','#102D3B','Estructura, wordmark «BOARD»'],['Turquesa oceánico','#087E8B','«RE», enlaces, seleccionado'],['Turquesa claro','#7AD1CE','Acentos sobre petróleo'],['Amarillo arena','#F4C15A','Solo la acción principal'],['Blanco agua','#EFF6F5','Fondo general'],['Blanco cálido','#F4F1EA','Logo sobre petróleo'],['Azul grisáceo','#4A6670','Texto secundario']].map(([n,hex,u])=>({n,hex,u}))};}
+}
+</script>
+</body>
+</html>

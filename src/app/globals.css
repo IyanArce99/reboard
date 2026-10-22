@@ -1,26 +1,148 @@
-@import "tailwindcss";
+@import "../styles/tokens.css";
 
+/* next/font genera nombres de familia propios: los tokens apuntan a sus variables. */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --rb-font-display: var(--font-barlow-condensed), "Barlow Condensed", sans-serif;
+  --rb-font-ui: var(--font-barlow), "Barlow", sans-serif;
+  --rb-font-mono: var(--font-plex-mono), "IBM Plex Mono", monospace;
+  --rb-pad-x: 32px;
+  --rb-on-petrol-chip-bd: rgba(122, 209, 206, 0.35);
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
+@media (max-width: 759px) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --rb-pad-x: 16px;
   }
 }
 
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+}
+
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  margin: 0;
+  background: var(--rb-water);
+  color: var(--rb-ink);
+  font-family: var(--rb-font-ui);
+  -webkit-font-smoothing: antialiased;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+h1,
+h2,
+h3,
+p {
+  margin: 0;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+  color: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+button:disabled {
+  cursor: not-allowed;
+}
+
+img {
+  display: block;
+  max-width: 100%;
+}
+
+/* Foco visible: 2 px turquesa (CLAUDE.md). */
+:focus-visible {
+  outline: 2px solid var(--rb-teal);
+  outline-offset: 2px;
+}
+
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline-offset: 1px;
+}
+
+/* Scroll: barra fina en escritorio, oculta en carriles horizontales. */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(15, 27, 32, 0.28) transparent;
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(15, 27, 32, 0.28);
+  border-radius: 8px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+
+[data-rail] {
+  scrollbar-width: none;
+  overscroll-behavior-x: contain;
+  -webkit-overflow-scrolling: touch;
+}
+
+[data-rail]::-webkit-scrollbar {
+  display: none;
+}
+
+@media (max-width: 759px) {
+  * {
+    scrollbar-width: none;
+  }
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.container {
+  max-width: var(--rb-container);
+  margin: 0 auto;
+  padding-left: var(--rb-pad-x);
+  padding-right: var(--rb-pad-x);
+  width: 100%;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    transition: none !important;
+  }
 }

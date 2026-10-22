@@ -1,0 +1,274 @@
+/* Comparador (prototipo Reboard.dc.html, isCmp). */
+
+.page {
+  padding-top: 22px;
+  padding-bottom: 64px;
+}
+
+.title {
+  margin: 0;
+}
+
+.lead {
+  margin: 8px 0 18px;
+  font-size: 15px;
+  color: var(--rb-muted);
+}
+
+.few {
+  padding: 22px;
+  border: 1px dashed #a9c4c3;
+  border-radius: 14px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: center;
+  font-size: 15px;
+}
+
+.pick {
+  display: inline-flex;
+  align-items: center;
+  height: 46px;
+  border: 0;
+  border-radius: 10px;
+  background: var(--rb-petrol);
+  color: var(--rb-white);
+  font-size: 15px;
+  font-weight: 700;
+  padding: 0 18px;
+  cursor: pointer;
+  text-decoration: none;
+  white-space: nowrap;
+}
+.pick:hover {
+  background: var(--rb-petrol-2);
+}
+
+.gone {
+  margin: 0 0 12px;
+  font-size: 14px;
+  color: var(--rb-muted);
+}
+
+.linkBtn {
+  border: 0;
+  background: transparent;
+  padding: 0;
+  min-height: 44px;
+  color: var(--rb-teal-text);
+  font-size: inherit;
+  font-weight: 700;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.skeleton {
+  height: 640px;
+  border-radius: 14px;
+  border: 1px solid var(--rb-line);
+  background: linear-gradient(90deg, #ffffff 0%, #f1f6f6 50%, #ffffff 100%);
+  background-size: 200% 100%;
+  animation: shimmer 1.4s ease-in-out infinite;
+}
+
+@keyframes shimmer {
+  from {
+    background-position: 100% 0;
+  }
+  to {
+    background-position: -100% 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skeleton {
+    animation: none;
+  }
+}
+
+/* Carril con scroll horizontal que llega al borde de la pantalla. */
+.rail {
+  overflow-x: auto;
+  margin: 0 calc(-1 * var(--rb-pad-x));
+  padding: 0 var(--rb-pad-x);
+}
+.rail:focus-visible {
+  outline-offset: -2px;
+}
+
+/* overflow: clip recorta las esquinas sin crear un contenedor de scroll (no rompe el sticky). */
+.frame {
+  border: 1px solid var(--rb-line);
+  border-radius: 14px;
+  overflow: clip;
+  background: var(--rb-white);
+}
+
+.table {
+  width: 100%;
+  table-layout: fixed;
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+.corner,
+.head {
+  padding: 12px;
+  border-bottom: 1px solid var(--rb-line);
+  background: var(--rb-white);
+  vertical-align: top;
+  text-align: left;
+  font-weight: inherit;
+}
+.corner {
+  position: sticky;
+  left: 0;
+  z-index: 1;
+}
+.head {
+  border-left: 1px solid var(--rb-line-soft);
+}
+
+.headIn {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.photo {
+  position: relative;
+  display: block;
+  aspect-ratio: 4 / 3;
+  border-radius: 10px;
+  overflow: hidden;
+  background: #dde9e8;
+}
+
+.img {
+  object-fit: cover;
+}
+
+.headTitle {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--rb-petrol);
+  text-decoration: none;
+  line-height: 1.3;
+  /* Área táctil: la fila de botones de abajo cumple los 44 px; el título amplía su zona vertical. */
+  padding: 4px 0;
+}
+.headTitle:hover {
+  text-decoration: underline;
+}
+
+.headActions {
+  display: flex;
+  gap: 6px;
+}
+
+/* 36 px en el prototipo; 44 px por el mínimo táctil. */
+.open {
+  flex: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 44px;
+  border-radius: 8px;
+  background: var(--rb-petrol);
+  color: var(--rb-white);
+  font-size: 13px;
+  font-weight: 700;
+  text-decoration: none;
+  white-space: nowrap;
+}
+.open:hover {
+  background: var(--rb-petrol-2);
+}
+
+.remove {
+  flex: none;
+  width: 44px;
+  height: 44px;
+  border: 1px solid var(--rb-line-strong);
+  border-radius: 8px;
+  background: var(--rb-white);
+  color: var(--rb-petrol);
+  cursor: pointer;
+}
+.remove:hover {
+  border-color: var(--rb-teal);
+}
+
+.label,
+.cell {
+  padding: 11px 12px;
+  border-bottom: 1px solid var(--rb-line-soft);
+  text-align: left;
+  vertical-align: top;
+  background: var(--rb-white);
+}
+tbody tr:last-child .label,
+tbody tr:last-child .cell {
+  border-bottom: 0;
+}
+
+.label {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--rb-muted);
+  position: sticky;
+  left: 0;
+  z-index: 1;
+}
+tr[data-diff] .label {
+  color: var(--rb-petrol);
+  background: #f1f6f8;
+}
+
+.cell {
+  border-left: 1px solid var(--rb-line-soft);
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--rb-petrol);
+  overflow-wrap: anywhere;
+}
+tr[data-diff] .cell {
+  background: #f7fafb;
+}
+.cell[data-mono] {
+  font-family: var(--rb-font-mono);
+}
+.cell[data-strong] {
+  font-weight: 800;
+}
+/* «Sin indicar»: #617C82 en el prototipo; #4A6670 para AA. */
+.cell[data-tone="missing"] {
+  color: var(--rb-muted);
+}
+.cell[data-tone="good"] {
+  color: var(--rb-success);
+}
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+@media (max-width: 759px) {
+  .page {
+    padding-top: 14px;
+    padding-bottom: 40px;
+  }
+  .skeleton {
+    height: 560px;
+  }
+}

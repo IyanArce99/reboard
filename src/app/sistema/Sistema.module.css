@@ -1,0 +1,237 @@
+/* Sistema visual (interna). Prototipo: Reboard.dc.html, isSistema. */
+
+.page {
+  padding-top: 22px;
+  padding-bottom: 64px;
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
+}
+
+.kicker {
+  font-size: 13px;
+  color: var(--rb-muted);
+}
+
+.logo {
+  margin-top: 8px;
+}
+
+.lead {
+  margin-top: 12px;
+  font-size: 17px;
+  color: var(--rb-muted);
+  max-width: 62ch;
+  line-height: 1.5;
+}
+
+.h2 {
+  margin: 0 0 14px;
+  font-size: 20px;
+  font-weight: 800;
+}
+
+.h2Tight {
+  margin-bottom: 6px;
+}
+
+.sub {
+  margin: 0 0 14px;
+  font-size: 14px;
+  color: var(--rb-muted);
+}
+
+.swatches {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 10px;
+}
+
+.swatch {
+  border: 1px solid var(--rb-line);
+  border-radius: 12px;
+  overflow: hidden;
+  background: var(--rb-white);
+}
+
+.swatchColor {
+  height: 72px;
+}
+
+.swatchBody {
+  padding: 10px;
+}
+
+.swatchName {
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.swatchHex {
+  font-family: var(--rb-font-mono);
+  font-size: 12px;
+  color: var(--rb-muted);
+}
+
+.swatchUse {
+  font-size: 12px;
+  color: var(--rb-muted);
+  margin-top: 4px;
+}
+
+.box {
+  background: var(--rb-white);
+  border: 1px solid var(--rb-line);
+  border-radius: 14px;
+  padding: 22px;
+}
+
+.type {
+  display: grid;
+  gap: 14px;
+}
+
+.display {
+  font-size: 48px;
+  font-family: var(--rb-font-display);
+  font-weight: 800;
+  text-transform: uppercase;
+  line-height: 1;
+}
+
+.displaySm {
+  font-size: 28px;
+  font-family: var(--rb-font-display);
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.body {
+  font-size: 16px;
+  line-height: 1.5;
+  max-width: 60ch;
+}
+
+.monoBig {
+  font-family: var(--rb-font-mono);
+  font-size: 22px;
+  font-weight: 600;
+}
+
+.note {
+  font-size: 13px;
+  color: var(--rb-muted);
+}
+
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+}
+
+.bigBtn {
+  height: 50px;
+  font-size: 15px;
+  padding: 0 20px;
+}
+
+.disabledBtn {
+  border: 0;
+  border-radius: 10px;
+  background: #9db0b4;
+  color: var(--rb-white);
+  font-weight: 700;
+}
+
+.input {
+  width: auto;
+}
+
+.badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.state {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  padding: 6px 10px;
+  border-radius: 8px;
+  background: var(--rb-water);
+}
+
+.stateDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+}
+
+.src {
+  font-size: 12px;
+  font-weight: 700;
+  padding: 4px 8px;
+  border-radius: 5px;
+}
+.srcSeller {
+  background: var(--rb-success-tint);
+  color: #1f5640;
+}
+.srcMaker {
+  background: var(--rb-teal-tint);
+  color: var(--rb-teal-ink);
+}
+.srcNone {
+  background: #e3eeed;
+  color: var(--rb-muted);
+}
+
+.fitBadge {
+  font-size: 12px;
+  font-weight: 700;
+  padding: 4px 8px;
+  border-radius: 6px;
+  background: var(--rb-success-tint);
+  color: var(--rb-success);
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+  align-items: start;
+}
+
+.cardCol {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.two {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 12px;
+  font-size: 14px;
+  line-height: 1.55;
+}
+
+.two > div {
+  background: var(--rb-white);
+  border: 1px solid var(--rb-line);
+  border-radius: 14px;
+  padding: 20px;
+}
+
+@media (max-width: 759px) {
+  .display {
+    font-size: 36px;
+  }
+  .cards,
+  .two {
+    grid-template-columns: 1fr;
+  }
+}

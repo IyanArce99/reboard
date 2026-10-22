@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<div style="display:inline-flex;align-items:center;gap:{{ gap }};flex-direction:{{ dir }};vertical-align:middle;">
+  <div style="display:{{ iconDisplay }};width:{{ box }};height:{{ box }};border-radius:{{ boxRad }};background:{{ boxBg }};align-items:center;justify-content:center;flex:none;">
+    <svg width="{{ iso }}" height="{{ iso }}" viewBox="0 0 48 48" aria-hidden="true">
+      <g display="{{ dA }}">
+        <path d="M13 3 C18.6 11 18.6 33 16.1 45 L9.9 45 C7.4 33 7.4 11 13 3 Z" fill="{{ c1 }}"></path>
+        <line x1="13" y1="9" x2="13" y2="41.5" stroke="{{ c3 }}" stroke-width="1.3" stroke-linecap="round"></line>
+        <path d="M19.5 9.5 L27.5 9.5 A8.3 8.3 0 0 1 27.5 26.1 L19.5 26.1" fill="none" stroke="{{ c1 }}" stroke-width="6" stroke-linejoin="round"></path>
+        <path d="M26.5 27 L35.5 44" fill="none" stroke="{{ c2 }}" stroke-width="6" stroke-linecap="round"></path>
+      </g>
+      <g display="{{ dB }}">
+        <g transform="rotate(-38 24 24)">
+          <path d="M24 2.5 C31.2 11.5 31.2 34 27.6 45.5 L20.4 45.5 C16.8 34 16.8 11.5 24 2.5 Z" fill="{{ c1 }}"></path>
+          <line x1="24" y1="9" x2="24" y2="41.5" stroke="{{ c3 }}" stroke-width="1.4" stroke-linecap="round"></line>
+          <path d="M24 39.5 L24 46.5" stroke="{{ c2 }}" stroke-width="3.2" stroke-linecap="round"></path>
+        </g>
+      </g>
+      <g display="{{ dC }}">
+        <circle cx="24" cy="24" r="19" fill="none" stroke="{{ c2 }}" stroke-width="4" stroke-dasharray="96 23.4" stroke-linecap="round" transform="rotate(-60 24 24)"></circle>
+        <path d="M24 9.5 C28.6 15 28.6 31 26.3 38.5 L21.7 38.5 C19.4 31 19.4 15 24 9.5 Z" fill="{{ c1 }}"></path>
+        <line x1="24" y1="14" x2="24" y2="35.5" stroke="{{ c3 }}" stroke-width="1.2" stroke-linecap="round"></line>
+      </g>
+    </svg>
+  </div>
+  <span style="display:{{ wordDisplay }};font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:{{ wordSize }};letter-spacing:.035em;line-height:1;white-space:nowrap;"><span style="color:{{ reColor }};">RE</span><span style="color:{{ boardColor }};">BOARD</span></span>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:320,&quot;height&quot;:120},&quot;variant&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;horizontal&quot;,&quot;iso&quot;,&quot;stacked&quot;,&quot;app&quot;,&quot;word&quot;],&quot;default&quot;:&quot;horizontal&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;tone&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;light&quot;,&quot;dark&quot;],&quot;default&quot;:&quot;light&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;concept&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;A&quot;,&quot;B&quot;,&quot;C&quot;],&quot;default&quot;:&quot;A&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;size&quot;:{&quot;editor&quot;:&quot;int&quot;,&quot;default&quot;:32,&quot;min&quot;:12,&quot;max&quot;:240,&quot;tsType&quot;:&quot;number&quot;},&quot;appBg&quot;:{&quot;editor&quot;:&quot;color&quot;,&quot;default&quot;:&quot;#102D3B&quot;,&quot;tsType&quot;:&quot;string&quot;}}">
+class Component extends DCLogic {
+  renderVals(){
+    const p=this.props;const v=p.variant??'horizontal';const tone=p.tone??'light';const s=+(p.size??32);const concept=p.concept??'A';
+    const dark=tone==='dark';
+    const app=v==='app';
+    let c1=dark?'#F4F1EA':'#102D3B',c2=dark?'#7AD1CE':'#087E8B',c3=dark?'#102D3B':'#7AD1CE';
+    if(app){c1='#F4F1EA';c2='#7AD1CE';c3='#102D3B';}
+    if(concept==='B'&&!dark&&!app){c1='#087E8B';c2='#102D3B';c3='#EFF6F5';}
+    const showIcon=v!=='word',showWord=v==='horizontal'||v==='stacked'||v==='word';
+    return {c1,c2,c3,dA:concept==='A'?'inline':'none',dB:concept==='B'?'inline':'none',dC:concept==='C'?'inline':'none',
+      iconDisplay:showIcon?'flex':'none',wordDisplay:showWord?'inline-block':'none',
+      box:app?`${s}px`:`${s}px`,iso:app?`${Math.round(s*.68)}px`:`${s}px`,boxRad:app?`${Math.round(s*.24)}px`:'0',boxBg:app?(p.appBg??'#102D3B'):'transparent',
+      dir:v==='stacked'?'column':'row',gap:v==='stacked'?`${Math.round(s*.25)}px`:`${Math.round(s*.22)}px`,
+      wordSize:v==='stacked'?`${Math.round(s*.62)}px`:`${Math.round(s*.9)}px`,
+      reColor:dark?'#7AD1CE':'#087E8B',boardColor:dark?'#F4F1EA':'#102D3B'};
+  }
+}
+</script>
+</body>
+</html>

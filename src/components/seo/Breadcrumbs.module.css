@@ -1,0 +1,39 @@
+.crumbs {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--rb-muted);
+  margin-bottom: 10px;
+}
+
+.item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.item a {
+  color: var(--rb-muted);
+  padding: 4px 0;
+}
+.item a:hover {
+  color: var(--rb-petrol);
+  text-decoration: underline;
+}
+
+.back {
+  font-weight: 700;
+  color: var(--rb-petrol);
+  padding: 4px 0;
+}
+
+.sep {
+  color: #a9c4c3;
+}
+
+.current {
+  color: var(--rb-petrol);
+  font-weight: 600;
+}

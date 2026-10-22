@@ -1,0 +1,38 @@
+/* Reboard · Atlantic Blue — tokens extraídos del prototipo aprobado (Reboard.dc.html) */
+:root{
+  /* Marca */
+  --rb-petrol:#102D3B;        /* estructura, títulos, hero (variante A), "BOARD" */
+  --rb-petrol-2:#1B4252;      /* superficies sobre petróleo */
+  --rb-petrol-3:#2E5566;      /* bordes sobre petróleo */
+  --rb-teal:#087E8B;          /* seleccionado, activo, "RE" del logo */
+  --rb-teal-text:#07717C;     /* enlaces de texto (AA sobre claro) */
+  --rb-teal-light:#7AD1CE;    /* acentos sobre petróleo */
+  --rb-teal-tint:#DDF1F0;     /* chips de filtro aplicado, "Te encaja" */
+  --rb-teal-ink:#0A4F57;      /* texto sobre --rb-teal-tint */
+  --rb-sand:#F4C15A;          /* SOLO acción principal (Buscar, Contactar, Publicar, Vender gratis) */
+  --rb-sand-hover:#F0B43C; --rb-sand-active:#E6A92F;
+  --rb-water:#EFF6F5;         /* fondo general */
+  --rb-white:#FFFFFF;         /* tarjetas, formularios */
+  --rb-warm-white:#F4F1EA;    /* texto/logo sobre petróleo */
+  /* Texto */
+  --rb-ink:#102D3B; --rb-muted:#4A6670; --rb-faint:#617C82; --rb-on-petrol-muted:#B4C8CC;
+  /* Líneas */
+  --rb-line:#D6E4E3; --rb-line-strong:#C3D6D5; --rb-line-soft:#E6EFEE; --rb-hover:#EEF6F5;
+  /* Estados */
+  --rb-success:#1E6A47; --rb-success-tint:#DDEDE4;
+  --rb-warning:#C08A2E; --rb-warning-tint:#F5EBD8; --rb-warning-ink:#5E3D0B;
+  --rb-error:#A23A2C;   --rb-error-tint:#F4E1DC;   --rb-error-ink:#5C1F15;
+  /* Tipografía */
+  --rb-font-display:'Barlow Condensed',sans-serif; /* 800, MAYÚSCULAS: wordmark, H1, H2 */
+  --rb-font-ui:'Barlow',sans-serif;                /* 400–700: texto, precios, litros, filtros */
+  --rb-font-mono:'IBM Plex Mono',monospace;        /* medidas técnicas, contadores */
+  /* Radios */
+  --rb-r-chip:999px; --rb-r-input:10px; --rb-r-btn:12px; --rb-r-card:16px; --rb-r-panel:18px; --rb-r-sheet:24px; --rb-r-hero:32px;
+  /* Espaciado (escala 4px) */
+  --rb-s-1:4px; --rb-s-2:8px; --rb-s-3:12px; --rb-s-4:16px; --rb-s-6:24px; --rb-s-8:32px; --rb-s-14:56px;
+  /* Sombras (mínimas) */
+  --rb-shadow-search:0 18px 40px -24px rgba(0,0,0,.6);
+  --rb-shadow-card-hover:0 8px 24px -16px rgba(16,45,59,.35);
+  /* Layout */
+  --rb-container:1280px; --rb-header-h:64px; --rb-hit:44px;
+}
