@@ -48,3 +48,6 @@ next-env.d.ts
 /playwright/.cache/
 # capturas de referencia (dependen del SO; se generan en local)
 /tests/e2e/*-snapshots/
+
+# Copias de trabajo de agentes (git worktree)
+.claude/worktrees/
