@@ -1,7 +1,7 @@
 // Carga el inventario DEMO en el Supabase LOCAL para desarrollar con datos (nunca en remoto:
 // serviceClient() se niega a funcionar contra una URL que no sea local).
 // Uso: npm run db:seed-demo [-- 100|1000]   ·  Vaciar: npm run db:reset
-import { buildDemoInventory } from "../src/mocks/demo-inventory";
+import { buildDemoInventory } from "../tests/fixtures/demo-inventory";
 import { clearDemo, loadDemo } from "../tests/integration/demo-loader";
 import { serviceClient } from "../tests/integration/local-supabase";
 

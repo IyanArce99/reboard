@@ -177,14 +177,20 @@ export async function SearchResults({ filters: f, view, here, title, intro, crum
               <div className={styles.empty}>
                 <BoardsIllustration />
                 <h2 className={styles.emptyTitle}>No encontramos tablas con estos filtros</h2>
-                <p className={styles.emptyText}>Amplía la búsqueda (entre paréntesis, las tablas que verías):</p>
-                <div className={styles.suggestions}>
-                  {suggestions.map((s, i) => (
-                    <Link key={s.label} href={searchHref(s.filters, viewKeep)} scroll={false} className={ui.btnNeutral}>
-                      {s.label} ({suggestionCounts[i]})
-                    </Link>
-                  ))}
-                </div>
+                {suggestions.length > 0 ? (
+                  <>
+                    <p className={styles.emptyText}>Amplía la búsqueda (entre paréntesis, las tablas que verías):</p>
+                    <div className={styles.suggestions}>
+                      {suggestions.map((s, i) => (
+                        <Link key={s.label} href={searchHref(s.filters, viewKeep)} scroll={false} className={ui.btnNeutral}>
+                          {s.label} ({suggestionCounts[i]})
+                        </Link>
+                      ))}
+                    </div>
+                  </>
+                ) : (
+                  <p className={styles.emptyText}>Todavía no hay tablas publicadas.</p>
+                )}
                 <div className={styles.emptyAlert}>
                   <div>
                     <strong>O guarda la búsqueda como alerta.</strong> «{alert.text}»

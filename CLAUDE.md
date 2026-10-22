@@ -58,9 +58,11 @@ Header, MobileMenu (panel lateral), SearchBar (segmentos Ubicación / Litros / T
 - **Supabase:** Postgres, Auth y Storage. Un solo proyecto `reboard`, en la UE.
   - Las migraciones en `supabase/migrations` son la fuente de verdad del esquema. Nunca edites una ya aplicada: crea otra nueva.
   - Los tests de seguridad pgTAP están en `supabase/tests/database`.
-- **`REBOARD_DATA_SOURCE=mock|supabase`:**
+- **Fuente de datos (`src/lib/data`):**
   - el código de las páginas usa `getRepository()` y nunca sabe de dónde vienen los datos;
-  - las cuentas solo existen con `supabase` (`authEnabled()`).
+  - con `NEXT_PUBLIC_SUPABASE_URL` y `NEXT_PUBLIC_SUPABASE_ANON_KEY`, Supabase; sin ellas, un repositorio vacío (interfaz vacía y noindex);
+  - **la app no trae datos simulados**: el inventario DEMO es un fixture de tests (`tests/fixtures`);
+  - las cuentas solo existen con Supabase (`authEnabled()`).
 - **Seguridad:**
   - Cada Server Action vuelve a comprobar la sesión con `auth.getUser()` (nunca `getSession()`) y valida la entrada con zod.
   - **Service role** (`createServiceClient`) solo en el servidor y solo después de comprobar CAPTCHA, sesión y rol.
@@ -82,4 +84,5 @@ Header, MobileMenu (panel lateral), SearchBar (segmentos Ubicación / Litros / T
 - **Comprueba antes de dar algo por hecho:**
   - `npm run typecheck`, `npm run lint` y `npm test`;
   - con Supabase local: `npm run db:test` y `npm run test:integration`;
-  - `REBOARD_DATA_SOURCE=mock npm run build && npm run test:e2e`.
+  - `npm run build`;
+  - e2e y visuales: necesitan datos, así que se ejecutan contra Supabase local cargado con `scripts/seed-local-demo.mts` (desactivados en CI hasta configurar Supabase).

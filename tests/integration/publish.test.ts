@@ -9,7 +9,7 @@ import type { Database } from "@/lib/supabase/database.types";
 import { ListingInput, type ListingInput as Input } from "@/lib/publish/schema";
 import { PublishError, finalizeListing, panelAction, saveListing } from "@/lib/publish/save";
 import { withFilters } from "@/lib/search/filters";
-import { buildDemoInventory } from "@/mocks/demo-inventory";
+import { buildDemoInventory } from "../fixtures/demo-inventory";
 import { clearDemo, loadDemo } from "./demo-loader";
 import { anonClient, deleteTestUsers, signedInClient } from "./auth-helpers";
 import { serviceClient } from "./local-supabase";

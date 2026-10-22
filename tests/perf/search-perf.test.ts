@@ -5,7 +5,7 @@
 import { afterAll, describe, expect, it } from "vitest";
 import { supabaseRepository as db } from "@/lib/data/supabase-repository";
 import { emptyFilters, withFilters, type Filters } from "@/lib/search/filters";
-import { buildDemoInventory } from "@/mocks/demo-inventory";
+import { buildDemoInventory } from "../fixtures/demo-inventory";
 import { clearDemo, loadDemo } from "../integration/demo-loader";
 import { serviceClient } from "../integration/local-supabase";
 

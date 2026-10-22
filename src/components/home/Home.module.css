@@ -786,3 +786,11 @@
     transform: none;
   }
 }
+
+/* Estado vacío de «Recién publicadas»: publicar y crear alerta. */
+.emptyActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+}

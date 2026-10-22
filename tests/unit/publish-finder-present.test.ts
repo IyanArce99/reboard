@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { initialFinderState, isValidWeight, recommend, sanitizeFinderState } from "@/lib/finder/recommend";
 import { availability, idFromSlugId, listingPath, listingTitle, postedText, sourceBadge } from "@/lib/listing/present";
 import { fieldToInches, parseFeet, parseInches, parseLitres, parseMeasures } from "@/lib/publish/parse";
-import { buildDemoInventory, DEMO_REFERENCE_DATE } from "@/mocks/demo-inventory";
+import { buildDemoInventory, DEMO_REFERENCE_DATE } from "../fixtures/demo-inventory";
 
 describe("parse (medidas pegadas)", () => {
   it("interpreta el formato del prototipo", () => {

@@ -1,4 +1,4 @@
-// Cuentas (fase D). Solo existen con la base de datos real: con el inventario DEMO no hay
+// Cuentas (fase D). Solo existen con la base de datos real: sin Supabase configurado no hay
 // usuarios y los guardados viven en el dispositivo.
 
 import "server-only";

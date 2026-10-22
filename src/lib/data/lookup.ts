@@ -1,9 +1,7 @@
 import "server-only";
 import { createClient } from "@supabase/supabase-js";
-import { slugify } from "@/lib/domain/taxonomy";
 import type { Database } from "@/lib/supabase/database.types";
 import { isSupabaseConfigured, SUPABASE_ANON_KEY, SUPABASE_URL } from "@/lib/supabase/env";
-import { mockRepository } from "./mock-repository";
 
 // Comprobaciones ligeras para src/proxy.ts (404 reales y 308 al slug canónico), fuera de
 // `'use cache'` (proxy se ejecuta antes del render). Con Supabase se cachean en memoria unos
@@ -21,7 +19,8 @@ async function remember<T>(key: string, load: () => Promise<T>): Promise<T> {
   return value;
 }
 
-const fromSupabase = () => process.env.REBOARD_DATA_SOURCE === "supabase" && isSupabaseConfigured();
+// Sin Supabase no hay anuncios, catálogo ni tiendas: todo da 404.
+const fromSupabase = () => isSupabaseConfigured();
 
 const anon = () =>
   createClient<Database>(SUPABASE_URL, SUPABASE_ANON_KEY, {
@@ -30,7 +29,7 @@ const anon = () =>
 
 /** Slug canónico de un anuncio visible (publicado, vendido o caducado), o null si no existe. */
 export async function listingSlug(publicId: string): Promise<string | null> {
-  if (!fromSupabase()) return (await mockRepository.byId(publicId))?.slug ?? null;
+  if (!fromSupabase()) return null;
   return remember(`listing:${publicId}`, async () => {
     const { data } = await anon().from("listings").select("slug").eq("public_id", publicId).maybeSingle();
     return data?.slug ?? null;
@@ -47,10 +46,7 @@ export async function catalogSlugs(): Promise<Map<string, Set<string>>> {
     }
     return out;
   };
-  if (!fromSupabase()) {
-    const catalog = await mockRepository.catalog();
-    return build(catalog.map((m) => ({ brand: slugify(m.brand), model: m.slug })));
-  }
+  if (!fromSupabase()) return build([]);
   return remember("catalog", async () => {
     const { data } = await anon().from("board_models").select("slug, brand:brands(slug)");
     return build(
@@ -62,7 +58,7 @@ export async function catalogSlugs(): Promise<Map<string, Set<string>>> {
 }
 
 export async function shopSlugs(): Promise<Set<string>> {
-  if (!fromSupabase()) return new Set((await mockRepository.shops()).map((s) => s.slug));
+  if (!fromSupabase()) return new Set();
   return remember("shops", async () => {
     const { data } = await anon().from("shops").select("slug");
     return new Set((data ?? []).map((s) => s.slug));

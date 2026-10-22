@@ -10,7 +10,7 @@ import {
   type Shape,
 } from "@/lib/domain/taxonomy";
 import { ftLabel } from "@/lib/domain/format";
-import { emptyFilters, finLabel, hasVolumeFilter, type Filters } from "./filters";
+import { emptyFilters, finLabel, hasVolumeFilter, toQuery, type Filters } from "./filters";
 
 /** Nombres legibles de marcas y modelos (vienen del catálogo). */
 export interface CatalogNames {
@@ -169,6 +169,7 @@ export function emptySuggestions(f: Filters): { label: string; filters: Filters 
     out.push({ label, filters: { ...f, volMin: a, volMax: b } });
   }
   if (f.shapes.length) out.push({ label: "Cualquier tipo", filters: { ...f, shapes: [] } });
-  out.push({ label: "Quitar todos los filtros", filters: emptyFilters() });
+  // Solo si hay algo que quitar (sin filtros, la sugerencia sería la misma búsqueda vacía).
+  if (toQuery(f) !== toQuery(emptyFilters())) out.push({ label: "Quitar todos los filtros", filters: emptyFilters() });
   return out;
 }

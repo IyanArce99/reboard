@@ -17,8 +17,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     env:
-      # Fase A: sin backend. Los datos son el inventario DEMO en memoria.
-      REBOARD_DATA_SOURCE: mock
+      # Sin Supabase configurado: la app se construye con la interfaz vacía (sin datos simulados).
       NEXT_TELEMETRY_DISABLED: "1"
     steps:
       - uses: actions/checkout@v4
@@ -50,22 +49,13 @@ jobs:
             exit 1
           fi
 
-      - name: Navegador de Playwright
-        run: npx playwright install --with-deps chromium
-
-      - name: Tests e2e
-        run: npm run test:e2e
-
-      - uses: actions/upload-artifact@v4
-        if: failure()
-        with:
-          name: playwright-report
-          path: |
-            playwright-report/
-            test-results/
-          retention-days: 7
+      # Tests e2e y visuales DESACTIVADOS hasta configurar Supabase: necesitan anuncios, y la app ya
+      # no trae datos simulados. Para reactivarlos: Supabase local + scripts/seed-local-demo.mts y
+      # ejecutarlos contra esos datos (docs/DECISIONS.md, «Sin mocks en la app»).
 
   database:
+    # DESACTIVADO hasta configurar Supabase (decisión del titular). Quitar `if: false` para reactivarlo.
+    if: false
     # Migraciones y tests de seguridad (RLS, privilegios, Storage, búsqueda) contra Supabase LOCAL
     # en Docker. Nunca usa el proyecto remoto ni sus claves.
     runs-on: ubuntu-latest

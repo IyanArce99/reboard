@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { SHAPER_LOCAL, applyCatalogSize, emptyDraft, type PublishDraft } from "@/lib/publish/draft";
 import { ListingInput, draftToInput, firstIssueText, listingSlugFor, toE164 } from "@/lib/publish/schema";
 import { photoPathOk } from "@/lib/publish/save";
-import { DEMO_CATALOG } from "@/mocks/demo-inventory";
+import { DEMO_CATALOG } from "../fixtures/demo-inventory";
 
 const torq = DEMO_CATALOG.find((m) => m.brand === "Torq" && m.slug === "fun-tet")!;
 const size = torq.sizes.find((s) => s.label === `7'2"`)!;

@@ -17,7 +17,6 @@ const salt = [...crypto.getRandomValues(new Uint8Array(32))].map((b) => b.toStri
 writeFileSync(
   ".env.local",
   `# Generado por scripts/env-local.mjs para Supabase LOCAL. No se versiona.
-REBOARD_DATA_SOURCE=supabase
 NEXT_PUBLIC_SITE_URL=http://localhost:3000
 NEXT_PUBLIC_SUPABASE_URL=${env.API_URL}
 NEXT_PUBLIC_SUPABASE_ANON_KEY=${env.ANON_KEY}
@@ -29,4 +28,4 @@ NEXT_PUBLIC_TURNSTILE_SITE_KEY=1x00000000000000000000AA
 TURNSTILE_SECRET_KEY=1x0000000000000000000000000000000AA
 `,
 );
-console.log(".env.local creado para Supabase local (REBOARD_DATA_SOURCE=supabase).");
+console.log(".env.local creado para Supabase local .");

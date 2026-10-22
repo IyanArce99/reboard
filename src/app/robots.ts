@@ -1,10 +1,10 @@
 import type { MetadataRoute } from "next";
-import { getRepository } from "@/lib/data";
+import { siteIndexable } from "@/lib/data";
 import { absoluteUrl } from "@/lib/site";
 
 export default function robots(): MetadataRoute.Robots {
-  // Con datos DEMO no se rastrea nada.
-  if (getRepository().isDemo) return { rules: { userAgent: "*", disallow: "/" } };
+  // Sin datos reales no se rastrea nada.
+  if (!siteIndexable()) return { rules: { userAgent: "*", disallow: "/" } };
   return {
     rules: {
       userAgent: "*",

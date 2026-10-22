@@ -6,11 +6,11 @@
 //  - Origen 'manufacturer' sin medida de catálogo se guarda como 'seller' (lo exige la base de datos).
 
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
-import { mockRepository as mock } from "@/lib/data/mock-repository";
+import { mockRepository as mock } from "../fixtures/mock-repository";
 import { supabaseRepository as db } from "@/lib/data/supabase-repository";
 import type { Listing } from "@/lib/domain/types";
 import { emptyFilters, withFilters, type Filters, type Sort } from "@/lib/search/filters";
-import { buildDemoInventory } from "@/mocks/demo-inventory";
+import { buildDemoInventory } from "../fixtures/demo-inventory";
 import { clearDemo, loadDemo } from "./demo-loader";
 import { serviceClient } from "./local-supabase";
 

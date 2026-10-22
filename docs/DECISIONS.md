@@ -404,3 +404,10 @@ Detalle en `docs/seo-ux-audit.md`.
 - **Marcas en los filtros.** Pasan de un desplegable escondido en «más filtros» a chips con recuento tras «Tipo de tabla», a petición del usuario: la marca es un criterio de búsqueda frecuente en tablas usadas. El modelo aparece solo con una marca elegida.
 - **Copy honesto.** Mientras las alertas sean locales, «Crear alerta», nunca «te avisamos». No hay recordatorio de los 14 días: se dice dónde confirmarlo. No se inventan estadísticas, ni siquiera en la demo.
 - **npm 11.6.2 en CI.** Con npm 10, `npm ci` falla por las dependencias opcionales de `@emnapi`.
+
+## Sin mocks en la app (main)
+- **La rama `mvp` pasa a ser `main`** y todo el trabajo se hace ahí.
+- **La app ya no trae datos simulados.** Con `NEXT_PUBLIC_SUPABASE_URL` y `NEXT_PUBLIC_SUPABASE_ANON_KEY` usa Supabase. Sin ellas usa `emptyRepository`: interfaz vacía (estados vacíos, alertas, calculadora), sin cuentas, `noindex` y `robots.txt` bloqueando todo. Se elimina el aviso DEMO.
+- **El inventario DEMO se mueve a `tests/fixtures`** (`demo-inventory.ts`, `mock-repository.ts`). Lo siguen usando los tests unitarios, los de integración y `scripts/seed-local-demo.mts`, pero nunca llega a la app.
+- **CI:** se mantienen tipos, lint, tests unitarios y build. Los e2e (Playwright) y el job de base de datos quedan desactivados hasta configurar Supabase, por decisión del titular. Para reactivarlos: Supabase local, `npm run env:local`, `npx tsx scripts/seed-local-demo.mts`, ejecutar los e2e contra esos datos y quitar `if: false` del job `database`.
+- **Pendiente:** los e2e y visuales asumen el inventario DEMO (recuentos, ids como `a1040`). Hay que adaptarlos al cargarlo en Supabase local.

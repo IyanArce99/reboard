@@ -5,7 +5,7 @@ import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { listingDbId } from "@/lib/auth/shared";
 import type { Database } from "@/lib/supabase/database.types";
-import { buildDemoInventory } from "@/mocks/demo-inventory";
+import { buildDemoInventory } from "../fixtures/demo-inventory";
 import { clearDemo, loadDemo } from "./demo-loader";
 import { assertLocal, localSupabaseEnv, serviceClient } from "./local-supabase";
 

@@ -10,6 +10,7 @@ import { alertText } from "@/lib/search/describe";
 import { emptyFilters, toQuery, withFilters } from "@/lib/search/filters";
 import { landingPath } from "@/lib/search/landings";
 import { NearSwitcher } from "./NearSwitcher";
+import ui from "@/styles/ui.module.css";
 import styles from "./Home.module.css";
 
 const BANDS: [number, number, string][] = [
@@ -68,6 +69,30 @@ export async function NearSection() {
       : `Todavía hay pocas tablas en ${zn}. Guarda una alerta y consulta en Alertas cuántas coinciden.`;
   const allText = `Ver ${nearPage.total} en ${zn} →`;
   const zoneHref = landingPath(here, null);
+
+  // Sin ninguna tabla publicada (p. ej., antes de conectar la base de datos): nada de carrusel vacío
+  // ni «Ver 0 en …»; un estado vacío honesto con las dos acciones útiles.
+  if (totalActive === 0) {
+    return (
+      <section className={`container ${styles.near}`} aria-labelledby="near-title">
+        <h2 id="near-title" className={styles.h2}>
+          Todavía no hay tablas publicadas
+        </h2>
+        <div className={styles.lowInv}>
+          <div>
+            <strong>Reboard está empezando.</strong> Publica la tuya gratis o guarda una alerta con tu zona y vuelve a mirar
+            cuántas coinciden.
+          </div>
+          <div className={styles.emptyActions}>
+            <Link href="/vender/publicar" className={ui.btnPrimary}>
+              Publicar mi tabla
+            </Link>
+            <AlertButton text={alertText(zoneFilters, names)} query={toQuery(zoneFilters)} className={styles.outlineBtn} />
+          </div>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section className={`container ${styles.near}`} aria-labelledby="near-title">

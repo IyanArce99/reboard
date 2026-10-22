@@ -5,7 +5,8 @@ import type { Filters, Sort } from "@/lib/search/filters";
 /**
  * Acceso a datos de Reboard, por consultas: cada pantalla pide lo que necesita y la
  * implementación decide cómo resolverlo (en memoria en el mock; en SQL con Supabase).
- * Hoy solo existe la implementación DEMO (src/lib/data/mock-repository.ts).
+ * Implementaciones: supabase-repository.ts (datos reales) y empty-repository.ts (sin base de datos).
+ * El repositorio en memoria con el inventario DEMO es un fixture de tests (tests/fixtures).
  * Contrato documentado en docs/ARCHITECTURE.md §2.3.
  */
 

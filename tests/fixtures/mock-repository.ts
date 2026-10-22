@@ -1,3 +1,5 @@
+// Fixture de tests: repositorio en memoria con el inventario DEMO (tests/fixtures/demo-inventory.ts).
+// La app ya no lo usa: sin Supabase configurado, src/lib/data devuelve un repositorio vacío.
 import "server-only";
 import { REGIONS, SHAPES, ZONES, isActiveStatus, slugify } from "@/lib/domain/taxonomy";
 import type { Listing } from "@/lib/domain/types";
@@ -9,8 +11,8 @@ import {
   DEMO_REFERENCE_DATE,
   DEMO_SHOPS,
   buildDemoInventory,
-} from "@/mocks/demo-inventory";
-import type { ListingRepository, SearchOptions } from "./repository";
+} from "./demo-inventory";
+import type { ListingRepository, SearchOptions } from "@/lib/data/repository";
 
 /** Tamaños del inventario demo, como el selector «Inventario» del prototipo. */
 const SIZES = [20, 100, 1000];

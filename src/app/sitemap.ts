@@ -1,5 +1,5 @@
 import type { MetadataRoute } from "next";
-import { getRepository } from "@/lib/data";
+import { getRepository, siteIndexable } from "@/lib/data";
 import { GUIDES } from "@/lib/content/guides";
 import { slugify } from "@/lib/domain/taxonomy";
 import { listingPath } from "@/lib/listing/present";
@@ -12,7 +12,7 @@ import { absoluteUrl } from "@/lib/site";
 // anuncios solo entran si están disponibles (vendidos, caducados o retirados son noindex).
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const repo = getRepository();
-  if (repo.isDemo) return [];
+  if (!siteIndexable()) return [];
   const combos = [
     ...LANDING_FORMS.map((f) => [null, f] as const),
     ...LANDING_PLACES.map((p) => [p, null] as const),

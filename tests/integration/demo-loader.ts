@@ -6,7 +6,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@/lib/supabase/database.types";
 import { slugify } from "@/lib/domain/taxonomy";
 import type { Listing } from "@/lib/domain/types";
-import { DEMO_CATALOG, DEMO_SHOPS } from "@/mocks/demo-inventory";
+import { DEMO_CATALOG, DEMO_SHOPS } from "../fixtures/demo-inventory";
 
 type Sb = SupabaseClient<Database>;
 const STATUS: Record<Listing["status"], Database["public"]["Enums"]["listing_status"]> = {

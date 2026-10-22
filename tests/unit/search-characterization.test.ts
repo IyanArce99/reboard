@@ -7,7 +7,7 @@ import { describe, expect, it } from "vitest";
 import { isActiveStatus } from "@/lib/domain/taxonomy";
 import { withFilters, type Filters, type Sort } from "@/lib/search/filters";
 import { countMatches, matches, sortListings } from "@/lib/search/match";
-import { buildDemoInventory } from "@/mocks/demo-inventory";
+import { buildDemoInventory } from "../fixtures/demo-inventory";
 
 const all = buildDemoInventory(100);
 const active = all.filter((l) => isActiveStatus(l.status));

@@ -1,22 +1,23 @@
 import "server-only";
-import { mockRepository } from "./mock-repository";
+import { isSupabaseConfigured } from "@/lib/supabase/env";
+import { emptyRepository } from "./empty-repository";
 import type { ListingRepository } from "./repository";
 import { supabaseRepository } from "./supabase-repository";
 
 export type { ListingRepository } from "./repository";
 
-export type DataSource = "mock" | "supabase";
-
-export const dataSource = (): DataSource => (process.env.REBOARD_DATA_SOURCE === "supabase" ? "supabase" : "mock");
+export type DataSource = "supabase" | "none";
 
 /**
- * Repositorio de datos según REBOARD_DATA_SOURCE:
- * - `mock` (por defecto): inventario DEMO en memoria (desarrollo, tests, Preview de Vercel).
- * - `supabase`: datos reales (requiere NEXT_PUBLIC_SUPABASE_URL y NEXT_PUBLIC_SUPABASE_ANON_KEY).
+ * Fuente de datos: Supabase si están NEXT_PUBLIC_SUPABASE_URL y NEXT_PUBLIC_SUPABASE_ANON_KEY;
+ * si no, ninguna (interfaz vacía). No hay datos simulados en la app: el inventario DEMO vive solo
+ * en tests/fixtures para los tests.
  */
+export const dataSource = (): DataSource => (isSupabaseConfigured() ? "supabase" : "none");
+
+/** Solo se indexa con datos reales: una web vacía no debe aparecer en buscadores. */
+export const siteIndexable = () => dataSource() === "supabase";
+
 export function getRepository(): ListingRepository {
-  const source = process.env.REBOARD_DATA_SOURCE ?? "mock";
-  if (source === "mock") return mockRepository;
-  if (source === "supabase") return supabaseRepository;
-  throw new Error(`REBOARD_DATA_SOURCE="${source}" no es válido: usa "mock" o "supabase".`);
+  return dataSource() === "supabase" ? supabaseRepository : emptyRepository;
 }

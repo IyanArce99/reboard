@@ -3,11 +3,11 @@
 // (los valores esperados salen del mismo `matches()` que fija search-characterization).
 
 import { describe, expect, it } from "vitest";
-import { mockRepository as repo } from "@/lib/data/mock-repository";
+import { mockRepository as repo } from "../fixtures/mock-repository";
 import { isActiveStatus } from "@/lib/domain/taxonomy";
 import { emptyFilters, withFilters, type Filters } from "@/lib/search/filters";
 import { countMatches, matches, sortListings } from "@/lib/search/match";
-import { buildDemoInventory } from "@/mocks/demo-inventory";
+import { buildDemoInventory } from "../fixtures/demo-inventory";
 
 const all = buildDemoInventory(100);
 const active = all.filter((l) => isActiveStatus(l.status));

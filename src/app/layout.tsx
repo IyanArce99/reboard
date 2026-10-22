@@ -2,12 +2,11 @@ import type { Metadata, Viewport } from "next";
 import { Barlow, Barlow_Condensed, IBM_Plex_Mono } from "next/font/google";
 import { Suspense } from "react";
 import { CompareTray } from "@/components/layout/CompareTray";
-import { DemoBanner } from "@/components/layout/DemoBanner";
 import { Footer } from "@/components/layout/Footer";
 import { Header } from "@/components/layout/Header";
 import { UserStateProvider } from "@/components/user/UserStateProvider";
 import { authEnabled } from "@/lib/auth/config";
-import { getRepository } from "@/lib/data";
+import { siteIndexable } from "@/lib/data";
 import { SITE_NAME, SITE_URL } from "@/lib/site";
 import "./globals.css";
 
@@ -34,7 +33,6 @@ const plexMono = IBM_Plex_Mono({
   preload: false,
 });
 
-const isDemo = getRepository().isDemo;
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
@@ -46,8 +44,8 @@ export const metadata: Metadata = {
   applicationName: SITE_NAME,
   icons: { icon: "/favicon.svg" },
   openGraph: { siteName: SITE_NAME, locale: "es_ES", type: "website" },
-  // Con datos DEMO no se indexa nada: los anuncios simulados no deben aparecer en buscadores.
-  robots: isDemo ? { index: false, follow: false } : undefined,
+  // Sin base de datos la web está vacía: no se indexa hasta que haya anuncios reales.
+  robots: siteIndexable() ? undefined : { index: false, follow: false },
 };
 
 export const viewport: Viewport = {
@@ -55,7 +53,6 @@ export const viewport: Viewport = {
 };
 
 export default async function RootLayout({ children }: LayoutProps<"/">) {
-  const repo = getRepository();
   return (
     <html lang="es" className={`${barlow.variable} ${barlowCondensed.variable} ${plexMono.variable}`}>
       <body>
@@ -63,7 +60,6 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
           <a className="skip-link" href="#contenido">
             Saltar al contenido
           </a>
-          {repo.isDemo && <DemoBanner />}
           <Header />
           <div id="contenido" className="skip-target" tabIndex={-1}>
             {children}
