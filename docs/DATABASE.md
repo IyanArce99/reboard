@@ -136,7 +136,7 @@ create table public.listings (
   previous_price_eur integer check (previous_price_eur between 1 and 20000),
 
   zone_slug     text not null references public.zones(slug),
-  town          text not null check (char_length(town) between 2 and 80),
+  town          text not null check (char_length(town) between 2 and 80),   -- municipio (sin coordenadas)
   contact_method public.contact_method not null default 'whatsapp',
 
   published_at  timestamptz,
@@ -511,6 +511,7 @@ grant select on public.contact_events to authenticated;                         
 | `isDemo` | `is_demo` |
 
 ## Seeds
-- `supabase/seed/zones.sql`: las 9 zonas y la región `canarias` (todos los entornos).
+- `supabase/seed/zones.sql`: las 9 zonas (provincias o islas) y la región `canarias` (todos los entornos).
+- Municipios: si se crea una tabla `towns` para validar `town`, sus datos tienen que venir del INE. No se generan a mano.
 - `supabase/seed/catalog.sql`: marcas, modelos y medidas. **En producción, solo con datos verificados contra la tabla del fabricante** (`source_note`). Hoy son DEMO.
 - `supabase/seed/demo.sql`: tiendas y anuncios DEMO (`is_demo = true`), **solo en staging**. Necesitan perfiles DEMO creados con service role.

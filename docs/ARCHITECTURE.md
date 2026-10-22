@@ -1,6 +1,6 @@
 # Arquitectura — Reboard MVP
 
-Estado: **propuesta** (22-10-2026). No hay nada de esto implementado todavía. Documentos relacionados: [DATABASE.md](DATABASE.md), [SECURITY.md](SECURITY.md), [MVP_IMPLEMENTATION.md](MVP_IMPLEMENTATION.md) y el plan por tareas de [ROADMAP.md](ROADMAP.md).
+Estado: **aprobada** (22-10-2026), con las decisiones de producto de §7. La fase A (preparación) está hecha; el backend (fases B–G) aún no. Documentos relacionados: [DATABASE.md](DATABASE.md), [SECURITY.md](SECURITY.md), [MVP_IMPLEMENTATION.md](MVP_IMPLEMENTATION.md) y el plan por tareas de [ROADMAP.md](ROADMAP.md).
 
 ---
 
@@ -12,9 +12,9 @@ Estado: **propuesta** (22-10-2026). No hay nada de esto implementado todavía. D
 | Next.js 16.4.2 (App Router), React 19.3, TypeScript 5 | `cacheComponents` y `partialPrefetching` activos |
 | Dependencias de producción | Solo `next`, `react`, `react-dom` y `server-only` |
 | Estilos | CSS Modules sobre `src/styles/tokens.css`. Sin librería de UI |
-| Tests | **Ninguno**: no hay Vitest, Jest ni Playwright en el proyecto |
-| CI / despliegue | **Nada configurado**: no hay `.github/`, `vercel.json` ni `.env.example` |
-| Git | **Todo el trabajo está sin commitear**: solo existe el commit inicial de create-next-app |
+| Tests | ✅ Fase A: Vitest (unitarios, caracterización de la búsqueda, contrato del repositorio) y Playwright (rutas, recorridos y capturas locales) |
+| CI / despliegue | ✅ `.github/workflows/ci.yml` y `.env.example`. Vercel aún sin configurar (G3) |
+| Git | ✅ Trabajo commiteado en la rama `mvp` (fase A). `master` sin tocar. Sin remoto configurado |
 | Server Actions | **Ninguna**: hoy toda la escritura es local al navegador |
 
 ### 1.2 Rutas (28 entradas)
@@ -37,7 +37,7 @@ Estado: **propuesta** (22-10-2026). No hay nada de esto implementado todavía. D
 
 ### 1.3 Capa de datos
 - **Interfaz:** `ListingRepository` (`src/lib/data/repository.ts`). Única implementación: `mockRepository`, en memoria, con `isDemo = true`.
-- **Problema principal:** la interfaz devuelve **colecciones completas** (`all()`, `active()`). Todo el filtrado, la ordenación y los recuentos se hacen en JS sobre el inventario entero:
+- **Problema principal (resuelto en A6):** la interfaz devolvía **colecciones completas** (`all()`, `active()`). Todo el filtrado, la ordenación y los recuentos se hacen en JS sobre el inventario entero:
   - `src/lib/search/match.ts`
   - `src/components/search/SearchResults.tsx`
   - `src/components/home/NearSection.tsx`
@@ -46,7 +46,7 @@ Estado: **propuesta** (22-10-2026). No hay nada de esto implementado todavía. D
   - `src/app/api/tablas/route.ts`
   - `src/proxy.ts`
 
-  Con una base de datos real esto tiene que pasar a SQL.
+  Con una base de datos real esto tiene que pasar a SQL. **Desde A6** las páginas piden consultas al repositorio y el filtrado en memoria solo vive en `mock-repository.ts`. Excepción: el asistente refina en el navegador los (máximo 300) resultados de `/api/tablas`.
 - **Modelo:** `src/lib/domain/types.ts` (`Listing`, `Measured<T>`, `CatalogModel`, `Shop`) es correcto y se mantiene como contrato de la UI. La base de datos se mapea a este tipo.
 
 ### 1.4 Dónde hay datos mock o almacenamiento local
@@ -91,7 +91,7 @@ Se **acepta la arquitectura propuesta** (Next.js + Supabase Postgres, Auth y Sto
 2. **Acceso por email con código (OTP) y sin contraseña** como único método del MVP. Encaja con «registro al final», no exige gestionar contraseñas y evita SMS. Google OAuth es opcional y posterior.
 3. **Dos proyectos Supabase: *staging* (con seed DEMO) y *production* (sin datos DEMO).** Así los datos simulados nunca pueden mezclarse con los reales, sin filtros frágiles en RLS.
 4. **Búsqueda en Postgres puro (B-tree y consultas parametrizadas) más una función RPC para los recuentos de facetas.** No hace falta motor de búsqueda externo (Algolia, Meilisearch) con el volumen previsto (miles de anuncios).
-5. **Sin PostGIS en el MVP.** La ubicación sigue siendo zona + localidad, y el filtro de distancia solo funciona con coordenadas (§4).
+5. **Sin PostGIS ni coordenadas.** La ubicación es provincia/isla + municipio (§4).
 
 ```
 Navegador ──► Vercel (Next.js 16)
@@ -122,7 +122,7 @@ Navegador ──► Vercel (Next.js 16)
 - **Sesión:** la del usuario se lee con `'use cache: private'` o detrás de `<Suspense>`, nunca dentro de un `'use cache'` normal. Ver `node_modules/next/dist/docs/01-app/02-guides/authentication-with-cache-components.md`.
 - **Riesgo:** el `use cache` normal es memoria por instancia en serverless. Si la tasa de aciertos es mala en Vercel, se evalúa `'use cache: remote'`.
 
-### 2.3 Nueva capa de datos (sustituye a `all()` / `active()`)
+### 2.3 Capa de datos por consultas (✅ implementada en A6; contrato real en `src/lib/data/repository.ts`)
 ```ts
 interface ListingRepository {
   readonly isDemo: boolean;
@@ -160,16 +160,13 @@ interface ListingRepository {
 
 ---
 
-## 4. Ubicación y distancia
-Hoy los km son simulados. Opciones:
-1. **MVP (recomendado):** solo zona + localidad (texto con sugerencias por zona).
-   - El selector de distancia se oculta cuando no hay coordenadas.
-   - La ordenación «Más cerca» se convierte en «Primero mi zona».
-2. **Después:** tabla `towns` con lat/lng (seed propio de localidades costeras) y distancia aproximada con la fórmula de Haversine en SQL. Sin PostGIS mientras no haga falta.
-
-Es una **decisión pendiente** (ver ROADMAP).
-
----
+## 4. Ubicación (decisión aprobada: municipio y provincia, sin coordenadas)
+- Cada anuncio guarda **provincia o isla** (`zone_slug`, las zonas actuales) y **municipio** (`town`). No se guardan coordenadas precisas.
+- La lista de municipios debe salir de una fuente oficial (INE). Es una tarea de datos de la fase B y **no se inventa**: mientras no exista, el municipio es texto con sugerencias por zona, como hoy.
+- **Sin distancia en km:** el selector de distancia se oculta con datos reales, y la ordenación «Más cerca» pasa a ser «Primero mi zona».
+  - El cambio es visible y se documentará en DECISIONS.md cuando se haga (tarea C2).
+  - Con datos DEMO todo sigue como ahora.
+- «Cerca de ti» sigue usando la cookie `rb_zona` (provincia o isla elegida por el usuario).
 
 ## 5. Despliegue
 - **Vercel:**
@@ -187,13 +184,26 @@ Es una **decisión pendiente** (ver ROADMAP).
    - El banner DEMO y el `noindex` global dependen de `repo.isDemo`. En producción, `REBOARD_DATA_SOURCE=supabase` y `isDemo=false`.
 4. El modo mock solo se elimina cuando los tests de paridad estén cubiertos por fixtures propios.
 
-## 7. Decisiones pendientes (para el equipo)
-La tabla con identificadores, recomendación y tareas bloqueadas está en [ROADMAP.md](ROADMAP.md#decisiones-pendientes).
-1. **Ubicación:** solo zona, o zona + coordenadas de localidad (§4).
-2. **Contacto:** ¿se puede contactar sin sesión? Recomendado: **sí**, para no añadir fricción, con límite por IP (SECURITY §5).
-3. **Reportes:** con o sin sesión. Recomendado: con sesión en el MVP.
-4. **Anuncios vendidos o caducados:** ¿mantener la URL con 200 + noindex, o 410? SEO.md lo deja pendiente.
-5. **Verificación del teléfono:** sin SMS en esta fase, el teléfono de contacto no se verifica. ¿Aceptamos el riesgo en el MVP? Recomendado: sí, con email verificado y reportes.
-6. **Dominio y región:** proyecto de Supabase en la UE (Frankfurt o París) por RGPD. El dominio está sin decidir.
-7. **Textos legales:** privacidad, cookies y condiciones son **bloqueantes** antes de abrir el registro en producción.
-8. **Captcha** en el acceso (Cloudflare Turnstile, integrable en Supabase Auth): recomendable contra bots. Sería un servicio externo nuevo, así que hay que decidirlo.
+## 7. Decisiones de producto (aprobadas el 22-10-2026)
+| Decisión | Aprobado | Efecto técnico |
+|---|---|---|
+| Dominio | **reboard.es** | `NEXT_PUBLIC_SITE_URL=https://reboard.es` en producción; remitente de los emails en ese dominio |
+| Región | **Supabase en la UE** | Proyectos staging y production en la UE |
+| Acceso | **Email con código OTP** | Supabase Auth OTP + SMTP de Resend. Sin contraseñas ni SMS |
+| Registro | **Al final de publicar** | El borrador y las fotos viven en el cliente hasta el paso 5 (MVP_IMPLEMENTATION §2) |
+| Ubicación | **Municipio y provincia, sin coordenadas** | §4 |
+| Contacto | **Sin registro, con límites y protección contra abuso** | `reveal_contact` con límite por IP + CAPTCHA (SECURITY §5) |
+| Reportes | **Requieren sesión** | RLS `reports_insert` solo para `authenticated` |
+| Vendidos y caducados | **Se mantienen sus URLs** | 200 + `noindex` + alternativas, como ahora. Sin 410 |
+| Teléfonos | **Sin verificar al principio** | Riesgo aceptado, con las mitigaciones de SECURITY §5 |
+| CAPTCHA | **En acciones sensibles** | Acceso, contacto, publicar y reportar. El proveedor está pendiente (se recomienda Cloudflare Turnstile, integrable en Supabase Auth) |
+| Emails | **Resend** (transaccionales) | SMTP de Supabase Auth. Más adelante, avisos de alertas |
+| Pagos y mensajería | **Fuera del MVP** | Sin chat propio ni pasarela de pago |
+
+**Siguen pendientes:**
+- **Textos legales** (aviso legal, privacidad, cookies y condiciones): bloquean abrir el registro en producción.
+- **Proveedor de CAPTCHA.**
+- **Plan de Supabase:** se recomienda Pro en producción por las copias de seguridad.
+- **Fuente de municipios:** dataset del INE.
+
+La tabla con las tareas a las que afectan está en [ROADMAP.md](ROADMAP.md#decisiones).

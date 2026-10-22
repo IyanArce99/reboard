@@ -32,7 +32,7 @@ Reglas:
 - **Redirecciones tras el acceso:** solo a rutas internas (comprueba que la ruta empieza por `/` y no por `//`). Así se evitan las redirecciones abiertas.
 - **Límites:**
   - Los de Supabase Auth: envíos de OTP por hora y por email.
-  - Captcha (Cloudflare Turnstile) recomendado. **Es una decisión pendiente** porque añade un servicio.
+  - **CAPTCHA (aprobado) en acciones sensibles:** solicitar el código de acceso, revelar el contacto, publicar y reportar. El token se verifica en el servidor (Server Action o Supabase Auth). El proveedor está pendiente; se recomienda Cloudflare Turnstile, que Supabase Auth admite de forma nativa.
 
 ## 3. Datos y RLS
 - **RLS en todas las tablas de `public`.** Una tabla sin políticas no es accesible para `anon` ni `authenticated`.
@@ -57,7 +57,7 @@ Reglas:
 
 ## 5. Contacto y anti-scraping
 - El teléfono **no aparece en el HTML ni en el JSON-LD**. Se revela al pulsar «Contactar», con una Server Action que llama a `reveal_contact(public_id, user, ip_hash)`.
-- **Límite:** 30 contactos por hora y por IP (aplicado en la función). Con sesión se puede ampliar.
+- **Contacto sin registro (aprobado):** CAPTCHA antes de revelar el número y límite de 30 contactos por hora y por IP (aplicado en la función). Con sesión se puede ampliar.
   - `ip_hash` = HMAC-SHA256(IP, `CONTACT_IP_SALT`). La IP nunca se guarda en claro.
 - WhatsApp se abre con `https://wa.me/{número}?text=…` desde el navegador del comprador. **Reboard no envía mensajes.**
 - **Riesgo aceptado en el MVP:** el teléfono del vendedor no se verifica (no hay SMS en esta fase). Se mitiga con el email verificado, los reportes y la moderación.
@@ -76,7 +76,7 @@ Reglas:
 - **Fotos huérfanas:** las de borradores abandonados se limpian con un cron (más de 7 días sin anuncio publicado).
 
 ## 7. Moderación básica
-- **Reportes** (con sesión): uno por persona y anuncio. Con 3 reportes abiertos, el anuncio pasa automáticamente a `flagged` (sigue visible y aparece en la cola).
+- **Reportes** (requieren sesión, aprobado): uno por persona y anuncio, con CAPTCHA. Con 3 reportes abiertos, el anuncio pasa automáticamente a `flagged` (sigue visible y aparece en la cola).
 - **Panel de moderación** (`/moderacion`, solo `role in (moderator, admin)`): retirar, restaurar o descartar reportes. Cada acción queda registrada en `moderation_actions`.
 - `removed` oculta el anuncio, borra sus fotos de Storage y el dueño no puede reabrirlo.
 - Los roles de moderador los asigna un admin por SQL o service role. No hay interfaz para ello en el MVP.

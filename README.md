@@ -21,7 +21,15 @@ Es un proyecto **Next.js 16 (App Router + TypeScript)** que recrea el prototipo 
 npm install
 npm run dev            # http://localhost:3000
 npm run build && npm start
+
+npm test               # Vitest: lógica, caracterización de la búsqueda y contrato del repositorio
+npm run typecheck      # TypeScript
+npm run lint
+npm run test:e2e       # Playwright (requiere npm run build): rutas, SEO y recorridos
+npm run test:visual    # capturas de referencia, solo local (-- --update-snapshots para regenerarlas)
 ```
+
+Copia `.env.example` a `.env.local` para cambiar las variables. El trabajo en curso está en la rama `mvp`.
 
 Variables opcionales: `REBOARD_DEMO_INVENTORY` (20 | 100 | 1000, 100 por defecto), `NEXT_PUBLIC_SITE_URL` (para canonical y JSON-LD).
 

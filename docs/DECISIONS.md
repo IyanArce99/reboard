@@ -84,3 +84,41 @@ Registro de decisiones tomadas al recrear el prototipo en Next.js. Las que cambi
 - `proxy` también valida `/marcas/*`, `/tiendas/*` y `/guias/*`, para dar 404 reales.
 - `noindexRobots()` (`src/lib/seo.ts`): con datos DEMO, las páginas `noindex` mantienen el `nofollow` del layout.
 - `CompareTray` se oculta en la ficha, el comparador, publicar y el asistente, que tienen su propia barra fija abajo.
+
+## Fase A (preparación, rama `mvp`)
+
+### Git
+- Rama `mvp` creada desde `master`, con un commit de recuperación de todo el trabajo previo. `master` no se ha tocado y no hay remoto configurado.
+- `.gitignore`: se versiona `.env.example` (el resto de `.env*` sigue ignorado). Se ignoran las salidas de Playwright y sus capturas de referencia.
+
+### Tests
+- **Vitest** (`npm test`):
+  - Lógica pura: filtros, títulos, landings, parser, recomendador y presentación.
+  - **Caracterización** de la búsqueda sobre el inventario DEMO, con snapshots.
+  - **Contrato** de `ListingRepository`, pensado para ejecutarse también contra Supabase en C3.
+  - `server-only` se sustituye por un módulo vacío en los tests.
+- **Playwright:**
+  - `npm run test:e2e`: códigos HTTP de 44 URLs, SEO demo y recorridos (buscador, hoja de búsqueda, calculadora, comparador, ficha y ausencia de errores de hidratación).
+  - `npm run test:visual`: capturas de 8 pantallas en escritorio y móvil. **Las referencias no se versionan**, porque dependen del sistema operativo y pesan unos 12 MB. Se generan en local antes de un cambio y se comparan después.
+- Dependencias de desarrollo nuevas: `vitest` y `@playwright/test` (la misma versión que los navegadores ya instalados). No hay dependencias de producción nuevas.
+
+### CI
+- `.github/workflows/ci.yml`: typecheck, lint, tests unitarios, build, comprobación de que no hay secretos de servidor en `.next/static` y e2e.
+- **No se ha ejecutado en GitHub** porque el repositorio no tiene remoto. Sus pasos se han ejecutado en local.
+- ESLint ignora `design/`: es el prototipo de referencia, con 2 errores y 30 avisos que no son de la app.
+
+### Repositorio por consultas (A6)
+- `ListingRepository` ya no expone `all()` ni `active()`. Expone consultas:
+  - `search`, `unknownVolume`, `count` y `facets`;
+  - `byId`, `byIds` y `similar`;
+  - `countBySeller`, `shopListings`, `modelPrices`, `sellerListings` y `listingParams`.
+
+  El filtrado en memoria solo vive en `mock-repository.ts`.
+- `pickOwn` (el vendedor DEMO del panel) pasa al mock como `sellerListings(null)`.
+- `/buscar` calcula los recuentos de las sugerencias solo en el estado vacío, que es donde se muestran.
+- **Excepción documentada:** el asistente sigue refinando en el navegador los resultados de `/api/tablas`, que como máximo son 300. Con datos reales habrá que vigilar ese límite (tarea C2).
+- **Diferencias de comportamiento: ninguna.** Los snapshots de búsqueda, los 54 e2e y las 16 capturas de referencia son idénticos antes y después de A6.
+
+### Otros
+- `unsplash()` pasa a `src/lib/images.ts`: las páginas ya no importan `src/mocks`.
+- `.env.example` documenta las variables actuales y las previstas, sin valores.

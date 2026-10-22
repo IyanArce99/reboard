@@ -4,10 +4,10 @@ Objetivo: el primer recorrido real, de principio a fin, **sin rediseñar la inte
 
 **Fuera de esta fase:** pagos, comisiones, SMS, emails de alertas, geolocalización con distancia real, panel de tiendas e importación CSV.
 
-## 0. Antes de tocar el backend
-1. **Commit del estado actual.** Hoy todo el trabajo está sin commitear (solo existe el commit inicial).
-2. Añadir tests a la lógica pura que se va a reutilizar (`filters`, `match`, `parse`, `recommend`, `landings`). Son la red de seguridad de la migración.
-3. Cambiar la interfaz del repositorio a consultas (`search`, `facets`, `count`, `byPublicId`…) y adaptar el `mockRepository` y las páginas. **Sin cambios visibles:** el build y las capturas tienen que salir iguales.
+## 0. Antes de tocar el backend: ✅ hecho (fase A, rama `mvp`)
+1. ✅ Commit de recuperación del trabajo (rama `mvp`).
+2. ✅ Tests de la lógica pura, caracterización de la búsqueda y contrato del repositorio (Vitest).
+3. ✅ La interfaz del repositorio pasa a consultas (`search`, `facets`, `count`, `byIds`…), sin cambios visibles: las capturas de referencia y los e2e son iguales.
 
 ## 1. Registrarse o iniciar sesión
 - **Ruta nueva `/entrar`** (noindex):
@@ -67,7 +67,7 @@ Se mantiene `PublishFlow` (5 pasos). Los cambios:
   - Paginación con `range` y orden con `order`.
 - **«Litros sin indicar»:** una segunda consulta con `volume_l is null` y el resto de filtros.
 - **Recuentos del panel:** la RPC `listing_facets(p jsonb)`.
-- **Distancia:** sin coordenadas en el MVP. El selector se oculta y «Más cerca» pasa a «Primero mi zona» (decisión D-ubic en ROADMAP).
+- **Ubicación:** provincia o isla + municipio, sin coordenadas (decisión aprobada). El selector de distancia se oculta con datos reales y «Más cerca» pasa a «Primero mi zona».
 - **Paridad:** tests que comparan `search()` y `facets()` contra `matches()` del mock con el mismo inventario sembrado en staging.
 
 ## 6. Contactar con el vendedor
