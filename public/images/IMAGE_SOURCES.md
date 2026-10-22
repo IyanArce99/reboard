@@ -1,4 +1,16 @@
-# Imágenes del prototipo
+# Origen de las imágenes
+
+## Fotografía editorial (Pexels) · `public/images/fotos/`
+Fotos de ambiente de la web: home, vender, guías, tiendas, 404 y cierre de marca. **No son fotos de anuncios** y nunca se usan como tales.
+
+- **Licencia:** Pexels (https://www.pexels.com/license/). Uso gratuito, también comercial, sin atribución obligatoria. Se acredita igualmente.
+- **Límites de la licencia:**
+  - no dar a entender que las personas o marcas que aparecen respaldan Reboard;
+  - no revender las fotos sin modificar.
+- **Créditos:** detalle por foto (autor, enlace, tamaño) en [`fotos/CREDITS.generated.md`](fotos/CREDITS.generated.md). Lista pública en `/creditos`.
+- **Proceso:** `node scripts/photos.mjs` descarga, redimensiona, convierte a WebP, genera el placeholder y reescribe `src/lib/photos.ts`. Para añadir o cambiar una foto, edita la lista del script y vuelve a ejecutarlo.
+
+## Fotos de stock del prototipo (Unsplash) · solo datos DEMO
 
 Todas son **fotos de stock de Unsplash** (licencia Unsplash: uso comercial libre, sin atribución obligatoria) usadas como **placeholder**. En producción, las fotos de los anuncios las sube cada vendedor. Ninguna muestra una tabla real anunciada.
 

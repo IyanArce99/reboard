@@ -13,6 +13,7 @@ Variables: `src/styles/tokens.css`. Referencia visual: la pantalla «Sistema vis
 | teal-tint / teal-ink | #DDF1F0 / #0A4F57 | Filtro aplicado, «Te encaja», comparación activa |
 | sand | #F4C15A (hover #F0B43C, active #E6A92F) | **Solo la acción principal.** Sin etiquetas amarillas. |
 | water | #EFF6F5 | Fondo general |
+| shore / shore-line | #F7F3EA / #E7DFCC | Arena cálida: fondo editorial alterno (cómo funciona, pasos, cabeceras de guías y tiendas, estados vacíos) |
 | white | #FFFFFF | Tarjetas, formularios, header |
 | warm-white | #F4F1EA | Texto y logo sobre petróleo |
 | muted | #4A6670 | Texto secundario (usar este en tamaño pequeño) |
@@ -32,7 +33,8 @@ Variables: `src/styles/tokens.css`. Referencia visual: la pantalla «Sistema vis
 |---|---|---|
 | H1 hero | Barlow Condensed 800, MAYÚSCULAS, line-height .92 | clamp(50px, 5.6vw, 84px) / 38px |
 | H1 interior | Barlow Condensed 800, MAYÚSCULAS | 38px / 26px (asistente: 52 / 34) |
-| H2 sección | Barlow Condensed 800, MAYÚSCULAS | 32–36px / 24–26px |
+| H2 sección | Barlow Condensed 800, MAYÚSCULAS (siempre, vía `SectionHeader`) | clamp(28px, 3vw, 40px) |
+| Eyebrow de sección | IBM Plex Mono 12px, MAYÚSCULAS, tracking .08em, turquesa | 12px |
 | Pregunta del asistente | Barlow Condensed 800 | 46px / 34px |
 | Cuerpo | Barlow 400 | 15–16px, line-height 1.45–1.6 |
 | Lead | Barlow 400 | 19px / 16px |
@@ -120,3 +122,32 @@ Ver `public/brand/README.md`. El logo es el isotipo «R + tabla» más el wordma
 - La tabla entera y visible, con el estado apreciable y la luz natural.
 - En el prototipo son placeholders de stock (`public/images/IMAGE_SOURCES.md`).
 - Los vendidos se muestran en gris (`grayscale(1)`).
+
+
+## Dirección de arte «coastal editorial» (2026-10)
+Detalle y justificación en `docs/DESIGN_AUDIT.md`.
+
+### Piezas de marca (`src/components/brand/`)
+| Componente | Uso |
+|---|---|
+| `Photo` | Foto editorial de `src/lib/photos.ts` con `next/image`, placeholder borroso y calidad 70. `decorative` cuando el texto ya lo explica. `preload` solo en la imagen LCP. |
+| `SectionHeader` | Cabecera única de sección: eyebrow + título condensado + entradilla + enlace. `as="h1"` en cabeceras de página. |
+| `BoardShape` | Silueta SVG de cada forma, a escala relativa. Categorías de la home, modelos de marca, ficha de modelo y resultado del asistente. Tono `soft` para softboard o principiantes. |
+| `EmptyState` / `BoardsIllustration` | Estados vacíos con tres siluetas, título condensado, explicación y acciones. |
+| `ClosingBand` | Cierre de marca con foto y dos acciones (Buscar / Vender). Solo en páginas editoriales. |
+
+### Reglas de fotografía
+- **Dónde sí:** páginas editoriales y de marca (home, vender, guías, tiendas, 404).
+- **Dónde no:** pantallas funcionales (buscar, comparar, guardado, panel, publicar). En ellas mandan los anuncios y, como mucho, se usan siluetas.
+- **Nunca como foto de un anuncio, una marca o un modelo.** En la ficha de modelo se usa la silueta de la forma («Silueta orientativa»).
+- **Tratamiento:**
+  - radio `--rb-r-photo` (24px);
+  - velo petróleo cuando lleva texto encima;
+  - zoom de 1,03 al pasar el ratón solo en tarjetas enlazadas, desactivado con `prefers-reduced-motion`.
+- **Créditos:** en `/creditos` y en `public/images/IMAGE_SOURCES.md`. En las guías, pie de foto con el autor.
+- **Ancho de los bloques:** no combines `container` con una clase de módulo que cambie `max-width` o `margin`, porque el orden de carga del CSS decide cuál gana. Anida un div dentro del contenedor.
+
+### Ritmo
+- **Separación entre secciones:** 64px en escritorio y 44px en móvil. Bloque «arena» con 64px de padding.
+- **Cabeceras de color:** hero petróleo con radio inferior de 32px en home y vender; cabecera arena en guías y tiendas.
+- **Footer:** petróleo con tres columnas (Comprar · Elegir bien · Vender) y una fila inferior con los créditos.

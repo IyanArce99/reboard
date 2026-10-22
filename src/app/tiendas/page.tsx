@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
+import { Photo } from "@/components/brand/Photo";
 import { Breadcrumbs } from "@/components/seo/Breadcrumbs";
 import { ShopDirectory, ToastButton } from "@/components/shops/ShopIslands";
 import { SHOP_TYPE_LABEL, shopPath, shopPlace, usedBoards } from "@/components/shops/shops";
@@ -45,24 +46,32 @@ export default async function ShopsPage() {
   }));
 
   return (
-    <main className={`container ${styles.page}`}>
-      <Breadcrumbs items={[{ label: "Inicio", href: "/" }]} current={{ label: TITLE, href: "/tiendas" }} />
-      <div className={styles.head}>
-        <div>
-          <h1 className={ui.h1}>{TITLE}</h1>
-          <p className={styles.intro}>
-            Sus tablas usadas aparecen junto a las de particulares en todas las búsquedas. Aquí puedes ver su inventario
-            completo, horarios y contacto.
-          </p>
+    <main>
+      <div className={styles.hero}>
+        <div className={`container ${styles.heroInner}`}>
+          <div className={styles.heroText}>
+            <Breadcrumbs items={[{ label: "Inicio", href: "/" }]} current={{ label: TITLE, href: "/tiendas" }} />
+            <p className={styles.eyebrow}>Profesionales</p>
+            <h1 className={styles.title}>{TITLE}</h1>
+            <p className={styles.intro}>
+              Sus tablas usadas aparecen junto a las de particulares en todas las búsquedas. Aquí ves su inventario completo,
+              horarios y cómo contactar.
+            </p>
+            <ToastButton
+              className={`${ui.btnOutline} ${styles.joinBtn}`}
+              text="Alta profesional: subida por CSV, feed autorizado o carga asistida por nuestro equipo. El alta aún no está abierta."
+            >
+              Añadir mi tienda o escuela
+            </ToastButton>
+          </div>
+          <div className={styles.heroPhoto}>
+            <Photo slug="tablas-alquiler" sizes="(max-width: 759px) 100vw, 40vw" preload />
+          </div>
         </div>
-        <ToastButton
-          className={`${ui.btnOutline} ${styles.joinBtn}`}
-          text="Alta profesional: subida por CSV, feed autorizado o carga asistida por nuestro equipo. El alta aún no está abierta."
-        >
-          Añadir mi tienda o escuela
-        </ToastButton>
       </div>
-      <ShopDirectory cards={cards} />
+      <div className={`container ${styles.page}`}>
+        <ShopDirectory cards={cards} />
+      </div>
     </main>
   );
 }

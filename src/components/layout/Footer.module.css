@@ -1,63 +1,113 @@
 .footer {
-  border-top: 1px solid var(--rb-line);
-  background: #e3eeed;
   margin-top: auto;
+  background: var(--rb-petrol);
+  color: var(--rb-warm-white);
 }
 
 .inner {
   max-width: var(--rb-container);
   margin: 0 auto;
-  padding: 36px var(--rb-pad-x) 28px;
+  padding: 56px var(--rb-pad-x) 36px;
   display: grid;
-  grid-template-columns: 2fr 1fr 1fr 1fr;
-  gap: 24px;
-  font-size: 14px;
+  grid-template-columns: 1.6fr 1fr 1fr 1fr;
+  gap: 32px;
+  font-size: 15px;
 }
 
 .brand,
 .col {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 10px;
 }
 
 .tagline {
+  margin-top: 6px;
   font-family: var(--rb-font-display);
-  font-size: 18px;
+  font-size: 24px;
   font-weight: 800;
   text-transform: uppercase;
-  color: var(--rb-teal);
+  color: var(--rb-teal-light);
 }
 
 .muted {
-  color: var(--rb-muted);
-  line-height: 1.45;
+  color: var(--rb-on-petrol-muted);
+  line-height: 1.5;
+  max-width: 38ch;
+}
+
+.colTitle {
+  font-family: var(--rb-font-mono);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--rb-teal-light);
+  margin-bottom: 4px;
 }
 
 .col a {
-  color: var(--rb-muted);
+  color: var(--rb-warm-white);
   padding: 2px 0;
 }
 .col a:hover {
-  color: var(--rb-petrol);
+  color: var(--rb-white);
   text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.footer a:focus-visible {
+  outline-color: var(--rb-teal-light);
+}
+
+.bottom {
+  max-width: var(--rb-container);
+  margin: 0 auto;
+  padding: 18px var(--rb-pad-x) 28px;
+  border-top: 1px solid var(--rb-petrol-3);
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 8px 24px;
+  font-size: 13px;
+  color: var(--rb-on-petrol-muted);
+}
+.bottom a {
+  color: var(--rb-on-petrol-muted);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.bottom a:hover {
+  color: var(--rb-warm-white);
+}
+
+@media (max-width: 1099px) {
+  .inner {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  .brand {
+    grid-column: 1 / -1;
+  }
 }
 
 @media (max-width: 759px) {
   .inner {
     grid-template-columns: 1fr 1fr;
+    padding-top: 40px;
+    gap: 24px 16px;
   }
   .brand {
     grid-column: 1 / -1;
   }
+  .col {
+    gap: 0;
+  }
   /* Áreas táctiles de 44 px en móvil. */
-  .col a {
+  .col a,
+  .bottom a {
     min-height: 44px;
     display: flex;
     align-items: center;
     padding: 0;
-  }
-  .col {
-    gap: 0;
   }
 }

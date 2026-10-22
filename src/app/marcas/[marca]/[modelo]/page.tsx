@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
-import Image from "next/image";
 import { notFound } from "next/navigation";
+import { BoardShape } from "@/components/brand/BoardShape";
 import { brandPath, modelPath, sizeIndexOf } from "@/components/catalog/catalog";
 import { ModelSizes, type ModelSizeView } from "@/components/catalog/ModelSizes";
 import { ListingCard } from "@/components/listing/ListingCard";
@@ -12,12 +12,9 @@ import { fmtIn, inToCm } from "@/lib/domain/format";
 import { listingPath, listingTitle } from "@/lib/listing/present";
 import { searchHref, toQuery, withFilters } from "@/lib/search/filters";
 import { absoluteUrl } from "@/lib/site";
-import { unsplash } from "@/lib/images";
-import ui from "@/styles/ui.module.css";
 import styles from "@/components/catalog/Catalog.module.css";
 
 /** Foto de stock del prototipo: aquí irá la foto autorizada de la marca. */
-const STOCK_PHOTO = "1621951289270-b942dc5f4320";
 
 export async function generateStaticParams() {
   const catalog = await getRepository().catalog();
@@ -95,13 +92,13 @@ export default async function ModelPage({ params }: PageProps<"/marcas/[marca]/[
         allHref={searchHref(withFilters({ brand: brandSlug, model: m.slug }))}
         photo={
           <div className={styles.photo}>
-            <Image src={unsplash(STOCK_PHOTO, 1200)} alt="" fill sizes="(max-width: 759px) 100vw, 50vw" preload />
-            <span className={styles.stockTag}>foto de stock · aquí iría la foto autorizada de la marca</span>
+            <BoardShape shape={m.shape} size={300} title={`Silueta orientativa de una ${SHAPE_INFO[m.shape].label.toLowerCase()}`} />
+            <span className={styles.stockTag}>Silueta orientativa de una {SHAPE_INFO[m.shape].label.toLowerCase()}</span>
           </div>
         }
         intro={
           <>
-            <h1 className={ui.h1}>
+            <h1 className={styles.title}>
               {m.brand} {m.model}
             </h1>
             <div className={styles.tags}>

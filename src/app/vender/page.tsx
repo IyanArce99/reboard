@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { Photo } from "@/components/brand/Photo";
+import { SectionHeader } from "@/components/brand/SectionHeader";
 import { getRepository } from "@/lib/data";
 import ui from "@/styles/ui.module.css";
 import styles from "@/components/publish/SellLanding.module.css";
@@ -14,52 +16,62 @@ export const metadata: Metadata = {
 
 const BENEFITS = [
   ["Gratis y sin comisión", "Publicar no cuesta nada y no nos quedamos con parte de la venta."],
-  [
-    "Contacto directo",
-    "Quien la quiera te escribe por WhatsApp o te llama. No gestionamos pagos ni envíos: enseñas la tabla en persona.",
-  ],
-  ["Te encuentran por sus medidas", "Litros, medidas, tipo y ubicación: tu tabla sale a quien busca exactamente eso."],
-  ["Registro al final", "Empiezas por las fotos. Solo te pedimos verificar el teléfono al final, antes de publicar."],
+  ["Hablas directamente", "Quien la quiera te escribe por WhatsApp o te llama. Sin chats intermedios ni pagos por la plataforma."],
+  ["Te encuentran por sus medidas", "Litros, largo, tipo y zona: tu tabla aparece a quien busca exactamente eso."],
+  ["Sin registrarte antes", "Empiezas por las fotos. La cuenta se crea al final, con tu email, justo antes de publicar."],
 ] as const;
 
 const STEPS = [
-  "Fotos: hazlas con el móvil o elígelas de la galería.",
-  "La tabla: marca, modelo y medida del catálogo, o pega las medidas que tengas escritas.",
-  "Tipo y estado: forma, construcción, estado y reparaciones.",
-  "Precio, zona y cómo quieres que te contacten.",
-  "Revisa cómo se verá y verifica tu teléfono.",
+  ["Fotos", "Con el móvil o desde la galería. La tabla entera por arriba y por abajo, y los detalles: quillas, cantos y reparaciones."],
+  ["La tabla", "Marca, modelo y medida del catálogo, o escribe las medidas que tengas apuntadas."],
+  ["Tipo y estado", "Forma, construcción, estado y reparaciones. Contarlo todo ahorra mensajes y viajes en balde."],
+  ["Precio y zona", "Tu precio, el municipio donde se puede ver y cómo prefieres que te contacten."],
+  ["Revisa y publica", "Ves cómo quedará el anuncio y confirmas tu email."],
+] as const;
+
+const TIPS = [
+  "Fotos con luz natural y la tabla entera: es lo primero que se mira.",
+  "Pon los litros si los sabes. Es el dato por el que más se busca.",
+  "Cuenta las reparaciones, aunque sean pequeñas. Da confianza y evita sorpresas al quedar.",
+  "Precio realista: mira lo que piden por tablas parecidas en la ficha de su modelo.",
 ];
 
 export default function VenderPage() {
   const isDemo = getRepository().isDemo;
   return (
-    <main className={`container ${styles.page}`}>
-      <section className={styles.hero}>
-        <div className={styles.kicker}>Vender tu tabla</div>
-        <h1 className={ui.h1}>Vende tu tabla de surf usada</h1>
-        <p className={styles.lead}>
-          Su próximo surfista ya la está buscando. Publícala gratis desde el móvil, sin comisión.
-        </p>
-        <div className={styles.ctas}>
-          <Link href="/vender/publicar" className={styles.cta}>
-            Publicar gratis
-          </Link>
-          <Link href="/panel" className={styles.secondary}>
-            Ya tengo anuncios: ir a mi panel
-          </Link>
+    <main>
+      <section className={styles.heroWrap}>
+        <div className={`container ${styles.hero}`}>
+          <div className={styles.heroText}>
+            <p className={styles.kicker}>Vender tu tabla</p>
+            <h1 className={styles.h1}>
+              Vende tu tabla de surf <span>usada</span>
+            </h1>
+            <p className={styles.lead}>
+              Si lleva meses parada, alguien la está buscando con esas medidas. Publícala gratis desde el móvil en cinco pasos.
+            </p>
+            <div className={styles.ctas}>
+              <Link href="/vender/publicar" className={styles.cta}>
+                Publicar gratis
+              </Link>
+              <Link href="/panel" className={styles.secondary}>
+                Ya tengo anuncios
+              </Link>
+            </div>
+            {isDemo && (
+              <p className={styles.demo}>
+                <span className={ui.demoTag}>DEMO</span> Puedes probar el formulario, pero todavía no se publican anuncios reales.
+              </p>
+            )}
+          </div>
+          <div className={styles.heroPhoto}>
+            <Photo slug="tabla-usada-tarima" sizes="(max-width: 759px) 100vw, 40vw" preload position="50% 45%" />
+          </div>
         </div>
-        {isDemo && (
-          <p className={styles.demo}>
-            <span className={ui.demoTag}>DEMO</span> Reboard está en fase de demostración: puedes probar el formulario, pero
-            todavía no publica anuncios reales.
-          </p>
-        )}
       </section>
 
-      <section aria-labelledby="vender-por-que" className={styles.block}>
-        <h2 id="vender-por-que" className={styles.h2}>
-          Por qué venderla en Reboard
-        </h2>
+      <section className={`container ${styles.block}`} aria-labelledby="vender-por-que">
+        <SectionHeader id="vender-por-que" eyebrow="Por qué aquí" title="Hecho para vender tablas, no de todo" />
         <ul className={styles.benefits}>
           {BENEFITS.map(([t, d]) => (
             <li key={t} className={styles.benefit}>
@@ -70,26 +82,44 @@ export default function VenderPage() {
         </ul>
       </section>
 
-      <section aria-labelledby="vender-como" className={styles.block}>
-        <h2 id="vender-como" className={styles.h2}>
-          Cómo se publica
-        </h2>
-        <ol className={styles.steps}>
-          {STEPS.map((s, i) => (
-            <li key={s}>
-              <span className={styles.num} aria-hidden="true">
-                {i + 1}
-              </span>
-              {s}
-            </li>
-          ))}
-        </ol>
-        <p className={styles.note}>
-          Cada 14 días te pediremos que confirmes que sigue disponible; si no lo confirmas, el anuncio caduca a los 30.
-        </p>
-        <Link href="/vender/publicar" className={styles.cta}>
-          Publicar gratis
-        </Link>
+      <section className={styles.howWrap} aria-labelledby="vender-como">
+        <div className={`container ${styles.how}`}>
+          <div>
+            <SectionHeader id="vender-como" eyebrow="Cómo se publica" title="Cinco pasos, unos minutos" />
+            <ol className={styles.steps}>
+              {STEPS.map(([t, d], i) => (
+                <li key={t}>
+                  <span className={styles.num} aria-hidden="true">
+                    {String(i + 1).padStart(2, "0")}
+                  </span>
+                  <div>
+                    <h3 className={styles.stepT}>{t}</h3>
+                    <p className={styles.stepD}>{d}</p>
+                  </div>
+                </li>
+              ))}
+            </ol>
+            <p className={styles.note}>
+              Cada 14 días te pediremos que confirmes que sigue disponible. Si no lo confirmas, el anuncio caduca a los 30 días.
+            </p>
+            <Link href="/vender/publicar" className={styles.cta}>
+              Empezar con las fotos
+            </Link>
+          </div>
+          <aside className={styles.tips} aria-labelledby="vender-consejos">
+            <div className={styles.tipsPhoto}>
+              <Photo slug="tablas-usadas-quillas" sizes="(max-width: 759px) 100vw, 34vw" decorative />
+            </div>
+            <h3 id="vender-consejos" className={styles.tipsTitle}>
+              Para que se venda antes
+            </h3>
+            <ul>
+              {TIPS.map((t) => (
+                <li key={t}>{t}</li>
+              ))}
+            </ul>
+          </aside>
+        </div>
       </section>
     </main>
   );

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { BoardsIllustration } from "@/components/brand/EmptyState";
 import { ListingCard } from "@/components/listing/ListingCard";
 import { Breadcrumbs, type Crumb } from "@/components/seo/Breadcrumbs";
 import { JsonLd } from "@/components/seo/JsonLd";
@@ -173,6 +174,7 @@ export async function SearchResults({ filters: f, view, here, title, intro, crum
               </>
             ) : (
               <div className={styles.empty}>
+                <BoardsIllustration />
                 <h2 className={styles.emptyTitle}>No encontramos tablas con estos filtros</h2>
                 <div className={styles.emptyTag}>Tu próxima tabla ya existe; puede que aún no esté publicada.</div>
                 <p className={styles.emptyText}>Prueba a ampliar la búsqueda. Entre paréntesis, cuántas tablas aparecerían.</p>

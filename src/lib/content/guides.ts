@@ -1,3 +1,5 @@
+import type { PhotoSlug } from "@/lib/photos";
+
 // Guías de compra (/guias). Plantilla del prototipo (design/prototype/Reboard.dc.html, «Guía»).
 //
 // DEMO: el único contenido es el de ejemplo del prototipo («contenido de demostración»). Las guías
@@ -19,7 +21,8 @@ export interface Guide {
   /** Sección de las migas («Comprar», «Vender»…). */
   section: string;
   shortAnswer: string;
-  image: { unsplashId: string; alt: string };
+  /** Foto editorial de cabecera (src/lib/photos.ts). */
+  photo: PhotoSlug;
   checklist: GuideCheckRow[];
   /** ISO (AAAA-MM-DD). */
   updatedAt: string;
@@ -37,7 +40,7 @@ export const GUIDES: Guide[] = [
     section: "Comprar",
     shortAnswer:
       "revisa golpes y reparaciones, zonas blandas o delaminadas, el estado de las cajas de quillas y que las medidas coincidan con lo anunciado. Una reparación bien hecha no es un problema; una entrada de agua sí.",
-    image: { unsplashId: "1632334738554-95c79fb27eb7", alt: "Tabla blanca sobre la arena" },
+    photo: "tablas-usadas-quillas",
     checklist: [
       { zone: "Cantos y nose", ok: "golpes pequeños sellados con resina", ko: "grietas abiertas o fibra a la vista" },
       { zone: "Cubierta", ok: "marcas de pies y talones (pressure dings)", ko: "zonas blandas que ceden al presionar" },

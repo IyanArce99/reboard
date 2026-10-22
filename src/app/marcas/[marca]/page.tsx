@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { BoardShape } from "@/components/brand/BoardShape";
 import { brandPath, modelMeta, modelPath, modelRange, usedCount } from "@/components/catalog/catalog";
 import { ListingCard } from "@/components/listing/ListingCard";
 import { Breadcrumbs } from "@/components/seo/Breadcrumbs";
@@ -67,12 +68,14 @@ export default async function BrandPage({ params }: PageProps<"/marcas/[marca]">
       <Breadcrumbs items={[{ label: "Inicio", href: "/" }]} current={{ label: b.name, href: brandPath(b.slug) }} />
       <div className={styles.head}>
         <div className={styles.headText}>
-          {/* Los logotipos de las marcas no están autorizados: marcador neutro con el nombre. */}
-          <div className={styles.logo} aria-hidden="true">
-            <span className={styles.logoName}>{b.name}</span>
-            <span className={styles.logoNote}>espacio para el logotipo autorizado</span>
+          {/* Los logotipos de las marcas no están autorizados: monograma tipográfico propio. */}
+          <div className={styles.brandMark} aria-hidden="true">
+            <span className={styles.monogram}>{b.name.charAt(0)}</span>
+            <span className={styles.brandMarkText}>
+              Marca · {models.length} {models.length === 1 ? "modelo" : "modelos"} en el catálogo
+            </span>
           </div>
-          <h1 className={ui.h1}>Tablas {b.name} de segunda mano</h1>
+          <h1 className={styles.title}>Tablas {b.name} de segunda mano</h1>
           {content && (
             <p className={styles.intro}>
               {content.intro}
@@ -87,7 +90,7 @@ export default async function BrandPage({ params }: PageProps<"/marcas/[marca]">
 
       <section className={styles.section} aria-labelledby="usadas-title">
         <h2 id="usadas-title" className={styles.h2}>
-          {b.name} de segunda mano · {usedPage.total}
+          {b.name} en venta <span className={styles.h2Count}>{usedPage.total}</span>
         </h2>
         {used.length > 0 ? (
           <>
@@ -117,6 +120,9 @@ export default async function BrandPage({ params }: PageProps<"/marcas/[marca]">
               const n = modelCounts[i];
               return (
                 <Link key={m.slug} href={modelPath(m)} className={styles.modelCard}>
+                  <span className={styles.modelShape}>
+                    <BoardShape shape={m.shape} size={88} />
+                  </span>
                   <span className={styles.modelName}>{m.model}</span>
                   <span className={styles.modelMeta}>{modelMeta(m)}</span>
                   <span className={styles.modelRange}>{modelRange(m)}</span>

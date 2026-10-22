@@ -87,6 +87,9 @@ Un único proyecto Supabase (`reboard`, UE, plan gratuito). Todo se ha hecho y p
 | C5 ✅ | `next.config`: host de Storage en `remotePatterns`; `dangerouslyAllowLocalIP` solo con Supabase local. (Cabeceras de seguridad y CSP: fase G) | C1 | Fotos de Storage servidas por `next/image` |
 | C6 ✅ | Rendimiento con 100, 1.000 y 10.000 anuncios (`npm run perf:local`) y optimización de la búsqueda en SQL | C2 | p95 < 25 ms con 1.000 y < 160 ms con 10.000 (sin caché) |
 
+### Diseño: dirección de arte y copy ✅ en local, el 22-10-2026
+Dirección «coastal editorial» con fotografía de Pexels (local, optimizada y acreditada), siluetas SVG de las formas, cabecera de sección única, footer de marca y copy revisado. Rediseñadas la home, `/vender`, `/guias`, la guía, `/tiendas`, marca y modelo, el resultado del asistente, el bloque «Antes de comprar» de la ficha, los estados vacíos y la 404. Nueva página `/creditos`. Detalle, fotos, copy antes/después y pendientes en `docs/DESIGN_AUDIT.md`.
+
 ### Fase D: cuentas
 | # | Tarea | Depende de | Hecho cuando |
 |---|---|---|---|

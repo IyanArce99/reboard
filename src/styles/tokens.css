@@ -12,6 +12,8 @@
   --rb-sand:#F4C15A;          /* SOLO acción principal (Buscar, Contactar, Publicar, Vender gratis) */
   --rb-sand-hover:#F0B43C; --rb-sand-active:#E6A92F;
   --rb-water:#EFF6F5;         /* fondo general */
+  --rb-shore:#F7F3EA;         /* arena cálida: fondo editorial alterno (secciones de marca, guías) */
+  --rb-shore-line:#E7DFCC;    /* bordes sobre --rb-shore */
   --rb-white:#FFFFFF;         /* tarjetas, formularios */
   --rb-warm-white:#F4F1EA;    /* texto/logo sobre petróleo */
   /* Texto */
@@ -27,6 +29,7 @@
   --rb-font-ui:'Barlow',sans-serif;                /* 400–700: texto, precios, litros, filtros */
   --rb-font-mono:'IBM Plex Mono',monospace;        /* medidas técnicas, contadores */
   /* Radios */
+  --rb-r-photo:24px;          /* bloques de fotografía editorial */
   --rb-r-chip:999px; --rb-r-input:10px; --rb-r-btn:12px; --rb-r-card:16px; --rb-r-panel:18px; --rb-r-sheet:24px; --rb-r-hero:32px;
   /* Espaciado (escala 4px) */
   --rb-s-1:4px; --rb-s-2:8px; --rb-s-3:12px; --rb-s-4:16px; --rb-s-6:24px; --rb-s-8:32px; --rb-s-14:56px;

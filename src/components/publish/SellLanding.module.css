@@ -1,20 +1,26 @@
-/* Landing /vender. No existe en el prototipo: reutiliza tokens y piezas de la home y de publicar. */
+/* Landing /vender: foto + confianza + pasos (docs/DESIGN_AUDIT.md). */
 
-.page {
-  max-width: 1080px;
-  padding-top: 32px;
-  padding-bottom: 64px;
-  display: flex;
-  flex-direction: column;
-  gap: 40px;
+.heroWrap {
+  background: var(--rb-petrol);
+  color: var(--rb-warm-white);
+  border-radius: 0 0 32px 32px;
+  overflow: hidden;
 }
 
 .hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr);
+  gap: 48px;
+  align-items: center;
+  padding-top: 56px;
+  padding-bottom: 56px;
+}
+
+.heroText {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: 12px;
-  max-width: 720px;
+  gap: 14px;
 }
 
 .kicker {
@@ -22,78 +28,86 @@
   font-size: 12px;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: var(--rb-teal-text);
+  color: var(--rb-teal-light);
+}
+
+.h1 {
+  font-family: var(--rb-font-display);
+  font-size: clamp(44px, 5.4vw, 76px);
+  font-weight: 800;
+  line-height: 0.92;
+  text-transform: uppercase;
+  text-wrap: balance;
+}
+.h1 span {
+  color: var(--rb-teal-light);
 }
 
 .lead {
-  font-size: 17px;
+  font-size: 19px;
   line-height: 1.5;
-  color: var(--rb-muted);
-  max-width: 52ch;
+  color: #d2dfe1;
+  max-width: 46ch;
 }
 
 .ctas {
   display: flex;
   flex-wrap: wrap;
-  align-items: center;
-  gap: 10px 18px;
-  margin-top: 6px;
+  gap: 10px;
+  margin-top: 8px;
 }
 
-/* Amarillo: acción principal. */
-.cta {
+.cta,
+.secondary {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  align-self: flex-start;
-  height: 56px;
-  padding: 0 28px;
+  height: 52px;
+  padding: 0 24px;
   border-radius: 12px;
+  font-size: 16px;
+  font-weight: 800;
+}
+.cta {
   background: var(--rb-sand);
   color: var(--rb-petrol);
-  font-size: 17px;
-  font-weight: 800;
 }
 .cta:hover {
   background: var(--rb-sand-hover);
 }
-.cta:active {
-  background: var(--rb-sand-active);
-}
-.cta:focus-visible {
-  outline-color: var(--rb-petrol);
-}
-
 .secondary {
-  display: inline-flex;
-  align-items: center;
-  min-height: 44px;
-  font-size: 15px;
-  font-weight: 700;
-  color: var(--rb-teal-text);
-  text-decoration: underline;
-  text-underline-offset: 3px;
+  border: 1.5px solid rgba(244, 241, 234, 0.7);
+  color: var(--rb-warm-white);
+}
+.secondary:hover {
+  border-color: var(--rb-warm-white);
+  background: rgba(255, 255, 255, 0.08);
+}
+.heroWrap a:focus-visible {
+  outline-color: var(--rb-teal-light);
 }
 
 .demo {
+  font-size: 14px;
+  color: var(--rb-on-petrol-muted);
   display: flex;
-  flex-wrap: wrap;
+  gap: 8px;
   align-items: center;
-  gap: 6px;
-  font-size: 13px;
-  color: var(--rb-muted);
-  line-height: 1.45;
+  flex-wrap: wrap;
+}
+
+.heroPhoto {
+  position: relative;
+  aspect-ratio: 4 / 5;
+  max-height: 560px;
+  width: 100%;
+  border-radius: var(--rb-r-photo);
+  overflow: hidden;
+  background: var(--rb-petrol-2);
 }
 
 .block {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
-.h2 {
-  font-size: 22px;
-  font-weight: 800;
+  padding-top: 64px;
 }
 
 .benefits {
@@ -102,67 +116,115 @@
   padding: 0;
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 12px;
+  gap: 16px;
 }
 
 .benefit {
-  padding: 18px;
-  border-radius: 16px;
+  padding: 22px 20px;
+  border-top: 3px solid var(--rb-teal);
   background: var(--rb-white);
-  border: 1px solid var(--rb-line);
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
+  border-radius: 0 0 16px 16px;
 }
 .benefit p {
+  margin-top: 6px;
   font-size: 15px;
   line-height: 1.5;
   color: var(--rb-muted);
 }
 
 .h3 {
-  margin: 0;
-  font-size: 17px;
-  font-weight: 800;
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 1.25;
+}
+
+.howWrap {
+  margin-top: 72px;
+  padding: 64px 0 72px;
+  background: var(--rb-shore);
+  border-top: 1px solid var(--rb-shore-line);
+}
+
+.how {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(0, 0.8fr);
+  gap: 56px;
+  align-items: start;
 }
 
 .steps {
   list-style: none;
-  margin: 0;
+  margin: 0 0 20px;
   padding: 0;
   display: flex;
   flex-direction: column;
-  gap: 10px;
-  max-width: 640px;
 }
 .steps li {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  font-size: 16px;
-  line-height: 1.45;
+  display: grid;
+  grid-template-columns: 56px minmax(0, 1fr);
+  gap: 14px;
+  padding: 18px 0;
+  border-top: 1px solid var(--rb-shore-line);
 }
 
 .num {
-  flex: none;
-  width: 32px;
-  height: 32px;
-  border-radius: 999px;
-  background: var(--rb-petrol);
-  color: var(--rb-white);
-  font-family: var(--rb-font-mono);
-  font-size: 14px;
-  font-weight: 600;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  font-family: var(--rb-font-display);
+  font-size: 36px;
+  font-weight: 800;
+  line-height: 0.9;
+  color: var(--rb-teal);
+}
+
+.stepT {
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.stepD {
+  margin-top: 4px;
+  font-size: 15px;
+  line-height: 1.55;
+  color: var(--rb-muted);
+  max-width: 56ch;
 }
 
 .note {
   font-size: 14px;
-  color: var(--rb-muted);
   line-height: 1.5;
-  max-width: 640px;
+  color: var(--rb-muted);
+  margin-bottom: 18px;
+  max-width: 60ch;
+}
+
+.tips {
+  background: var(--rb-white);
+  border-radius: var(--rb-r-photo);
+  overflow: hidden;
+  border: 1px solid var(--rb-shore-line);
+}
+.tips ul {
+  margin: 0;
+  padding: 0 24px 24px 42px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  font-size: 15px;
+  line-height: 1.5;
+  color: var(--rb-muted);
+}
+
+.tipsPhoto {
+  position: relative;
+  aspect-ratio: 3 / 2;
+}
+
+.tipsTitle {
+  padding: 20px 24px 10px;
+  font-family: var(--rb-font-display);
+  font-size: 26px;
+  font-weight: 800;
+  text-transform: uppercase;
+  line-height: 1;
 }
 
 @media (max-width: 1099px) {
@@ -172,19 +234,40 @@
 }
 
 @media (max-width: 759px) {
-  .page {
-    padding-top: 18px;
-    padding-bottom: 40px;
-    gap: 32px;
+  .heroWrap {
+    border-radius: 0 0 22px 22px;
+  }
+  .hero {
+    grid-template-columns: 1fr;
+    gap: 28px;
+    padding-top: 28px;
+    padding-bottom: 28px;
+  }
+  .heroPhoto {
+    aspect-ratio: 4 / 3;
+    order: -1;
+  }
+  .lead {
+    font-size: 17px;
+  }
+  .ctas a {
+    flex: 1 1 100%;
+  }
+  .block {
+    padding-top: 44px;
   }
   .benefits {
     grid-template-columns: 1fr;
   }
-  .cta {
-    align-self: stretch;
-    width: 100%;
+  .howWrap {
+    margin-top: 48px;
+    padding: 44px 0 48px;
   }
-  .ctas {
+  .how {
+    grid-template-columns: 1fr;
+    gap: 32px;
+  }
+  .how .cta {
     width: 100%;
   }
 }

@@ -256,8 +256,19 @@ export default async function FichaPage({ params }: PageProps<"/anuncio/[slugId]
                 )}
               </div>
             </section>
-            <section className={styles.before}>
-              <strong>Antes de comprar.</strong> Reboard no gestiona pagos ni envíos. Queda en un sitio público, revisa cantos, fondo y cajas de quillas, y paga al recoger. Desconfía de quien pida señal, envío por mensajería o pagos por adelantado.
+            <section className={styles.before} aria-labelledby="antes-title">
+              <h2 id="antes-title" className={styles.beforeTitle}>
+                Antes de comprar
+              </h2>
+              <ul>
+                <li>Queda en un sitio público y mira la tabla en persona.</li>
+                <li>Revisa cantos, fondo y cajas de quillas. Presiona la cubierta: no debe ceder.</li>
+                <li>Paga al recogerla. Desconfía de quien pida señal, envío por mensajería o pagos por adelantado.</li>
+              </ul>
+              <p>
+                Reboard no gestiona pagos ni envíos.{" "}
+                <Link href="/guias/que-revisar-al-comprar-una-tabla-usada">Qué revisar en una tabla usada →</Link>
+              </p>
             </section>
           </div>
         </div>

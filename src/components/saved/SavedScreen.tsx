@@ -5,11 +5,13 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { EmptyState } from "@/components/brand/EmptyState";
 import { ListingCard } from "@/components/listing/ListingCard";
 import { useUserState, type SavedAlert } from "@/components/user/UserStateProvider";
 import { eur } from "@/lib/domain/format";
 import type { Listing } from "@/lib/domain/types";
 import { useHereZone, useListings } from "./useListings";
+import ui from "@/styles/ui.module.css";
 import styles from "./Saved.module.css";
 
 type Tab = "saved" | "alerts";
@@ -50,9 +52,16 @@ function SavedList() {
 
   if (ready && !saved.length) {
     return (
-      <div className={styles.empty}>
-        Aún no has guardado tablas. Pulsa el corazón en cualquier anuncio y aquí verás si baja de precio o se vende.
-      </div>
+      <EmptyState
+        title="Aún no has guardado tablas"
+        actions={
+          <Link href="/buscar" className={ui.btnPrimary}>
+            Buscar tablas
+          </Link>
+        }
+      >
+        Pulsa el corazón en cualquier anuncio y aquí verás si baja de precio o se vende.
+      </EmptyState>
     );
   }
   if (failed) return <LoadError retry={retry} />;
@@ -117,9 +126,21 @@ function AlertList() {
       ) : alerts.length ? (
         alerts.map((a) => <AlertRow key={a.id} alert={a} />)
       ) : (
-        <div className={styles.empty}>
-          No tienes alertas. Créalas desde los resultados de búsqueda, una ficha de modelo o la herramienta «¿Qué tabla necesito?».
-        </div>
+        <EmptyState
+          title="No tienes alertas"
+          actions={
+            <>
+              <Link href="/buscar" className={ui.btnPrimary}>
+                Buscar tablas
+              </Link>
+              <Link href="/calculadora-litros" className={ui.btnNeutral}>
+                ¿Qué tabla necesito?
+              </Link>
+            </>
+          }
+        >
+          Haz una búsqueda con tus medidas y pulsa «Crear alerta»: te enseñaremos aquí cuántas tablas coinciden.
+        </EmptyState>
       )}
     </div>
   );

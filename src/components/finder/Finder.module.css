@@ -40,7 +40,7 @@
 .h1 {
   margin: 6px 0 0;
   font-family: var(--rb-font-display);
-  font-size: 34px;
+  font-size: clamp(34px, 4.2vw, 56px);
   font-weight: 800;
   text-transform: uppercase;
   line-height: 0.95;
@@ -48,8 +48,8 @@
 }
 
 .lead {
-  margin: 6px 0 0;
-  font-size: 15px;
+  margin: 10px 0 0;
+  font-size: 17px;
   color: var(--rb-muted);
   max-width: 60ch;
   line-height: 1.45;
@@ -815,11 +815,18 @@ button.seg::after {
 .typePhoto {
   position: relative;
   height: 150px;
-  background-color: #dde9e8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background:
+    repeating-linear-gradient(0deg, transparent 0 29px, rgba(16, 45, 59, 0.05) 29px 30px),
+    var(--rb-shore);
+  border-bottom: 1px solid var(--rb-shore-line);
 }
 
+/* Tabla tumbada: se lee mejor en un hueco apaisado. */
 .typeImg {
-  object-fit: cover;
+  transform: rotate(-90deg);
 }
 
 .typeTag {

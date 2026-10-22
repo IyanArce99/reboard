@@ -1,20 +1,26 @@
 import Link from "next/link";
-import ui from "@/styles/ui.module.css";
+import { Photo } from "@/components/brand/Photo";
+import styles from "./not-found.module.css";
 
 export default function NotFound() {
   return (
-    <main className="container" style={{ paddingTop: 48, paddingBottom: 64 }}>
-      <h1 className={ui.h1}>No encontramos esta página</h1>
-      <p style={{ marginTop: 12, fontSize: 17, lineHeight: 1.5 }}>
-        Puede que el anuncio se haya retirado o que el enlace no sea correcto. Tu próxima tabla ya existe: búscala por litros, tipo y zona.
-      </p>
-      <div style={{ display: "flex", gap: 8, marginTop: 20, flexWrap: "wrap" }}>
-        <Link href="/buscar" className={ui.btnPrimary}>
-          Buscar tablas
-        </Link>
-        <Link href="/" className={ui.btnNeutral}>
-          Volver al inicio
-        </Link>
+    <main className={styles.wrap}>
+      <Photo slug="surfista-niebla" sizes="100vw" position="50% 50%" decorative />
+      <div className={`container ${styles.inner}`}>
+        <p className={styles.eyebrow}>Error 404</p>
+        <h1 className={styles.title}>Esta ola ya pasó</h1>
+        <p className={styles.lead}>
+          No encontramos esta página. Puede que el anuncio se haya retirado o que el enlace no sea correcto. Tu próxima tabla ya existe:
+          búscala por litros, tipo y zona.
+        </p>
+        <div className={styles.actions}>
+          <Link href="/buscar" className={styles.primary}>
+            Buscar tablas
+          </Link>
+          <Link href="/" className={styles.secondary}>
+            Volver al inicio
+          </Link>
+        </div>
       </div>
     </main>
   );

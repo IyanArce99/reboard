@@ -28,6 +28,7 @@ const OK = [
   "/tiendas",
   "/tiendas/marea-boards",
   "/guias",
+  "/creditos",
   "/guias/que-revisar-al-comprar-una-tabla-usada",
   "/guias/que-tabla-comprar-despues-de-una-softboard",
   "/sistema",

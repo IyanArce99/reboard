@@ -1,0 +1,35 @@
+.page {
+  padding-top: 48px;
+  padding-bottom: 72px;
+  max-width: 860px;
+}
+
+.list {
+  margin: 28px 0 0;
+  padding: 0;
+  list-style: none;
+  border-top: 1px solid var(--rb-line);
+}
+.list li {
+  padding: 14px 0;
+  border-bottom: 1px solid var(--rb-line);
+  font-size: 15px;
+  line-height: 1.5;
+  color: var(--rb-muted);
+}
+.list a,
+.note a {
+  color: var(--rb-teal-text);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.list li > a {
+  color: var(--rb-petrol);
+  font-weight: 600;
+}
+
+.note {
+  margin-top: 20px;
+  font-size: 14px;
+  color: var(--rb-muted);
+}

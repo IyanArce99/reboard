@@ -18,29 +18,45 @@
   max-width: 64ch;
 }
 
-/* Marcador neutro: los logotipos de las marcas no están autorizados. */
-.logo {
-  height: 56px;
+/* Monograma tipográfico: los logotipos de las marcas no están autorizados. */
+.brandMark {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 0 16px;
-  border: 1px dashed #a9c4c3;
-  border-radius: 10px;
-  width: fit-content;
-  margin-bottom: 12px;
+  gap: 12px;
+  margin: 18px 0 14px;
 }
 
-.logoName {
-  font-size: 17px;
+.monogram {
+  width: 56px;
+  height: 56px;
+  border-radius: 14px;
+  background: var(--rb-petrol);
+  color: var(--rb-teal-light);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--rb-font-display);
+  font-size: 28px;
   font-weight: 800;
-  color: var(--rb-petrol);
+  text-transform: uppercase;
 }
 
-.logoNote {
+.brandMarkText {
   font-family: var(--rb-font-mono);
   font-size: 12px;
-  color: var(--rb-faint);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--rb-teal-text);
+}
+
+.title {
+  font-family: var(--rb-font-display);
+  font-size: clamp(36px, 4.4vw, 60px);
+  font-weight: 800;
+  line-height: 0.96;
+  text-transform: uppercase;
+  color: var(--rb-petrol);
+  text-wrap: balance;
 }
 
 .intro {
@@ -60,18 +76,29 @@
 }
 
 .section {
-  margin-top: 28px;
+  margin-top: 44px;
 }
 
 .section + .section {
-  margin-top: 36px;
+  margin-top: 56px;
 }
 
 .h2 {
-  margin: 0 0 14px;
-  font-size: 32px;
+  margin: 0 0 16px;
+  font-family: var(--rb-font-display);
+  font-size: clamp(28px, 3vw, 40px);
   font-weight: 800;
-  letter-spacing: -0.02em;
+  text-transform: uppercase;
+  line-height: 0.98;
+  color: var(--rb-petrol);
+}
+
+.h2Count {
+  font-family: var(--rb-font-mono);
+  font-size: 0.45em;
+  font-weight: 500;
+  color: var(--rb-teal-text);
+  vertical-align: 0.5em;
 }
 
 .grid {
@@ -121,8 +148,20 @@
   border-color: var(--rb-petrol);
 }
 
+.modelShape {
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  height: 104px;
+  margin: -16px -16px 8px;
+  padding: 8px 0;
+  background: var(--rb-shore);
+  border-bottom: 1px solid var(--rb-shore-line);
+  border-radius: 11px 11px 0 0;
+}
+
 .modelName {
-  font-size: 17px;
+  font-size: 18px;
   font-weight: 800;
   color: var(--rb-petrol);
 }
@@ -155,16 +194,28 @@
   align-items: start;
 }
 
+/* Ficha de modelo: silueta de la forma (no hay fotos autorizadas de las marcas). */
 .photo {
   position: relative;
   aspect-ratio: 4 / 3;
-  border-radius: 16px;
+  border-radius: var(--rb-r-photo);
   overflow: hidden;
-  background: #dde9e8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background:
+    repeating-linear-gradient(0deg, transparent 0 39px, rgba(16, 45, 59, 0.06) 39px 40px),
+    var(--rb-shore);
+  border: 1px solid var(--rb-shore-line);
+  container-type: inline-size;
 }
 
-.photo img {
-  object-fit: cover;
+/* Tabla tumbada ocupando ~80 % del ancho del panel. */
+.photo svg {
+  flex: none;
+  height: 80cqw;
+  width: auto;
+  transform: rotate(-90deg);
 }
 
 .stockTag {
@@ -310,9 +361,12 @@
 }
 
 .tableTitle {
-  margin: 0 0 6px;
-  font-size: 20px;
+  margin: 0 0 8px;
+  font-family: var(--rb-font-display);
+  font-size: 26px;
   font-weight: 800;
+  text-transform: uppercase;
+  line-height: 1;
 }
 
 .tableNote {

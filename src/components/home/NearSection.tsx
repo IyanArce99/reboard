@@ -66,6 +66,7 @@ export async function NearSection() {
       <NearSwitcher
         heading={
           <div>
+            <p className={styles.nearEyebrow}>Cerca de ti · {zn}</p>
             <h2 id="near-title" className={styles.h2}>
               Recién publicadas cerca de ti
             </h2>
@@ -120,6 +121,7 @@ export async function NearSection() {
 export function NearSkeleton() {
   return (
     <section className={`container ${styles.near}`} aria-busy="true">
+      <p className={styles.nearEyebrow}>Cerca de ti</p>
       <h2 className={styles.h2}>Recién publicadas cerca de ti</h2>
       <div className={styles.skeletonRail} />
     </section>

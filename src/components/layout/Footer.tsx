@@ -2,12 +2,33 @@ import Link from "next/link";
 import { Logo } from "@/components/Logo";
 import styles from "./Footer.module.css";
 
-const BUY: [string, string][] = [
-  ["Todas las tablas", "/buscar"],
-  ["Evolutivas", "/tablas/evolutiva"],
-  ["Softboards", "/tablas/softboard"],
-  ["Gran Canaria", "/tablas/gran-canaria"],
-  ["Asturias", "/tablas/asturias"],
+const COLUMNS: { title: string; links: [string, string][] }[] = [
+  {
+    title: "Comprar",
+    links: [
+      ["Todas las tablas", "/buscar"],
+      ["Evolutivas", "/tablas/evolutiva"],
+      ["Softboards", "/tablas/softboard"],
+      ["Gran Canaria", "/tablas/gran-canaria"],
+      ["Asturias", "/tablas/asturias"],
+    ],
+  },
+  {
+    title: "Elegir bien",
+    links: [
+      ["¿Cuántos litros necesito?", "/calculadora-litros"],
+      ["Comparar anuncios", "/comparar"],
+      ["Guías", "/guias"],
+    ],
+  },
+  {
+    title: "Vender",
+    links: [
+      ["Publicar gratis", "/vender/publicar"],
+      ["Cómo funciona vender", "/vender"],
+      ["Tiendas y escuelas", "/tiendas"],
+    ],
+  },
 ];
 
 export function Footer() {
@@ -15,31 +36,26 @@ export function Footer() {
     <footer className={styles.footer}>
       <div className={styles.inner}>
         <div className={styles.brand}>
-          <Logo size={28} />
-          <span className={styles.tagline}>Tu próxima tabla ya existe.</span>
-          <span className={styles.muted}>
-            Tablas de surf de segunda mano en España. Sin pagos ni comisiones: contacto directo entre comprador y vendedor.
-          </span>
+          <Logo size={30} tone="dark" />
+          <p className={styles.tagline}>Tu próxima tabla ya existe.</p>
+          <p className={styles.muted}>
+            Tablas de surf de segunda mano en España. Sin pagos ni comisiones: compradores y vendedores hablan directamente.
+          </p>
         </div>
-        <nav className={styles.col} aria-label="Comprar">
-          <strong>Comprar</strong>
-          {BUY.map(([l, href]) => (
-            <Link key={href} href={href}>
-              {l}
-            </Link>
-          ))}
-        </nav>
-        <nav className={styles.col} aria-label="Herramientas">
-          <strong>Herramientas</strong>
-          <Link href="/calculadora-litros">¿Qué tabla necesito?</Link>
-          <Link href="/comparar">Comparar anuncios</Link>
-          <Link href="/guias">Guías</Link>
-        </nav>
-        <nav className={styles.col} aria-label="Vender">
-          <strong>Vender</strong>
-          <Link href="/vender/publicar">Publicar gratis</Link>
-          <Link href="/tiendas">Tiendas y escuelas</Link>
-        </nav>
+        {COLUMNS.map((c) => (
+          <nav key={c.title} className={styles.col} aria-label={c.title}>
+            <h2 className={styles.colTitle}>{c.title}</h2>
+            {c.links.map(([l, href]) => (
+              <Link key={href} href={href}>
+                {l}
+              </Link>
+            ))}
+          </nav>
+        ))}
+      </div>
+      <div className={styles.bottom}>
+        <span>Reboard · Hecho para surfistas en España</span>
+        <Link href="/creditos">Créditos de fotografía</Link>
       </div>
     </footer>
   );

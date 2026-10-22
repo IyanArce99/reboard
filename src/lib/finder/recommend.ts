@@ -4,7 +4,6 @@
 // Módulo puro: sin React ni servidor, lo usan la isla del asistente y el contenido SEO.
 
 import type { Shape } from "@/lib/domain/taxonomy";
-import { unsplash } from "@/lib/images";
 
 export type LevelKey = "learn" | "ride" | "turn" | "pro";
 export type FreqKey = "low" | "mid" | "high";
@@ -125,22 +124,20 @@ export interface TypeInfo {
   why: string;
   cons: string;
   lens: string;
-  /** Foto de stock de Unsplash (DEMO, ver public/images/IMAGE_SOURCES.md). */
-  img: string;
+  /** Silueta con la que se dibuja (softboard: forma evolutiva en tono suave). */
+  shape: Shape;
 }
 
 export const TYPE_INFO: Record<FinderType, TypeInfo> = {
-  softboard: { label: "Softboard", plural: "softboards", why: "Máxima estabilidad y seguridad mientras aprendes.", cons: "Se queda corta cuando empiezas a ir por la pared.", lens: "7'0\"–8'6\"", img: "1537519646099-335112f03225" },
-  evolutiva: { label: "Evolutiva", plural: "evolutivas", why: "Rígida, con mucho volumen y remada fácil: el paso natural después de la softboard.", cons: "Menos ágil en olas potentes.", lens: "7'0\"–8'0\"", img: "1621951289270-b942dc5f4320" },
-  longboard: { label: "Longboard", plural: "longboards", why: "Coge olas muy pequeñas y es muy estable.", cons: "Pesada, y cuesta más pasar la rompiente y transportarla.", lens: "9'0\"–9'6\"", img: "1703159453462-8a2d2866afaf" },
-  midlength: { label: "Midlength", plural: "midlengths", why: "Deslizamiento y remada con un surf fluido y tranquilo.", cons: "Menos reactiva en giros cerrados.", lens: "6'10\"–7'10\"", img: "1531722569936-825d3dd91b15" },
-  fish: { label: "Fish", plural: "fish", why: "Corta y ancha: rápida y divertida en olas pequeñas y medianas.", cons: "Puede costar en olas grandes y huecas.", lens: "5'6\"–6'4\"", img: "1544840494-d0e48b117320" },
-  hibrida: { label: "Híbrida", plural: "híbridas", why: "Equilibrio entre facilidad y rendimiento para progresar en maniobras.", cons: "Exige ya cierta técnica.", lens: "5'8\"–6'6\"", img: "1632334738554-95c79fb27eb7" },
-  shortboard: { label: "Shortboard", plural: "shortboards", why: "Máxima respuesta en olas con fuerza.", cons: "Poco volumen: penaliza mucho en olas pequeñas.", lens: "5'8\"–6'4\"", img: "1632299768491-51d27b80d088" },
+  softboard: { label: "Softboard", plural: "softboards", why: "Máxima estabilidad y seguridad mientras aprendes.", cons: "Se queda corta cuando empiezas a ir por la pared.", lens: "7'0\"–8'6\"", shape: "evolutiva" },
+  evolutiva: { label: "Evolutiva", plural: "evolutivas", why: "Rígida, con mucho volumen y remada fácil: el paso natural después de la softboard.", cons: "Menos ágil en olas potentes.", lens: "7'0\"–8'0\"", shape: "evolutiva" },
+  longboard: { label: "Longboard", plural: "longboards", why: "Coge olas muy pequeñas y es muy estable.", cons: "Pesada, y cuesta más pasar la rompiente y transportarla.", lens: "9'0\"–9'6\"", shape: "longboard" },
+  midlength: { label: "Midlength", plural: "midlengths", why: "Deslizamiento y remada con un surf fluido y tranquilo.", cons: "Menos reactiva en giros cerrados.", lens: "6'10\"–7'10\"", shape: "midlength" },
+  fish: { label: "Fish", plural: "fish", why: "Corta y ancha: rápida y divertida en olas pequeñas y medianas.", cons: "Puede costar en olas grandes y huecas.", lens: "5'6\"–6'4\"", shape: "fish" },
+  hibrida: { label: "Híbrida", plural: "híbridas", why: "Equilibrio entre facilidad y rendimiento para progresar en maniobras.", cons: "Exige ya cierta técnica.", lens: "5'8\"–6'6\"", shape: "hibrida" },
+  shortboard: { label: "Shortboard", plural: "shortboards", why: "Máxima respuesta en olas con fuerza.", cons: "Poco volumen: penaliza mucho en olas pequeñas.", lens: "5'8\"–6'4\"", shape: "shortboard" },
 };
 
-export const typeImage = (t: FinderType, w = 700) =>
-  unsplash(TYPE_INFO[t].img, w);
 
 /** Factor de litros por kg según el nivel (REC del prototipo). */
 const FACTORS: Record<LevelKey, [number, number]> = {

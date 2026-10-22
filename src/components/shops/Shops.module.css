@@ -5,6 +5,67 @@
   padding-bottom: 64px;
 }
 
+/* ——— Cabecera del directorio ——— */
+.hero {
+  background: var(--rb-shore);
+  border-bottom: 1px solid var(--rb-shore-line);
+}
+
+.heroInner {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(0, 0.8fr);
+  gap: 40px;
+  align-items: center;
+  padding-top: 22px;
+  padding-bottom: 36px;
+}
+
+.heroText {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.eyebrow {
+  margin-top: 18px;
+  font-family: var(--rb-font-mono);
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--rb-teal-text);
+}
+
+.title {
+  font-family: var(--rb-font-display);
+  font-size: clamp(38px, 4.6vw, 64px);
+  font-weight: 800;
+  line-height: 0.95;
+  text-transform: uppercase;
+  color: var(--rb-petrol);
+}
+
+.heroPhoto {
+  position: relative;
+  aspect-ratio: 3 / 2;
+  border-radius: var(--rb-r-photo);
+  overflow: hidden;
+  margin-top: 14px;
+  background: #e7dfcc;
+}
+
+@media (max-width: 759px) {
+  .heroInner {
+    grid-template-columns: 1fr;
+    gap: 20px;
+    padding-bottom: 28px;
+  }
+  .heroPhoto {
+    aspect-ratio: 16 / 9;
+    margin-top: 0;
+  }
+}
+
 .head {
   display: flex;
   flex-wrap: wrap;
@@ -23,6 +84,7 @@
 
 .joinBtn {
   height: 46px;
+  margin-top: 8px;
 }
 
 .filters {

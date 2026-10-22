@@ -1,33 +1,59 @@
-import Image from "next/image";
 import Link from "next/link";
 import { Suspense } from "react";
+import { BoardShape } from "@/components/brand/BoardShape";
+import { ClosingBand } from "@/components/brand/ClosingBand";
+import { Photo } from "@/components/brand/Photo";
+import { SectionHeader } from "@/components/brand/SectionHeader";
 import { NearSection, NearSkeleton, getHere } from "@/components/home/NearSection";
 import { SearchBar } from "@/components/search/SearchBar";
 import { AlertButton } from "@/components/user/islands";
 import { getRepository } from "@/lib/data";
 import { getCatalogNames } from "@/lib/data/names";
-import { NO_BRAND, ZONES, slugify } from "@/lib/domain/taxonomy";
+import { NO_BRAND, ZONES, slugify, type Shape } from "@/lib/domain/taxonomy";
+import type { PhotoSlug } from "@/lib/photos";
 import { alertText } from "@/lib/search/describe";
 import { emptyFilters, toQuery, withFilters } from "@/lib/search/filters";
 import { formFilters, landingPath, type LandingForm } from "@/lib/search/landings";
-import { unsplash } from "@/lib/images";
 import styles from "@/components/home/Home.module.css";
 
-const CATEGORIES: [string, LandingForm][] = [
-  ["Evolutivas", "evolutiva"],
-  ["Softboards", "softboard"],
-  ["Midlength", "midlength"],
-  ["Longboards", "longboard"],
-  ["Shortboards", "shortboard"],
-  ["Fish", "fish"],
-  ["Para principiantes", "principiantes"],
+// Tipos de tabla con su silueta. Softboard es una construcción y «principiantes» una necesidad:
+// se dibujan con la forma más habitual y en tono suave para distinguirlos.
+const CATEGORIES: { label: string; form: LandingForm; shape: Shape; soft?: boolean; hint: string }[] = [
+  { label: "Evolutivas", form: "evolutiva", shape: "evolutiva", hint: "Para salir de la softboard" },
+  { label: "Softboards", form: "softboard", shape: "evolutiva", soft: true, hint: "Espuma: aprender sin miedo" },
+  { label: "Para principiantes", form: "principiantes", shape: "longboard", soft: true, hint: "55 L o más" },
+  { label: "Longboards", form: "longboard", shape: "longboard", hint: "Olas pequeñas y estilo" },
+  { label: "Midlengths", form: "midlength", shape: "midlength", hint: "Remada fácil, surf fluido" },
+  { label: "Fish", form: "fish", shape: "fish", hint: "Rápidas en olas pequeñas" },
+  { label: "Híbridas", form: "hibrida", shape: "hibrida", hint: "Para progresar en maniobras" },
+  { label: "Shortboards", form: "shortboard", shape: "shortboard", hint: "Rendimiento con fuerza" },
 ];
 
-// Guías de «Antes de comprar». Solo existe la plantilla; el contenido está pendiente (docs/ROADMAP.md).
-const GUIDES = [
-  { t: "Qué revisar al comprar una tabla usada", href: "/guias/que-revisar-al-comprar-una-tabla-usada", img: "1632334738554-95c79fb27eb7" },
-  { t: "Cuántos litros necesita mi tabla", href: "/calculadora-litros", img: "1455729552865-3658a5d39692" },
-  { t: "Qué tabla comprar después de una softboard", href: "/guias/que-tabla-comprar-despues-de-una-softboard", img: "1537519646099-335112f03225" },
+const STEPS = [
+  { n: "01", t: "Busca por lo que importa", d: "Litros, largo, tipo, precio y zona. Cada medida dice de dónde sale: del vendedor, del fabricante o sin indicar." },
+  { n: "02", t: "Habla directamente con quien vende", d: "Un mensaje de WhatsApp o una llamada. Sin intermediarios ni comisiones: Reboard no cobra nada." },
+  { n: "03", t: "Pruébala y paga al recogerla", d: "Quedad en un sitio público, revisa cantos, fondo y quillas, y paga en mano. Nunca por adelantado." },
+];
+
+const GUIDES: { t: string; d: string; href: string; photo: PhotoSlug }[] = [
+  {
+    t: "Qué revisar al comprar una tabla usada",
+    d: "Golpes, reparaciones, zonas blandas y quillas: lo que se acepta y lo que no.",
+    href: "/guias/que-revisar-al-comprar-una-tabla-usada",
+    photo: "tablas-usadas-quillas",
+  },
+  {
+    t: "Cuántos litros necesitas",
+    d: "Peso, nivel y olas: 7 preguntas y un rango orientativo de volumen.",
+    href: "/calculadora-litros",
+    photo: "clase-surf",
+  },
+  {
+    t: "Compara antes de decidir",
+    d: "Hasta tres anuncios lado a lado: litros, medidas, estado, precio y zona.",
+    href: "/comparar",
+    photo: "entrando-al-agua",
+  },
 ];
 
 async function HeroSearch() {
@@ -39,7 +65,7 @@ async function HeroSearch() {
 
 export default async function Home() {
   const repo = getRepository();
-  const catFilters = CATEGORIES.map(([label, form]) => ({ label, form, f: withFilters(formFilters(form)) }));
+  const catFilters = CATEGORIES.map((c) => ({ ...c, f: withFilters(formFilters(c.form)) }));
   const [names, facets, catCounts] = await Promise.all([
     getCatalogNames(repo),
     repo.facets(emptyFilters()),
@@ -47,7 +73,6 @@ export default async function Home() {
   ]);
 
   const cats = catFilters.map((c, i) => ({ ...c, n: catCounts[i] })).sort((a, b) => Number(b.n > 0) - Number(a.n > 0));
-
   const zones = ZONES.map((z) => ({ ...z, n: facets.zones[z.slug] ?? 0 })).sort((a, b) => b.n - a.n);
   const brands = [...names.brands, { slug: NO_BRAND.slug, name: NO_BRAND.short }].map((b) => ({
     ...b,
@@ -56,83 +81,149 @@ export default async function Home() {
 
   return (
     <main>
+      {/* ───────── Hero ───────── */}
       <div className={styles.heroWrap}>
+        <div className={styles.heroPhoto}>
+          <Photo slug="hero-surfistas-orilla" sizes="100vw" preload position="62% 55%" decorative />
+        </div>
         <section className={`container ${styles.hero}`}>
-          <div className={styles.heroTop}>
-            <div>
-              <div className={styles.kicker}>Tu próxima tabla ya existe</div>
-              <h1 className={styles.h1}>
-                Tablas de surf
-                <br />
-                <span>de segunda mano</span>
-              </h1>
-              <p className={styles.lead}>
-                Encuentra tu próxima tabla. Busca por medidas, litros, tipo y ubicación entre anuncios de surfistas y tiendas.
-              </p>
-            </div>
-            <div className={styles.heroLinks}>
-              <Link href="/calculadora-litros">
-                ¿Cuántos litros necesitas? <span>Descúbrelo en 30 s</span>
-              </Link>
-              <Link href="/vender/publicar">
-                ¿Vendes una tabla? <span>Publícala gratis</span>
-              </Link>
-            </div>
-          </div>
+          <p className={styles.kicker}>Tu próxima tabla ya existe</p>
+          <h1 className={styles.h1}>
+            Tablas de surf
+            <br />
+            <span>de segunda mano</span>
+          </h1>
+          <p className={styles.lead}>
+            Busca por litros, medidas y zona entre tablas de surfistas, tiendas y escuelas. Hablas directamente con quien vende,
+            sin comisiones.
+          </p>
 
           <Suspense fallback={<div className={styles.searchSkeleton} />}>
             <HeroSearch />
           </Suspense>
 
-          <div data-rail="1" className={styles.cats}>
-            <Link href="/buscar?avanzados=1" className={`${styles.cat} ${styles.mOnly}`}>
-              Filtros
+          <div className={styles.heroLinks}>
+            <Link href="/calculadora-litros">
+              ¿No sabes cuántos litros? <span>Calcúlalo en 7 preguntas</span>
             </Link>
-            {cats.map((c) =>
-              c.n ? (
-                <Link key={c.form} href={landingPath(null, c.form)} className={styles.cat}>
-                  {c.label}
-                  <span>{c.n}</span>
-                </Link>
-              ) : (
-                <AlertButton key={c.form} text={alertText(c.f, names)} query={toQuery(c.f)} className={`${styles.cat} ${styles.catEmpty}`}>
-                  {c.label}
-                  <span>0</span>
-                </AlertButton>
-              ),
-            )}
+            <Link href="/vender/publicar">
+              ¿Vendes una tabla? <span>Publícala gratis</span>
+            </Link>
+            <Link href="/buscar?avanzados=1" className={styles.mOnly}>
+              Más filtros: <span>marca, estado, quillas…</span>
+            </Link>
           </div>
         </section>
       </div>
 
+      {/* ───────── Tipos de tabla ───────── */}
+      <section className={`container ${styles.section}`} aria-labelledby="tipos-title">
+        <SectionHeader id="tipos-title" eyebrow="Explora por tipo" title="¿Qué forma buscas?" action={{ href: "/buscar", label: "Ver todas las tablas" }} />
+        <div data-rail="1" className={styles.types}>
+          {cats.map((c) =>
+            c.n ? (
+              <Link key={c.form} href={landingPath(null, c.form)} className={styles.type}>
+                <span className={styles.typeShape}>
+                  <BoardShape shape={c.shape} size={96} tone={c.soft ? "soft" : "light"} />
+                </span>
+                <span className={styles.typeName}>{c.label}</span>
+                <span className={styles.typeHint}>{c.hint}</span>
+                <span className={styles.typeCount}>
+                  {c.n} {c.n === 1 ? "tabla" : "tablas"}
+                </span>
+              </Link>
+            ) : (
+              <AlertButton key={c.form} text={alertText(c.f, names)} query={toQuery(c.f)} className={`${styles.type} ${styles.typeEmpty}`}>
+                <span className={styles.typeShape}>
+                  <BoardShape shape={c.shape} size={96} tone="soft" />
+                </span>
+                <span className={styles.typeName}>{c.label}</span>
+                <span className={styles.typeHint}>{c.hint}</span>
+                <span className={styles.typeCount}>Sin anuncios · avísame</span>
+              </AlertButton>
+            ),
+          )}
+        </div>
+      </section>
+
+      {/* ───────── Recién publicadas cerca ───────── */}
       <Suspense fallback={<NearSkeleton />}>
         <NearSection />
       </Suspense>
 
-      <section className={`container ${styles.promos}`}>
+      {/* ───────── Cómo funciona ───────── */}
+      <section className={styles.how} aria-labelledby="como-title">
+        <div className={`container ${styles.howInner}`}>
+          <div className={styles.howPhoto}>
+            <Photo slug="surfista-a-coruna" sizes="(max-width: 759px) 100vw, 40vw" position="40% 50%" />
+          </div>
+          <div>
+            <SectionHeader
+              id="como-title"
+              eyebrow="Cómo funciona"
+              title="Compra como entre surfistas"
+              lead="Reboard es el sitio donde encontrar la tabla. El trato es entre tú y quien la vende."
+            />
+            <ol className={styles.steps}>
+              {STEPS.map((s) => (
+                <li key={s.n}>
+                  <span className={styles.stepN}>{s.n}</span>
+                  <div>
+                    <h3 className={styles.stepT}>{s.t}</h3>
+                    <p className={styles.stepD}>{s.d}</p>
+                  </div>
+                </li>
+              ))}
+            </ol>
+          </div>
+        </div>
+      </section>
+
+      {/* ───────── Asistente y vender ───────── */}
+      <section className={`container ${styles.section} ${styles.promos}`}>
         <Link href="/calculadora-litros" className={styles.promo}>
-          <span>
-            <span className={styles.promoTitle}>¿Qué tabla necesitas?</span>
-            <span className={styles.promoText}>Dinos tu peso y nivel y te enseñamos las que pueden encajarte.</span>
-          </span>
-          <span className={styles.promoIcon} aria-hidden="true">
-            →
+          <Photo slug="aprendiendo-espuma" sizes="(max-width: 759px) 100vw, 50vw" position="50% 40%" decorative />
+          <span className={styles.promoBody}>
+            <span className={styles.promoEyebrow}>¿Qué tabla necesito?</span>
+            <span className={styles.promoTitle}>No compres a ciegas</span>
+            <span className={styles.promoText}>
+              Peso, nivel, olas y lo que quieres conseguir. Te damos un rango de litros y te enseñamos las tablas que encajan.
+            </span>
+            <span className={styles.promoCta}>Calcular mis litros →</span>
           </span>
         </Link>
         <Link href="/vender/publicar" className={`${styles.promo} ${styles.promoSell}`}>
-          <span>
+          <Photo slug="tablas-cobertizo" sizes="(max-width: 759px) 100vw, 50vw" position="50% 35%" decorative />
+          <span className={styles.promoBody}>
+            <span className={styles.promoEyebrow}>Vender</span>
             <span className={styles.promoTitle}>¿Tienes una tabla parada?</span>
-            <span className={styles.promoText}>Su próximo surfista ya la está buscando. Publícala gratis desde el móvil, sin comisión.</span>
-          </span>
-          <span className={styles.promoIcon} aria-hidden="true">
-            +
+            <span className={styles.promoText}>
+              Publícala gratis en 5 pasos desde el móvil. Te escriben directamente quienes buscan esas medidas.
+            </span>
+            <span className={styles.promoCtaSell}>Publicar mi tabla</span>
           </span>
         </Link>
       </section>
 
-      <section className={`container ${styles.explore}`}>
+      {/* ───────── Explorar ───────── */}
+      <section className={`container ${styles.section}`} aria-labelledby="guias-title">
+        <SectionHeader id="guias-title" eyebrow="Antes de comprar" title="Para elegir bien" action={{ href: "/guias", label: "Guías y herramientas" }} />
+        <div className={styles.guides}>
+          {GUIDES.map((g) => (
+            <Link key={g.href} href={g.href} className={styles.guide}>
+              <span className={styles.guidePhoto}>
+                <Photo slug={g.photo} sizes="(max-width: 759px) 100vw, 33vw" decorative />
+              </span>
+              <span className={styles.guideT}>{g.t}</span>
+              <span className={styles.guideD}>{g.d}</span>
+            </Link>
+          ))}
+        </div>
+      </section>
+
+      <section className={`container ${styles.section} ${styles.explore}`} aria-label="Explorar por zona y marca">
         <div>
-          <h2 className={styles.h3}>Tablas de segunda mano por zona</h2>
+          <h2 className={styles.h3}>Por zona</h2>
           <div className={styles.zones}>
             {zones.map((z) => {
               const f = withFilters({ zone: z.slug });
@@ -151,7 +242,7 @@ export default async function Home() {
           </div>
         </div>
         <div>
-          <h2 className={styles.h3}>Busca por marca</h2>
+          <h2 className={styles.h3}>Por marca</h2>
           <div className={styles.brands}>
             {brands.map((b) => (
               <Link
@@ -165,21 +256,9 @@ export default async function Home() {
             ))}
           </div>
         </div>
-        <div>
-          <h2 className={styles.h3}>Antes de comprar</h2>
-          <div className={styles.guides}>
-            {GUIDES.map((g) => (
-              <Link key={g.href} href={g.href} className={styles.guide}>
-                <Image src={unsplash(g.img, 200)} alt="" width={56} height={44} className={styles.guideImg} />
-                {g.t}
-              </Link>
-            ))}
-          </div>
-          <p className={styles.note}>
-            Busca, contacta directamente con el vendedor y revisa la tabla en persona. No gestionamos pagos ni envíos.
-          </p>
-        </div>
       </section>
+
+      <ClosingBand />
     </main>
   );
 }

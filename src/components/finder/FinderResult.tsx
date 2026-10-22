@@ -2,9 +2,9 @@
 
 // Resultado del asistente: rango orientativo, tipos de tabla y anuncios compatibles.
 
-import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { BoardShape } from "@/components/brand/BoardShape";
 import { ListingCard } from "@/components/listing/ListingCard";
 import { useUserState } from "@/components/user/UserStateProvider";
 import { SHAPE_INFO } from "@/lib/domain/taxonomy";
@@ -19,7 +19,7 @@ import {
   resultFilters,
   typeFilter,
 } from "@/lib/finder/listings";
-import { TYPE_INFO, WAVES, levelOf, typeImage, type FinderState, type Recommendation } from "@/lib/finder/recommend";
+import { TYPE_INFO, WAVES, levelOf, type FinderState, type Recommendation } from "@/lib/finder/recommend";
 import { alertText } from "@/lib/search/describe";
 import { searchHref, toQuery, withFilters, type Filters } from "@/lib/search/filters";
 import type { SummaryItem } from "./FinderWizard";
@@ -157,7 +157,7 @@ export function FinderResult({ state: W, rec: r, summary, onEdit, onRestart, set
             return (
               <article key={t} className={styles.type} data-first={i === 0 || undefined}>
                 <div className={styles.typePhoto}>
-                  <Image src={typeImage(t)} alt="" fill sizes="(max-width: 759px) 100vw, 360px" quality={70} className={styles.typeImg} />
+                  <BoardShape shape={info.shape} size={140} tone={t === "softboard" ? "soft" : "light"} className={styles.typeImg} />
                   <span className={styles.typeTag}>{i === 0 ? "La que más encaja" : "También encaja"}</span>
                 </div>
                 <div className={styles.typeBody}>

@@ -1,0 +1,172 @@
+# Auditoría de diseño, dirección de arte y copy
+
+Fecha: 22-10-2026 · Rama `mvp`. Capturas «antes» y «después» a 375, 768 y 1440 px de 20 pantallas (fuera del repo por tamaño). Resultado y comparación al final (§6).
+
+## 1. Diagnóstico
+La base funciona y es honesta:
+- paleta Atlantic Blue reconocible;
+- tarjetas de anuncio claras;
+- formularios accesibles;
+- datos con su origen.
+
+Pero **parece un prototipo** por estos problemas, ordenados por impacto.
+
+### P0: falta identidad visual y emocional
+1. **Sin fotografía fuera de los anuncios.** Home, vender, asistente, guías y tiendas son bloques planos petróleo o blancos. No hay playa, ni gente, ni tablas en contexto. La marca no transmite surf.
+2. **El hero de la home es solo tipografía.** Funciona, pero no comunica «surf» ni «tablas usadas» de un vistazo.
+3. **Las fotos de anuncios DEMO se repiten** (la misma tabla amarilla en muchas tarjetas). Es inevitable con datos de ejemplo, pero refuerza la sensación de maqueta si no hay más imagen alrededor.
+
+### P1: jerarquía y sistema
+4. **Los titulares mezclan dos sistemas:**
+   - Barlow Condensed en mayúsculas (home, H1).
+   - Barlow 700 en frase con mayúscula inicial («Por qué venderla en Reboard», «Torq de segunda mano · 26», «Lista de comprobación»).
+
+   No hay un componente de cabecera de sección.
+5. **Las páginas editoriales parecen documentación:**
+   - `/vender`: 4 cajas iguales, una lista numerada y el CTA repetido.
+   - Guía: imagen gigante recortada, tabla y CTA en caja gris.
+   - Tiendas: rejilla con mucho vacío.
+6. **El footer no cierra.** Un bloque gris con columnas sueltas, sin momento de marca ni llamada final.
+7. **Ritmo vertical irregular:** separaciones de 28 a 64 px sin patrón. Las secciones «se pegan» o quedan huecas.
+8. **Chips de tipo en el hero:** son correctos, pero son solo texto. Las formas de tabla son muy visuales y un dibujo enseñaría más que la palabra.
+
+### P2: detalles de UX y copy
+9. **Copy demasiado técnico o largo en sitios clave:**
+   - «Calculadora de litros y tipo de tabla en 7 preguntas cortas…».
+   - «Sus tablas usadas aparecen junto a las de particulares…».
+   - El paso de teléfono habla de «verificación» que aún no existe en el MVP.
+10. **El CTA principal de vender se repite** dos veces con el mismo texto en `/vender`, y el segundo queda aislado.
+11. **Estados vacíos solo con texto** (guardado, alertas, comparador, búsqueda sin resultados). Son correctos, pero fríos.
+12. **Marca:** el marcador del logotipo es un recuadro con borde discontinuo y la etiqueta «espacio para el logotipo autorizado». Visualmente pobre.
+13. **Móvil:** el hero ocupa casi toda la primera pantalla antes de enseñar tablas. Es correcto, pero los chips se cortan sin indicar que hay más.
+
+### Lo que funciona y se mantiene
+- **ListingCard** (vertical y horizontal), **FilterPanel**, búsqueda y URLs: los anuncios son los protagonistas.
+- **Ficha:** galería, panel de precio, datos con su origen y la barra de contacto en móvil.
+- **Accesibilidad:** áreas táctiles de 44 px, foco visible, contraste AA y `aria-checked` en el asistente.
+- **Paleta Atlantic Blue y logotipo** (aprobados): no se cambian.
+
+## 2. Dirección de arte
+**«Coastal editorial»:** la claridad de un marketplace (Wallapop) con la fotografía y el ritmo de una revista de surf, sin efectos.
+
+- **Fotografía real, cotidiana:**
+  - surfistas normales caminando hacia el agua, gente aprendiendo, tablas usadas, talleres y racks;
+  - playas reales (una de ellas en A Coruña);
+  - personas de espaldas o sin rostro reconocible en contextos promocionales (licencia de Pexels: no implicar respaldo);
+  - nunca como si fueran fotos de anuncios.
+- **Tratamiento:**
+  - fotos a sangre o en bloques con radio grande (24 px);
+  - sobre petróleo, un velo petróleo que va de opaco a transparente para leer el texto;
+  - sin duotonos agresivos ni filtros.
+- **Color:**
+  - Petróleo para la estructura y los bloques de marca.
+  - **Arena cálida** (`--rb-shore` #F7F3EA, que deriva del warm white) como fondo editorial alterno al agua (#EFF6F5), para dar ritmo.
+  - El amarillo sigue reservado a la acción principal.
+- **Tipografía (sistema único):**
+  - Etiqueta (eyebrow): IBM Plex Mono 12 px, mayúsculas y turquesa.
+  - Títulos de sección: **Barlow Condensed 800 en mayúsculas**, siempre.
+  - Entradilla: Barlow 400, 17–19 px.
+  - Se acaba la mezcla con Barlow 700 en frase en los titulares de sección. Barlow 700 se mantiene en titulares de tarjeta y en UI.
+- **Ilustración funcional:** siluetas SVG de las 7 formas de tabla, vistas desde arriba y a escala relativa. Se usan en categorías, el asistente y el contenido SEO. Ligeras, accesibles y propias; nada decorativo gratuito.
+- **Movimiento:** solo las transiciones existentes (0,15 s) y el zoom sutil de la foto al pasar el ratón en tarjetas editoriales. Respeta `prefers-reduced-motion`.
+
+## 3. Plan priorizado
+| Prioridad | Cambio | Páginas |
+|---|---|---|
+| P0 | Sistema de fotos (`src/lib/photos.ts` + `Photo`), siluetas de tabla (`BoardShape`), cabecera de sección única (`SectionHeader`) y fondo arena | Global |
+| P0 | Home: hero con foto, categorías con silueta, «cómo funciona» en 3 pasos, bloques de asistente y vender con foto, guías con imagen y footer de marca | `/` |
+| P1 | Footer con cierre de marca y llamada final; cabecera más compacta | Global |
+| P1 | `/vender` rehecha: foto, beneficios reales, pasos, consejos de foto y un solo CTA | `/vender` |
+| P1 | Asistente: cabecera con foto, siluetas en las opciones de tabla actual y en el resultado | `/calculadora-litros` |
+| P1 | Guías: índice editorial con tarjetas de foto y guía con columna de lectura | `/guias`, `/guias/*` |
+| P1 | Estados vacíos con foto o silueta y copy útil | Búsqueda, guardado, alertas, comparador y 404 |
+| P2 | Tiendas: cabecera con foto y foto por defecto propia; marca: monograma en lugar del recuadro discontinuo | `/tiendas*`, `/marcas/*` |
+| P2 | Ficha: bloque de confianza y vendedor más claros, y migas más útiles | `/anuncio/*` |
+| P2 | Copy en toda la web (§5) | Todas |
+
+## 4. Fotografías incorporadas
+**Fuente:** Pexels. Licencia gratuita (https://www.pexels.com/license/): uso libre, atribución no obligatoria. Se acredita igualmente en `public/images/IMAGE_SOURCES.md`. Cada foto se ha verificado en su página: título, autor, licencia «Gratis» y dimensiones.
+
+**Proceso:** `scripts/photos.mjs` descarga, redimensiona (máx. 1.400–2.400 px), convierte a WebP (q74), genera un placeholder borroso y escribe el manifiesto `src/lib/photos.ts`. 16 fotos, 2,5 MB en total. `next/image` sirve AVIF/WebP del tamaño de cada pantalla.
+
+| Archivo | Uso actual | Autor (Pexels) |
+|---|---|---|
+| `hero-surfistas-orilla` | Hero de la home (imagen LCP, `preload`) | Kampus Production (Portugal) |
+| `tablas-cobertizo` | Home: «¿Tienes una tabla parada?» | Justyna Sieczka |
+| `tabla-usada-tarima` | Hero de `/vender` | Enric Cruz López |
+| `aprendiendo-espuma` | Home: «No compres a ciegas» (asistente) | Luke Miller |
+| `tablas-usadas-quillas` | Guía «Qué revisar»: cabecera, tarjeta de la home y consejos de `/vender` | Viktorya Sergeeva |
+| `surfista-a-coruna` | Home: «Compra como entre surfistas» | Tanhauser Vázquez R. (A Coruña) |
+| `clase-surf` | Home y `/guias`: tarjeta del asistente | Serg Alesenko |
+| `entrando-al-agua` | Home: tarjeta del comparador | Kampus Production |
+| `tablas-orilla` | `/guias`: tarjeta del comparador | Alexa Fernando |
+| `tablas-alquiler` | Cabecera de `/tiendas` | ArtHouse Studio |
+| `atardecer-playa` | Cierre de marca (`ClosingBand`) | Victoria Marzullo |
+| `surfista-niebla` | 404 | Romina Ordóñez |
+| `shaper-taller`, `tablas-taghazout`, `surfistas-camino`, `tabla-azul-arena` | En reserva para guías futuras. No se cargan en ninguna página. | Lachlan Ross, Jillian Morkan, Kampus Production, Alexa Fernando |
+
+## 5. Principios de copy
+- **Tú**, español de España, frases cortas. Primero qué puedes hacer y después por qué te interesa.
+- **Prohibido:** «descubre una experiencia única», superlativos vacíos, cifras inventadas, testimonios y garantías.
+- **Las promesas solo describen lo que existe:**
+  - sin comisión;
+  - contacto directo;
+  - te encuentran por medidas;
+  - registro al final;
+  - datos con su origen.
+- **CTAs con verbo + objeto:** «Buscar tablas», «Publicar mi tabla», «Calcular mis litros».
+
+## 6. Resultado
+### Cambios por página
+| Página | Antes | Después |
+|---|---|---|
+| Home | Hero solo de texto sobre petróleo; tipos como chips de texto; titulares mezclados; footer gris | Hero con foto a sangre y velo. 8 tipos con silueta, pista y recuento («Avísame» si no hay anuncios). «Recién publicadas» con eyebrow de zona. «Cómo funciona» en 3 pasos con foto. 2 bloques con foto (asistente y vender). 3 tarjetas con foto (guía, asistente, comparador). Zonas y marcas. Cierre de marca. |
+| Footer | Gris claro, 4 columnas | Petróleo, 3 columnas (Comprar · Elegir bien · Vender) y fila de créditos |
+| `/vender` | Columna de texto con listas | Hero con foto y 2 CTA. 4 beneficios reales. 5 pasos numerados. Caja de consejos con foto. CTA «Empezar con las fotos». |
+| `/guias` | Lista con miniaturas de Unsplash | Cabecera arena; tarjetas grandes con foto y descripción; bloque «Herramientas» (asistente y comparador) |
+| Guía | Columna estrecha; foto con etiqueta «foto de stock» | Titular editorial. Foto 21:9 con pie de autor. Respuesta corta destacada. Checklist con columnas Aceptable / Cuidado. CTA petróleo y anuncios recientes. |
+| `/tiendas` | Título y botón | Cabecera arena con foto, eyebrow y CTA de alta |
+| Marca | Recuadro discontinuo «espacio para el logotipo autorizado» | Monograma tipográfico; titulares condensados; modelos con silueta |
+| Modelo | Foto de stock «aquí iría la foto autorizada» | Silueta de la forma, a escala, sobre arena: «Silueta orientativa de una evolutiva» |
+| Asistente | Fotos de stock por tipo, no siempre de esa forma | Silueta exacta de cada tipo; titular más grande |
+| Ficha | «Antes de comprar» en un párrafo | Bloque con 3 comprobaciones y enlace a la guía; titulares condensados |
+| Búsqueda vacía, guardado y alertas | Texto en caja discontinua | Ilustración de siluetas, título condensado, explicación y acciones |
+| 404 | Texto y dos botones | Foto a sangre, «Esta ola ya pasó» y dos acciones |
+| Nueva: `/creditos` | — | Créditos de las fotos con autor, enlace y licencia |
+
+### Copy (antes → después)
+| Dónde | Antes | Después |
+|---|---|---|
+| Hero de la home | Lead técnico («Calculadora de litros…») | «Busca por litros, medidas y zona entre tablas de surfistas, tiendas y escuelas. Hablas directamente con quien vende, sin comisiones.» |
+| Vender, hero | «Su próximo surfista ya la está buscando.» | «Si lleva meses parada, alguien la está buscando con esas medidas. Publícala gratis desde el móvil en cinco pasos.» |
+| Vender, registro | «Solo te pedimos verificar el teléfono al final» | «La cuenta se crea al final, con tu email, justo antes de publicar» (decisión aprobada: OTP por email) |
+| Vender, CTA secundario | «Ya tengo anuncios: ir a mi panel» | «Ya tengo anuncios» |
+| Home, guías | Enlazaba una guía sin contenido | Tarjeta del comparador, «Compara antes de decidir»: no se promociona contenido que no existe |
+| Pasos de compra | — | «Busca por lo que importa» · «Habla directamente con quien vende» · «Pruébala y paga al recogerla» |
+| Guía pendiente | Texto interno («Respuesta corta, tabla de comprobación…») | «Estamos escribiendo esta guía. Mientras tanto, el asistente…» |
+| Alertas vacías | «No tienes alertas. Créalas desde…» | Título «No tienes alertas», explicación y botones a Buscar y al asistente |
+
+### Validación
+- **Capturas:** antes y después a 375, 768 y 1440 px, 20 páginas. No se versionan; se generan con un script local. **Sin scroll horizontal en ninguna.**
+- **Tests:**
+  - TypeScript y ESLint sin errores;
+  - 72 tests unitarios;
+  - 55 e2e en modo mock, incluidos «sin errores de hidratación con estado guardado» y el nuevo `/creditos`;
+  - 16 referencias visuales regeneradas. Una ejecución falló una vez por las fotos remotas de Unsplash de los anuncios DEMO; pasa al repetirla.
+- **Rendimiento:**
+  - solo la foto del hero lleva `preload` (WebP de 86 KB en origen; `next/image` sirve el tamaño del viewport);
+  - el resto carga en diferido con placeholder borroso;
+  - las siluetas son SVG en línea, sin peticiones.
+- **Accesibilidad:**
+  - fotos decorativas con `alt=""` e informativas con alt descriptivo;
+  - foco visible en turquesa claro sobre petróleo;
+  - áreas táctiles de 44 px en el footer móvil;
+  - la checklist de la guía mantiene los roles de tabla y en móvil muestra las etiquetas «Aceptable / Cuidado»;
+  - `prefers-reduced-motion` desactiva el zoom.
+
+### Pendiente
+- **Publicar (`/vender/publicar`):** el flujo pide verificar el teléfono. Pasa a email en la fase E, con la publicación real.
+- **Asistente:** faltan las siluetas en las opciones de «tabla actual». No se han hecho para no tocar la lógica del wizard.
+- **Fichas de tienda:** siguen con fotos de stock (datos DEMO). Con datos reales, cada tienda sube la suya; si no lo hace, se usa `tablas-alquiler`.
+- **Anuncios DEMO:** siguen con fotos de Unsplash en remoto. Solo afecta a los datos de demostración.
+- **Fotos propias:** cuando haya fotos de la comunidad o encargadas, se sustituyen en `scripts/photos.mjs` sin tocar componentes.

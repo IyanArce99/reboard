@@ -349,8 +349,11 @@
 }
 
 .h2 {
-  font-size: 20px;
+  font-family: var(--rb-font-display);
+  font-size: 26px;
   font-weight: 800;
+  text-transform: uppercase;
+  line-height: 1;
   margin-bottom: 10px;
 }
 
@@ -494,12 +497,39 @@
 }
 
 .before {
-  padding: 16px;
-  border-radius: 12px;
-  background: var(--rb-teal-tint);
-  font-size: 14px;
+  padding: 20px 22px;
+  border-radius: 16px;
+  background: var(--rb-shore);
+  border: 1px solid var(--rb-shore-line);
+  font-size: 15px;
   line-height: 1.55;
-  color: var(--rb-teal-ink);
+  color: var(--rb-ink);
+}
+.before ul {
+  margin: 8px 0 10px;
+  padding-left: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.before p {
+  font-size: 14px;
+  color: var(--rb-muted);
+}
+.before a {
+  color: var(--rb-teal-text);
+  font-weight: 700;
+}
+.before a:hover {
+  text-decoration: underline;
+}
+
+.beforeTitle {
+  font-family: var(--rb-font-display);
+  font-size: 24px;
+  font-weight: 800;
+  text-transform: uppercase;
+  line-height: 1;
 }
 
 .similar {
@@ -508,10 +538,12 @@
 }
 
 .similarTitle {
-  margin-bottom: 14px;
-  font-size: 32px;
+  margin-bottom: 16px;
+  font-family: var(--rb-font-display);
+  font-size: clamp(28px, 3vw, 40px);
   font-weight: 800;
-  letter-spacing: -0.02em;
+  text-transform: uppercase;
+  line-height: 0.98;
 }
 
 .similarGrid {

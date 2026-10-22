@@ -450,9 +450,15 @@
   background: var(--rb-white);
   border: 1px solid var(--rb-line);
 }
+.empty > span[aria-hidden] {
+  margin-bottom: 14px;
+}
 .emptyTitle {
-  font-size: 24px;
+  font-family: var(--rb-font-display);
+  font-size: clamp(26px, 2.8vw, 34px);
   font-weight: 800;
+  text-transform: uppercase;
+  line-height: 1;
 }
 .emptyTag {
   font-size: 14px;
