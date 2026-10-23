@@ -233,12 +233,13 @@ export function SearchBar({ here, initialCount, supportsDistance = true, zoneCou
   return (
     <div ref={wrapRef} className={styles.wrap}>
       <div className={styles.bar} data-open={panel ? true : undefined}>
-        {seg("zona", "Zona", where, "")}
-        <span className={styles.sep} />
-        {seg("litros", "Litros", vol, "¿Cuántos litros?")}
-        <span className={`${styles.sep} ${styles.dOnly}`} />
-        {seg("tipo", "Tipo de tabla", type, "Cualquier tipo", styles.dOnly)}
-        <Link href={`${href}${href.includes("?") ? "&" : "?"}avanzados=1`} className={`${styles.filters} ${styles.dOnly}`}>
+        {seg("zona", "Zona", where, "", styles.segZona)}
+        <span className={`${styles.sep} ${styles.sep1}`} />
+        {seg("litros", "Litros", vol, "¿Cuántos litros?", styles.segLitros)}
+        <span className={`${styles.sep} ${styles.sep2}`} />
+        {seg("tipo", "Tipo de tabla", type, "Cualquier tipo", styles.segTipo)}
+        {/* «Más filtros» va dentro del buscador también en tableta y móvil (antes, en móvil, era un texto suelto debajo). */}
+        <Link href={`${href}${href.includes("?") ? "&" : "?"}avanzados=1`} className={styles.filters}>
           <SlidersIcon />
           Más filtros
         </Link>

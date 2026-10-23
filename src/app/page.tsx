@@ -136,9 +136,6 @@ export default async function Home() {
               ¿No sabes cuántos litros? <span>Calcúlalo en 7 preguntas</span>
             </Link>
             {!inventoryEmpty && sellLink}
-            <Link href="/buscar?avanzados=1" className={styles.mOnly}>
-              Más filtros: <span>marca, estado, quillas…</span>
-            </Link>
           </div>
         </section>
       </div>
