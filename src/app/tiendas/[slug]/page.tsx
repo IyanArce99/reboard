@@ -11,7 +11,7 @@ import { getRepository } from "@/lib/data";
 import { ago, daysBetween } from "@/lib/domain/format";
 import { placeName } from "@/lib/domain/taxonomy";
 import { toQuery, withFilters } from "@/lib/search/filters";
-import { absoluteUrl } from "@/lib/site";
+import { absoluteUrl, OG_BASE } from "@/lib/site";
 import { unsplash } from "@/lib/images";
 import ui from "@/styles/ui.module.css";
 import styles from "@/components/shops/Shops.module.css";
@@ -38,7 +38,7 @@ export async function generateMetadata({ params }: PageProps<"/tiendas/[slug]">)
     title,
     description,
     alternates: { canonical: path, languages: { "es-ES": path } },
-    openGraph: { title, description, url: path, images: [{ url: unsplash(s.image, 1200) }] },
+    openGraph: { ...OG_BASE, title, description, url: path, images: [{ url: unsplash(s.image, 1200) }] },
   };
 }
 

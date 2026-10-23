@@ -3,6 +3,7 @@ import { FinderSeo } from "@/components/finder/FinderSeo";
 import { FinderWizard } from "@/components/finder/FinderWizard";
 import { Breadcrumbs } from "@/components/seo/Breadcrumbs";
 import styles from "@/components/finder/Finder.module.css";
+import { OG_BASE } from "@/lib/site";
 
 const PATH = "/calculadora-litros";
 const TITLE = "¿Qué tabla de surf necesito? Calculadora de litros";
@@ -13,7 +14,7 @@ export const metadata: Metadata = {
   title: TITLE,
   description: DESCRIPTION,
   alternates: { canonical: PATH, languages: { "es-ES": PATH } },
-  openGraph: { title: TITLE, description: DESCRIPTION, url: PATH },
+  openGraph: { ...OG_BASE, title: TITLE, description: DESCRIPTION, url: PATH },
 };
 
 export default function Page() {

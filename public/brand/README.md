@@ -8,3 +8,7 @@ Isotipo elegido: **1a · R + tabla** (el palo de la R es una tabla vista desde a
 - `../favicon.svg`: favicon.
 
 Reglas: margen mínimo = ½ de la altura del isotipo · mínimo 24 px de alto el horizontal, 16 px el isotipo · fondos permitidos: blanco, #EFF6F5 o #102D3B · nunca sobre amarillo, ni deformado, girado o recoloreado. Guía completa: design/prototype/Reboard Marca.dc.html.
+
+Exportados (23-10-2026, generados con Chromium desde `reboard-app-icon.svg`):
+- `../favicon.ico` (16, 32 y 48 px), `../apple-touch-icon.png` (180 px, sin transparencia) y `reboard-icon-192.png` / `reboard-icon-512.png` (manifest y logo de `Organization`).
+- `../og-reboard.png`: imagen por defecto al compartir (1200×630). Se usa en todas las páginas mediante `OG_BASE` (`src/lib/site.ts`); las fichas de anuncio usan su primera foto.

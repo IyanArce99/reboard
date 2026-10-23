@@ -9,7 +9,7 @@ import { SiteNotice } from "@/components/layout/SiteNotice";
 import { UserStateProvider } from "@/components/user/UserStateProvider";
 import { authEnabled } from "@/lib/auth/config";
 import { siteIndexable } from "@/lib/data";
-import { SITE_NAME, SITE_URL } from "@/lib/site";
+import { OG_BASE, SITE_NAME, SITE_URL } from "@/lib/site";
 import "./globals.css";
 
 const barlow = Barlow({
@@ -44,8 +44,16 @@ export const metadata: Metadata = {
   },
   description: "Compra y vende tablas de surf de segunda mano en España. Busca por litros, medidas, tipo y zona, sin comisiones.",
   applicationName: SITE_NAME,
-  icons: { icon: "/favicon.svg" },
-  openGraph: { siteName: SITE_NAME, locale: "es_ES", type: "website" },
+  icons: {
+    icon: [
+      { url: "/favicon.ico", sizes: "any" },
+      { url: "/favicon.svg", type: "image/svg+xml" },
+    ],
+    apple: "/apple-touch-icon.png",
+  },
+  openGraph: OG_BASE,
+  // Imagen grande al compartir (X/Twitter usa og:image si no hay una propia).
+  twitter: { card: "summary_large_image" },
   // Sin base de datos la web está vacía: no se indexa hasta que haya anuncios reales.
   robots: siteIndexable() ? undefined : { index: false, follow: false },
 };

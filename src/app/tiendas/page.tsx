@@ -10,6 +10,7 @@ import { getRepository } from "@/lib/data";
 import { unsplash } from "@/lib/images";
 import ui from "@/styles/ui.module.css";
 import styles from "@/components/shops/Shops.module.css";
+import { OG_BASE } from "@/lib/site";
 
 const TITLE = "Tiendas y escuelas";
 const DESCRIPTION =
@@ -19,7 +20,7 @@ export const metadata: Metadata = {
   title: TITLE,
   description: DESCRIPTION,
   alternates: { canonical: "/tiendas", languages: { "es-ES": "/tiendas" } },
-  openGraph: { title: TITLE, description: DESCRIPTION, url: "/tiendas" },
+  openGraph: { ...OG_BASE, title: TITLE, description: DESCRIPTION, url: "/tiendas" },
 };
 
 export default async function ShopsPage() {

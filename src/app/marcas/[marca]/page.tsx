@@ -14,7 +14,7 @@ import { slugify } from "@/lib/domain/taxonomy";
 import { listingPath, listingTitle } from "@/lib/listing/present";
 import { alertText } from "@/lib/search/describe";
 import { searchHref, toQuery, withFilters } from "@/lib/search/filters";
-import { absoluteUrl } from "@/lib/site";
+import { absoluteUrl, OG_BASE } from "@/lib/site";
 import ui from "@/styles/ui.module.css";
 import styles from "@/components/catalog/Catalog.module.css";
 
@@ -43,7 +43,7 @@ export async function generateMetadata({ params }: PageProps<"/marcas/[marca]">)
     title,
     description,
     alternates: { canonical: path, languages: { "es-ES": path } },
-    openGraph: { title, description, url: path },
+    openGraph: { ...OG_BASE, title, description, url: path },
   };
 }
 

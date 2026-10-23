@@ -11,7 +11,7 @@ import { CONSTRUCTION_INFO, SHAPE_INFO, slugify } from "@/lib/domain/taxonomy";
 import { fmtIn, inToCm } from "@/lib/domain/format";
 import { listingPath, listingTitle } from "@/lib/listing/present";
 import { searchHref, toQuery, withFilters } from "@/lib/search/filters";
-import { absoluteUrl } from "@/lib/site";
+import { absoluteUrl, OG_BASE } from "@/lib/site";
 import styles from "@/components/catalog/Catalog.module.css";
 
 /** Foto de stock del prototipo: aquí irá la foto autorizada de la marca. */
@@ -41,7 +41,7 @@ export async function generateMetadata({ params }: PageProps<"/marcas/[marca]/[m
     title,
     description,
     alternates: { canonical: path, languages: { "es-ES": path } },
-    openGraph: { title, description, url: path },
+    openGraph: { ...OG_BASE, title, description, url: path },
   };
 }
 

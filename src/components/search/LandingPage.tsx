@@ -21,6 +21,7 @@ import {
 } from "@/lib/search/landings";
 import { landingIndexable } from "@/lib/search/indexing";
 import { noindexRobots } from "@/lib/seo";
+import { OG_BASE } from "@/lib/site";
 
 /** Interpreta los segmentos de /tablas/[segmento]/[forma]. */
 export function resolveLanding(segment: string, form?: string): { place: string | null; form: LandingForm | null } {
@@ -47,7 +48,7 @@ export async function landingMetadata(place: string | null, form: LandingForm | 
     title,
     description,
     alternates: { canonical: path, languages: { "es-ES": path } },
-    openGraph: { title, description, url: path },
+    openGraph: { ...OG_BASE, title, description, url: path },
     // Política de indexación: src/lib/search/indexing.ts (el sitemap aplica la misma).
     ...(landingIndexable(place, form, n) ? {} : { robots: noindexRobots() }),
   };

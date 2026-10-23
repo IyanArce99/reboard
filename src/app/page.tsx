@@ -14,7 +14,7 @@ import { NO_BRAND, ZONES, slugify, type Shape } from "@/lib/domain/taxonomy";
 import type { PhotoSlug } from "@/lib/photos";
 import { emptyFilters, withFilters } from "@/lib/search/filters";
 import { formFilters, landingPath, type LandingForm } from "@/lib/search/landings";
-import { absoluteUrl, SITE_NAME } from "@/lib/site";
+import { absoluteUrl, SITE_NAME, OG_BASE } from "@/lib/site";
 import styles from "@/components/home/Home.module.css";
 
 const DESCRIPTION =
@@ -23,7 +23,7 @@ const DESCRIPTION =
 export const metadata: Metadata = {
   description: DESCRIPTION,
   alternates: { canonical: "/", languages: { "es-ES": "/" } },
-  openGraph: { url: "/", description: DESCRIPTION },
+  openGraph: { ...OG_BASE, url: "/", description: DESCRIPTION },
 };
 
 // Tipos de tabla con su silueta. Softboard es una construcción y «principiantes» una necesidad:
@@ -287,7 +287,7 @@ export default async function Home() {
               "@id": absoluteUrl("/#org"),
               name: SITE_NAME,
               url: absoluteUrl("/"),
-              logo: absoluteUrl("/brand/reboard-app-icon.svg"),
+              logo: absoluteUrl("/brand/reboard-icon-512.png"),
               description: DESCRIPTION,
             },
           ],

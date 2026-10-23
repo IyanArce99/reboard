@@ -36,7 +36,7 @@ import {
 import { alertText } from "@/lib/search/describe";
 import { toQuery, withFilters } from "@/lib/search/filters";
 import { landingPath } from "@/lib/search/landings";
-import { absoluteUrl } from "@/lib/site";
+import { absoluteUrl, OG_BASE } from "@/lib/site";
 import ui from "@/styles/ui.module.css";
 import styles from "@/components/listing/Ficha.module.css";
 
@@ -70,7 +70,7 @@ export async function generateMetadata({ params }: PageProps<"/anuncio/[slugId]"
     title,
     description,
     alternates: { canonical: listingPath(l), languages: { "es-ES": listingPath(l) } },
-    openGraph: { title, description, url: listingPath(l), images: l.photos[0] ? [{ url: l.photos[0].url }] : undefined },
+    openGraph: { ...OG_BASE, title, description, url: listingPath(l), ...(l.photos[0] ? { images: [{ url: l.photos[0].url }] } : {}) },
     // Vendida, caducada o retirada: la URL sigue (con alternativas parecidas), pero noindex para
     // que no aparezca en Google una tabla que ya no se puede comprar. Sale también del sitemap.
     ...(isOff(l) ? { robots: noindexRobots() } : {}),

@@ -11,7 +11,7 @@ import { getRepository } from "@/lib/data";
 import { PHOTOS } from "@/lib/photos";
 import { emptyFilters } from "@/lib/search/filters";
 import { noindexRobots } from "@/lib/seo";
-import { absoluteUrl, SITE_NAME } from "@/lib/site";
+import { absoluteUrl, SITE_NAME, OG_BASE } from "@/lib/site";
 import styles from "@/components/guides/Guides.module.css";
 
 export function generateStaticParams() {
@@ -38,7 +38,7 @@ export async function generateMetadata({ params }: PageProps<"/guias/[slug]">): 
     title: g.title,
     description: g.description,
     alternates: { canonical: path, languages: { "es-ES": path } },
-    openGraph: {
+    openGraph: { ...OG_BASE,
       type: "article",
       title: g.title,
       description: g.description,

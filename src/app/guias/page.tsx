@@ -6,6 +6,7 @@ import { Breadcrumbs } from "@/components/seo/Breadcrumbs";
 import { GUIDES, guideDate } from "@/lib/content/guides";
 import type { PhotoSlug } from "@/lib/photos";
 import styles from "@/components/guides/Guides.module.css";
+import { OG_BASE } from "@/lib/site";
 
 const TITLE = "Guías de compra";
 const DESCRIPTION =
@@ -15,7 +16,7 @@ export const metadata: Metadata = {
   title: TITLE,
   description: DESCRIPTION,
   alternates: { canonical: "/guias", languages: { "es-ES": "/guias" } },
-  openGraph: { title: TITLE, description: DESCRIPTION, url: "/guias" },
+  openGraph: { ...OG_BASE, title: TITLE, description: DESCRIPTION, url: "/guias" },
 };
 
 const TOOLS: { t: string; d: string; href: string; photo: PhotoSlug; cta: string }[] = [
