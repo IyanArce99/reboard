@@ -102,5 +102,6 @@ export const config = {
     "/entrar",
     "/vender/publicar",
     "/moderacion/:path*",
+    "/admin/:path*",
   ],
 };
