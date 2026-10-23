@@ -23,10 +23,18 @@ select throws_ok($$
   insert into public.listings (slug, status, size_label, length_in, shape, construction, condition, price_eur, zone_slug, town, published_at)
   values ('u-antiguo', 'published', '6''0"', 72, 'fish', 'pu', 'buen-estado', 200, 'tenerife', 'El Médano', '2020-01-01')
 $$, '42501', null, 'un usuario no fija published_at');
-insert into public.listings (slug, status, size_label, length_in, shape, construction, condition, price_eur, zone_slug, town, volume_l, volume_source)
-values ('u-fish', 'published', '6''0"', 72, 'fish', 'pu', 'buen-estado', 200, 'tenerife', 'El Médano', 45, 'seller'),
-       ('u-evo-tf', 'published', '7''0"', 84, 'evolutiva', 'pu', 'buen-estado', 210, 'tenerife', 'El Médano', 50, 'seller'),
-       ('u-long-gc', 'published', '9''0"', 108, 'longboard', 'epoxy', 'buen-estado', 400, 'gran-canaria', 'Telde', 80, 'seller');
+insert into public.listings (slug, size_label, length_in, shape, construction, condition, price_eur, zone_slug, town, volume_l, volume_source)
+values ('u-fish', '6''0"', 72, 'fish', 'pu', 'buen-estado', 200, 'tenerife', 'El Médano', 45, 'seller'),
+       ('u-evo-tf', '7''0"', 84, 'evolutiva', 'pu', 'buen-estado', 210, 'tenerife', 'El Médano', 50, 'seller'),
+       ('u-long-gc', '9''0"', 108, 'longboard', 'epoxy', 'buen-estado', 400, 'gran-canaria', 'Telde', 80, 'seller');
+-- Foto y teléfono (requisitos para publicar), y el usuario publica sus borradores.
+reset role;
+insert into public.listing_photos (listing_id, storage_path, position, width, height)
+select id, seller_id || '/' || id || '/foto.webp', 0, 1200, 1600 from public.listings where slug in ('u-fish', 'u-evo-tf', 'u-long-gc');
+insert into public.listing_contacts (listing_id, phone_e164)
+select id, '+34600000000' from public.listings where slug in ('u-fish', 'u-evo-tf', 'u-long-gc');
+set local role authenticated;
+update public.listings set status = 'published' where slug in ('u-fish', 'u-evo-tf', 'u-long-gc');
 select ok((select confirmed_at > now() - interval '1 minute' from public.listings where slug = 'u-fish'),
   'un usuario que publica confirma «ahora»');
 reset role;

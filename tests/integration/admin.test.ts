@@ -19,12 +19,12 @@ let seller: { client: Sb; userId: string };
 let listingId = 0;
 let publicId = "";
 
-async function makeListing(client: Sb) {
+/** Anuncio publicado por el camino real: borrador → foto y teléfono → publicado. */
+async function makeListing(client: Sb, userId: string) {
   const { data, error } = await client
     .from("listings")
     .insert({
       slug: "admin-it-tabla",
-      status: "published",
       size_label: `7'0"`,
       length_in: 84,
       shape: "evolutiva",
@@ -37,6 +37,12 @@ async function makeListing(client: Sb) {
     .select("id, public_id")
     .single();
   if (error) throw error;
+  const photo = await sb.from("listing_photos").insert({ listing_id: data.id, storage_path: `${userId}/${data.id}/foto.webp`, position: 0 });
+  if (photo.error) throw photo.error;
+  const contact = await sb.from("listing_contacts").insert({ listing_id: data.id, phone_e164: "+34600000000" });
+  if (contact.error) throw contact.error;
+  const pub = await client.from("listings").update({ status: "published" }).eq("id", data.id);
+  if (pub.error) throw pub.error;
   return data;
 }
 
@@ -49,7 +55,7 @@ beforeAll(async () => {
   await sb.from("profiles").update({ role: "user" }).eq("role", "admin");
   await sb.from("profiles").update({ role: "admin" }).eq("id", admin.userId);
   // El inicio de sesión ya se hizo: la sesión es la misma, pero el rol se lee en cada consulta.
-  const l = await makeListing(seller.client);
+  const l = await makeListing(seller.client, seller.userId);
   listingId = l.id;
   publicId = l.public_id!;
 });

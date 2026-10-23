@@ -44,7 +44,17 @@ export async function publishDraft(opts: {
     const { error } = await sb.storage
       .from("listing-photos")
       .upload(path, p.blob, { contentType: p.blob.type, cacheControl: "31536000", upsert: false });
-    if (error) return { ok: false, message: "No se ha podido subir una foto. Revisa la conexión y vuelve a intentarlo.", publicId: saved.publicId };
+    if (error) {
+      // Cuota de Storage (migración 20261027090000): 16 archivos por anuncio y 120 subidas al día.
+      const quota = /row-level security|unauthorized|403/i.test(error.message);
+      return {
+        ok: false,
+        message: quota
+          ? "Has subido muchas fotos en poco tiempo. Espera unas horas y vuelve a intentarlo."
+          : "No se ha podido subir una foto. Revisa la conexión y vuelve a intentarlo.",
+        publicId: saved.publicId,
+      };
+    }
     // La foto ya está en Storage: si hay que reintentar, no se vuelve a subir.
     p.path = path;
     refs.push({ path, width: p.width ?? 1, height: p.height ?? 1 });

@@ -457,3 +457,22 @@ Detalle en `docs/ADMIN.md`.
   - configurar los proveedores (`docs/PRODUCTION_SETUP.md` §3b);
   - renovar cada 6 meses la clave de Apple;
   - **revisar la política de privacidad** para mencionar Google y Apple como vía de acceso y los datos que recibimos (email y nombre).
+
+## Publicar solo por el camino de la web, y cuota de fotos (23-10-2026)
+
+**Problema.** La auditoría de lanzamiento (`docs/LAUNCH_READINESS_AUDIT.md`, S2 y S3) encontró dos huecos:
+- Un usuario con sesión podía crear anuncios **ya publicados** directamente por la API REST de Supabase: sin fotos, sin teléfono, sin Turnstile y sin límite.
+- Podía subir archivos a Storage sin cuota.
+
+**Decisión.** Las reglas pasan a la base de datos (migración `20261027090000_publish_guard_storage_quota`), así que valen igual para la web que para la API:
+- **Un usuario solo crea borradores.** Publicar es pasar de borrador a publicado, y exige al menos una foto y un teléfono de contacto (`listing_needs_photos`, `listing_needs_contact`).
+- **Máximo 15 anuncios nuevos por usuario y día** (`listing_daily_limit`). La web lo explica con un mensaje claro.
+- **Storage:**
+  - máximo 16 archivos por anuncio (8 fotos, más margen al sustituirlas al editar);
+  - máximo 120 subidas por usuario y día;
+  - un usuario suspendido no puede modificar sus fotos.
+- El servidor (service role) y las funciones del panel de administración no tienen estos límites.
+
+**Tests.** 10 nuevos en pgTAP (`02_listings`, `04_storage_photos`). Los tests que preparaban anuncios publicados como usuario ahora siguen el camino real o los crea el servidor.
+
+**Pendiente:** el resto de hallazgos de la auditoría (S4–S14).

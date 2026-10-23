@@ -109,6 +109,10 @@ export async function saveListing(sb: Sb, userId: string, v: ListingData, editin
       .insert({ ...row, status: "draft" })
       .select("id, public_id, slug, status")
       .single();
+    // Límite de la base de datos: 15 anuncios nuevos por usuario y día (migración 20261027090000).
+    if (error?.message.includes("listing_daily_limit")) {
+      throw new PublishError("state", "Has creado muchos anuncios hoy. Podrás publicar más mañana.");
+    }
     if (error || !data) throw new PublishError("db", error?.message ?? "insert");
     listing = data;
   }

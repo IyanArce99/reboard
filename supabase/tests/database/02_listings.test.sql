@@ -18,11 +18,30 @@ select is((select display_name from public.profiles where id = '11111111-1111-11
 set local role authenticated;
 set local request.jwt.claims to '{"sub":"11111111-1111-1111-1111-111111111111","role":"authenticated"}';
 
+-- Publicar = borrador → foto y teléfono → publicado (20261027090000_publish_guard_storage_quota).
+select throws_ok($$
+  insert into public.listings (slug, status, size_label, length_in, shape, construction, condition, price_eur, zone_slug, town)
+  values ('t-directo', 'published', '7''2"', 86, 'evolutiva', 'epoxy', 'buen-estado', 200, 'gran-canaria', 'Telde')
+$$, '42501', null, 'A no puede crear un anuncio ya publicado (solo borradores)');
 select lives_ok($$
-  insert into public.listings (slug, status, size_label, length_in, shape, construction, condition, price_eur, zone_slug, town,
+  insert into public.listings (slug, size_label, length_in, shape, construction, condition, price_eur, zone_slug, town,
                                volume_l, volume_source)
-  values ('t-publicado', 'published', '7''2"', 86, 'evolutiva', 'epoxy', 'buen-estado', 200, 'gran-canaria', 'Telde', 47, 'seller')
-$$, 'A publica un anuncio');
+  values ('t-publicado', '7''2"', 86, 'evolutiva', 'epoxy', 'buen-estado', 200, 'gran-canaria', 'Telde', 47, 'seller')
+$$, 'A crea el borrador');
+select throws_ok($$ update public.listings set status = 'published' where slug = 't-publicado' $$,
+  'P0001', 'listing_needs_photos', 'sin fotos no se publica');
+select lives_ok($$
+  insert into public.listing_photos (listing_id, storage_path, position, width, height)
+  select id, '11111111-1111-1111-1111-111111111111/' || id || '/00000000-0000-0000-0000-000000000001.webp', 0, 1200, 1600
+  from public.listings where slug = 't-publicado'
+$$, 'A añade una foto');
+select throws_ok($$ update public.listings set status = 'published' where slug = 't-publicado' $$,
+  'P0001', 'listing_needs_contact', 'sin teléfono no se publica');
+select lives_ok($$
+  insert into public.listing_contacts (listing_id, phone_e164) select id, '+34600000000' from public.listings where slug = 't-publicado'
+$$, 'A añade el teléfono');
+select lives_ok($$ update public.listings set status = 'published' where slug = 't-publicado' $$,
+  'A publica un anuncio');
 select lives_ok($$
   insert into public.listings (slug, size_label, length_in, shape, construction, condition, price_eur, zone_slug, town)
   values ('t-borrador', '6''0"', 72, 'shortboard', 'pu', 'como-nueva', 300, 'asturias', 'Gijón')
@@ -136,6 +155,19 @@ set local request.jwt.claims to '{"sub":"11111111-1111-1111-1111-111111111111","
 delete from public.listings where slug = 't-publicado';
 reset role;
 select is((select count(*) from public.listings where slug = 't-publicado'), 0::bigint, 'el dueño elimina su anuncio sin moderación');
+
+-- Límite de anuncios nuevos por usuario y día (15; A ya ha creado algunos en este archivo)
+set local role authenticated;
+set local request.jwt.claims to '{"sub":"22222222-2222-2222-2222-222222222222","role":"authenticated"}';
+select throws_ok($$
+  insert into public.listings (slug, size_label, length_in, shape, construction, condition, price_eur, zone_slug, town)
+  select 't-lote-' || g, '6''0"', 72, 'fish', 'pu', 'buen-estado', 200, 'asturias', 'Gijón' from generate_series(1, 16) g
+$$, 'P0001', 'listing_daily_limit', 'máximo 15 anuncios nuevos al día por usuario');
+select lives_ok($$
+  insert into public.listings (slug, size_label, length_in, shape, construction, condition, price_eur, zone_slug, town)
+  select 't-lote-' || g, '6''0"', 72, 'fish', 'pu', 'buen-estado', 200, 'asturias', 'Gijón' from generate_series(1, 15) g
+$$, 'hasta 15 sí');
+reset role;
 
 select * from finish();
 rollback;

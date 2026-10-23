@@ -67,5 +67,18 @@ set local role anon;
 set local request.jwt.claims to '{"role":"anon"}';
 select is((select count(*) from public.listing_photos where listing_id = (select listing_id from _paths)), 8::bigint, 'anon ve las fotos de un anuncio publicado');
 
+-- Cuota de Storage (20261027090000): 16 archivos por anuncio
+set local role authenticated;
+set local request.jwt.claims to '{"sub":"11111111-1111-1111-1111-111111111111","role":"authenticated"}';
+select lives_ok($$
+  insert into storage.objects (bucket_id, name)
+  select 'listing-photos', '11111111-1111-1111-1111-111111111111/' || listing_id || '/q' || g || '.webp' from _paths, generate_series(1, 15) g
+$$, 'hasta 16 archivos en la carpeta de un anuncio');
+select throws_ok($$
+  insert into storage.objects (bucket_id, name)
+  select 'listing-photos', '11111111-1111-1111-1111-111111111111/' || listing_id || '/q-extra.webp' from _paths
+$$, '42501', null, 'el archivo 17 de un anuncio se rechaza');
+reset role;
+
 select * from finish();
 rollback;

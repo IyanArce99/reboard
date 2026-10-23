@@ -43,9 +43,11 @@ select throws_ok($$ select public.admin_moderate_listing('a1', 'hide', 'motivo')
   '42501', null, 'usuario normal: no modera');
 
 -- El vendedor publica un anuncio (para moderación y suspensión)
-set local request.jwt.claims to '{"sub":"cccccccc-0000-0000-0000-000000000003","role":"authenticated","aal":"aal1"}';
-insert into public.listings (slug, status, size_label, length_in, shape, construction, condition, price_eur, zone_slug, town)
-values ('t-admin-pub', 'published', '7''0"', 84, 'evolutiva', 'pu', 'buen-estado', 200, 'cantabria', 'Somo');
+-- (creado por el servidor: el recorrido de publicar se prueba en 02_listings)
+reset role;
+insert into public.listings (seller_id, slug, status, size_label, length_in, shape, construction, condition, price_eur, zone_slug, town)
+values ('cccccccc-0000-0000-0000-000000000003', 't-admin-pub', 'published', '7''0"', 84, 'evolutiva', 'pu', 'buen-estado', 200, 'cantabria', 'Somo');
+set local role authenticated;
 
 -- ───────── Admin ─────────
 set local request.jwt.claims to '{"sub":"aaaaaaaa-0000-0000-0000-000000000001","role":"authenticated","aal":"aal1"}';

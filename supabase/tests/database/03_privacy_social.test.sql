@@ -9,11 +9,13 @@ insert into auth.users (id, instance_id, aud, role, email) values
   ('33333333-3333-3333-3333-333333333333', '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated', 'c@test.invalid'),
   ('44444444-4444-4444-4444-444444444444', '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated', 'd@test.invalid');
 
--- A publica con teléfono de contacto
+-- Anuncio publicado de A (creado por el servidor; el recorrido de publicar se prueba en 02_listings)
+insert into public.listings (seller_id, slug, status, size_label, length_in, shape, construction, condition, price_eur, zone_slug, town)
+values ('11111111-1111-1111-1111-111111111111', 't-contacto', 'published', '7''2"', 86, 'evolutiva', 'epoxy', 'buen-estado', 200, 'gran-canaria', 'Telde');
+
+-- A guarda su teléfono de contacto
 set local role authenticated;
 set local request.jwt.claims to '{"sub":"11111111-1111-1111-1111-111111111111","role":"authenticated"}';
-insert into public.listings (slug, status, size_label, length_in, shape, construction, condition, price_eur, zone_slug, town)
-values ('t-contacto', 'published', '7''2"', 86, 'evolutiva', 'epoxy', 'buen-estado', 200, 'gran-canaria', 'Telde');
 select lives_ok($$
   insert into public.listing_contacts (listing_id, phone_e164)
   select id, '+34600000000' from public.listings where slug = 't-contacto'
