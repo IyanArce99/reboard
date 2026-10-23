@@ -21,7 +21,9 @@
     "test:integration": "vitest run --config vitest.integration.config.ts",
     "perf:local": "vitest run --config vitest.perf.config.ts",
     "env:local": "node scripts/env-local.mjs",
-    "db:seed-demo": "tsx scripts/seed-local-demo.mts"
+    "db:seed-demo": "tsx scripts/seed-local-demo.mts",
+    "admin:grant": "node --env-file-if-exists=.env.local scripts/grant-admin.mjs",
+    "test:e2e:admin": "playwright test -c playwright.admin.config.ts"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.7",

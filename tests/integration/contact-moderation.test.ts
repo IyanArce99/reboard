@@ -1,5 +1,5 @@
 // Fase F contra Supabase LOCAL: revelar el contacto (límite por IP), caducidad y limpieza,
-// reportes con marca automática y moderación con registro.
+// reportes con marca automática y moderación con registro (con la sesión del moderador, sin borrar fotos).
 
 import sharp from "sharp";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
@@ -174,19 +174,28 @@ describe("reportes y moderación (F3)", () => {
     expect((await seller.client.from("reports").select("id").eq("listing_id", listing.id)).data).toEqual([]);
   });
 
-  it("solo un moderador ve la cola; al retirar, desaparecen el anuncio y sus fotos, y queda registrado", async () => {
+  it("solo un moderador ve la cola; al retirar (con su sesión) desaparece de la web, conserva las fotos y queda registrado", async () => {
     const mod = reporters[2];
     expect((await mod.client.rpc("is_moderator")).data).toBe(false);
     expect((await mod.client.from("moderation_actions").select("id")).data).toEqual([]);
+    // Sin rol, la función de la base de datos lo rechaza aunque se llame directamente.
+    expect((await moderate(mod.client, listing.publicId, "remove", "sin permiso"))?.message).toMatch(/forbidden/);
     await sb.from("profiles").update({ role: "moderator" }).eq("id", mod.userId);
     expect((await mod.client.rpc("is_moderator")).data).toBe(true);
     const queue = await mod.client.from("reports").select("listing_id").eq("status", "open").eq("listing_id", listing.id);
     expect(queue.data).toHaveLength(3);
 
+    // Ocultar y retirar exigen motivo; marcar vendido es solo para admin.
+    expect((await moderate(mod.client, listing.publicId, "hide", ""))?.message).toMatch(/reason_required/);
+    expect((await moderate(mod.client, listing.publicId, "mark_sold", "vendida por WhatsApp"))?.message).toMatch(/forbidden/);
+
     expect(await storageHas(listing.path)).toBe(true);
-    await moderate(sb, mod.userId, listing.publicId, "remove", "estafa confirmada");
+    expect(await moderate(mod.client, listing.publicId, "remove", "estafa confirmada")).toBeNull();
     expect(await db.byId(listing.publicId)).toBeNull();
-    expect(await storageHas(listing.path)).toBe(false);
+    // Retirar ya no borra nada: ni el archivo de Storage ni la fila (que el moderador puede revisar).
+    expect(await storageHas(listing.path)).toBe(true);
+    expect((await mod.client.from("listing_photos").select("storage_path").eq("listing_id", listing.id)).data).toEqual([{ storage_path: listing.path }]);
+    expect((await anonClient().from("listing_photos").select("id").eq("listing_id", listing.id)).data).toEqual([]);
     const { data: open } = await sb.from("reports").select("id").eq("listing_id", listing.id).eq("status", "open");
     expect(open).toEqual([]);
     const { data: log } = await mod.client.from("moderation_actions").select("action, reason").eq("listing_id", listing.id);
@@ -194,6 +203,24 @@ describe("reportes y moderación (F3)", () => {
     // El dueño no puede volver a publicarlo.
     const back = await seller.client.from("listings").update({ status: "published" }).eq("id", listing.id);
     expect(back.error).not.toBeNull();
+  });
+
+  it("ocultar y restaurar: vuelve a la web con sus fotos y queda en el historial", async () => {
+    const mod = reporters[2];
+    const other = await publishOne();
+    expect(await moderate(mod.client, other.publicId, "hide", "revisando las fotos")).toBeNull();
+    expect(await db.byId(other.publicId)).toBeNull();
+    expect(await moderate(mod.client, other.publicId, "restore", null)).toBeNull();
+    expect((await db.byId(other.publicId))?.photos.length).toBe(1);
+    const { data: log } = await mod.client.from("moderation_actions").select("action").eq("listing_id", other.id).order("created_at");
+    expect(log?.map((x) => x.action)).toEqual(["hide", "restore"]);
+  });
+
+  it("no se puede reportar un anuncio propio; el motivo «fotos» existe", async () => {
+    const other = await publishOne();
+    const own = await seller.client.from("reports").insert({ listing_id: other.id, reason: "fotos" });
+    expect(own.error?.message).toMatch(/own_listing/);
+    expect((await reporters[0].client.from("reports").insert({ listing_id: other.id, reason: "fotos" })).error).toBeNull();
   });
 });
 

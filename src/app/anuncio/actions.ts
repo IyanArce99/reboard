@@ -5,6 +5,7 @@
 
 import { headers } from "next/headers";
 import { z } from "zod";
+import { REPORT_REASON_VALUES } from "@/components/moderation/labels";
 import { authEnabled } from "@/lib/auth/config";
 import { revealContact } from "@/lib/moderation/service";
 import { clientIp, ipHash } from "@/lib/security/ip";
@@ -43,7 +44,7 @@ export async function revealContactAction(args: { publicId: string; token: strin
 
 const Report = z.object({
   publicId: PublicId,
-  reason: z.enum(["fraude", "datos-falsos", "vendida", "duplicado", "inapropiado", "otro"]),
+  reason: z.enum(REPORT_REASON_VALUES),
   details: z
     .string()
     .max(1000)
@@ -70,6 +71,9 @@ export async function reportListingAction(args: z.input<typeof Report>): Promise
   const { error } = await sb.from("reports").insert({ listing_id: id, reason: a.data.reason, details: a.data.details });
   if (error) {
     if (error.code === "23505") return { ok: false, message: "Ya has reportado este anuncio. Lo revisaremos." };
+    // Errores de reports_guard (base de datos): anuncio propio y límite diario contra el abuso.
+    if (/own_listing/.test(error.message)) return { ok: false, message: "No puedes reportar tu propio anuncio." };
+    if (/report_limit/.test(error.message)) return { ok: false, message: "Has enviado muchos reportes hoy. Inténtalo mañana." };
     return { ok: false, message: "No se ha podido enviar el reporte. Vuelve a intentarlo." };
   }
   return { ok: true };

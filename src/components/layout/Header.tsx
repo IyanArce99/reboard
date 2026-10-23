@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Suspense } from "react";
 import { Logo } from "@/components/Logo";
+import { HeartIcon, MenuIcon, UserIcon } from "@/components/icons";
 import { AccountButton, MainNav, MobileMenu, SavedButton } from "./HeaderClient";
 import styles from "./Header.module.css";
 
@@ -25,12 +26,38 @@ export function Header() {
         </Suspense>
 
         <div className={styles.actions}>
-          <SavedButton />
-          <AccountButton />
+          {/* Leen la URL (página activa): cada uno con su Suspense y un respaldo estático idéntico,
+              para que la cabecera siga en el HTML inicial también en rutas dinámicas sin prerender (/admin). */}
+          <Suspense
+            fallback={
+              <Link href="/guardado" aria-label="Guardadas" data-tip="Guardadas" className={styles.iconBtn}>
+                <HeartIcon />
+              </Link>
+            }
+          >
+            <SavedButton />
+          </Suspense>
+          <Suspense
+            fallback={
+              <Link href="/entrar" aria-label="Entrar" data-tip="Entrar" className={styles.iconBtn}>
+                <UserIcon />
+              </Link>
+            }
+          >
+            <AccountButton />
+          </Suspense>
           <Link href="/vender/publicar" className={styles.publish}>
             Publicar tabla
           </Link>
-          <MobileMenu />
+          <Suspense
+            fallback={
+              <button type="button" aria-label="Menú" className={`${styles.iconBtn} ${styles.menuBtn}`} disabled>
+                <MenuIcon />
+              </button>
+            }
+          >
+            <MobileMenu />
+          </Suspense>
         </div>
       </div>
     </header>

@@ -80,8 +80,13 @@ export interface ListingRepository {
   /** Pares slug/id para prerenderizar fichas (todas las del mock; las N recientes con base de datos). */
   listingParams(limit?: number): Promise<{ slug: string; id: string }[]>;
 
+  /** Catálogo público: solo modelos activos y verificados (medidas copiadas de la tabla del fabricante). */
   catalog(): Promise<CatalogModel[]>;
-  /** Marcas conocidas (tengan o no modelos en el catálogo), por nombre. */
-  brands(): Promise<{ slug: string; name: string }[]>;
+  /**
+   * Marcas activas (tengan o no modelos en el catálogo): primero las destacadas en el orden del panel
+   * (/admin/catalogo), luego el resto por nombre. `featured`: destacada en el formulario de publicación.
+   * Opcional solo por los fixtures de tests; las implementaciones de la app siempre lo indican.
+   */
+  brands(): Promise<{ slug: string; name: string; featured?: boolean }[]>;
   shops(): Promise<Shop[]>;
 }

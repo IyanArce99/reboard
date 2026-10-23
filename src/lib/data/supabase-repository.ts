@@ -191,13 +191,18 @@ async function listingParamsCached(limit: number) {
   return (data ?? []).map((r) => ({ slug: r.slug, id: r.public_id ?? "" })).filter((r) => r.id);
 }
 
+// Catálogo público (publicar, /marcas, sitemap): solo modelos activos y verificados de marcas activas.
+// Un modelo sin verificar no se presenta nunca como dato del fabricante.
 async function catalogCached() {
   "use cache";
   cacheLife("hours");
   cacheTag("catalog");
   const { data, error } = await createPublicClient()
     .from("board_models")
-    .select("*, brand:brands(name), sizes:board_model_sizes(*)")
+    .select("*, brand:brands!board_models_brand_id_fkey!inner(name), sizes:board_model_sizes(*)")
+    .eq("active", true)
+    .eq("verification", "verified")
+    .eq("brand.active", true)
     .order("name");
   fail("catalog", error);
   return (data ?? []).map((m) => rowToCatalogModel(m as Parameters<typeof rowToCatalogModel>[0]));
@@ -207,9 +212,16 @@ async function brandsCached() {
   "use cache";
   cacheLife("hours");
   cacheTag("catalog");
-  const { data, error } = await createPublicClient().from("brands").select("slug, name").order("name");
+  // Activas; destacadas primero en el orden del panel y luego por nombre (índice brands_publish).
+  const { data, error } = await createPublicClient()
+    .from("brands")
+    .select("slug, name, featured")
+    .eq("active", true)
+    .order("featured", { ascending: false })
+    .order("sort_order")
+    .order("name");
   fail("brands", error);
-  return (data ?? []).map((b) => ({ slug: b.slug as string, name: b.name as string }));
+  return (data ?? []).map((b) => ({ slug: b.slug, name: b.name, featured: b.featured }));
 }
 
 async function shopsCached() {

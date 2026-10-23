@@ -125,6 +125,6 @@ export const mockRepository: ListingRepository = {
   catalog: async () => DEMO_CATALOG,
 
   brands: async () =>
-    [...new Set(DEMO_CATALOG.map((m) => m.brand))].sort((a, b) => a.localeCompare(b, "es")).map((name) => ({ slug: slugify(name), name })),
+    [...new Set(DEMO_CATALOG.map((m) => m.brand))].sort((a, b) => a.localeCompare(b, "es")).map((name) => ({ slug: slugify(name), name, featured: false })),
   shops: async () => DEMO_SHOPS,
 };

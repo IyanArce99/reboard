@@ -157,6 +157,11 @@ select:not([multiple]):disabled {
   opacity: 0.6;
 }
 
+/* Panel de administración: sin la cabecera ni el pie del marketplace (ver SiteChrome). */
+body:has([data-admin-shell]) [data-site-chrome] {
+  display: none !important;
+}
+
 .visually-hidden {
   position: absolute;
   width: 1px;

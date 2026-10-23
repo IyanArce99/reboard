@@ -8,6 +8,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { createContext, useContext, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { reportListingAction, revealContactAction } from "@/app/anuncio/actions";
+import { REPORT_REASONS, type ReportReason } from "@/components/moderation/labels";
 import { Turnstile, TURNSTILE_SITE_KEY, type TurnstileHandle } from "@/components/security/Turnstile";
 import { useUserState } from "@/components/user/UserStateProvider";
 import { useDialogFocus } from "@/lib/a11y/useDialogFocus";
@@ -215,16 +216,9 @@ export function ShareButton({ url, className }: { url: string; className: string
   );
 }
 
-const REASONS: [string, string][] = [
-  ["fraude", "Posible estafa (pide señal, envío o pago por adelantado)"],
-  ["datos-falsos", "Las fotos o los datos no son reales"],
-  ["vendida", "Ya está vendida"],
-  ["duplicado", "Anuncio duplicado"],
-  ["inapropiado", "Contenido inapropiado"],
-  ["otro", "Otro motivo"],
-];
-
-type Reason = "fraude" | "datos-falsos" | "vendida" | "duplicado" | "inapropiado" | "otro";
+// Motivos y etiquetas compartidos con moderación y el panel (enum report_reason).
+const REASONS = REPORT_REASONS;
+type Reason = ReportReason;
 
 export function ReportButton({ className }: { className: string }) {
   const { toast, account } = useUserState();
@@ -307,7 +301,7 @@ export function ReportButton({ className }: { className: string }) {
                   <legend className={styles.modalHint}>¿Qué pasa con este anuncio?</legend>
                   {REASONS.map(([v, l]) => (
                     <label key={v} className={styles.reportOption}>
-                      <input type="radio" name="reason" value={v} checked={reason === v} onChange={() => setReason(v as Reason)} />
+                      <input type="radio" name="reason" value={v} checked={reason === v} onChange={() => setReason(v)} />
                       {l}
                     </label>
                   ))}

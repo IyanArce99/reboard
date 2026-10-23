@@ -4,6 +4,8 @@ import { Suspense } from "react";
 import { CompareTray } from "@/components/layout/CompareTray";
 import { Footer } from "@/components/layout/Footer";
 import { Header } from "@/components/layout/Header";
+import { SiteChrome } from "@/components/layout/SiteChrome";
+import { SiteNotice } from "@/components/layout/SiteNotice";
 import { UserStateProvider } from "@/components/user/UserStateProvider";
 import { authEnabled } from "@/lib/auth/config";
 import { siteIndexable } from "@/lib/data";
@@ -60,14 +62,19 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
           <a className="skip-link" href="#contenido">
             Saltar al contenido
           </a>
-          <Header />
+          <SiteChrome>
+            <SiteNotice />
+            <Header />
+          </SiteChrome>
           <div id="contenido" className="skip-target" tabIndex={-1}>
             {children}
           </div>
-          <Footer />
-          <Suspense fallback={null}>
-            <CompareTray />
-          </Suspense>
+          <SiteChrome>
+            <Footer />
+            <Suspense fallback={null}>
+              <CompareTray />
+            </Suspense>
+          </SiteChrome>
         </UserStateProvider>
       </body>
     </html>

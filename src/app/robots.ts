@@ -12,7 +12,7 @@ export default function robots(): MetadataRoute.Robots {
       // Solo se bloquea lo que no es una página (API, enlaces de acceso) o redirige a entrar.
       // Búsquedas filtradas, guardadas, comparador, publicar y legales llevan noindex: si se
       // bloquearan aquí, Google no podría leer ese noindex y podría indexar la URL sin contenido.
-      disallow: ["/api/", "/auth/", "/panel", "/cuenta", "/moderacion", "/sistema"],
+      disallow: ["/api/", "/auth/", "/panel", "/cuenta", "/moderacion", "/sistema", "/admin"],
     },
     sitemap: absoluteUrl("/sitemap.xml"),
   };

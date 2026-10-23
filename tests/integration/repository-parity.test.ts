@@ -137,6 +137,9 @@ describe("paridad mock ↔ Supabase (inventario DEMO en local)", () => {
         constructionSource: "x",
         publishedAt: new Date(x.publishedAt).toISOString(),
         confirmedAt: new Date(x.confirmedAt).toISOString(),
+        // «pendiente» se deriva de confirmedAt y de la fecha actual: el mock usa una fecha fija
+        // (DEMO_REFERENCE_DATE) y Supabase la real. confirmedAt ya se compara exactamente.
+        status: x.status === "pendiente" ? "disponible" : x.status,
       });
       expect(normalize(l)).toEqual(normalize(m));
     }

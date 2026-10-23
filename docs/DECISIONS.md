@@ -433,3 +433,13 @@ Detalle y verificación en `docs/BETA_AUDIT.md`.
 - **Indexación con interruptor explícito.** `SITE_INDEXABLE=true` (además de Supabase): no se indexa en `*.vercel.app` ni con los textos legales en borrador.
 - **Marcas al publicar.** `POPULAR_BRANDS` (Torq, NSP, Softech…) va primero; el listado completo queda tras «Ver todas las marcas». Es un orden de conveniencia, sustituible por el recuento de anuncios reales.
 - **Guía de producción:** `docs/PRODUCTION_SETUP.md`. Los secretos solo van en los paneles y no se copian datos de prueba.
+
+## Panel de administración
+Detalle en `docs/ADMIN.md`.
+- **El rol de la aplicación** sigue en `profiles.role` (RBAC protegido por privilegios de columna), no en `app_metadata` ni `user_metadata`. Así no hay dos fuentes de verdad y el rol se revoca en la siguiente consulta, sin esperar a que caduque el JWT.
+- **MFA:** `admin_status()` exige sesión `aal2` al admin que tiene un factor verificado, o a todos si `admin_mfa_required` está activo. Activarlo exige una sesión `aal2`, para no dejarse fuera.
+- **Ocultar y retirar** reutilizan `moderation = 'removed'`: no cambian ni la búsqueda ni los índices. La diferencia se guarda en `moderation_actions`. **La moderación ya no borra fotos.**
+- **`/moderacion` sin service role:** usa `admin_moderate_listing` con la sesión del moderador.
+- **Último admin:** lo protege un disparador. La service role puede saltárselo; es la vía de recuperación.
+- **Aviso de la web** por `/api/aviso` y no en el layout raíz, porque los datos en el layout rompían la regeneración de las páginas prerenderizadas.
+- **Región de Vercel `dub1`**, junto a Supabase `eu-west-1` (Irlanda).

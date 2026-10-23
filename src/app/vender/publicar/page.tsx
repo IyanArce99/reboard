@@ -58,6 +58,7 @@ async function Flow({ searchParams }: { searchParams: PageProps<"/vender/publica
     <PublishFlow
       catalog={catalog}
       brands={brandList.map((b) => b.name)}
+      featuredBrands={brandList.filter((b) => b.featured).map((b) => b.name)}
       priceRefs={priceRefs}
       nowIso={now.toISOString()}
       dataIsDemo={repo.isDemo}

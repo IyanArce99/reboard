@@ -62,7 +62,9 @@ export async function loadDemo(sb: Sb, listings: Listing[]) {
           shape: m.shape,
           construction: m.construction,
           description: m.description,
-          source_note: "DEMO (tests locales)",
+          // Solo fixture de tests: el catálogo público exige modelos verificados (con fuente).
+          source_note: "DEMO (tests locales): no es una tabla real del fabricante",
+          verification: "verified",
         })),
       )
       .select("id, slug"),
@@ -113,6 +115,7 @@ export async function loadDemo(sb: Sb, listings: Listing[]) {
         hours: s.hours,
         inventory_source: s.inventorySource,
         profile_id: sellerId.get(s.name) ?? null,
+        status: "approved", // las nuevas entran como pendientes; el público solo ve las aprobadas
       })),
     ),
     "shops",

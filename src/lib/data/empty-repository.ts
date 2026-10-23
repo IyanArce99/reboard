@@ -1,6 +1,6 @@
 import "server-only";
 import { cacheLife } from "next/cache";
-import { REFERENCE_BRANDS, slugify } from "@/lib/domain/taxonomy";
+import { POPULAR_BRANDS, REFERENCE_BRANDS, slugify } from "@/lib/domain/taxonomy";
 import type { ListingRepository } from "./repository";
 
 const none = { items: [], total: 0 };
@@ -35,6 +35,14 @@ export const emptyRepository: ListingRepository = {
   listingParams: async () => [],
   catalog: async () => [],
   // Nombres de marca de referencia (no son datos de anuncios): el selector de publicar no sale vacío.
-  brands: async () => REFERENCE_BRANDS.map((name) => ({ slug: slugify(name), name })),
+  // Mismo orden que Supabase: destacadas (las habituales, POPULAR_BRANDS) primero y luego por nombre.
+  brands: async () => {
+    const featured = POPULAR_BRANDS.filter((b) => REFERENCE_BRANDS.includes(b));
+    const rest = REFERENCE_BRANDS.filter((b) => !featured.includes(b)).sort((a, b) => a.localeCompare(b, "es"));
+    return [
+      ...featured.map((name) => ({ slug: slugify(name), name, featured: true })),
+      ...rest.map((name) => ({ slug: slugify(name), name, featured: false })),
+    ];
+  },
   shops: async () => [],
 };

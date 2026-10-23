@@ -6,7 +6,7 @@
 
 import { useMemo, useState } from "react";
 import { BoardShape } from "@/components/brand/BoardShape";
-import { CONSTRUCTIONS, CONSTRUCTION_INFO, SHAPES, SHAPE_INFO } from "@/lib/domain/taxonomy";
+import { CONSTRUCTIONS, CONSTRUCTION_INFO, POPULAR_BRANDS, SHAPES, SHAPE_INFO } from "@/lib/domain/taxonomy";
 import {
   NO_BRAND_OPTION,
   OTHER_BRAND,
@@ -15,6 +15,7 @@ import {
   applyCatalogSize,
   convertUnits,
   orderBrands,
+  visibleBrandCount,
   type FieldSource,
   type PublishDraft,
 } from "@/lib/publish/draft";
@@ -32,23 +33,30 @@ const SRC_LABEL: Record<FieldSource, { text: string; tone: string; needs: boolea
 interface Props extends StepProps, CatalogProps {
   /** Marcas conocidas (tengan o no modelos en el catálogo). */
   brands: string[];
+  /**
+   * Marcas destacadas en el orden del panel (/admin/catalogo → repo.brands() con featured). Siempre
+   * visibles. Sin la lista, las habituales (POPULAR_BRANDS).
+   */
+  featuredBrands?: string[];
   toast: (text: string) => void;
 }
 
-/** Marcas visibles antes de «Ver todas»: primero las que tienen modelos en el catálogo. */
+/** Marcas visibles antes de «Ver todas» como mínimo (y todas las destacadas, aunque sean más). */
 const TOP_BRANDS = 12;
 
-export function StepBoard({ d, set, setD, catalog, brands: known, toast }: Props) {
+export function StepBoard({ d, set, setD, catalog, brands: known, featuredBrands, toast }: Props) {
   const [paste, setPaste] = useState("");
   // Error fijo bajo el campo (no un toast que desaparece): DESIGN_AUDIT §8.
   const [pasteError, setPasteError] = useState("");
   const [allBrands, setAllBrands] = useState(false);
   // Torq, NSP, Softech… primero; el listado completo, tras «Ver todas las marcas».
-  const brands = useMemo(() => orderBrands(known, [...new Set(catalog.map((m) => m.brand))]), [catalog, known]);
+  const featured = featuredBrands?.length ? featuredBrands : POPULAR_BRANDS;
+  const brands = useMemo(() => orderBrands(known, [...new Set(catalog.map((m) => m.brand))], featured), [catalog, known, featured]);
+  const top = visibleBrandCount(brands.filter((b) => featured.includes(b)).length, TOP_BRANDS);
   // Al editar un anuncio con una marca escrita a mano que no está en la lista, se muestra igual.
   const special = [SHAPER_LOCAL, NO_BRAND_OPTION, OTHER_BRAND];
   const shownBrands = [
-    ...(allBrands ? brands : brands.filter((b, i) => i < TOP_BRANDS || b === d.brand)),
+    ...(allBrands ? brands : brands.filter((b, i) => i < top || b === d.brand)),
     ...(d.brand && !brands.includes(d.brand) && !special.includes(d.brand) ? [d.brand] : []),
   ];
   const models = catalog.filter((m) => m.brand === d.brand);
@@ -91,7 +99,7 @@ export function StepBoard({ d, set, setD, catalog, brands: known, toast }: Props
             </Chip>
           ))}
         </div>
-        {brands.length > TOP_BRANDS && (
+        {brands.length > top && (
           <button type="button" className={styles.moreBrands} aria-expanded={allBrands} onClick={() => setAllBrands((a) => !a)}>
             {allBrands ? "Ver menos marcas" : `Ver todas las marcas (${brands.length})`}
           </button>

@@ -1,12 +1,12 @@
 import "server-only";
 
-// Operaciones con SERVICE ROLE (fase F): revelar el contacto, caducidad, limpieza y moderación.
-// Quien las llama debe haber verificado antes CAPTCHA, sesión y permisos (docs/SECURITY.md).
+// Operaciones de la fase F: revelar el contacto, caducidad y limpieza, y borrar cuentas, con SERVICE
+// ROLE (quien las llama debe haber verificado antes CAPTCHA, sesión y permisos, docs/SECURITY.md);
+// la moderación, en cambio, usa el cliente de la sesión y la base de datos comprueba el rol.
 // Reciben el cliente como parámetro para poder probarlas contra Supabase local.
 
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@/lib/supabase/database.types";
-import { listingDbId } from "@/lib/auth/shared";
 
 type Sb = SupabaseClient<Database>;
 const BUCKET = "listing-photos";
@@ -53,36 +53,23 @@ export async function dailyMaintenance(sb: Sb, now = new Date()) {
   return { expired: expired ?? 0, draftsDeleted: drafts?.length ?? 0, photosDeleted: photos };
 }
 
-export type ModerationAction = "remove" | "restore" | "dismiss_reports";
+export type ModerationAction = "hide" | "remove" | "restore" | "mark_sold" | "dismiss_reports" | "resolve_reports";
 
 /**
- * Acción de un moderador sobre un anuncio. Queda registrada en moderation_actions.
- * Retirar oculta el anuncio (moderation = 'removed') y borra sus fotos de Storage.
+ * Acción de moderación sobre un anuncio con el cliente de la SESIÓN del moderador o admin (nunca
+ * service role): la función admin_moderate_listing comprueba el rol en la base de datos, aplica el
+ * cambio y lo registra en moderation_actions y en la auditoría en la misma transacción.
+ * Ninguna acción borra fotos ni datos del vendedor (ocultar y retirar solo cambian la visibilidad).
+ * Devuelve el error de la base de datos (o null) para que quien llama lo traduzca.
  */
-export async function moderate(sb: Sb, moderatorId: string, publicId: string, action: ModerationAction, reason: string | null) {
-  const id = listingDbId(publicId);
-  if (id == null) throw new Error("id");
-  const { data: listing } = await sb.from("listings").select("id, seller_id").eq("id", id).maybeSingle();
-  if (!listing) throw new Error("not-found");
-  const now = new Date().toISOString();
-
-  if (action === "remove") {
-    const { error } = await sb.from("listings").update({ moderation: "removed" }).eq("id", id);
-    if (error) throw new Error(error.message);
-    await removeFolder(sb, `${listing.seller_id}/${id}`);
-    await sb.from("listing_photos").delete().eq("listing_id", id);
-    await sb.from("reports").update({ status: "resolved", resolved_at: now, resolved_by: moderatorId }).eq("listing_id", id).eq("status", "open");
-  } else if (action === "restore") {
-    const { error } = await sb.from("listings").update({ moderation: "visible" }).eq("id", id);
-    if (error) throw new Error(error.message);
-    await sb.from("reports").update({ status: "dismissed", resolved_at: now, resolved_by: moderatorId }).eq("listing_id", id).eq("status", "open");
-  } else {
-    await sb.from("reports").update({ status: "dismissed", resolved_at: now, resolved_by: moderatorId }).eq("listing_id", id).eq("status", "open");
-    await sb.from("listings").update({ moderation: "visible" }).eq("id", id).eq("moderation", "flagged");
-  }
-
-  const { error: logError } = await sb.from("moderation_actions").insert({ listing_id: id, moderator_id: moderatorId, action, reason });
-  if (logError) throw new Error(logError.message);
+export async function moderate(sb: Sb, publicId: string, action: ModerationAction, reason: string | null) {
+  const { error } = await sb.rpc("admin_moderate_listing", {
+    p_public_id: publicId,
+    p_action: action,
+    // p_reason admite NULL en SQL; los tipos generados no lo reflejan.
+    p_reason: reason as string,
+  });
+  return error;
 }
 
 /**

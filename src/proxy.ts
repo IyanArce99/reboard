@@ -45,12 +45,16 @@ const PRIVATE: Record<string, { requireUser: boolean }> = {
   entrar: { requireUser: false },
   "vender/publicar": { requireUser: false },
   moderacion: { requireUser: true },
+  // Panel de administración: sesión obligatoria. El permiso (rol admin y MFA) lo comprueban la
+  // página, cada acción y la base de datos; el proxy solo refresca la sesión y pide entrar.
+  admin: { requireUser: true },
 };
 
 const privateKey = (parts: string[]) => (parts[0] === "vender" && parts[1] === "publicar" ? "vender/publicar" : parts[0]);
 
 async function privateRoute(request: NextRequest, section: string) {
-  if (!authEnabled()) return NextResponse.next();
+  // Sin base de datos no hay cuentas: el panel de administración no existe (404 real, no solo el contenido).
+  if (!authEnabled()) return section === "admin" ? notFound(request) : NextResponse.next();
   const { response, user } = await refreshSession(request);
   if (user && section === "entrar") {
     const next = safeNext(request.nextUrl.searchParams.get("siguiente"));

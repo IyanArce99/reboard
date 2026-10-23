@@ -36,6 +36,8 @@ Sin dominio propio, nadie más podrá entrar ni publicar.
 
 ## 2. Migraciones, RLS y Storage
 
+> **Hecho (23-10-2026):** proyecto `ogatmhplmnfetcgdtdge` (eu-west-1). Las 15 migraciones están aplicadas y los 185 tests pgTAP pasan contra producción. La conexión se hizo con `.env.remote`, que no se versiona ni lo lee la app. El primer admin es `iyiarce@gmail.com` (ver `docs/ADMIN.md`).
+
 Las migraciones de `supabase/migrations` crean todo:
 - las tablas, con RLS en todas;
 - las funciones de búsqueda y caducidad;
@@ -112,7 +114,7 @@ En **Project → Settings → Environment Variables**, marca **solo Production**
 - **Borra `REBOARD_DATA_SOURCE` si existe:** ya no se usa.
 - **Install Command:** `npx -y npm@11.6.2 ci` (ver `LAUNCH_CHECKLIST.md`).
 - **Despliegue:** después, **Deployments → Redeploy** del último despliegue de `main`. Las variables `NEXT_PUBLIC_*` se fijan al compilar.
-- **Región de las funciones:** 🤖 en cuanto confirmes que Supabase está en Fráncfort, añado `"regions": ["fra1"]` a `vercel.json` para que la web y la base de datos estén cerca.
+- **Región de las funciones:** hecho. El proyecto Supabase está en Irlanda (`eu-west-1`), así que `vercel.json` fija `"regions": ["dub1"]` (Dublín).
 
 ## 7. Antes de abrir al público 🧑
 

@@ -5,7 +5,35 @@ export type Database = {
   
   "public": {
           Tables: {
-            "board_model_sizes": {
+            "admin_audit_log": {
+                  Row: {
+                    "action": string,"actor_id": string | null,"after": Json | null,"before": Json | null,"created_at": string,"entity_id": string,"entity_type": string,"id": number,"reason": string | null
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "action": string,"actor_id"?: string | null,"after"?: Json | null,"before"?: Json | null,"created_at"?: string,"entity_id": string,"entity_type": string,"id"?: never,"reason"?: string | null
+                  }
+                  Update: {
+                    "action"?: string,"actor_id"?: string | null,"after"?: Json | null,"before"?: Json | null,"created_at"?: string,"entity_id"?: string,"entity_type"?: string,"id"?: never,"reason"?: string | null
+                  }
+                  Relationships: [
+                    
+                  ]
+                },"app_settings": {
+                  Row: {
+                    "description": string | null,"is_public": boolean,"key": string,"updated_at": string,"updated_by": string | null,"value": NonNullable<Json>
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "description"?: string | null,"is_public"?: boolean,"key": string,"updated_at"?: string,"updated_by"?: string | null,"value": NonNullable<Json>
+                  }
+                  Update: {
+                    "description"?: string | null,"is_public"?: boolean,"key"?: string,"updated_at"?: string,"updated_by"?: string | null,"value"?: NonNullable<Json>
+                  }
+                  Relationships: [
+                    
+                  ]
+                },"board_model_sizes": {
                   Row: {
                     "id": number,"label": string,"length_in": number,"model_id": number,"sort_order": number,"thickness_in": number,"volume_l": number | null,"width_in": number
                   }
@@ -27,14 +55,14 @@ isOneToOne: false
                   ]
                 },"board_models": {
                   Row: {
-                    "brand_id": number,"construction": Database["public"]['Enums']["board_construction"],"created_at": string,"description": string | null,"id": number,"name": string,"shape": Database["public"]['Enums']["board_shape"],"slug": string,"source_note": string | null
+                    "active": boolean,"brand_id": number,"construction": Database["public"]['Enums']["board_construction"],"created_at": string,"description": string | null,"id": number,"name": string,"shape": Database["public"]['Enums']["board_shape"],"slug": string,"source_note": string | null,"updated_at": string,"verification": string,"verified_at": string | null,"verified_by": string | null
                   }
                   ComputedFields: never
                   Insert: {
-                    "brand_id": number,"construction": Database["public"]['Enums']["board_construction"],"created_at"?: string,"description"?: string | null,"id"?: never,"name": string,"shape": Database["public"]['Enums']["board_shape"],"slug": string,"source_note"?: string | null
+                    "active"?: boolean,"brand_id": number,"construction": Database["public"]['Enums']["board_construction"],"created_at"?: string,"description"?: string | null,"id"?: never,"name": string,"shape": Database["public"]['Enums']["board_shape"],"slug": string,"source_note"?: string | null,"updated_at"?: string,"verification"?: string,"verified_at"?: string | null,"verified_by"?: string | null
                   }
                   Update: {
-                    "brand_id"?: number,"construction"?: Database["public"]['Enums']["board_construction"],"created_at"?: string,"description"?: string | null,"id"?: never,"name"?: string,"shape"?: Database["public"]['Enums']["board_shape"],"slug"?: string,"source_note"?: string | null
+                    "active"?: boolean,"brand_id"?: number,"construction"?: Database["public"]['Enums']["board_construction"],"created_at"?: string,"description"?: string | null,"id"?: never,"name"?: string,"shape"?: Database["public"]['Enums']["board_shape"],"slug"?: string,"source_note"?: string | null,"updated_at"?: string,"verification"?: string,"verified_at"?: string | null,"verified_by"?: string | null
                   }
                   Relationships: [
                     {
@@ -47,17 +75,23 @@ isOneToOne: false
                   ]
                 },"brands": {
                   Row: {
-                    "created_at": string,"id": number,"intro": string | null,"logo_path": string | null,"name": string,"slug": string
+                    "active": boolean,"aliases": (string)[],"created_at": string,"featured": boolean,"id": number,"intro": string | null,"logo_path": string | null,"merged_into": number | null,"name": string,"slug": string,"sort_order": number,"updated_at": string
                   }
                   ComputedFields: never
                   Insert: {
-                    "created_at"?: string,"id"?: never,"intro"?: string | null,"logo_path"?: string | null,"name": string,"slug": string
+                    "active"?: boolean,"aliases"?: (string)[],"created_at"?: string,"featured"?: boolean,"id"?: never,"intro"?: string | null,"logo_path"?: string | null,"merged_into"?: number | null,"name": string,"slug": string,"sort_order"?: number,"updated_at"?: string
                   }
                   Update: {
-                    "created_at"?: string,"id"?: never,"intro"?: string | null,"logo_path"?: string | null,"name"?: string,"slug"?: string
+                    "active"?: boolean,"aliases"?: (string)[],"created_at"?: string,"featured"?: boolean,"id"?: never,"intro"?: string | null,"logo_path"?: string | null,"merged_into"?: number | null,"name"?: string,"slug"?: string,"sort_order"?: number,"updated_at"?: string
                   }
                   Relationships: [
-                    
+                    {
+      foreignKeyName: "brands_merged_into_fkey"
+      columns: ["merged_into"]
+isOneToOne: false
+      referencedRelation: "brands"
+      referencedColumns: ["id"]
+    }
                   ]
                 },"contact_events": {
                   Row: {
@@ -223,14 +257,14 @@ isOneToOne: false
                   ]
                 },"profiles": {
                   Row: {
-                    "created_at": string,"display_name": string,"id": string,"role": Database["public"]['Enums']["user_role"],"seller_type": Database["public"]['Enums']["seller_type"],"updated_at": string
+                    "created_at": string,"display_name": string,"id": string,"role": Database["public"]['Enums']["user_role"],"seller_type": Database["public"]['Enums']["seller_type"],"suspended_at": string | null,"suspended_by": string | null,"suspension_reason": string | null,"updated_at": string
                   }
                   ComputedFields: never
                   Insert: {
-                    "created_at"?: string,"display_name"?: string,"id": string,"role"?: Database["public"]['Enums']["user_role"],"seller_type"?: Database["public"]['Enums']["seller_type"],"updated_at"?: string
+                    "created_at"?: string,"display_name"?: string,"id": string,"role"?: Database["public"]['Enums']["user_role"],"seller_type"?: Database["public"]['Enums']["seller_type"],"suspended_at"?: string | null,"suspended_by"?: string | null,"suspension_reason"?: string | null,"updated_at"?: string
                   }
                   Update: {
-                    "created_at"?: string,"display_name"?: string,"id"?: string,"role"?: Database["public"]['Enums']["user_role"],"seller_type"?: Database["public"]['Enums']["seller_type"],"updated_at"?: string
+                    "created_at"?: string,"display_name"?: string,"id"?: string,"role"?: Database["public"]['Enums']["user_role"],"seller_type"?: Database["public"]['Enums']["seller_type"],"suspended_at"?: string | null,"suspended_by"?: string | null,"suspension_reason"?: string | null,"updated_at"?: string
                   }
                   Relationships: [
                     
@@ -269,14 +303,14 @@ isOneToOne: false
                   ]
                 },"shops": {
                   Row: {
-                    "address": string | null,"created_at": string,"hours": string | null,"id": number,"inventory_source": string | null,"name": string,"profile_id": string | null,"slug": string,"town": string,"type": Database["public"]['Enums']["seller_type"],"zone_slug": string
+                    "address": string | null,"created_at": string,"hours": string | null,"id": number,"inventory_source": string | null,"name": string,"profile_id": string | null,"reviewed_at": string | null,"reviewed_by": string | null,"slug": string,"status": string,"status_reason": string | null,"town": string,"type": Database["public"]['Enums']["seller_type"],"updated_at": string,"zone_slug": string
                   }
                   ComputedFields: never
                   Insert: {
-                    "address"?: string | null,"created_at"?: string,"hours"?: string | null,"id"?: never,"inventory_source"?: string | null,"name": string,"profile_id"?: string | null,"slug": string,"town": string,"type": Database["public"]['Enums']["seller_type"],"zone_slug": string
+                    "address"?: string | null,"created_at"?: string,"hours"?: string | null,"id"?: never,"inventory_source"?: string | null,"name": string,"profile_id"?: string | null,"reviewed_at"?: string | null,"reviewed_by"?: string | null,"slug": string,"status"?: string,"status_reason"?: string | null,"town": string,"type": Database["public"]['Enums']["seller_type"],"updated_at"?: string,"zone_slug": string
                   }
                   Update: {
-                    "address"?: string | null,"created_at"?: string,"hours"?: string | null,"id"?: never,"inventory_source"?: string | null,"name"?: string,"profile_id"?: string | null,"slug"?: string,"town"?: string,"type"?: Database["public"]['Enums']["seller_type"],"zone_slug"?: string
+                    "address"?: string | null,"created_at"?: string,"hours"?: string | null,"id"?: never,"inventory_source"?: string | null,"name"?: string,"profile_id"?: string | null,"reviewed_at"?: string | null,"reviewed_by"?: string | null,"slug"?: string,"status"?: string,"status_reason"?: string | null,"town"?: string,"type"?: Database["public"]['Enums']["seller_type"],"updated_at"?: string,"zone_slug"?: string
                   }
                   Relationships: [
                     {
@@ -313,13 +347,73 @@ isOneToOne: false
             [_ in never]: never
           }
           Functions: {
-            "count_listings":
+            "admin_get_user":
+{ Args: { "p_user": string }; Returns: {
+              "banned_until": string,"created_at": string,"display_name": string,"email": string,"email_confirmed": boolean,"has_mfa": boolean,"id": string,"last_sign_in_at": string,"role": Database["public"]['Enums']["user_role"],"seller_type": Database["public"]['Enums']["seller_type"],"suspended_at": string,"suspension_reason": string
+            }[]
+                           },
+"admin_list_users":
+{ Args: { "p_limit"?: number,"p_offset"?: number,"p_search"?: string,"p_status"?: string }; Returns: {
+              "created_at": string,"display_name": string,"email": string,"id": string,"last_sign_in_at": string,"listings_active": number,"listings_total": number,"role": Database["public"]['Enums']["user_role"],"seller_type": Database["public"]['Enums']["seller_type"],"suspended_at": string,"total_count": number
+            }[]
+                           },
+"admin_log":
+{ Args: { "p_action": string,"p_actor": string,"p_after": Json,"p_before": Json,"p_entity_id": string,"p_entity_type": string,"p_reason": string }; Returns: undefined
+                           },
+"admin_merge_brands":
+{ Args: { "p_from": number,"p_into": number,"p_reason": string }; Returns: undefined
+                           },
+"admin_moderate_listing":
+{ Args: { "p_action": string,"p_public_id": string,"p_reason": string }; Returns: undefined
+                           },
+"admin_reactivate_user":
+{ Args: { "p_reason": string,"p_user": string }; Returns: undefined
+                           },
+"admin_set_model_verification":
+{ Args: { "p_model": number,"p_reason": string,"p_verified": boolean }; Returns: undefined
+                           },
+"admin_set_role":
+{ Args: { "p_reason": string,"p_role": Database["public"]['Enums']["user_role"],"p_user": string }; Returns: undefined
+                           },
+"admin_set_shop_status":
+{ Args: { "p_reason": string,"p_shop": number,"p_status": string }; Returns: undefined
+                           },
+"admin_stats":
+{ Args: { "p_days"?: number }; Returns: Json
+                           },
+"admin_status":
+{ Args: Record<PropertyKey, never>; Returns: string
+                           },
+"admin_suspend_user":
+{ Args: { "p_hide_listings"?: boolean,"p_reason": string,"p_user": string }; Returns: number
+                           },
+"admin_update_listing":
+{ Args: { "p_patch": Json,"p_public_id": string,"p_reason": string }; Returns: undefined
+                           },
+"admin_update_setting":
+{ Args: { "p_key": string,"p_reason": string,"p_value": Json }; Returns: undefined
+                           },
+"admin_user_emails":
+{ Args: { "p_ids": (string)[] }; Returns: {
+              "email": string,"id": string
+            }[]
+                           },
+"admin_with_reason":
+{ Args: { "p_reason": string }; Returns: undefined
+                           },
+"count_listings":
 { Args: { "p": Json,"p_exclude_zone"?: string,"p_statuses"?: (Database["public"]['Enums']["listing_status"])[],"p_unknown_volume"?: boolean }; Returns: number
                            },
 "expire_listings":
 { Args: Record<PropertyKey, never>; Returns: number
                            },
+"is_admin":
+{ Args: Record<PropertyKey, never>; Returns: boolean
+                           },
 "is_moderator":
+{ Args: Record<PropertyKey, never>; Returns: boolean
+                           },
+"is_suspended":
 { Args: Record<PropertyKey, never>; Returns: boolean
                            },
 "listing_facets":
@@ -375,6 +469,9 @@ isOneToOne: false
         isOneToOne: false
         isSetofReturn: true
       } },
+"require_admin":
+{ Args: Record<PropertyKey, never>; Returns: string
+                           },
 "reveal_contact":
 { Args: { "p_ip_hash": string,"p_public_id": string,"p_user": string }; Returns: {
               "method": Database["public"]['Enums']["contact_method"],"phone_e164": string
@@ -428,6 +525,12 @@ isOneToOne: false
         isOneToOne: false
         isSetofReturn: true
       } },
+"setting_bool":
+{ Args: { "p_default": boolean,"p_key": string }; Returns: boolean
+                           },
+"setting_int":
+{ Args: { "p_default": number,"p_key": string }; Returns: number
+                           },
 "similar_listings":
 { Args: { "p_limit"?: number,"p_public_id": string }; Returns: {
               "accessories": string | null,
@@ -478,7 +581,7 @@ isOneToOne: false
       } }
           }
           Enums: {
-            "board_condition": "como-nueva"|"muy-buen-estado"|"buen-estado"|"con-reparaciones","board_construction": "pu"|"epoxy"|"softboard","board_shape": "shortboard"|"fish"|"hibrida"|"evolutiva"|"midlength"|"longboard"|"gun","contact_method": "whatsapp"|"phone","data_source": "seller"|"manufacturer","listing_status": "draft"|"published"|"sold"|"expired"|"withdrawn","moderation_state": "visible"|"flagged"|"removed","report_reason": "fraude"|"datos-falsos"|"vendida"|"duplicado"|"inapropiado"|"otro","report_status": "open"|"resolved"|"dismissed","seller_type": "particular"|"tienda"|"escuela","user_role": "user"|"moderator"|"admin"
+            "board_condition": "como-nueva"|"muy-buen-estado"|"buen-estado"|"con-reparaciones","board_construction": "pu"|"epoxy"|"softboard","board_shape": "shortboard"|"fish"|"hibrida"|"evolutiva"|"midlength"|"longboard"|"gun","contact_method": "whatsapp"|"phone","data_source": "seller"|"manufacturer","listing_status": "draft"|"published"|"sold"|"expired"|"withdrawn","moderation_state": "visible"|"flagged"|"removed","report_reason": "fraude"|"datos-falsos"|"fotos"|"vendida"|"duplicado"|"inapropiado"|"otro","report_status": "open"|"resolved"|"dismissed","seller_type": "particular"|"tienda"|"escuela","user_role": "user"|"moderator"|"admin"
           }
           CompositeTypes: {
             [_ in never]: never
@@ -594,7 +697,7 @@ export type CompositeTypes<
 export const Constants = {
   "public": {
           Enums: {
-            "board_condition": ["como-nueva", "muy-buen-estado", "buen-estado", "con-reparaciones"],"board_construction": ["pu", "epoxy", "softboard"],"board_shape": ["shortboard", "fish", "hibrida", "evolutiva", "midlength", "longboard", "gun"],"contact_method": ["whatsapp", "phone"],"data_source": ["seller", "manufacturer"],"listing_status": ["draft", "published", "sold", "expired", "withdrawn"],"moderation_state": ["visible", "flagged", "removed"],"report_reason": ["fraude", "datos-falsos", "vendida", "duplicado", "inapropiado", "otro"],"report_status": ["open", "resolved", "dismissed"],"seller_type": ["particular", "tienda", "escuela"],"user_role": ["user", "moderator", "admin"]
+            "board_condition": ["como-nueva", "muy-buen-estado", "buen-estado", "con-reparaciones"],"board_construction": ["pu", "epoxy", "softboard"],"board_shape": ["shortboard", "fish", "hibrida", "evolutiva", "midlength", "longboard", "gun"],"contact_method": ["whatsapp", "phone"],"data_source": ["seller", "manufacturer"],"listing_status": ["draft", "published", "sold", "expired", "withdrawn"],"moderation_state": ["visible", "flagged", "removed"],"report_reason": ["fraude", "datos-falsos", "fotos", "vendida", "duplicado", "inapropiado", "otro"],"report_status": ["open", "resolved", "dismissed"],"seller_type": ["particular", "tienda", "escuela"],"user_role": ["user", "moderator", "admin"]
           }
         }
 } as const

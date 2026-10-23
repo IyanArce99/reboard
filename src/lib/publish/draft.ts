@@ -22,18 +22,22 @@ export const OTHER_MODEL = "Otro";
 export const OTHER_BRAND = "Otra marca";
 /** Opciones de marca que no son una marca de la lista. */
 /**
- * Orden de las marcas al publicar: primero las habituales (POPULAR_BRANDS, en ese orden), luego las
- * que tienen modelos en el catálogo y después el resto por orden alfabético. Sin duplicados.
+ * Orden de las marcas al publicar: primero las destacadas en el orden del panel (/admin/catalogo;
+ * sin esa lista, las habituales POPULAR_BRANDS), luego las que tienen modelos en el catálogo y después
+ * el resto por orden alfabético. Sin duplicados.
  */
-export function orderBrands(known: string[], withModels: string[]): string[] {
+export function orderBrands(known: string[], withModels: string[], featured: readonly string[] = POPULAR_BRANDS): string[] {
   const all = [...new Set([...known, ...withModels])];
-  const popular = POPULAR_BRANDS.filter((b) => all.includes(b));
+  const popular = [...new Set(featured)].filter((b) => all.includes(b));
   const models = withModels.filter((b) => !popular.includes(b));
   const rest = all.filter((b) => !popular.includes(b) && !models.includes(b)).sort((a, b) => a.localeCompare(b, "es"));
   return [...popular, ...models, ...rest];
 }
 
-export const isListedBrand = (b: string) => Boolean(b) && b !== SHAPER_LOCAL && b !== NO_BRAND_OPTION && b !== OTHER_BRAND;
+/** Marcas visibles antes de «Ver todas las marcas»: al menos `min`, y nunca se oculta una destacada. */
+export const visibleBrandCount = (featuredCount: number, min = 12) => Math.max(min, featuredCount);
+
+export const isListedBrand =(b: string) => Boolean(b) && b !== SHAPER_LOCAL && b !== NO_BRAND_OPTION && b !== OTHER_BRAND;
 
 export type ContactMethod = "whatsapp" | "phone" | "email";
 
