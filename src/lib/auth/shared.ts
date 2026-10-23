@@ -22,6 +22,8 @@ export function cleanDisplayName(raw: string): string | null {
 export function authErrorText(error: { code?: string; status?: number; message?: string } | null | undefined): string {
   if (!error) return "";
   switch (error.code) {
+    case "invalid_credentials":
+      return "Email o contraseña incorrectos.";
     case "otp_expired":
       return "El código ha caducado o no es correcto. Pide uno nuevo.";
     case "over_email_send_rate_limit":
