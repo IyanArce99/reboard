@@ -35,19 +35,20 @@ export function authErrorText(error: { code?: string; status?: number; message?:
   if (!error) return "";
   switch (error.code) {
     case "invalid_credentials":
-      return "Email o contraseña incorrectos.";
+      return "El email o la contraseña no son correctos. Si no la recuerdas, entra con un código por email.";
     case "otp_expired":
-      return "El código ha caducado o no es correcto. Pide uno nuevo.";
+      return "El código no es correcto o ha caducado. Comprueba que sea el último que te enviamos o pide otro.";
     case "over_email_send_rate_limit":
+      return "Has pedido demasiados códigos seguidos. Espera unos minutos y vuelve a intentarlo.";
     case "over_request_rate_limit":
-      return "Has pedido demasiados códigos. Espera unos minutos y vuelve a intentarlo.";
+      return "Demasiados intentos seguidos. Espera unos minutos y vuelve a intentarlo.";
     case "email_address_invalid":
     case "validation_failed":
-      return "Revisa el email: no parece válido.";
+      return "Ese email no parece válido. Revísalo.";
     case "captcha_failed":
       return "No hemos podido comprobar que no eres un robot. Vuelve a intentarlo.";
     case "signup_disabled":
-      return "Ahora mismo no se pueden crear cuentas nuevas.";
+      return "Ahora mismo no se pueden crear cuentas nuevas. Vuelve a probar más tarde.";
   }
   if (error.status === 429) return "Demasiados intentos. Espera unos minutos y vuelve a intentarlo.";
   return "No ha funcionado. Revisa tu conexión y vuelve a intentarlo.";

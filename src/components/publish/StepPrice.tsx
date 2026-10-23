@@ -135,7 +135,7 @@ export function StepPrice({ d, set, model, refs, dataIsDemo, live }: Props) {
             onChange={(e) => set({ phone: e.target.value })}
           />
           <span id="pub-phone-help" className={styles.small}>
-            No aparece escrito en el anuncio: lo ve quien pulsa «Mostrar contacto», con protección contra robots.
+            No aparece escrito en el anuncio: solo lo ve quien pulsa «Mostrar contacto», y está protegido contra robots.
             {!live && " Todavía no se guarda."}
           </span>
         </div>

@@ -21,8 +21,8 @@ export default async function LegalPage({ params }: PageProps<"/legal/[doc]">) {
   return (
     <main className={`container ${styles.page}`}>
       <div className={styles.draft} role="note">
-        <strong>Borrador pendiente de revisión legal.</strong> Este texto aún no es válido: faltan los datos del titular y la
-        revisión de un profesional.
+        <strong>Borrador pendiente de revisión legal.</strong> Este texto aún no es definitivo: falta la revisión de un
+        profesional y hay apartados por completar (los que van entre corchetes).
       </div>
       <h1 className={styles.title}>{d.title}</h1>
       <p className={styles.intro}>{d.intro}</p>

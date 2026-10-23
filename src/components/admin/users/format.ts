@@ -120,7 +120,7 @@ const ACTION_LABEL: Record<string, string> = {
   hide: "Ocultar",
   remove: "Retirar",
   restore: "Restaurar",
-  mark_sold: "Marcar vendido",
+  mark_sold: "Marcar como vendido",
   dismiss_reports: "Descartar reportes",
   resolve_reports: "Resolver reportes",
   flag: "Marcar en revisión",

@@ -45,7 +45,7 @@ export function Comparator() {
     <p className={styles.gone}>
       {gone.length === 1 ? "1 tabla de tu comparación ya no existe en Reboard." : `${gone.length} tablas de tu comparación ya no existen en Reboard.`}{" "}
       <button type="button" className={styles.linkBtn} onClick={() => gone.forEach((id) => removeCompare(id))}>
-        Quitarlas
+        {gone.length === 1 ? "Quitarla" : "Quitarlas"}
       </button>
     </p>
   );
@@ -57,8 +57,8 @@ export function Comparator() {
         <div className={styles.few}>
           <span>
             {listings.length === 1
-              ? "Tienes 1 tabla seleccionada. Añade al menos otra desde los resultados."
-              : "Pulsa «Comparar» en 2 a 4 tablas desde la búsqueda o la ficha."}
+              ? "Tienes 1 tabla. Añade al menos otra para poder compararlas."
+              : "Elige de 2 a 4 tablas con el botón «Comparar» de la búsqueda o de cada anuncio."}
           </span>
           <Link href="/buscar" className={styles.pick}>
             Elegir tablas

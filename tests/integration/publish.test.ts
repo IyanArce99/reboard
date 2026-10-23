@@ -175,7 +175,7 @@ describe("publicar (E3, E4)", () => {
     const ficha = await db.byId(publicId);
     expect(ficha?.status).toBe("vendida");
 
-    await expect(panelAction(seller.client, seller.userId, publicId, "confirm")).rejects.toThrow(/Solo se confirman/);
+    await expect(panelAction(seller.client, seller.userId, publicId, "confirm")).rejects.toThrow(/Solo puedes confirmar/);
     await panelAction(seller.client, seller.userId, publicId, "republish");
     await panelAction(seller.client, seller.userId, publicId, "withdraw");
     ({ data } = await sb.from("listings").select("status, sold_at").eq("id", listingId).single());

@@ -37,9 +37,9 @@ export function SavedScreen({ tab }: { tab: Tab }) {
 }
 
 function savedNote(l: Listing): { text: string; tone: "sold" | "drop" } | null {
-  if (l.status === "vendida") return { text: "Se ha vendido · te mostramos similares en la ficha", tone: "sold" };
+  if (l.status === "vendida") return { text: "Vendida · en su anuncio tienes tablas parecidas", tone: "sold" };
   if (l.status === "caducada" || l.status === "retirada")
-    return { text: "Ya no está publicada · te mostramos similares en la ficha", tone: "sold" };
+    return { text: "Ya no está a la venta · en su anuncio tienes tablas parecidas", tone: "sold" };
   if (l.previousPrice != null && l.previousPrice > l.price)
     return { text: `Ha bajado de ${eur(l.previousPrice)} a ${eur(l.price)}`, tone: "drop" };
   return null;
@@ -73,7 +73,7 @@ function SavedList() {
     <div aria-busy={loading || undefined}>
       {gone.length > 0 && (
         <p className={styles.gone}>
-          {gone.length === 1 ? "1 tabla guardada ya no existe en Reboard." : `${gone.length} tablas guardadas ya no existen en Reboard.`}{" "}
+          {gone.length === 1 ? "1 tabla que guardaste ya no está en Reboard." : `${gone.length} tablas que guardaste ya no están en Reboard.`}{" "}
           <button type="button" className={styles.linkBtn} onClick={() => gone.forEach((id) => toggleSaved(id))}>
             {gone.length === 1 ? "Quitarla de la lista" : "Quitarlas de la lista"}
           </button>
@@ -119,7 +119,7 @@ function AlertList() {
   return (
     <div className={styles.alerts}>
       <p className={styles.alertInfo}>
-        Las alertas se guardan solo en este dispositivo. Los avisos por email todavía no están activos: vuelve aquí para ver cuántas tablas coinciden ahora.
+        Tus alertas se guardan solo en este dispositivo y no envían emails ni notificaciones. Vuelve aquí cuando quieras para ver cuántas tablas coinciden con cada una.
       </p>
       {!ready ? (
         <div className={styles.alertSkeleton} aria-hidden="true" />
@@ -139,7 +139,7 @@ function AlertList() {
             </>
           }
         >
-          Haz una búsqueda con tus medidas y pulsa «Crear alerta»: te enseñaremos aquí cuántas tablas coinciden.
+          Busca con tus medidas y pulsa «Crear alerta». La alerta se queda aquí, en este dispositivo, y cada vez que entres verás cuántas tablas coinciden.
         </EmptyState>
       )}
     </div>

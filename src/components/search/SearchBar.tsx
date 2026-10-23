@@ -40,11 +40,11 @@ const VOLUME_HINT: Record<number, string> = {
 };
 const SHAPE_HINT: Record<Shape, string> = {
   shortboard: "Olas con fuerza",
-  fish: "Olas pequeñas, rápida",
+  fish: "Rápida en olas pequeñas",
   hibrida: "Para progresar",
-  evolutiva: "Salir de la espuma",
+  evolutiva: "Para dejar la espuma",
   midlength: "Remada fácil",
-  longboard: "Olas pequeñas, estilo",
+  longboard: "Olas pequeñas y estilo",
   gun: "Olas grandes",
 };
 const CANARIAS = REGIONS.find((r) => r.slug === "canarias")?.zones ?? [];
@@ -317,7 +317,7 @@ function ZoneOptions({
         ¿Dónde buscas?
       </h2>
       <p className={styles.groupHint}>
-        {showCounts ? "Por isla o provincia. El número son las tablas publicadas." : "Por isla o provincia."}
+        {showCounts ? "Por isla o provincia, con las tablas publicadas en cada una." : "Por isla o provincia."}
       </p>
       {option("", "Toda España", showCounts ? total : undefined)}
       <div className={styles.zoneCols}>
@@ -388,7 +388,7 @@ function VolumeOptions({
         <span className={styles.rangeUnit}>L</span>
       </div>
       <p className={styles.groupHint}>
-        Orientativo para unos 75 kg: depende de tu peso y tu nivel.{" "}
+        Orientativo para unos 75 kg; lo tuyo depende de tu peso y tu nivel.{" "}
         <Link href="/calculadora-litros" className={styles.inlineLink}>
           Calcular mis litros →
         </Link>

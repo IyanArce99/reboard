@@ -123,7 +123,7 @@ export default async function SistemaPage() {
           <span className={ui.proBadge}>Escuela</span>
           <span className={styles.fitBadge}>Te encaja</span>
           <span className={`${styles.src} ${styles.srcSeller}`}>Confirmado por vendedor</span>
-          <span className={`${styles.src} ${styles.srcMaker}`}>Según fabricante · variante confirmada</span>
+          <span className={`${styles.src} ${styles.srcMaker}`}>Según el fabricante · variante confirmada</span>
           <span className={`${styles.src} ${styles.srcNone}`}>Sin indicar</span>
         </div>
       </section>

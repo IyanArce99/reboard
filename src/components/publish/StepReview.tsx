@@ -122,15 +122,18 @@ export function StepReview({ d, catalog, now, live, editing, pending, needsLogin
               <li>Los cambios se verán en el anuncio y en las búsquedas al momento.</li>
             ) : (
               <>
-                <li>Aparece en las búsquedas en cuanto lo publiques. Es gratis y sin comisiones.</li>
-                <li>Tu teléfono no se muestra: solo lo ve quien pulsa «Mostrar contacto».</li>
-                <li>Confirma cada 14 días en «Mis anuncios» que sigue disponible; si no, caduca a los 30 días.</li>
+                <li>Sale en las búsquedas en cuanto lo publicas. Es gratis y sin comisiones.</li>
+                <li>Tu teléfono no aparece escrito en el anuncio: solo lo ve quien pulsa «Mostrar contacto».</li>
+                <li>
+                  Cada 14 días, entra en «Mis anuncios» y confirma que la tabla sigue a la venta. Si pasan 30 días sin confirmarlo, el
+                  anuncio caduca. No enviamos recordatorios.
+                </li>
               </>
             )}
           </ul>
         ) : (
           <p className={styles.demoNote}>
-            La publicación todavía no está abierta: al pulsar no se publica nada, no se guarda tu número y las fotos no salen de tu
+            Todavía no se puede publicar: al pulsar no se publica nada, no se guarda tu número y las fotos no salen de tu
             dispositivo.
           </p>
         )}
@@ -139,8 +142,8 @@ export function StepReview({ d, catalog, now, live, editing, pending, needsLogin
           <div className={styles.loginBox}>
             <span className={styles.loginTitle}>Último paso: confirma tu email</span>
             <span className={styles.small}>
-              Te enviamos un código de 6 cifras. Con esa cuenta gestionas el anuncio: confirmarlo, bajar el precio o marcarlo como
-              vendido. Tu anuncio se queda guardado mientras tanto.
+              Te mandamos un código de 6 cifras para entrar o crear tu cuenta. Con ella gestionas el anuncio: confirmarlo, bajar el
+              precio o marcarlo como vendido. Mientras tanto, el anuncio se queda guardado.
             </span>
             <LoginForm onDone={onLogin} />
           </div>

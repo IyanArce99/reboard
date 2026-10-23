@@ -41,9 +41,9 @@ import ui from "@/styles/ui.module.css";
 import styles from "@/components/listing/Ficha.module.css";
 
 const UNAVAILABLE: Partial<Record<Listing["status"], [string, string]>> = {
-  vendida: ["Esta tabla ya se ha vendido", "El vendedor la marcó como vendida. Te mostramos alternativas con medidas parecidas."],
-  caducada: ["Este anuncio ha caducado", "El vendedor no confirmó la disponibilidad en 30 días. Puede que ya no esté a la venta."],
-  retirada: ["Anuncio retirado", "Este anuncio ya no está publicado."],
+  vendida: ["Esta tabla ya se ha vendido", "El vendedor la ha marcado como vendida. Abajo tienes tablas con medidas parecidas."],
+  caducada: ["Este anuncio ha caducado", "El vendedor lleva 30 días sin confirmar que sigue a la venta. Puede que ya no la tenga."],
+  retirada: ["Anuncio retirado", "El vendedor ha quitado este anuncio."],
 };
 
 export async function generateStaticParams() {
@@ -103,7 +103,7 @@ export default async function FichaPage({ params }: PageProps<"/anuncio/[slugId]
 
   const keySpecs = [
     { k: "Longitud", v: l.sizeLabel, s: len != null ? `${inToCm(len)} cm` : "" },
-    { k: "Litros", v: vol != null ? `${vol} L` : "—", s: vol != null ? (l.volume.source === "manufacturer" ? "según fabricante" : "indicado por el vendedor") : "sin indicar", unknown: vol == null },
+    { k: "Litros", v: vol != null ? `${vol} L` : "—", s: vol != null ? (l.volume.source === "manufacturer" ? "según el fabricante" : "según el vendedor") : "sin indicar", unknown: vol == null },
     { k: "Anchura", v: width != null ? fmtIn(width) : "—", s: thick != null ? `grosor ${fmtIn(thick)}` : "" },
   ];
 
@@ -163,7 +163,7 @@ export default async function FichaPage({ params }: PageProps<"/anuncio/[slugId]
                 </a>
               )}
               <AlertButton text={alertText(similarFilters, names)} query={toQuery(similarFilters)} className={styles.unavailAlert}>
-                Crear alerta de una similar
+                Crear alerta de tablas parecidas
               </AlertButton>
             </div>
           </div>
@@ -213,14 +213,14 @@ export default async function FichaPage({ params }: PageProps<"/anuncio/[slugId]
               <CompareButton id={l.id} label={listingShortLabel(l)} className={styles.action} />
             </div>
             <div className={styles.safety}>
-              No pagues señales ni por adelantado. Ve a ver la tabla en persona antes de pagar. <ReportButton className={styles.report} />
+              No pagues nada por adelantado, ni siquiera una señal. Ve a ver la tabla antes de pagar. <ReportButton className={styles.report} />
             </div>
           </div>
 
           <div className={styles.details}>
             <section>
               <h2 className={styles.h2}>Datos técnicos</h2>
-              <p className={styles.sub}>Cada dato indica de dónde sale. Nunca mostramos medidas estimadas como verificadas.</p>
+              <p className={styles.sub}>Junto a cada dato verás de dónde sale: del vendedor o del fabricante. No damos por buena ninguna medida estimada.</p>
               <dl className={styles.specTable}>
                 {rows.map((r) => {
                   const badge = sourceBadge(r.v, r.src);
@@ -270,10 +270,10 @@ export default async function FichaPage({ params }: PageProps<"/anuncio/[slugId]
                 <div className={ui.label}>Ficha técnica del modelo</div>
                 <div className={styles.modelText}>
                   {isModel
-                    ? `${l.brand} ${l.model}, medida ${l.sizeLabel} del catálogo, elegida por el vendedor.`
+                    ? `${l.brand} ${l.model} en ${l.sizeLabel}. El vendedor ha elegido esta medida del catálogo del fabricante.`
                     : l.brand
-                      ? `${l.brand}, modelo fuera del catálogo. Las medidas son las que indica el vendedor.`
-                      : "Tabla sin marca o de shaper local. Las medidas son las que indica el vendedor."}
+                      ? `${l.brand}, un modelo que no está en nuestro catálogo. Las medidas las indica el vendedor.`
+                      : "Tabla sin marca o de un shaper local. Las medidas las indica el vendedor."}
                 </div>
                 {isModel && (
                   <Link href={`/marcas/${slugify(l.brand!)}/${l.modelSlug}`} className={styles.modelLink}>
@@ -287,9 +287,9 @@ export default async function FichaPage({ params }: PageProps<"/anuncio/[slugId]
                 Antes de comprar
               </h2>
               <ul>
-                <li>Queda en un sitio público y mira la tabla en persona.</li>
+                <li>Queda en un sitio público y mira la tabla con calma.</li>
                 <li>Revisa cantos, fondo y cajas de quillas. Presiona la cubierta: no debe ceder.</li>
-                <li>Paga al recogerla. Desconfía de quien pida señal, envío por mensajería o pagos por adelantado.</li>
+                <li>Paga cuando te la lleves. Desconfía si te piden una señal, pagar por adelantado o enviártela por mensajería.</li>
               </ul>
               <p>
                 Reboard no gestiona pagos ni envíos.{" "}
@@ -301,7 +301,7 @@ export default async function FichaPage({ params }: PageProps<"/anuncio/[slugId]
 
         <section id="similares" className={styles.similar} aria-labelledby="similar-title">
           <h2 id="similar-title" className={styles.similarTitle}>
-            Tablas similares
+            Tablas parecidas
           </h2>
           <div className={styles.similarGrid}>
             {similar.map((x) => (

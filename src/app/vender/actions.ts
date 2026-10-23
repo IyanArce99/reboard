@@ -15,20 +15,20 @@ import { createUserClient } from "@/lib/supabase/server";
 export type ActionResult<T> = ({ ok: true } & T) | { ok: false; message: string; login?: boolean };
 
 async function session() {
-  if (!authEnabled()) return { error: { ok: false as const, message: "La publicación real no está activa en la demo." } };
+  if (!authEnabled()) return { error: { ok: false as const, message: "Todavía no se pueden publicar anuncios." } };
   const sb = await createUserClient();
   const { data } = await sb.auth.getUser();
-  if (!data.user) return { error: { ok: false as const, message: "Tu sesión ha caducado. Confirma tu email para seguir.", login: true } };
+  if (!data.user) return { error: { ok: false as const, message: "Tu sesión ha caducado. Vuelve a entrar con tu email para seguir.", login: true } };
   return { sb, user: data.user };
 }
 
 function failure(e: unknown): { ok: false; message: string } {
   if (e instanceof PublishError) {
     if (e.code === "db") console.error("[publicar]", e.message);
-    return { ok: false, message: e.code === "db" ? "No se ha podido guardar. Vuelve a intentarlo." : e.message };
+    return { ok: false, message: e.code === "db" ? "No hemos podido guardar el anuncio. Vuelve a intentarlo en un momento." : e.message };
   }
   console.error("[publicar]", e);
-  return { ok: false, message: "No se ha podido guardar. Vuelve a intentarlo." };
+  return { ok: false, message: "No hemos podido guardar el anuncio. Vuelve a intentarlo en un momento." };
 }
 
 function invalidate(publicId: string) {
@@ -46,7 +46,7 @@ const SaveArgs = z.object({
 /** Paso 1 de publicar: valida, comprueba Turnstile y guarda el anuncio (borrador si es nuevo). */
 export async function saveListingAction(args: z.input<typeof SaveArgs>): Promise<ActionResult<{ publicId: string; listingId: number; userId: string; status: string }>> {
   const a = SaveArgs.safeParse(args);
-  if (!a.success) return { ok: false, message: "Algo no ha ido bien. Recarga la página y vuelve a intentarlo." };
+  if (!a.success) return { ok: false, message: "Algo ha fallado. Recarga la página y vuelve a intentarlo." };
   const parsed = ListingInput.safeParse(a.data.input);
   if (!parsed.success) return { ok: false, message: firstIssueText(parsed.error) };
 
@@ -60,7 +60,7 @@ export async function saveListingAction(args: z.input<typeof SaveArgs>): Promise
     if (captcha.reason === "not-configured") {
       // Fallo de configuración del servidor: se registra aquí y el usuario ve un mensaje neutro.
       console.error("[publicar] Turnstile no está configurado (falta la clave secreta).");
-      return { ok: false, message: "No se puede publicar ahora mismo. Inténtalo más tarde." };
+      return { ok: false, message: "Ahora mismo no se puede publicar. Vuelve a intentarlo más tarde." };
     }
     return { ok: false, message: "No hemos podido comprobar que no eres un robot. Vuelve a intentarlo." };
   }
@@ -85,7 +85,7 @@ const FinalizeArgs = z.object({
 /** Paso 2: fotos ya subidas a Storage → filas en listing_photos, y publicar si es nuevo. */
 export async function finalizeListingAction(args: z.input<typeof FinalizeArgs>): Promise<ActionResult<{ path: string }>> {
   const a = FinalizeArgs.safeParse(args);
-  if (!a.success) return { ok: false, message: "Revisa las fotos: hace falta entre 1 y 8." };
+  if (!a.success) return { ok: false, message: "Revisa las fotos: tiene que haber entre 1 y 8." };
   const s = await session();
   if ("error" in s) return s.error!;
   try {
@@ -102,7 +102,7 @@ const DeleteArgs = z.object({ publicId: z.string().regex(/^a\d{1,15}$/) });
 /** Eliminar un anuncio propio desde «Mis anuncios» (con sus fotos). */
 export async function deleteListingServer(args: { publicId: string }): Promise<ActionResult<object>> {
   const a = DeleteArgs.safeParse(args);
-  if (!a.success) return { ok: false, message: "Algo no ha ido bien. Recarga la página y vuelve a intentarlo." };
+  if (!a.success) return { ok: false, message: "Algo ha fallado. Recarga la página y vuelve a intentarlo." };
   const s = await session();
   if ("error" in s) return s.error!;
   try {
@@ -123,7 +123,7 @@ const PanelArgs = z.object({
 /** Acciones del panel del vendedor (E5). */
 export async function panelActionServer(args: { publicId: string; action: PanelAction; price?: number }): Promise<ActionResult<object>> {
   const a = PanelArgs.safeParse(args);
-  if (!a.success) return { ok: false, message: "Algo no ha ido bien. Recarga la página y vuelve a intentarlo." };
+  if (!a.success) return { ok: false, message: "Algo ha fallado. Recarga la página y vuelve a intentarlo." };
   const s = await session();
   if ("error" in s) return s.error!;
   try {

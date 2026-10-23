@@ -37,7 +37,7 @@ export default async function AdminShops(props: PageProps<"/admin/tiendas">) {
         subtitle="Directorio público: solo se muestran las aprobadas (lo impone la base de datos). Las demás solo las ve el equipo."
       />
       <Notice>
-        El alta de tiendas por su cuenta todavía no está abierta: las fichas las crea el equipo aquí con datos que la tienda haya
+        Las tiendas todavía no pueden darse de alta por su cuenta: las fichas las crea el equipo aquí con datos que la tienda haya
         confirmado. No inventes horarios, direcciones ni inventario.
       </Notice>
 

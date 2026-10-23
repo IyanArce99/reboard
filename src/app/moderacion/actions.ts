@@ -26,5 +26,5 @@ export async function moderateAction(args: z.input<typeof Args>): Promise<{ ok: 
   if (error) return { ok: false, message: adminErrorText(error) };
   updateTag("listings");
   updateTag(`listing:${a.data.publicId}`);
-  return { ok: true, message: "Acción registrada." };
+  return { ok: true, message: "Hecho. La acción queda registrada." };
 }

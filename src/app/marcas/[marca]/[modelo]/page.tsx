@@ -35,7 +35,7 @@ export async function generateMetadata({ params }: PageProps<"/marcas/[marca]/[m
   const m = await model(marca, modelo);
   const title = `${m.brand} ${m.model}: medidas, litros y segunda mano`;
   const sizes = m.sizes.map((s) => `${s.label} (${vol(s.volume)})`).join(", ");
-  const description = `${SHAPE_INFO[m.shape].label} ${CONSTRUCTION_INFO[m.construction].short} de ${m.brand}. Medidas del catálogo: ${sizes}. Unidades usadas en venta de cada medida.`;
+  const description = `${SHAPE_INFO[m.shape].label} ${CONSTRUCTION_INFO[m.construction].short} de ${m.brand}. Medidas del catálogo: ${sizes}. Tablas de segunda mano en venta en cada medida.`;
   const path = modelPath(m);
   return {
     title,

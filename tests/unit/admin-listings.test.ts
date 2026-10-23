@@ -134,7 +134,7 @@ describe("reportes", () => {
 
   it("los motivos coinciden con el enum report_reason y tienen etiqueta", () => {
     expect(REPORT_REASONS.map(([v]) => v).sort()).toEqual(["datos-falsos", "duplicado", "fotos", "fraude", "inapropiado", "otro", "vendida"]);
-    expect(REPORT_REASON_LABEL.fotos).toBe("Fotografías que no corresponden");
+    expect(REPORT_REASON_LABEL.fotos).toBe("Las fotos no son de esta tabla");
     expect(REPORT_REASON_LABEL.fraude).toBe("Posible estafa");
   });
 });

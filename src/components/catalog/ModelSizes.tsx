@@ -85,8 +85,8 @@ export function ModelSizes({ brand, model, intro, photo, sizes, sourceNote, tota
             ))}
           </dl>
           <div className={styles.sourceRow}>
-            <span className={styles.sourceBadge}>Según fabricante</span>
-            <span>Medidas del catálogo. En cada anuncio, el vendedor elige su medida.</span>
+            <span className={styles.sourceBadge}>Según el fabricante</span>
+            <span>Medidas del catálogo del fabricante. En cada anuncio, el vendedor indica cuál es la suya.</span>
           </div>
           {profile && (
             <div className={styles.fit} data-in={inRange(sz.volume) || undefined} role="status">
@@ -151,7 +151,7 @@ export function ModelSizes({ brand, model, intro, photo, sizes, sourceNote, tota
         ) : (
           <div className={styles.noneBox}>
             <div className={styles.noneText}>
-              No hay ninguna {brand} {model} {sz.label} usada publicada ahora mismo. Guarda una alerta para seguirla.
+              Ahora mismo no hay ninguna {brand} {model} {sz.label} usada a la venta. Crea una alerta y, desde Alertas, verás si aparece alguna.
             </div>
             <AlertButton text={sz.alert.text} query={sz.alert.query} className={`${ui.btnStrong} ${styles.noneBtn}`}>
               Crear alerta de esta medida

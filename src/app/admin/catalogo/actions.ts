@@ -245,7 +245,7 @@ export async function deleteSize(sizeId: number): Promise<AdminActionResult> {
   const used = await ctx.sb.from("listings").select("id", { count: "exact", head: true }).eq("model_size_id", sid.data);
   if (used.error) return bad(adminErrorText(used.error));
   if ((used.count ?? 0) > 0)
-    return bad(`${used.count} anuncio(s) usan esta medida: no se puede borrar. Corrígela o desactiva el modelo.`);
+    return bad(`${used.count === 1 ? "Un anuncio usa" : `${used.count} anuncios usan`} esta medida: no se puede borrar. Corrígela o desactiva el modelo.`);
   const { data, error } = await ctx.sb.from("board_model_sizes").delete().eq("id", sid.data).select("id");
   if (error) return bad(adminErrorText(error));
   if (!data?.length) return bad("No existe o no tienes permiso.");

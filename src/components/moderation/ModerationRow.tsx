@@ -22,8 +22,8 @@ export interface ModerationRowData {
 type Action = "hide" | "remove" | "restore" | "dismiss_reports";
 
 const CONFIRM: Partial<Record<Action, string>> = {
-  hide: "¿Ocultar el anuncio temporalmente? Deja de verse en la web; fotos y datos se conservan y se puede restaurar.",
-  remove: "¿Retirar el anuncio por incumplimiento? Deja de verse y el vendedor no podrá volver a publicarlo. Fotos y datos se conservan.",
+  hide: "¿Ocultar el anuncio temporalmente? Deja de verse en la web, pero las fotos y los datos se conservan y se puede restaurar.",
+  remove: "¿Retirar el anuncio por incumplimiento? Deja de verse y el vendedor no podrá volver a publicarlo. Las fotos y los datos se conservan.",
 };
 
 export function ModerationRow({ row }: { row: ModerationRowData }) {

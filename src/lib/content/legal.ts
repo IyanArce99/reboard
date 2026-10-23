@@ -56,7 +56,7 @@ export const LEGAL_DOCS: LegalDoc[] = [
         p: [
           "Si creas una cuenta: tu email (para entrar con un código de un solo uso) y el nombre visible que elijas.",
           "Si entras con Google o con Apple: recibimos de ellos tu email y tu nombre. Usamos solo el nombre de pila como nombre visible inicial (puedes cambiarlo en «Mi cuenta»). Si en Apple eliges ocultar tu email, recibimos una dirección de reenvío de Apple.",
-          "Si publicas un anuncio: los datos de la tabla, la localidad (nunca una dirección exacta), las fotos (se les quitan en tu dispositivo los datos de ubicación y de la cámara antes de subirlas) y tu teléfono de contacto. El teléfono no aparece en el anuncio: se muestra a quien pulsa «Mostrar contacto».",
+          "Si publicas un anuncio: los datos de la tabla, la localidad (nunca una dirección exacta), las fotos (antes de subirlas, tu dispositivo les quita los datos de ubicación y de la cámara) y tu teléfono de contacto. El teléfono no aparece en el anuncio: se muestra a quien pulsa «Mostrar contacto».",
           "Cuando alguien pide el contacto de un anuncio: registramos el anuncio, la fecha y un código derivado de la dirección IP (HMAC) que no permite recuperar la IP. Sirve para limitar abusos y para que el vendedor vea cuántas veces se ha pedido su contacto.",
           "Si guardas tablas con tu cuenta: la lista de anuncios guardados. Si reportas un anuncio: el motivo y el detalle que escribas.",
           "Sin cuenta, tus guardados, alertas y comparaciones se quedan en tu dispositivo y no los recibimos.",
@@ -80,7 +80,7 @@ export const LEGAL_DOCS: LegalDoc[] = [
       {
         h: "Conservación",
         p: [
-          "Los anuncios sin confirmar en 30 días caducan; los borradores sin publicar se borran a los 7 días con sus fotos. Si borras tu cuenta, se borran tu perfil, tus anuncios, tus fotos, tus guardados y tus reportes.",
+          "Los anuncios que no se confirman en 30 días caducan; los borradores sin publicar se borran a los 7 días con sus fotos. Si borras tu cuenta, se borran tu perfil, tus anuncios, tus fotos, tus guardados y tus reportes.",
           "[Plazo de conservación del registro de contactos y de los anuncios caducados o vendidos: pendiente de decidir.]",
         ],
       },
@@ -100,10 +100,10 @@ export const LEGAL_DOCS: LegalDoc[] = [
       {
         h: "Cookies y almacenamiento que usamos",
         p: [
-          "Todas son propias y técnicas: sin ellas la función que pides no funciona. Por eso no te pedimos consentimiento ni mostramos un banner de cookies.",
+          "Todas son propias y técnicas: sin ellas no funciona lo que pides. Por eso no te pedimos consentimiento ni mostramos un banner de cookies.",
           "Sesión (cookies «sb-…» de Supabase): solo si entras con tu cuenta. Mantienen la sesión iniciada.",
           "Zona de referencia (cookie «rb_zona»): solo si eliges tu zona. Recuerda la zona para mostrar «cerca de ti».",
-          "Almacenamiento local del navegador: guardados, alertas y comparación («rb-usuario-v1»), las respuestas de TablaFinder («rb-asistente-v1»), «Mis anuncios» en este dispositivo («rb-panel-v1») y el anuncio a medias (IndexedDB). No salen de tu dispositivo salvo que entres con tu cuenta (los guardados).",
+          "Almacenamiento local del navegador: guardados, alertas y comparación («rb-usuario-v1»), las respuestas de TablaFinder («rb-asistente-v1»), «Mis anuncios» en este dispositivo («rb-panel-v1») y el anuncio que dejas a medias (IndexedDB). No salen de tu dispositivo salvo que entres con tu cuenta (los guardados).",
           "Cloudflare Turnstile se carga solo en el acceso, al pedir un contacto, al publicar y al reportar, para comprobar que no eres un robot. [Revisar con la documentación de Cloudflare qué almacena.]",
         ],
       },
@@ -124,7 +124,7 @@ export const LEGAL_DOCS: LegalDoc[] = [
       {
         h: "Comprar y contactar",
         p: [
-          "El trato es entre comprador y vendedor. Recomendamos ver la tabla en persona y pagar al recogerla. Nunca pagues señales, envíos ni pagos por adelantado a desconocidos.",
+          "El trato es entre comprador y vendedor. Recomendamos ver la tabla en persona y pagar al recogerla. Nunca adelantes señales, envíos ni otros pagos a desconocidos.",
         ],
       },
       { h: "Uso prohibido", p: ["Anuncios falsos o duplicados, spam, contenido ofensivo, recopilar teléfonos de forma automatizada o suplantar a otra persona. Reboard puede retirar anuncios y cerrar cuentas que incumplan estas reglas."] },

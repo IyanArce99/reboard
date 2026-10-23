@@ -44,6 +44,6 @@ export const consShort = (l: Listing) => CONSTRUCTION_INFO[l.construction].short
 export function sourceBadge(value: unknown, source: DataSource): { text: string; tone: "seller" | "manufacturer" | "none" } {
   if (value == null || source == null) return { text: "Sin indicar", tone: "none" };
   return source === "manufacturer"
-    ? { text: "Según fabricante", tone: "manufacturer" }
-    : { text: "Indicado por el vendedor", tone: "seller" };
+    ? { text: "Según el fabricante", tone: "manufacturer" }
+    : { text: "Según el vendedor", tone: "seller" };
 }

@@ -7,7 +7,7 @@ import styles from "@/components/finder/Finder.module.css";
 const PATH = "/calculadora-litros";
 const TITLE = "¿Qué tabla de surf necesito? Calculadora de litros";
 const DESCRIPTION =
-  "Calcula un rango orientativo de litros y el tipo de tabla de surf que suele encajarte en 7 preguntas, y mira tablas de segunda mano compatibles. Sin registro.";
+  "Responde 7 preguntas y obtén un rango orientativo de litros y el tipo de tabla de surf que suele irte bien. Después, mira las tablas de segunda mano que encajan. Sin registro.";
 
 export const metadata: Metadata = {
   title: TITLE,
@@ -27,8 +27,8 @@ export default function Page() {
             <p className={styles.kicker}>TablaFinder · Calculadora de litros</p>
             <h1 className={styles.h1}>¿Qué tabla de surf necesito?</h1>
             <p className={styles.lead}>
-              Siete preguntas sobre tu peso, nivel y olas. Te damos un rango orientativo de litros, el tipo de tabla que suele
-              encajar y las tablas de segunda mano publicadas en ese rango. Sin registro.
+              Siete preguntas sobre tu peso, tu nivel y tus olas. Te damos un rango orientativo de litros, el tipo de tabla que
+              suele irte bien y las tablas de segunda mano que hay publicadas en ese rango. Sin registro.
             </p>
           </>
         }

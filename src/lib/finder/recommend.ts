@@ -99,7 +99,7 @@ export const CURRENT_BOARDS: [string, string][] = [
 
 export const FREQS: [FreqKey, string, string][] = [
   ["low", "Menos de una vez a la semana", "Con menos práctica, algo más de volumen suele ayudar a coger olas."],
-  ["mid", "Una o dos veces por semana", "El ritmo habitual: usamos el rango de referencia."],
+  ["mid", "Una o dos veces por semana", "Lo más habitual: usamos el rango de referencia."],
   ["high", "Tres o más veces por semana", "Con más práctica se suele poder ir algo más ajustado."],
 ];
 
@@ -107,27 +107,27 @@ export const WAVES: [WavesKey, string, string][] = [
   ["small", "Pequeñas y suaves", "0,5–1 m · olas blandas, orilla y espuma"],
   ["med", "Medianas", "1–2 m · pared definida y algo de fuerza"],
   ["big", "Potentes o grandes", "Más de 2 m · olas rápidas o huecas"],
-  ["unsure", "No lo sé", "Usaremos un término medio"],
+  ["unsure", "No lo sé", "Calculamos con un término medio"],
 ];
 
 export const GOALS: [GoalKey, string][] = [
   ["learn", "Aprender y coger más olas"],
   ["soft", "Pasar de una softboard a una tabla rígida"],
   ["turns", "Mejorar mis giros"],
-  ["manio", "Conseguir más maniobrabilidad"],
-  ["small", "Surfear con más facilidad en olas pequeñas"],
-  ["calm", "Practicar un surf más tranquilo"],
+  ["manio", "Ganar maniobrabilidad"],
+  ["small", "Aprovechar más las olas pequeñas"],
+  ["calm", "Un surf más tranquilo y fluido"],
 ];
 
 /** [pregunta, ayuda] de cada paso. */
 export const QUESTIONS: [string, string][] = [
-  ["¿Cuánto pesas?", "El peso suele ser el dato que más influye en el volumen. Solo lo usamos para calcular."],
-  ["¿Cuál es tu nivel?", "Responde con sinceridad: un poco más de volumen suele ayudar a progresar."],
-  ["¿Qué tabla usas ahora?", "Nos ayuda a entender de dónde vienes, para no proponerte un salto demasiado brusco."],
-  ["¿Con qué frecuencia surfeas?", "Quien surfea poco suele agradecer más volumen. Con más práctica se puede ajustar."],
+  ["¿Cuánto pesas?", "Es lo que más influye en los litros. Solo lo usamos para el cálculo."],
+  ["¿Cuál es tu nivel?", "Responde con sinceridad. Si dudas entre dos, elige el más bajo: un poco más de volumen suele ayudar a progresar."],
+  ["¿Qué tabla usas ahora?", "Así sabemos de dónde partes y no te proponemos un cambio demasiado brusco."],
+  ["¿Con qué frecuencia surfeas?", "Si surfeas poco, suele venir bien algo más de volumen. Con más horas de agua puedes ir más ajustado."],
   ["¿Qué olas sueles surfear?", "Las olas pequeñas suelen pedir más volumen y superficie; las potentes, más control."],
-  ["¿Qué quieres conseguir?", "Puedes elegir más de una opción."],
-  ["¿Dónde buscas y cuánto quieres gastar?", "Solo filtra las tablas que te enseñamos: no cambia el rango de litros."],
+  ["¿Qué quieres conseguir?", "Puedes elegir varias."],
+  ["¿Dónde buscas y cuánto quieres gastar?", "Esto solo filtra las tablas que te enseñamos; no cambia tu rango de litros."],
 ];
 
 export interface TypeInfo {
@@ -145,11 +145,11 @@ export interface TypeInfo {
 export const TYPE_INFO: Record<FinderType, TypeInfo> = {
   softboard: { label: "Softboard", singular: "softboard", plural: "softboards", why: "Muy estable y más segura mientras aprendes.", cons: "Suele quedarse corta cuando empiezas a ir por la pared.", lens: "7'0\"–8'6\"", shape: "evolutiva" },
   evolutiva: { label: "Evolutiva", singular: "evolutiva", plural: "evolutivas", why: "Rígida, con mucho volumen y remada fácil: un paso habitual después de la softboard.", cons: "Menos ágil en olas potentes.", lens: "7'0\"–8'0\"", shape: "evolutiva" },
-  longboard: { label: "Longboard", singular: "longboard", plural: "longboards", why: "Suele coger con facilidad olas muy pequeñas y es muy estable.", cons: "Pesada, y cuesta más pasar la rompiente y transportarla.", lens: "9'0\"–9'6\"", shape: "longboard" },
-  midlength: { label: "Midlength", singular: "midlength", plural: "midlengths", why: "Deslizamiento y remada con un surf fluido y tranquilo.", cons: "Menos reactiva en giros cerrados.", lens: "6'10\"–7'10\"", shape: "midlength" },
-  fish: { label: "Fish", singular: "fish", plural: "fish", why: "Corta y ancha: rápida y divertida en olas pequeñas y medianas.", cons: "Puede costar en olas grandes y huecas.", lens: "5'6\"–6'4\"", shape: "fish" },
-  hibrida: { label: "Híbrida", singular: "híbrida", plural: "híbridas", why: "Equilibrio entre facilidad y rendimiento para progresar en maniobras.", cons: "Exige ya cierta técnica.", lens: "5'8\"–6'6\"", shape: "hibrida" },
-  shortboard: { label: "Shortboard", singular: "shortboard", plural: "shortboards", why: "Mucha respuesta en olas con fuerza.", cons: "Poco volumen: suele costar en olas pequeñas.", lens: "5'8\"–6'4\"", shape: "shortboard" },
+  longboard: { label: "Longboard", singular: "longboard", plural: "longboards", why: "Entra con facilidad en olas muy pequeñas y es muy estable.", cons: "Pesa, cuesta más pasar la rompiente y es incómoda de transportar.", lens: "9'0\"–9'6\"", shape: "longboard" },
+  midlength: { label: "Midlength", singular: "midlength", plural: "midlengths", why: "Rema bien y desliza mucho: para un surf fluido y tranquilo.", cons: "Menos reactiva en giros cerrados.", lens: "6'10\"–7'10\"", shape: "midlength" },
+  fish: { label: "Fish", singular: "fish", plural: "fish", why: "Corta y ancha: rápida y divertida en olas pequeñas y medianas.", cons: "Cuesta más controlarla en olas grandes y huecas.", lens: "5'6\"–6'4\"", shape: "fish" },
+  hibrida: { label: "Híbrida", singular: "híbrida", plural: "híbridas", why: "Un punto medio entre facilidad y rendimiento para seguir mejorando tus maniobras.", cons: "Pide ya cierta técnica.", lens: "5'8\"–6'6\"", shape: "hibrida" },
+  shortboard: { label: "Shortboard", singular: "shortboard", plural: "shortboards", why: "Responde muy bien en olas con fuerza.", cons: "Poco volumen: en olas pequeñas se suele quedar corta.", lens: "5'8\"–6'4\"", shape: "shortboard" },
 };
 
 
@@ -177,7 +177,7 @@ const LENGTHS: Record<LevelKey, string> = {
 
 const LOOK: Record<LevelKey, string[]> = {
   learn: ["Anchura en torno a 22\" o más y cantos gruesos", "Mucho volumen repartido a lo largo de la tabla", "Construcción resistente: epoxy o softboard"],
-  ride: ["Volumen dentro de tu rango, sin bajar de golpe", "Cantos medios y algo de rocker", "Quillas thruster o 2+1 versátiles"],
+  ride: ["Volumen dentro de tu rango, sin bajar de golpe", "Cantos medios y algo de rocker", "Quillas versátiles: thruster o 2+1"],
   turn: ["Volumen algo más ajustado para girar", "Cola squash o swallow según el tipo de ola", "Rocker moderado"],
   pro: ["Volumen ajustado a tus olas habituales", "Rocker adaptado a la fuerza de la ola", "Cantos finos para más agarre"],
 };
@@ -185,8 +185,8 @@ const LOOK: Record<LevelKey, string[]> = {
 const AVOID: Record<LevelKey, string[]> = {
   learn: ["Shortboards de menos de 40 L", "Tablas muy estrechas o con mucho rocker"],
   ride: ["Bajar más de un 20 % de volumen de una vez", "Tablas de alto rendimiento muy finas"],
-  turn: ["Tablas demasiado voluminosas que no giran", "Longboards si buscas maniobras"],
-  pro: ["Exceso de volumen en olas potentes", "Comprar solo por la marca sin revisar las medidas"],
+  turn: ["Tablas con tanto volumen que no giran", "Longboards si buscas maniobras"],
+  pro: ["Pasarte de volumen en olas potentes", "Comprar solo por la marca sin revisar las medidas"],
 };
 
 export interface Recommendation {
@@ -267,7 +267,7 @@ export function recommend(
     }
   }
   if (lo > VOL_MAX - MIN_SPAN || hi > VOL_MAX) {
-    note += ` El cálculo pasa de ${VOL_MAX} L, más de lo que suelen tener las tablas de serie: lo limitamos ahí y conviene consultar medidas concretas en una tienda.`;
+    note += ` El cálculo pasa de ${VOL_MAX} L, más de lo que suelen tener las tablas de serie. Lo dejamos en ese tope: mejor consulta medidas concretas en una tienda.`;
   }
   lo = clamp(lo, VOL_MIN, VOL_MAX - MIN_SPAN);
   hi = clamp(hi, lo + MIN_SPAN, VOL_MAX);

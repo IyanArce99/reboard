@@ -26,12 +26,12 @@ export function DoneScreen({ done, editing, onAgain }: { done: Done; editing: bo
           <p className={styles.doneText}>
             {editing
               ? "Los cambios ya se ven en el anuncio y en las búsquedas."
-              : "Ya aparece en las búsquedas por sus medidas. Confirma cada 14 días en «Mis anuncios» que sigue disponible; si no, caduca a los 30 días."}
+              : "Ya sale en las búsquedas. Importante: entra en «Mis anuncios» cada 14 días y confirma que sigue a la venta. Si pasan 30 días sin confirmarlo, el anuncio caduca. No enviamos recordatorios, así que apúntatelo."}
           </p>
         ) : (
           <p className={styles.doneText}>
-            La publicación todavía no está abierta, así que el anuncio no se ha guardado y las fotos no han salido de tu dispositivo.
-            Cuando abramos, aparecerá en las búsquedas por sus medidas.
+            Todavía no se puede publicar, así que el anuncio no se ha guardado y las fotos no han salido de tu dispositivo.
+            Cuando se pueda, tu tabla saldrá en las búsquedas por sus medidas.
           </p>
         )}
         <div className={styles.doneBtns}>

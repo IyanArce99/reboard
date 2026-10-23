@@ -36,7 +36,7 @@ export async function publishDraft(opts: {
       refs.push({ path: p.path, width: p.width ?? 1, height: p.height ?? 1 });
       continue;
     }
-    if (!p.blob) return { ok: false, message: "Vuelve a añadir las fotos: alguna no se ha podido preparar.", publicId: saved.publicId };
+    if (!p.blob) return { ok: false, message: "Alguna foto no se ha podido preparar. Quítala, vuelve a añadirla y prueba otra vez.", publicId: saved.publicId };
     n += 1;
     onProgress(`Subiendo fotos · ${n} de ${toUpload}`);
     const ext = p.blob.type === "image/jpeg" ? "jpg" : "webp";
@@ -50,8 +50,8 @@ export async function publishDraft(opts: {
       return {
         ok: false,
         message: quota
-          ? "Has subido muchas fotos en poco tiempo. Espera unas horas y vuelve a intentarlo."
-          : "No se ha podido subir una foto. Revisa la conexión y vuelve a intentarlo.",
+          ? "Has llegado al límite de fotos que se pueden subir por ahora. Espera unas horas y vuelve a intentarlo: no pierdes lo que has rellenado."
+          : "No hemos podido subir una de las fotos. Revisa la conexión y vuelve a intentarlo.",
         publicId: saved.publicId,
       };
     }

@@ -38,16 +38,16 @@ async function resolveCatalog(sb: Sb, v: ListingData) {
   const { data: brand } = await sb.from("brands").select("id, name").eq("slug", v.brandSlug).maybeSingle();
   // Marca que no está en la tabla: sin modelo, se guarda como texto (brand_text) en lugar de fallar.
   if (!brand) {
-    if (v.modelSlug) throw new PublishError("catalog", "La marca no está en el catálogo.");
+    if (v.modelSlug) throw new PublishError("catalog", "No encontramos esa marca en el catálogo. Vuelve al paso «La tabla» y elígela de nuevo.");
     return { brandId: null, modelId: null, sizeId: null, brandName: null, modelName: null };
   }
   if (!v.modelSlug) return { brandId: brand.id, modelId: null, sizeId: null, brandName: brand.name, modelName: null };
   const { data: model } = await sb.from("board_models").select("id, name").eq("slug", v.modelSlug).eq("brand_id", brand.id).maybeSingle();
-  if (!model) throw new PublishError("catalog", "El modelo no está en el catálogo.");
+  if (!model) throw new PublishError("catalog", "No encontramos ese modelo en el catálogo. Vuelve al paso «La tabla» y elígelo de nuevo.");
   let sizeId: number | null = null;
   if (v.catalogSize) {
     const { data: size } = await sb.from("board_model_sizes").select("id").eq("model_id", model.id).eq("label", v.catalogSize).maybeSingle();
-    if (!size) throw new PublishError("catalog", "La medida no está en el catálogo.");
+    if (!size) throw new PublishError("catalog", "No encontramos esa medida en el catálogo. Vuelve al paso «La tabla» y elígela de nuevo.");
     sizeId = size.id;
   }
   return { brandId: brand.id, modelId: model.id, sizeId, brandName: brand.name, modelName: model.name };
@@ -99,7 +99,7 @@ export async function saveListing(sb: Sb, userId: string, v: ListingData, editin
   let listing: { id: number; public_id: string | null; slug: string; status: Status };
   if (editingPublicId) {
     const own = await ownListing(sb, userId, editingPublicId);
-    if (!own) throw new PublishError("not-found", "No encontramos ese anuncio en tu cuenta.");
+    if (!own) throw new PublishError("not-found", "No encontramos ese anuncio en tu cuenta. Puede que se haya eliminado.");
     const { data, error } = await sb.from("listings").update(row).eq("id", own.id).select("id, public_id, slug, status").single();
     if (error || !data) throw new PublishError("db", error?.message ?? "update");
     listing = data;
@@ -111,7 +111,7 @@ export async function saveListing(sb: Sb, userId: string, v: ListingData, editin
       .single();
     // Límite de la base de datos: 15 anuncios nuevos por usuario y día (migración 20261027090000).
     if (error?.message.includes("listing_daily_limit")) {
-      throw new PublishError("state", "Has creado muchos anuncios hoy. Podrás publicar más mañana.");
+      throw new PublishError("state", "Has llegado al máximo de 15 anuncios nuevos en 24 horas. Podrás publicar más dentro de unas horas; este se queda guardado en tu dispositivo.");
     }
     if (error || !data) throw new PublishError("db", error?.message ?? "insert");
     listing = data;
@@ -131,21 +131,21 @@ export async function saveListing(sb: Sb, userId: string, v: ListingData, editin
  */
 export async function finalizeListing(sb: Sb, userId: string, publicId: string, photos: PhotoRef[], publish: boolean) {
   const own = await ownListing(sb, userId, publicId);
-  if (!own) throw new PublishError("not-found", "No encontramos ese anuncio en tu cuenta.");
-  if (photos.length < 1 || photos.length > MAX_PHOTOS) throw new PublishError("photos", "Hace falta entre 1 y 8 fotos.");
-  if (new Set(photos.map((p) => p.path)).size !== photos.length) throw new PublishError("photos", "Has añadido la misma foto dos veces.");
+  if (!own) throw new PublishError("not-found", "No encontramos ese anuncio en tu cuenta. Puede que se haya eliminado.");
+  if (photos.length < 1 || photos.length > MAX_PHOTOS) throw new PublishError("photos", "Tiene que haber entre 1 y 8 fotos.");
+  if (new Set(photos.map((p) => p.path)).size !== photos.length) throw new PublishError("photos", "Has añadido la misma foto dos veces. Quita una y vuelve a intentarlo.");
   for (const p of photos) {
-    if (!photoPathOk(p.path, userId, own.id)) throw new PublishError("photos", "Vuelve a añadir las fotos.");
+    if (!photoPathOk(p.path, userId, own.id)) throw new PublishError("photos", "Vuelve a añadir las fotos y prueba otra vez.");
   }
 
   const folder = `${userId}/${own.id}`;
   const { data: objects, error: listError } = await sb.storage.from("listing-photos").list(folder, { limit: 100 });
   if (listError) {
     console.error("[publicar] list photos", listError.message);
-    throw new PublishError("photos", "No se ha podido comprobar las fotos. Vuelve a intentarlo.");
+    throw new PublishError("photos", "No hemos podido comprobar las fotos. Vuelve a intentarlo.");
   }
   const stored = new Set((objects ?? []).map((o) => `${folder}/${o.name}`));
-  if (photos.some((p) => !stored.has(p.path))) throw new PublishError("photos", "Alguna foto no se ha subido. Vuelve a intentarlo.");
+  if (photos.some((p) => !stored.has(p.path))) throw new PublishError("photos", "Alguna foto no ha terminado de subirse. Vuelve a intentarlo.");
 
   // Se reescriben las filas en el orden nuevo (la posición es única por anuncio).
   const del = await sb.from("listing_photos").delete().eq("listing_id", own.id);
@@ -169,7 +169,7 @@ export async function finalizeListing(sb: Sb, userId: string, publicId: string, 
     const { error } = await sb.from("listings").update({ status: "published" }).eq("id", own.id);
     if (error) {
       console.error("[publicar] publish", error.message);
-      throw new PublishError("state", "No se ha podido publicar el anuncio. Vuelve a intentarlo.");
+      throw new PublishError("state", "No hemos podido publicar el anuncio. Vuelve a intentarlo.");
     }
   }
   return { publicId: own.public_id ?? publicId, slug: own.slug };
@@ -184,11 +184,11 @@ export type PanelAction = "confirm" | "sold" | "republish" | "withdraw" | "price
  */
 export async function deleteOwnListing(sb: Sb, userId: string, publicId: string) {
   const own = await ownListing(sb, userId, publicId);
-  if (!own) throw new PublishError("not-found", "No encontramos ese anuncio en tu cuenta.");
+  if (!own) throw new PublishError("not-found", "No encontramos ese anuncio en tu cuenta. Puede que se haya eliminado.");
   const { data: deleted, error } = await sb.from("listings").delete().eq("id", own.id).select("id");
   if (error || !deleted?.length) {
     if (error) console.error("[eliminar]", error.message);
-    throw new PublishError("state", "Este anuncio está en revisión y no se puede eliminar. Puedes retirarlo para que no se vea.");
+    throw new PublishError("state", "Este anuncio está en revisión y ahora no se puede eliminar. Si quieres que no se vea, retíralo.");
   }
   // Fotos: después de borrar la fila (si fallara, quedan archivos sin anuncio, no un anuncio sin fotos).
   const folder = `${userId}/${own.id}`;
@@ -203,7 +203,7 @@ export async function deleteOwnListing(sb: Sb, userId: string, publicId: string)
 
 export async function panelAction(sb: Sb, userId: string, publicId: string, action: PanelAction, price?: number) {
   const own = await ownListing(sb, userId, publicId);
-  if (!own) throw new PublishError("not-found", "No encontramos ese anuncio en tu cuenta.");
+  if (!own) throw new PublishError("not-found", "No encontramos ese anuncio en tu cuenta. Puede que se haya eliminado.");
   const patches: Record<PanelAction, Database["public"]["Tables"]["listings"]["Update"]> = {
     confirm: { confirmed_at: new Date().toISOString() },
     sold: { status: "sold" },
@@ -213,13 +213,13 @@ export async function panelAction(sb: Sb, userId: string, publicId: string, acti
   };
   const patch = patches[action];
   if (action === "price" && !(Number.isInteger(price) && price! >= 1 && price! <= 20000)) {
-    throw new PublishError("state", "Indica un precio entre 1 y 20.000 €.");
+    throw new PublishError("state", "Pon un precio entre 1 y 20.000 €.");
   }
-  if (action === "confirm" && own.status !== "published") throw new PublishError("state", "Solo se confirman anuncios publicados.");
+  if (action === "confirm" && own.status !== "published") throw new PublishError("state", "Solo puedes confirmar anuncios que estén publicados.");
   const { error } = await sb.from("listings").update(patch).eq("id", own.id);
   if (error) {
     console.error("[panel]", action, error.message);
-    throw new PublishError("state", "Ese cambio no está permitido en este anuncio.");
+    throw new PublishError("state", "Ese cambio no se puede hacer en este anuncio ahora mismo. Recarga la página y vuelve a probar.");
   }
   return { publicId: own.public_id ?? publicId };
 }

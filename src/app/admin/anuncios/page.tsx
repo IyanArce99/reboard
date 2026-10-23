@@ -96,7 +96,7 @@ export default async function AdminListingsPage(props: PageProps<"/admin/anuncio
         <label className={s.field}>
           Moderación
           <select name="moderacion" defaultValue={f.moderacion ?? ""}>
-            <option value="">Toda</option>
+            <option value="">Cualquiera</option>
             {MODERATION_FILTERS.map((v) => (
               <option key={v} value={v}>
                 {MODERATION_FILTER_LABEL[v]}

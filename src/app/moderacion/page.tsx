@@ -54,14 +54,14 @@ async function Queue() {
     <>
       {isAdmin === true && (
         <p className={styles.lead}>
-          Eres administrador: en el <Link href="/admin/reportes">panel de reportes</Link> tienes también el historial, la ficha completa y
+          Eres administrador: en el <Link href="/admin/reportes">panel de reportes</Link> también tienes el historial, la ficha completa y
           las cuentas de los vendedores.
         </p>
       )}
       <p className={styles.lead}>
-        {rows.length ? `${rows.length} anuncio${rows.length > 1 ? "s" : ""} por revisar.` : "No hay nada pendiente."} Al llegar al
-        umbral de reportes abiertos, un anuncio pasa a «en revisión» automáticamente (sigue visible hasta que decidas). Ocultar o
-        retirar no borra fotos ni datos: se puede restaurar.
+        {rows.length ? `${rows.length} anuncio${rows.length > 1 ? "s" : ""} por revisar.` : "No hay nada pendiente."} Cuando un
+        anuncio acumula suficientes reportes abiertos, pasa solo a «en revisión» y sigue visible hasta que decidas. Ocultar o
+        retirar no borra fotos ni datos: siempre se puede restaurar.
       </p>
       <div className={styles.rows}>
         {rows.map((r) => (

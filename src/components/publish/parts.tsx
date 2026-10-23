@@ -14,9 +14,9 @@ export const MAX_PHOTOS = 8;
 export const STEPS = [
   { short: "Fotos", title: "Enséñanos tu tabla", lead: "Las fotos son lo primero que se mira. La primera será la portada." },
   { short: "La tabla", title: "Cuéntanos qué tabla es", lead: "Marca, medidas y tipo: así te encuentra quien busca por litros." },
-  { short: "Estado", title: "¿En qué estado está?", lead: "Cuéntalo tal cual: genera confianza y te ahorra visitas en balde." },
+  { short: "Estado", title: "¿En qué estado está?", lead: "Cuéntalo tal cual: da confianza y te ahorra visitas en balde." },
   { short: "Precio y ubicación", title: "¿Por cuánto la vendes?", lead: "Pon el precio, dónde está la tabla y cómo quieres que te contacten." },
-  { short: "Revisar", title: "Así quedará tu anuncio", lead: "Revisa que todo esté bien. Puedes cambiar cualquier parte sin perder nada." },
+  { short: "Revisar", title: "Así quedará tu anuncio", lead: "Comprueba que todo está bien. Puedes cambiar cualquier parte sin perder lo demás." },
 ] as const;
 
 export interface StepProps {

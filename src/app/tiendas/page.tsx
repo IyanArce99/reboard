@@ -13,7 +13,7 @@ import styles from "@/components/shops/Shops.module.css";
 
 const TITLE = "Tiendas y escuelas";
 const DESCRIPTION =
-  "Tiendas de surf y escuelas con tablas de segunda mano: sus tablas usadas, su dirección y su horario. Sus tablas aparecen también en todas las búsquedas.";
+  "Tiendas de surf y escuelas que venden tablas de segunda mano: sus tablas usadas, su dirección y su horario. Sus anuncios también salen en la búsqueda.";
 
 export const metadata: Metadata = {
   title: TITLE,
@@ -55,8 +55,8 @@ export default async function ShopsPage() {
             <p className={styles.eyebrow}>Profesionales</p>
             <h1 className={styles.title}>{TITLE}</h1>
             <p className={styles.intro}>
-              Sus tablas usadas aparecen junto a las de particulares en todas las búsquedas. Aquí ves sus tablas usadas, su
-              dirección y su horario.
+              Aquí tienes sus tablas usadas, su dirección y su horario. Sus anuncios también salen en la búsqueda, junto a
+              los de particulares.
             </p>
             <p className={styles.joinNote}>El alta de tiendas y escuelas aún no está abierta.</p>
           </div>
@@ -78,8 +78,8 @@ export default async function ShopsPage() {
               </Link>
             }
           >
-            Cuando se den de alta, verás aquí sus tablas usadas, su dirección y su horario. Mientras tanto, las tablas de
-            particulares están en la búsqueda.
+            Cuando se den de alta, verás aquí sus tablas usadas, su dirección y su horario. Mientras tanto, puedes ver las
+            tablas de particulares en la búsqueda.
           </EmptyState>
         )}
       </div>

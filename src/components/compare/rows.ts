@@ -49,7 +49,7 @@ const DEFS: Def[] = [
   ["Construcción", (l) => CONSTRUCTION_INFO[l.construction].label],
   ["Tipo", (l) => SHAPE_INFO[l.shape].label],
   ["Estado", (l) => CONDITION_LABEL[l.condition]],
-  ["Reparaciones", (l) => (l.repairs ? "Sí · ver ficha" : "Ninguna indicada")],
+  ["Reparaciones", (l) => (l.repairs ? "Sí · ver anuncio" : "Ninguna indicada")],
   ["Ubicación", (l) => `${l.town}, ${zoneName(l)}`],
   ["Distancia", (l, c) => (l.zone !== c.here ? "Otra zona" : l.distanceKm != null ? `${l.distanceKm} km` : null), true],
   ["Disponibilidad", (l, c) => availability(l, c.now).text],

@@ -12,13 +12,13 @@ export interface BrandContent {
 }
 
 const BRAND_INTROS: Record<string, string> = {
-  Torq: "Marca de tablas en epoxy moldeado (TET), muy habitual en escuelas y entre surfistas que progresan. Duras, ligeras y resistentes a los golpes.",
-  NSP: "Tablas en epoxy resistentes, muy presentes en escuelas y alquiler.",
-  Softech: "Softboards de gama alta: espuma blanda con fondo deslizante.",
-  Firewire: "Construcciones técnicas en epoxy y modelos de shapers reconocidos.",
-  Lost: "Modelos híbridos y shortboards de PU de diseño californiano.",
-  "Channel Islands": "Shortboards, híbridas y midlengths en PU clásico.",
-  Pukas: "Marca vasca con modelos para todo tipo de olas.",
+  Torq: "Tablas de epoxy moldeado (TET). Se ven mucho en escuelas y entre surfistas que están progresando.",
+  NSP: "Tablas de epoxy, muy habituales en escuelas y en alquiler.",
+  Softech: "Softboards: tablas de espuma blanda con fondo deslizante.",
+  Firewire: "Tablas de epoxy con construcciones propias y modelos de varios shapers conocidos.",
+  Lost: "Shortboards e híbridas, sobre todo en PU.",
+  "Channel Islands": "Shortboards, híbridas y midlengths, sobre todo en PU.",
+  Pukas: "Marca vasca con modelos para casi cualquier tipo de ola.",
 };
 
 /** Intro de la marca, o null si no hay texto (no se inventa uno). */

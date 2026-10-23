@@ -67,8 +67,8 @@ export async function NearSection() {
   const lowInv = totalActive < 60 || (chosen && near.length < 8);
   const lowText =
     totalActive < 60
-      ? `Hay ${totalActive} ${totalActive === 1 ? "tabla publicada" : "tablas publicadas"} en toda España. Guarda una alerta${chosen ? " con tu zona" : ""} y vuelve a mirar cuántas coinciden.`
-      : `Todavía hay pocas tablas en ${zn}. Guarda una alerta y consulta en Alertas cuántas coinciden.`;
+      ? `Hay ${totalActive} ${totalActive === 1 ? "tabla publicada" : "tablas publicadas"} en toda España. Guarda una alerta${chosen ? " con tu zona" : ""} y pásate por Alertas de vez en cuando para ver cuántas coinciden.`
+      : `Aún hay pocas tablas en ${zn}. Guarda una alerta y mira en Alertas cuántas coinciden.`;
   const allText = chosen ? `Ver ${nearPage.total} en ${zn} →` : `Ver las ${nearPage.total} tablas →`;
   const zoneHref = chosen ? landingPath(here, null) : "/buscar";
 
@@ -82,8 +82,8 @@ export async function NearSection() {
         </h2>
         <div className={styles.lowInv}>
           <div>
-            <strong>Reboard está empezando.</strong> Si tienes una tabla parada, publícala gratis: serás de las primeras.
-            Si buscas, guarda una alerta y vuelve a mirar cuántas coinciden.
+            <strong>Reboard acaba de arrancar.</strong> Si tienes una tabla parada, publícala gratis y será de las primeras.
+            Si buscas, guarda una alerta y pásate por Alertas para ver cuántas coinciden.
           </div>
           <div className={styles.emptyActions}>
             <Link href="/vender/publicar" className={ui.btnPrimary}>
@@ -144,7 +144,7 @@ export async function NearSection() {
       {lowInv && (
         <div className={styles.lowInv}>
           <div>
-            <strong>Reboard está empezando.</strong> {lowText}
+            <strong>Reboard acaba de arrancar.</strong> {lowText}
           </div>
           <AlertButton text={alertText(zoneFilters, names)} query={toQuery(zoneFilters)} className={styles.outlineBtn} />
         </div>

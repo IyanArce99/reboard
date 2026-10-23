@@ -116,7 +116,7 @@ export function SellerPanel({ listings, nowIso, live = false, sellerName, contac
   }
 
   async function remove(l: Listing) {
-    if (!window.confirm("¿Eliminar el anuncio y sus fotos? No se puede deshacer. Si solo quieres que no se vea, retíralo.")) return;
+    if (!window.confirm("¿Eliminar el anuncio y sus fotos? No se puede deshacer. Si solo quieres que deje de verse, mejor retíralo.")) return;
     setBusy(l.id);
     const r = await deleteListingServer({ publicId: l.id });
     setBusy(null);
@@ -125,7 +125,7 @@ export function SellerPanel({ listings, nowIso, live = false, sellerName, contac
       if (r.login) router.push("/entrar?siguiente=/panel");
       return;
     }
-    toast("Anuncio eliminado, con sus fotos.");
+    toast("Anuncio y fotos eliminados.");
     router.refresh();
   }
 
@@ -144,8 +144,8 @@ export function SellerPanel({ listings, nowIso, live = false, sellerName, contac
   const statusText = (l: Listing, t: Tab) => {
     if (l.status === "vendida") return "Vendida · ya no aparece en búsquedas";
     if (l.status === "retirada") return "Retirada · no aparece en búsquedas";
-    if (l.status === "caducada") return "Caducada · no se confirmó en 30 días";
-    if (t === "pendientes") return `Confirma que sigue disponible · última confirmación ${ago(confDays(l))}`;
+    if (l.status === "caducada") return "Caducada · pasaron 30 días sin confirmarla";
+    if (t === "pendientes") return `Confirma que sigue a la venta · última vez ${ago(confDays(l))}`;
     return `Activa · confirmada ${ago(confDays(l))}`;
   };
 
@@ -173,8 +173,8 @@ export function SellerPanel({ listings, nowIso, live = false, sellerName, contac
         <div className={styles.need} role="status">
           <span>
             {pend.length > 1
-              ? `${pend.length} anuncios sin confirmar desde hace más de ${CONFIRM_DAYS} días. Si no los confirmas, caducarán a los 30 días.`
-              : `1 anuncio sin confirmar desde hace más de ${CONFIRM_DAYS} días. Si no lo confirmas, caducará a los 30 días.`}
+              ? `Tienes ${pend.length} anuncios sin confirmar desde hace más de ${CONFIRM_DAYS} días. Si siguen a la venta, confírmalos: a los 30 días sin confirmar, caducan.`
+              : `Tienes 1 anuncio sin confirmar desde hace más de ${CONFIRM_DAYS} días. Si sigue a la venta, confírmalo: a los 30 días sin confirmar, caduca.`}
           </span>
           <button
             type="button"
@@ -198,7 +198,7 @@ export function SellerPanel({ listings, nowIso, live = false, sellerName, contac
             </Link>
           }
         >
-          Publicar es gratis y lleva unos minutos: fotos, medidas, estado y precio.
+          Publicar es gratis y se hace en unos minutos: fotos, medidas, estado y precio.
         </EmptyState>
       ) : (
         <>
@@ -253,7 +253,7 @@ export function SellerPanel({ listings, nowIso, live = false, sellerName, contac
                     {live && (
                       <div className={styles.stats}>
                         <span>
-                          Contacto pedido {contacts[l.id] ?? 0} {contacts[l.id] === 1 ? "vez" : "veces"}
+                          Contacto mostrado {contacts[l.id] ?? 0} {contacts[l.id] === 1 ? "vez" : "veces"}
                         </span>
                       </div>
                     )}
@@ -371,8 +371,8 @@ export function SellerPanel({ listings, nowIso, live = false, sellerName, contac
 
       <p className={styles.foot}>
         {live
-          ? "Los cambios se ven al momento en las búsquedas. Si bajas el precio, la ficha mostrará el precio anterior tachado. Solo contamos las veces que alguien pulsa «Mostrar contacto»; no hay chat propio."
-          : "En la demo no mostramos estadísticas. Con datos reales, solo contamos las veces que alguien pulsa «Mostrar contacto»; no hay chat propio. Los cambios de este panel se guardan solo en este dispositivo."}
+          ? "Confirma cada anuncio al menos cada 14 días: si pasan 30 sin confirmarlo, caduca. No enviamos recordatorios. Los cambios se ven al momento en las búsquedas y, si bajas el precio, la ficha muestra el anterior tachado. Lo único que contamos es cuántas veces han pulsado «Mostrar contacto»."
+          : "En la demo no hay estadísticas. Con datos reales, lo único que contamos es cuántas veces han pulsado «Mostrar contacto». Los cambios de este panel se guardan solo en este dispositivo."}
       </p>
     </main>
   );

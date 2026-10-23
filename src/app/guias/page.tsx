@@ -21,14 +21,14 @@ export const metadata: Metadata = {
 const TOOLS: { t: string; d: string; href: string; photo: PhotoSlug; cta: string }[] = [
   {
     t: "¿Qué tabla necesito?",
-    d: "Peso, nivel, olas y lo que quieres conseguir. Un rango orientativo de litros y las tablas publicadas que entran en él.",
+    d: "Responde sobre tu peso, tu nivel, tus olas y lo que buscas, y te damos un rango orientativo de litros con las tablas publicadas que entran en él.",
     href: "/calculadora-litros",
     photo: "clase-surf",
     cta: "Calcular mis litros",
   },
   {
     t: "Comparar tablas",
-    d: "Hasta cuatro tablas lado a lado: litros, medidas, estado, precio y zona.",
+    d: "Hasta cuatro tablas, una al lado de otra: litros, medidas, estado, precio y zona.",
     href: "/comparar",
     photo: "tablas-orilla",
     cta: "Abrir el comparador",
@@ -46,7 +46,7 @@ export default function GuidesPage() {
             as="h1"
             eyebrow="Antes de comprar"
             title={TITLE}
-            lead="Respuestas cortas y listas de comprobación para comprar una tabla usada con criterio."
+            lead="Respuestas cortas y listas de comprobación para comprar una tabla usada sin llevarte sorpresas."
           />
         </div>
       </div>
@@ -70,7 +70,7 @@ export default function GuidesPage() {
       </section>
 
       <section className={`container ${styles.indexBody} ${styles.indexEnd}`} aria-labelledby="herramientas-title">
-        <SectionHeader id="herramientas-title" eyebrow="Herramientas" title="Para decidir con datos" />
+        <SectionHeader id="herramientas-title" eyebrow="Herramientas" title="Para elegir tu tabla" />
         <div className={styles.tools}>
           {TOOLS.map((t) => (
             <Link key={t.href} href={t.href} className={styles.tool}>

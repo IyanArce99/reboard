@@ -88,7 +88,7 @@ describe("present", () => {
   it("origen del dato", () => {
     expect(sourceBadge(null, null).tone).toBe("none");
     expect(sourceBadge(47, null).tone).toBe("none");
-    expect(sourceBadge(47, "manufacturer").text).toBe("Según fabricante");
-    expect(sourceBadge(47, "seller").text).toBe("Indicado por el vendedor");
+    expect(sourceBadge(47, "manufacturer").text).toBe("Según el fabricante");
+    expect(sourceBadge(47, "seller").text).toBe("Según el vendedor");
   });
 });

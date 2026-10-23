@@ -188,10 +188,10 @@ export function emptyStateCopy(f: Filters, inventoryTotal: number): { kind: Empt
     return {
       kind: "inventory",
       title: "Todavía no hay tablas publicadas",
-      text: "Reboard está empezando y aún no hay anuncios activos. Si tienes una tabla parada, publícala gratis; si buscas, guarda esta búsqueda como alerta y vuelve a mirar cuántas coinciden.",
+      text: "Reboard acaba de arrancar y aún no hay anuncios activos. Si tienes una tabla parada, publícala gratis. Si buscas, guarda esta búsqueda como alerta y vuelve más adelante para ver cuántas coinciden.",
     };
   return hasActiveFilters(f)
-    ? { kind: "filters", title: "No encontramos tablas con estos filtros", text: "Amplía la búsqueda (entre paréntesis, las tablas que verías):" }
+    ? { kind: "filters", title: "No encontramos tablas con estos filtros", text: "Prueba a ampliar la búsqueda. Entre paréntesis, las tablas que verías:" }
     : { kind: "filters", title: "No encontramos tablas", text: "Prueba con otra búsqueda." };
 }
 

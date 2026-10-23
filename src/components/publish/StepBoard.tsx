@@ -25,7 +25,7 @@ import styles from "./Publish.module.css";
 
 const SRC_LABEL: Record<FieldSource, { text: string; tone: string; needs: boolean }> = {
   cat: { text: "Según catálogo · confírmalo", tone: "cat", needs: true },
-  ai: { text: "Propuesta automática · revísala", tone: "ai", needs: true },
+  ai: { text: "Sacado de tu texto · revísalo", tone: "ai", needs: true },
   ok: { text: "Confirmado por ti", tone: "ok", needs: false },
   "": { text: "", tone: "none", needs: false },
 };
@@ -91,7 +91,7 @@ export function StepBoard({ d, set, setD, catalog, brands: known, featuredBrands
 
   return (
     <div className={styles.stepBody}>
-      <Group id="pub-brand" title="Marca" hint="¿No está en la lista? Elige «Otra marca» y escríbela. Sin marca: «Shaper local» o «Sin marca».">
+      <Group id="pub-brand" title="Marca" hint="¿No está en la lista? Elige «Otra marca» y escríbela. Si no tiene marca, «Shaper local» o «Sin marca».">
         <div className={styles.chips}>
           {[...shownBrands, SHAPER_LOCAL, NO_BRAND_OPTION, OTHER_BRAND].map((b) => (
             <Chip key={b} on={d.brand === b} onClick={() => set({ brand: b, model: "", size: "" })}>

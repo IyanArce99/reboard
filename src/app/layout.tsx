@@ -42,7 +42,7 @@ export const metadata: Metadata = {
     default: "Tablas de surf de segunda mano en España · Reboard",
     template: "%s · Reboard",
   },
-  description: "Compra y vende tablas de surf usadas. Busca por litros, medidas, tipo y ubicación. Sin comisiones.",
+  description: "Compra y vende tablas de surf de segunda mano en España. Busca por litros, medidas, tipo y zona, sin comisiones.",
   applicationName: SITE_NAME,
   icons: { icon: "/favicon.svg" },
   openGraph: { siteName: SITE_NAME, locale: "es_ES", type: "website" },

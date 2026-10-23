@@ -195,7 +195,7 @@ export function UserStateProvider({ children, authEnabled = false }: { children:
       const dbId = listingDbId(id);
       setState((s) => ({ ...s, saved: on ? s.saved.filter((x) => x !== id) : [...s.saved, id] }));
       if (!acc || dbId === null) {
-        if (!on) toast("Guardada en este dispositivo. Mira en Guardadas si baja de precio o se vende.");
+        if (!on) toast("Guardada en este dispositivo. En Guardadas verás si baja de precio o se vende.");
         return;
       }
       void loadSupabase()
@@ -267,7 +267,7 @@ export function UserStateProvider({ children, authEnabled = false }: { children:
               alerts: [{ id: crypto.randomUUID(), text, query, on: true, createdAt: new Date().toISOString() }, ...s.alerts],
             },
       );
-      toast("Alerta guardada en este dispositivo. Aún no enviamos avisos: la verás en Alertas.");
+      toast("Alerta guardada solo en este dispositivo. No envía emails ni avisos: entra en Alertas para ver cuántas tablas coinciden.");
     },
     [toast],
   );

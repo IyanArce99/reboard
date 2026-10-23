@@ -131,7 +131,7 @@ export function ContactProvider({ data, children }: { data: ContactData; childre
                   className={styles.waBtn}
                   onClick={() => {
                     setOpen(false);
-                    toast("Demo: se abriría WhatsApp con el mensaje. No hay chat propio.");
+                    toast("Demo: aquí se abriría WhatsApp con este mensaje.");
                   }}
                 >
                   Abrir WhatsApp
@@ -147,13 +147,13 @@ export function ContactProvider({ data, children }: { data: ContactData; childre
                   className={byWhatsApp ? styles.callBtn : styles.waBtn}
                   onClick={() => {
                     setOpen(false);
-                    toast("Demo: se mostraría el teléfono del vendedor.");
+                    toast("Demo: aquí verías el teléfono del vendedor.");
                   }}
                 >
                   Llamar
                 </button>
               )}
-              <div className={styles.modalNote}>Nunca pagues señales ni por adelantado. Reboard no intermedia en pagos ni envíos.</div>
+              <div className={styles.modalNote}>No pagues nada por adelantado, ni siquiera una señal. Reboard no gestiona pagos ni envíos.</div>
             </div>
           </>,
           document.body,
@@ -244,7 +244,7 @@ export function ReportButton({ className }: { className: string }) {
 
   const start = () => {
     if (!data.live) {
-      toast("Demo: con datos reales, el reporte llega a moderación.");
+      toast("Demo: con anuncios reales, el reporte llegaría a moderación.");
       return;
     }
     // Reportar requiere sesión (decisión aprobada): sin ella, el modal lo explica antes de ir a /entrar.
@@ -264,7 +264,7 @@ export function ReportButton({ className }: { className: string }) {
     setBusy(false);
     if (r.ok) {
       setOpen(false);
-      toast("Gracias. Revisaremos el anuncio.");
+      toast("Gracias. Vamos a revisar el anuncio.");
     } else setError(r.message);
   };
 
@@ -286,7 +286,7 @@ export function ReportButton({ className }: { className: string }) {
               </div>
               {!account ? (
                 <>
-                  <p className={styles.modalHint}>Para reportar necesitas entrar con tu email. Volverás a este anuncio.</p>
+                  <p className={styles.modalHint}>Para reportar un anuncio tienes que entrar en tu cuenta. Después volverás aquí.</p>
                   <button
                     type="button"
                     className={styles.waBtn}
@@ -319,7 +319,7 @@ export function ReportButton({ className }: { className: string }) {
                 </p>
               </form>
               )}
-              <div className={styles.modalNote}>Con tres reportes, el anuncio pasa a revisión. Lo revisa una persona.</div>
+              <div className={styles.modalNote}>Cuando un anuncio acumula tres reportes, pasa a revisión y lo mira una persona.</div>
             </div>
           </>,
           document.body,
@@ -336,13 +336,13 @@ export function FitNotice({ volume }: { volume: number | null }) {
   if (volume != null && volume >= profile.lo && volume <= profile.hi)
     return (
       <div className={styles.fit}>
-        <strong>Te encaja.</strong> Esta tabla está dentro de tu rango orientativo de volumen ({range}). Revisa también la longitud y el tipo de ola.
+        <strong>Te encaja.</strong> Sus litros entran en tu rango orientativo ({range}). Mira también la longitud y para qué olas es.
       </div>
     );
   return (
     <div className={styles.noFit}>
       {volume == null
-        ? "No podemos indicar si te encaja: el vendedor no ha indicado los litros."
+        ? "No sabemos si te encaja: el vendedor no ha indicado los litros."
         : `Fuera de tu rango orientativo (${range}).`}
     </div>
   );

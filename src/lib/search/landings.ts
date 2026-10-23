@@ -41,15 +41,15 @@ export function landingTitle(place: string | null, form: LandingForm | null, fal
 }
 
 const SHAPE_INTROS: Partial<Record<LandingForm, string>> = {
-  evolutiva: "Tablas con volumen y longitud intermedia para progresar después de la softboard. Busca por litros y longitud para comparar.",
-  shortboard: "Tablas cortas y de poco volumen para surf de rendimiento. El volumen es clave: filtra por litros.",
+  evolutiva: "Tablas con volumen y longitud intermedia para seguir progresando cuando dejas la softboard. Filtra por litros y longitud para compararlas.",
+  shortboard: "Tablas cortas y de poco volumen para olas con fuerza. Aquí cada litro cuenta: filtra por litros.",
   fish: "Tablas cortas y anchas, normalmente con cola swallow, para olas pequeñas y medianas.",
   hibrida: "Tablas entre la shortboard y la fish, con algo más de volumen para progresar en maniobras. Filtra por litros para compararlas.",
   longboard: "Tablas de 9 pies o más para olas pequeñas, remada fácil y estilo clásico.",
-  midlength: "Tablas de entre 6'8\" y 8'0\", para olas tranquilas y surf de deslizamiento.",
+  midlength: "Tablas de entre 6'8\" y 8'0\" que reman fácil y deslizan mucho, para olas tranquilas y un surf fluido.",
   gun: "Tablas largas y estrechas para olas grandes y con fuerza. Revisa longitud y litros antes de comprar.",
-  softboard: "Softboard es una construcción, no una forma: hay softboards evolutivas, fish y longboards. Ideales para empezar.",
-  principiantes: `Tablas de ${BEGINNER_MIN_VOLUME} litros o más: estabilidad y remada fácil para aprender. Si no sabes cuántos litros necesitas, usa «¿Qué tabla necesito?».`,
+  softboard: "Las softboards son tablas de espuma. Es una construcción, no una forma: las hay evolutivas, fish y longboard. Ideales para empezar.",
+  principiantes: `Tablas de ${BEGINNER_MIN_VOLUME} litros o más: estabilidad y remada fácil para aprender. Si no sabes cuántos litros necesitas, calcúlalo en «¿Qué tabla necesito?».`,
 };
 
 /** Qué es cada tipo, en una frase corta (meta description). */
@@ -76,7 +76,7 @@ export function landingDescription(place: string | null, form: LandingForm | nul
   const what = form ? (form === "principiantes" ? "tablas de surf para principiantes" : formLabel(form).toLowerCase()) : "tablas de surf";
   const head = count > 0 ? `${tablas(count)} de segunda mano${where}` : `Tablas de segunda mano${where}`;
   const kind = form ? `${FORM_SHORT[form]}. ` : "";
-  const tail = form ? "Litros, medidas, estado y precio de cada una; contacto directo con quien vende." : `Busca ${what} por litros, medidas y tipo; contacto directo con quien vende, sin comisiones.`;
+  const tail = form ? "Mira litros, medidas, estado y precio de cada una y habla directamente con quien vende." : `Busca ${what} por litros, medidas y tipo, y habla directamente con quien vende, sin comisiones.`;
   return `${head}. ${kind}${tail}`;
 }
 

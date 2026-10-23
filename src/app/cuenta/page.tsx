@@ -105,7 +105,7 @@ async function Account() {
       {expiredCount > 0 && (
         <p className={styles.notice} role="status">
           <span>
-            {expiredCount === 1 ? "Tienes 1 anuncio caducado." : `Tienes ${expiredCount} anuncios caducados.`} Si la tabla sigue a la venta, reactívalo.
+            {expiredCount === 1 ? "Tienes 1 anuncio caducado." : `Tienes ${expiredCount} anuncios caducados.`} Si la tabla sigue a la venta, puedes volver a publicarlo.
           </span>
           <Link href="/panel">Ir a mis anuncios</Link>
         </p>
@@ -136,9 +136,9 @@ async function Account() {
           <nav aria-label="Accesos de tu cuenta" className={styles.list}>
             {isAdmin && <Item href="/admin" icon="shield" title="Panel de administración" desc="Usuarios, anuncios, reportes, catálogo y configuración." staff />}
             {!isAdmin && isModerator && <Item href="/moderacion" icon="shield" title="Moderación" desc="Anuncios reportados pendientes de revisar." staff />}
-            <Item href="/panel" icon="board" title="Mis anuncios" desc="Editar, confirmar que sigue disponible, bajar precio o marcar vendida." />
-            <Item href="/guardado" icon="heart" title="Guardadas" desc="Las tablas que te gustan, sincronizadas con tu cuenta." />
-            <Item href="/alertas" icon="bell" title="Alertas" desc="Avisos de tablas nuevas. Se guardan en este dispositivo." />
+            <Item href="/panel" icon="board" title="Mis anuncios" desc="Editar, confirmar que siguen a la venta, bajar el precio o marcar como vendida." />
+            <Item href="/guardado" icon="heart" title="Guardadas" desc="Las tablas que has guardado, en el móvil y en el ordenador." />
+            <Item href="/alertas" icon="bell" title="Alertas" desc="Tus alertas de tablas nuevas. Se guardan solo en este dispositivo." />
           </nav>
         </div>
 

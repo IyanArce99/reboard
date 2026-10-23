@@ -11,12 +11,16 @@ import styles from "@/components/auth/Auth.module.css";
 
 export const metadata: Metadata = {
   title: "Entrar",
-  description: "Entra en Reboard con tu email: te enviamos un código de 6 cifras. Sin contraseñas.",
+  description: "Entra en Reboard con tu email y el código de 6 cifras que te enviamos. No necesitas contraseña.",
   robots: noindexRobots(),
 };
 
+const PROVIDER_NAME = { google: "Google", apple: "Apple" } as const;
+
 export default function EntrarPage() {
   const enabled = authEnabled();
+  // «Google», «Apple» o «Google o Apple», según los proveedores activos.
+  const social = enabledProviders().map((p) => PROVIDER_NAME[p]).join(" o ");
   return (
     <main className={styles.wrap}>
       <div className={styles.photo}>
@@ -28,23 +32,23 @@ export default function EntrarPage() {
         {enabled ? (
           <>
             <p className={styles.lead}>
-              {enabledProviders().length > 0
-                ? "Sin contraseñas: entra con tu cuenta de Google o Apple, o con un código de 6 cifras que te enviamos por email. Si es la primera vez, la cuenta se crea al entrar."
-                : "Sin contraseñas: te enviamos un código de 6 cifras a tu email. Si es la primera vez, la cuenta se crea al confirmarlo."}
+              {social
+                ? `Entra con ${social} o con tu email: te mandamos un código de 6 cifras, no necesitas contraseña. Si es tu primera vez, la cuenta se crea al entrar.`
+                : "Escribe tu email y te mandamos un código de 6 cifras para entrar. No necesitas contraseña. Si es tu primera vez, la cuenta se crea al confirmarlo."}
             </p>
             <Suspense fallback={<div className={styles.formSkeleton} />}>
               <LoginForm />
             </Suspense>
             <p className={styles.fine}>
-              Con la cuenta, tus tablas guardadas se sincronizan entre dispositivos y puedes gestionar tus anuncios. Solo usamos
-              tu email para que entres en tu cuenta{enabledProviders().length > 0 && " y, si entras con Google o Apple, tu nombre de pila para tu perfil (puedes cambiarlo)"}.
+              Con una cuenta, tus guardadas te siguen en el móvil y en el ordenador, y gestionas tus anuncios. Tu email solo lo
+              usamos para que entres{social && `; si entras con ${social}, también tu nombre de pila para el perfil (puedes cambiarlo)`}.
             </p>
           </>
         ) : (
           <>
             <p className={styles.lead}>
-              Las cuentas todavía no están activas. Tus tablas guardadas, alertas y comparaciones
-              se guardan en este dispositivo.
+              Todavía no se pueden crear cuentas. Mientras tanto, tus guardadas, alertas y comparaciones
+              se quedan en este dispositivo.
             </p>
             <div className={styles.actions}>
               <Link href="/guardado" className={ui.btnPrimary}>

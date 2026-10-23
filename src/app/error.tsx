@@ -17,7 +17,7 @@ export default function Error({ error, retry }: { error: unknown; retry: () => v
       <BoardsIllustration />
       <p className={styles.plainEyebrow}>Algo ha fallado</p>
       <h1 className={styles.plainTitle}>No hemos podido cargar esta página</h1>
-      <p className={styles.plainLead}>Puede ser un problema puntual de conexión. Vuelve a intentarlo; si sigue fallando, prueba dentro de un rato.</p>
+      <p className={styles.plainLead}>Puede que sea un fallo puntual de conexión. Vuelve a intentarlo y, si sigue fallando, prueba dentro de un rato.</p>
       <div className={styles.plainActions}>
         <button type="button" className={ui.btnPrimary} onClick={() => retry()}>
           Reintentar

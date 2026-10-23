@@ -20,7 +20,7 @@ import {
   typeFilters,
   widenOptions,
 } from "@/lib/finder/listings";
-import { TYPE_INFO, WAVES, levelOf, type FinderState, type Recommendation } from "@/lib/finder/recommend";
+import { TYPE_INFO, WAVES, type FinderState, type Recommendation } from "@/lib/finder/recommend";
 import { alertText } from "@/lib/search/describe";
 import { searchHref, toQuery, withFilters, type Filters } from "@/lib/search/filters";
 import type { SummaryItem } from "@/lib/finder/summary";
@@ -76,8 +76,9 @@ export function FinderResult({ state: W, rec: r, summary, onEdit, onRestart, set
   const zone = finderZone(W);
   const budget = budgetOf(W);
   const zoneName = finderZoneName(W);
-  const lvName = levelOf(r.level)[1];
-  const waves = W.waves ? WAVES.find((x) => x[0] === W.waves)![1].toLowerCase() : "";
+  const lvName = r.levelName;
+  // «No lo sé» no se cita en la frase («en olas no lo sé»).
+  const waves = W.waves && W.waves !== "unsure" ? WAVES.find((x) => x[0] === W.waves)![1].toLowerCase() : "";
 
   const comp = compatible(listings, r, zone, budget);
   const all = resultFilters(r, zone, budget);
@@ -101,9 +102,9 @@ export function FinderResult({ state: W, rec: r, summary, onEdit, onRestart, set
           </span>
         </h2>
         <p className={styles.resSub}>
-          Con {r.weight} kg y el nivel «{lvName.toLowerCase()}»{waves ? `, en olas ${waves}` : ""}, estas son las opciones que
-          suelen tener más sentido. Tómalas como orientación, no como una medida exacta: también dependen de tu forma
-          física, del modelo y de cómo reparte el volumen.
+          Con {r.weight} kg, nivel {lvName.toLowerCase()}{waves ? ` y olas ${waves}` : ""}, esto es lo que suele tener más
+          sentido. Tómalo como una orientación, no como una medida exacta: también influyen tu forma física, el modelo y
+          cómo reparte el volumen cada tabla.
         </p>
         <div className={styles.resChips}>
           {summary.map((s) => (
@@ -140,8 +141,8 @@ export function FinderResult({ state: W, rec: r, summary, onEdit, onRestart, set
           </div>
         </div>
         <p className={styles.why}>
-          Por qué: el volumen sale de tu peso y nivel, ajustado por frecuencia, tipo de ola y objetivo, con factores
-          orientativos habituales.{r.note}
+          Cómo lo calculamos: partimos de tu peso y tu nivel, y lo ajustamos según cuánto surfeas, el tipo de ola y lo que
+          quieres conseguir, con reglas orientativas habituales.{r.note}
         </p>
       </section>
 
@@ -235,7 +236,7 @@ export function FinderResult({ state: W, rec: r, summary, onEdit, onRestart, set
             <div className={styles.noneTitle}>
               {noneInRange
                 ? `Todavía no hay tablas publicadas entre ${r.lo} y ${r.hi} L.`
-                : "No hay tablas disponibles ahora mismo con estas características."}
+                : "Ahora mismo no hay tablas que cumplan todo esto."}
             </div>
             <div className={styles.noneText}>
               {noneInRange
@@ -266,7 +267,7 @@ export function FinderResult({ state: W, rec: r, summary, onEdit, onRestart, set
             <div className={styles.noneActions}>
               <AlertButton {...alertProps(all)} className={styles.alertBtn} />
               <Link href="/vender/publicar" className={styles.widen}>
-                ¿Tienes una tabla que no usas? Publícala gratis
+                ¿Tienes una tabla parada? Publícala gratis
               </Link>
             </div>
           </div>

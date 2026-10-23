@@ -20,7 +20,7 @@ export default function Creditos() {
           as="h1"
           eyebrow="Créditos"
           title="Créditos de fotografía"
-          lead="Las fotos de ambiente de Reboard son de Pexels y se usan con su licencia gratuita. No son fotos de anuncios: las tablas en venta se muestran con las fotos que sube quien vende. (Con datos de demostración, los anuncios usan fotos de stock de Unsplash, señaladas como tales. Las tiendas y escuelas sin foto propia también usan una foto de stock de Unsplash.)"
+          lead="Las fotos de ambiente de Reboard son de Pexels y se usan con su licencia gratuita. No son fotos de anuncios: cada tabla en venta se muestra con las fotos que sube su vendedor. Los anuncios de demostración y las tiendas y escuelas sin foto propia usan fotos de stock de Unsplash, marcadas como tales."
         />
         <ul className={styles.list}>
           {photos.map(([slug, p]) => (

@@ -30,4 +30,4 @@ export function modelRange(m: CatalogModel) {
   return `${lens} · ${lo === hi ? lo : `${lo}–${hi}`} L`;
 }
 
-export const usedCount = (n: number) => (n ? `${n} usada${n > 1 ? "s" : ""} en venta` : "Sin unidades usadas ahora");
+export const usedCount = (n: number) => (n ? `${n} usada${n > 1 ? "s" : ""} en venta` : "Ninguna en venta ahora");

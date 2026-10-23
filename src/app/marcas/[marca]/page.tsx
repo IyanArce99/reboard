@@ -111,7 +111,7 @@ export default async function BrandPage({ params }: PageProps<"/marcas/[marca]">
             )}
           </>
         ) : (
-          <div className={styles.empty}>Ahora no hay ninguna {b.name} usada publicada. Guarda una alerta para seguirla.</div>
+          <div className={styles.empty}>Ahora mismo no hay ninguna {b.name} usada a la venta. Crea una alerta y, desde Alertas, verás si aparece alguna.</div>
         )}
       </section>
 

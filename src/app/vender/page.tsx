@@ -9,30 +9,30 @@ import styles from "@/components/publish/SellLanding.module.css";
 export const metadata: Metadata = {
   title: "Vende tu tabla de surf usada gratis",
   description:
-    "Publica tu tabla de surf de segunda mano gratis y sin comisión, desde el móvil. Contacto directo por WhatsApp o teléfono con quien la busca.",
+    "Publica gratis tu tabla de surf de segunda mano desde el móvil, sin comisiones. Quien la quiera te escribe por WhatsApp o te llama.",
   alternates: { canonical: "/vender" },
 };
 
 const BENEFITS = [
-  ["Gratis y sin comisión", "Publicar no cuesta nada y no nos quedamos con parte de la venta."],
-  ["Hablas directamente", "Quien la quiera te escribe por WhatsApp o te llama. Sin chats intermedios ni pagos por la plataforma."],
-  ["Te encuentran por sus medidas", "Litros, longitud, tipo y zona: tu tabla aparece a quien busca exactamente eso."],
+  ["Gratis y sin comisión", "Publicar no cuesta nada y no nos llevamos ningún porcentaje de la venta."],
+  ["Tratas directamente con el comprador", "Te escribe por WhatsApp o te llama. Sin intermediarios: el pago y la entrega los acordáis entre vosotros."],
+  ["Te encuentran por medidas", "Litros, longitud, tipo y zona: tu tabla le sale a quien busca justo eso."],
   ["Sin registrarte antes", "Empiezas por las fotos. La cuenta se crea al final, con tu email, justo antes de publicar."],
 ] as const;
 
 const STEPS = [
   ["Fotos", "Con el móvil o desde la galería. La tabla entera por arriba y por abajo, y los detalles: quillas, cantos y reparaciones."],
-  ["La tabla", "Marca, modelo y medida del catálogo, o las medidas que tengas apuntadas. Y el tipo de tabla y su construcción."],
-  ["Estado", "Cómo está, sus golpes o reparaciones y lo que quieras contar. Contarlo todo ahorra mensajes y viajes en balde."],
-  ["Precio y ubicación", "Tu precio, la localidad donde se puede ver y cómo prefieres que te contacten."],
-  ["Revisar", "Ves cómo quedará el anuncio y confirmas tu email."],
+  ["La tabla", "Marca, modelo y medida del catálogo, o las medidas que tengas apuntadas. Luego, el tipo de tabla y la construcción."],
+  ["Estado", "Cómo está, qué golpes o reparaciones tiene y lo que quieras añadir. Si lo cuentas todo, te ahorras mensajes y viajes en balde."],
+  ["Precio y ubicación", "Cuánto pides, en qué localidad se puede ver y cómo prefieres que te contacten."],
+  ["Revisar", "Ves cómo quedará el anuncio, confirmas tu email y lo publicas."],
 ] as const;
 
 const TIPS = [
   "Fotos con luz natural y la tabla entera: es lo primero que se mira.",
   "Pon los litros si los sabes. Es el dato por el que más se busca.",
-  "Cuenta las reparaciones, aunque sean pequeñas. Da confianza y evita sorpresas al quedar.",
-  "Precio realista: mira lo que piden por tablas parecidas en la ficha de su modelo.",
+  "Cuenta las reparaciones, aunque sean pequeñas. Da confianza y evita sorpresas cuando quedéis.",
+  "Pon un precio realista: mira cuánto piden por tablas parecidas en la ficha de su modelo.",
 ];
 
 export default function VenderPage() {
@@ -48,7 +48,7 @@ export default function VenderPage() {
               Vende tu tabla de surf <span>usada</span>
             </h1>
             <p className={styles.lead}>
-              Si lleva meses parada, publícala gratis desde el móvil en cinco pasos. Quien busque esas medidas la encontrará.
+              ¿Lleva meses en el garaje? Publícala gratis desde el móvil en cinco pasos y que la encuentre quien busca justo esas medidas.
             </p>
             <div className={styles.ctas}>
               <Link href="/vender/publicar" className={styles.cta}>
@@ -62,7 +62,7 @@ export default function VenderPage() {
             </div>
             {closed && (
               <p className={styles.demo}>
-                La publicación todavía no está abierta: puedes recorrer el formulario, pero aún no se guarda ningún anuncio.
+                Todavía no se puede publicar: puedes recorrer el formulario para ver cómo es, pero no se guarda ningún anuncio.
               </p>
             )}
           </div>
@@ -73,7 +73,7 @@ export default function VenderPage() {
       </section>
 
       <section className={`container ${styles.block}`} aria-labelledby="vender-por-que">
-        <SectionHeader id="vender-por-que" eyebrow="Por qué aquí" title="Hecho para vender tablas, no de todo" />
+        <SectionHeader id="vender-por-que" eyebrow="Por qué aquí" title="Solo tablas de surf, nada más" />
         <ul className={styles.benefits}>
           {BENEFITS.map(([t, d]) => (
             <li key={t} className={styles.benefit}>
@@ -102,7 +102,8 @@ export default function VenderPage() {
               ))}
             </ol>
             <p className={styles.note}>
-              Confirma cada 14 días en «Mis anuncios» que sigue disponible; si no, caduca a los 30 días.
+              Después, entra en «Mis anuncios» cada 14 días y confirma que la tabla sigue a la venta. Si pasan 30 días sin
+              confirmarlo, el anuncio caduca. No enviamos recordatorios.
             </p>
             <Link href="/vender/publicar" className={styles.cta}>
               Empezar con las fotos

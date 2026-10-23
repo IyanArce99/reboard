@@ -132,7 +132,7 @@ export default async function GuidePage({ params }: PageProps<"/guias/[slug]">) 
           <div className={styles.cta}>
             <div>
               <p className={styles.ctaTitle}>¿Aún no sabes qué volumen buscar?</p>
-              <p className={styles.ctaText}>Siete preguntas sobre tu peso, nivel y olas, y un rango orientativo de litros.</p>
+              <p className={styles.ctaText}>Siete preguntas sobre tu peso, tu nivel y tus olas, y te damos un rango orientativo de litros.</p>
             </div>
             <Link href="/calculadora-litros" className={styles.ctaBtn}>
               Calcular mis litros

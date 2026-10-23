@@ -39,14 +39,14 @@ export const GUIDES: Guide[] = [
       "Lista de comprobación para comprar una tabla de surf de segunda mano: cantos, cubierta, fondo, cajas de quillas y medidas. Qué es aceptable y qué no.",
     section: "Comprar",
     shortAnswer:
-      "revisa golpes y reparaciones, zonas blandas o delaminadas, el estado de las cajas de quillas y que las medidas coincidan con lo anunciado. Una reparación bien hecha no es un problema; una entrada de agua sí.",
+      "revisa golpes y reparaciones, busca zonas blandas o delaminadas, comprueba las cajas de quillas y mira que las medidas coincidan con el anuncio. Una reparación bien hecha no es un problema; una tabla que ha cogido agua, sí.",
     photo: "tablas-usadas-quillas",
     checklist: [
       { zone: "Cantos y nose", ok: "golpes pequeños sellados con resina", ko: "grietas abiertas o fibra a la vista" },
-      { zone: "Cubierta", ok: "marcas de pies y talones (pressure dings)", ko: "zonas blandas que ceden al presionar" },
+      { zone: "Cubierta", ok: "hundimientos leves de pies y talones (pressure dings)", ko: "zonas blandas que ceden al presionar" },
       { zone: "Fondo", ok: "arañazos superficiales", ko: "burbujas o delaminación" },
       { zone: "Cajas de quillas", ok: "cajas firmes, sin holgura", ko: "cajas sueltas o con grietas alrededor" },
-      { zone: "Medidas", ok: "coinciden con lo escrito en el larguero (stringer)", ko: "el vendedor no sabe las medidas ni hay marca" },
+      { zone: "Medidas", ok: "coinciden con lo escrito en el larguero (stringer)", ko: "ni el vendedor sabe las medidas ni están escritas en la tabla" },
     ],
     updatedAt: "2026-10-22",
     byline: "Contenido de demostración, pendiente de revisar por un reparador.",

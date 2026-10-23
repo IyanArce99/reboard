@@ -36,7 +36,7 @@ async function Flow({ searchParams }: { searchParams: PageProps<"/vender/publica
       return (
         <main className={styles.page}>
           <h1 className={ui.h1}>No puedes editar este anuncio</h1>
-          <p className={styles.lead}>No existe o no es de tu cuenta.</p>
+          <p className={styles.lead}>Puede que ya no exista o que sea de otra cuenta.</p>
           <Link href="/panel" className={ui.btnPrimary}>
             Ver mis anuncios
           </Link>

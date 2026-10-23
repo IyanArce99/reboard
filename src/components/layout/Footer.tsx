@@ -38,7 +38,7 @@ export function Footer() {
         <div className={styles.brand}>
           <Logo size={30} tone="dark" />
           <p className={styles.muted}>
-            Tablas de surf de segunda mano en España. Sin pagos ni comisiones: compradores y vendedores hablan directamente.
+            Tablas de surf de segunda mano en España. Sin comisiones ni pagos por la web: quien compra y quien vende hablan directamente.
           </p>
         </div>
         {COLUMNS.map((c) => (

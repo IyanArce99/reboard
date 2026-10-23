@@ -30,37 +30,37 @@ export const metadata: Metadata = {
 // se dibujan con la forma más habitual y en tono suave para distinguirlos.
 const CATEGORIES: { label: string; form: LandingForm; shape: Shape; soft?: boolean; hint: string }[] = [
   { label: "Evolutivas", form: "evolutiva", shape: "evolutiva", hint: "Para salir de la softboard" },
-  { label: "Softboards", form: "softboard", shape: "evolutiva", soft: true, hint: "Espuma: aprender sin miedo" },
+  { label: "Softboards", form: "softboard", shape: "evolutiva", soft: true, hint: "De espuma, para aprender" },
   { label: "Para principiantes", form: "principiantes", shape: "longboard", soft: true, hint: "55 L o más" },
   { label: "Longboards", form: "longboard", shape: "longboard", hint: "Olas pequeñas y estilo" },
   { label: "Midlengths", form: "midlength", shape: "midlength", hint: "Remada fácil, surf fluido" },
   { label: "Fish", form: "fish", shape: "fish", hint: "Rápidas en olas pequeñas" },
   { label: "Híbridas", form: "hibrida", shape: "hibrida", hint: "Para progresar en maniobras" },
-  { label: "Shortboards", form: "shortboard", shape: "shortboard", hint: "Rendimiento con fuerza" },
+  { label: "Shortboards", form: "shortboard", shape: "shortboard", hint: "Para olas con fuerza" },
 ];
 
 const STEPS = [
-  { n: "01", t: "Busca por lo que importa", d: "Litros, longitud, tipo, precio y zona. Cada medida indica su origen: el vendedor, el fabricante o «sin indicar»." },
-  { n: "02", t: "Habla directamente con quien vende", d: "Un mensaje de WhatsApp o una llamada, sin intermediarios. Reboard no cobra comisión." },
-  { n: "03", t: "Mírala en persona y paga al recogerla", d: "Queda en un sitio público, revisa cantos, fondo y quillas, y paga en mano. Nunca por adelantado." },
+  { n: "01", t: "Filtra por lo que importa", d: "Litros, longitud, tipo, precio y zona. En cada medida ves de dónde sale: del vendedor, del fabricante o «sin indicar»." },
+  { n: "02", t: "Escribe o llama a quien vende", d: "Por WhatsApp o por teléfono, sin intermediarios. Reboard no se lleva comisión." },
+  { n: "03", t: "Mírala bien antes de pagar", d: "Quedad en un sitio público, revisa cantos, fondo y quillas, y paga en mano al llevártela. Nunca por adelantado." },
 ];
 
 const GUIDES: { t: string; d: string; href: string; photo: PhotoSlug }[] = [
   {
     t: "Qué revisar al comprar una tabla usada",
-    d: "Golpes, reparaciones, zonas blandas y quillas: lo que se acepta y lo que no.",
+    d: "Golpes, reparaciones, zonas blandas y quillas: qué puedes pasar por alto y qué no.",
     href: "/guias/que-revisar-al-comprar-una-tabla-usada",
     photo: "tablas-usadas-quillas",
   },
   {
     t: "Cuántos litros necesitas",
-    d: "Peso, nivel y olas: 7 preguntas y un rango orientativo de volumen.",
+    d: "Siete preguntas sobre tu peso, tu nivel y tus olas, y un rango orientativo de litros.",
     href: "/calculadora-litros",
     photo: "clase-surf",
   },
   {
     t: "Compara antes de decidir",
-    d: "Hasta cuatro tablas lado a lado: litros, medidas, estado, precio y zona.",
+    d: "Pon hasta cuatro tablas una al lado de otra: litros, medidas, estado, precio y zona.",
     href: "/comparar",
     photo: "entrando-al-agua",
   },
@@ -114,15 +114,15 @@ export default async function Home() {
           <Photo slug="hero-surfistas-orilla" sizes="100vw" preload position="62% 55%" decorative />
         </div>
         <section className={`container ${styles.hero}`}>
-          <p className={styles.kicker}>Compraventa entre surfistas · España</p>
+          <p className={styles.kicker}>Compra y vende en toda España</p>
           <h1 className={styles.h1}>
             Tablas de surf{" "}
             <br />
             <span>de segunda mano</span>
           </h1>
           <p className={styles.lead}>
-            Busca por litros, medidas y zona entre tablas de surfistas, tiendas y escuelas. Hablas directamente con quien vende,
-            sin comisiones.
+            Tablas de surfistas, tiendas y escuelas. Filtra por litros, medidas y zona, y habla directamente con quien vende. Sin
+            comisiones.
           </p>
 
           <Suspense fallback={<div className={styles.searchSkeleton} />}>
@@ -180,8 +180,8 @@ export default async function Home() {
             <SectionHeader
               id="como-title"
               eyebrow="Cómo funciona"
-              title="Compra como entre surfistas"
-              lead="Reboard te ayuda a encontrar la tabla; el trato es directo entre tú y quien la vende."
+              title="De surfista a surfista"
+              lead="Reboard te ayuda a encontrar la tabla. El trato lo cerráis tú y quien la vende."
             />
             <ol className={styles.steps}>
               {STEPS.map((s) => (
@@ -204,9 +204,9 @@ export default async function Home() {
           <Photo slug="aprendiendo-espuma" sizes="(max-width: 759px) 100vw, 50vw" position="50% 40%" decorative />
           <span className={styles.promoBody}>
             <span className={styles.promoEyebrow}>¿Qué tabla necesito?</span>
-            <span className={styles.promoTitle}>No compres a ciegas</span>
+            <span className={styles.promoTitle}>Acierta con los litros</span>
             <span className={styles.promoText}>
-              Peso, nivel, olas y lo que quieres conseguir. Te damos un rango orientativo de litros y las tablas publicadas que entran en él.
+              Cuéntanos tu peso, tu nivel, qué olas surfeas y qué quieres mejorar. Te damos un rango orientativo de litros y las tablas publicadas que entran en ese rango.
             </span>
             <span className={styles.promoCta}>Calcular mis litros →</span>
           </span>
@@ -217,7 +217,7 @@ export default async function Home() {
             <span className={styles.promoEyebrow}>Vender</span>
             <span className={styles.promoTitle}>¿Tienes una tabla parada?</span>
             <span className={styles.promoText}>
-              Publícala gratis en 5 pasos desde el móvil. Quien busca esas medidas te escribe o te llama directamente.
+              Publícala gratis desde el móvil en 5 pasos. Quien busque esas medidas te escribirá o te llamará directamente.
             </span>
             <span className={styles.promoCtaSell}>Publicar mi tabla</span>
           </span>
@@ -226,7 +226,7 @@ export default async function Home() {
 
       {/* ───────── Explorar ───────── */}
       <section className={`container ${styles.section}`} aria-labelledby="guias-title">
-        <SectionHeader id="guias-title" eyebrow="Antes de comprar" title="Para elegir bien" action={{ href: "/guias", label: "Guías y herramientas" }} />
+        <SectionHeader id="guias-title" eyebrow="Antes de comprar" title="Elige bien tu tabla" action={{ href: "/guias", label: "Guías y herramientas" }} />
         <div className={styles.guides}>
           {GUIDES.map((g) => (
             <Link key={g.href} href={g.href} className={styles.guide}>

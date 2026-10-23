@@ -96,7 +96,7 @@ export default async function AdminSettings() {
           <h2 id="h-limit" className={s.cardTitle}>
             Límite diario de reportes
           </h2>
-          <p className={s.muted}>Reportes máximos por persona y día, contra el abuso.</p>
+          <p className={s.muted}>Máximo de reportes por persona y día, para evitar abusos.</p>
           <ActionForm action={updateNumberSetting.bind(null, "report_daily_limit")} submitLabel="Guardar" className={c.form} ariaLabel="Límite diario de reportes">
             <div className={c.formGrid}>
               <label className={s.field}>

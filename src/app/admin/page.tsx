@@ -49,7 +49,7 @@ export default async function AdminDashboard(props: PageProps<"/admin">) {
     <>
       <PageHeader
         title="Panel"
-        subtitle="Datos reales de la base de datos. No se muestran mensajes ni ventas cerradas: no hay instrumentación fiable para medirlos."
+        subtitle="Datos reales de la base de datos. No se muestran mensajes ni ventas cerradas: no hay forma fiable de medirlos."
         actions={
           <nav className={s.btnRow} aria-label="Periodo">
             {PERIODS.map((p) => (

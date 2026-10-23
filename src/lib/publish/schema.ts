@@ -96,14 +96,14 @@ export const FIELD_TEXT: Record<string, string> = {
   thicknessIn: "El grosor debe estar entre 1 1/2\" y 5\".",
   volumeL: "Los litros deben estar entre 10 y 150.",
   priceEur: "El precio debe estar entre 1 y 20.000 €.",
-  town: "Indica la localidad (2–80 caracteres).",
+  town: "Escribe la localidad donde está la tabla (entre 2 y 80 caracteres).",
   phone: "Revisa el teléfono: por ejemplo, 600 000 000 o +34 600 000 000.",
   shape: "Elige el tipo de tabla.",
   construction: "Elige la construcción.",
-  condition: "Elige el estado.",
-  repairs: "Las reparaciones admiten hasta 600 caracteres.",
-  description: "La descripción admite hasta 2.000 caracteres.",
-  sizeLabel: "Indica la longitud.",
+  condition: "Elige el estado de la tabla.",
+  repairs: "El texto de golpes y reparaciones puede tener hasta 600 caracteres.",
+  description: "La descripción puede tener hasta 2.000 caracteres.",
+  sizeLabel: "Indica la longitud de la tabla.",
 };
 
 export function firstIssueText(error: z.ZodError): string {

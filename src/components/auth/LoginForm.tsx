@@ -17,8 +17,8 @@ const RESEND_AFTER = 60;
 const PROVIDERS = enabledProviders();
 const PROVIDER_NAME: Record<OAuthProvider, string> = { google: "Google", apple: "Apple" };
 const START_ERROR: Record<string, string> = {
-  enlace: "El enlace no es válido o ha caducado. Pide un código nuevo.",
-  social: "No se ha podido entrar con esa cuenta. Prueba otra vez o entra con tu email.",
+  enlace: "Ese enlace ya no vale: ha caducado o ya se ha usado. Pide un código nuevo.",
+  social: "No has podido entrar con esa cuenta. Prueba otra vez o entra con tu email.",
 };
 
 /** `onDone`: acceso incrustado (p. ej., al final de publicar); sin él, se navega a `siguiente`. */
@@ -247,7 +247,7 @@ export function LoginForm({ onDone }: { onDone?: () => void } = {}) {
       ) : (
         <form onSubmit={verify}>
           <p className={styles.sent}>
-            Te hemos enviado un código a <strong>{email.trim()}</strong>. Mira también en spam o promociones.
+            Te hemos enviado un código a <strong>{email.trim()}</strong>. Si no te llega en un par de minutos, mira en spam o en promociones.
           </p>
           <label htmlFor="login-code" className={ui.label}>
             Código de 6 cifras

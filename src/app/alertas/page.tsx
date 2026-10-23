@@ -3,7 +3,7 @@ import { privateMetadata } from "@/components/saved/metadata";
 import ui from "@/styles/ui.module.css";
 import styles from "@/components/saved/Saved.module.css";
 
-export const metadata = privateMetadata("Alertas", "Tus alertas de búsqueda guardadas en este dispositivo.");
+export const metadata = privateMetadata("Alertas", "Tus alertas de búsqueda, guardadas solo en este dispositivo. No envían emails ni notificaciones.");
 
 export default function AlertasPage() {
   return (

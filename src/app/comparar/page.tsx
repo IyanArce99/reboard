@@ -9,7 +9,7 @@ export default function CompararPage() {
   return (
     <main className={`container ${styles.page}`}>
       <h1 className={`${ui.h1} ${styles.title}`}>Comparar tablas</h1>
-      <p className={styles.lead}>Entre 2 y 4 tablas. Las filas resaltadas tienen valores distintos.</p>
+      <p className={styles.lead}>De 2 a 4 tablas, una al lado de otra. Las filas resaltadas son las que cambian entre ellas.</p>
       <Comparator />
     </main>
   );

@@ -44,9 +44,9 @@ export function ListingActions({
       )}
       {can.markSold && (
         <AdminAction
-          label="Marcar vendido"
+          label="Marcar como vendido"
           title={`Marcar ${publicId} como vendido`}
-          description="Úsalo solo con confirmación del vendedor o una causa clara. El anuncio deja de admitir contactos."
+          description="Úsalo solo si el vendedor lo confirma o hay un motivo claro. El anuncio deja de admitir contactos."
           action={act("mark_sold")}
         />
       )}
@@ -72,7 +72,7 @@ export function ListingActions({
         <AdminAction
           label="Retirar por incumplimiento"
           title={`Retirar ${publicId} por incumplimiento`}
-          description="Deja de verse y el vendedor no puede volver a publicarlo. Resuelve sus reportes abiertos. Fotos y datos se conservan para revisarlo."
+          description="Deja de verse y el vendedor no puede volver a publicarlo. Sus reportes abiertos quedan resueltos. Las fotos y los datos se conservan para revisarlo."
           action={act("remove")}
           tone="danger"
           confirmLabel="Retirar anuncio"

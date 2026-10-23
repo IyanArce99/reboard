@@ -185,8 +185,8 @@ export function PublishFlow({ catalog, brands, featuredBrands, priceRefs, nowIso
       const dropped = picked.length - batch.length;
       toast(
         batch.length
-          ? `Puedes añadir hasta ${MAX_PHOTOS} fotos: hemos añadido ${batch.length} y descartado ${dropped}.`
-          : `Puedes añadir hasta ${MAX_PHOTOS} fotos.`,
+          ? `Caben ${MAX_PHOTOS} fotos como máximo: hemos añadido ${batch.length} y dejado fuera ${dropped}.`
+          : `Ya tienes ${MAX_PHOTOS} fotos, que es el máximo.`,
       );
     }
     if (!batch.length) return;
@@ -230,7 +230,7 @@ export function PublishFlow({ catalog, brands, featuredBrands, priceRefs, nowIso
   const publish = async (token: string | null = captcha) => {
     setError("");
     if (!toE164(d.phone)) {
-      setError("Indica tu teléfono en «Precio y ubicación»: es como te contactarán (no aparece en el anuncio).");
+      setError("Falta tu teléfono. Añádelo en «Precio y ubicación»: es por donde te contactarán (no aparece escrito en el anuncio).");
       return;
     }
     const invalid = validate();
@@ -271,7 +271,7 @@ export function PublishFlow({ catalog, brands, featuredBrands, priceRefs, nowIso
         setError(r.message);
       }
     } catch {
-      setError("Se ha cortado la conexión. Tu anuncio sigue guardado en este dispositivo: vuelve a intentarlo.");
+      setError("Se ha cortado la conexión. No has perdido nada: el anuncio sigue guardado en este dispositivo. Vuelve a intentarlo.");
     } finally {
       // El token de Turnstile es de un solo uso.
       turnstile.current?.reset();
@@ -299,7 +299,7 @@ export function PublishFlow({ catalog, brands, featuredBrands, priceRefs, nowIso
       setWaitingCaptcha(false);
       setBusy(false);
       setProgress("");
-      setError("No hemos podido comprobar que no eres un robot. Recarga la página y vuelve a intentarlo: tu anuncio sigue guardado.");
+      setError("No hemos podido comprobar que no eres un robot. Recarga la página y vuelve a intentarlo; el anuncio sigue guardado.");
     }, 20_000);
     return () => clearTimeout(t);
   }, [waitingCaptcha]);
@@ -365,8 +365,8 @@ export function PublishFlow({ catalog, brands, featuredBrands, priceRefs, nowIso
         </ol>
         {!live && (
           <p className={styles.closedNote} role="note">
-            <strong>La publicación todavía no está abierta.</strong> Puedes recorrer los pasos para ver cómo funciona, pero no se
-            guarda nada: las fotos no salen de tu dispositivo y el anuncio no se publica.
+            <strong>Todavía no se puede publicar.</strong> Puedes recorrer los pasos para ver cómo funciona, pero no se guarda
+            nada: las fotos no salen de tu dispositivo y el anuncio no se publica.
           </p>
         )}
         {restored && (
@@ -424,7 +424,7 @@ export function PublishFlow({ catalog, brands, featuredBrands, priceRefs, nowIso
                 onFiles={(f) => void addFiles(f)}
                 onRemove={removePhoto}
                 onMove={movePhoto}
-                onLimit={() => toast(`Puedes añadir hasta ${MAX_PHOTOS} fotos.`)}
+                onLimit={() => toast(`Ya tienes ${MAX_PHOTOS} fotos, que es el máximo.`)}
               />
             )}
             {step === 2 && <StepBoard d={d} set={set} setD={setD} catalog={catalog} brands={brands} featuredBrands={featuredBrands} toast={toast} />}
