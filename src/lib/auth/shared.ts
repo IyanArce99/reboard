@@ -1,9 +1,21 @@
 // Utilidades de cuentas que se usan en el servidor y en el navegador.
 
-/** Destino tras entrar: solo rutas internas (evita redirecciones abiertas). */
+/**
+ * Destino tras entrar: solo rutas de esta web. Se rechazan caracteres de control y «\» (el navegador
+ * ignora tabuladores y saltos de línea, y «/%09/evil.com» acabaría en otro dominio) y se resuelve la
+ * ruta para comprobar que no sale del origen.
+ */
 export function safeNext(value: string | null | undefined, fallback = "/cuenta") {
-  if (!value || !value.startsWith("/") || value.startsWith("//") || value.startsWith("/\\")) return fallback;
-  return value;
+  if (!value || !value.startsWith("/") || /[\u0000-\u001F\u007F\\]/.test(value)) return fallback;
+  const base = "https://reboard.invalid";
+  let url: URL;
+  try {
+    url = new URL(value, base);
+  } catch {
+    return fallback;
+  }
+  if (url.origin !== base || url.pathname.startsWith("//")) return fallback;
+  return `${url.pathname}${url.search}${url.hash}`;
 }
 
 /** Id público de un anuncio («a123») → id de la tabla listings, o null. */

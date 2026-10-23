@@ -14,7 +14,7 @@ export interface LegalDoc {
   sections: LegalSection[];
 }
 
-const TITULAR = "[RAZÓN SOCIAL COMPLETA, p. ej. «… S.L.»]";
+const TITULAR = "Reboard";
 const NIF = "B23869027";
 const DOMICILIO = "C/ Lepanto 23, 35010 Las Palmas de Gran Canaria (Las Palmas)";
 const EMAIL = "hola@reboard.es";
@@ -27,7 +27,7 @@ export const LEGAL_DOCS: LegalDoc[] = [
     sections: [
       {
         h: "Titular",
-        p: [`Titular: ${TITULAR}. NIF: ${NIF}. Domicilio: ${DOMICILIO}. Contacto: ${EMAIL}.`, "[Datos de inscripción en el Registro Mercantil de Las Palmas: tomo, folio y hoja.]"],
+        p: [`Titular: ${TITULAR}. NIF: ${NIF}. Domicilio: ${DOMICILIO}. Contacto: ${EMAIL}.`],
       },
       {
         h: "Qué es Reboard",
@@ -73,7 +73,7 @@ export const LEGAL_DOCS: LegalDoc[] = [
           "Vercel (alojamiento de la web). [Región y garantías pendientes de confirmar.]",
           "Cloudflare Turnstile (comprobación anti-robots en el acceso, el contacto, publicar y reportar).",
           "Google y Apple, solo si eliges entrar con su cuenta: verifican tu identidad y nos envían tu email y tu nombre.",
-          "Resend (envío del email con el código de acceso). [Pendiente de contratar y configurar.]",
+          "DonDominio (correo electrónico de Reboard y envío del email con el código de acceso).",
           "[Revisar contratos de encargo de tratamiento y transferencias internacionales.]",
         ],
       },

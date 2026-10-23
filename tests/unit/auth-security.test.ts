@@ -6,8 +6,27 @@ describe("safeNext (redirección tras entrar)", () => {
   it("acepta rutas internas", () => {
     expect(safeNext("/panel")).toBe("/panel");
     expect(safeNext("/buscar?zona=asturias")).toBe("/buscar?zona=asturias");
+    expect(safeNext("/vender/publicar?editar=a12#fotos")).toBe("/vender/publicar?editar=a12#fotos");
   });
-  it.each(["https://evil.com", "//evil.com", "/\\evil.com", "javascript:alert(1)", "", null, undefined])(
+  it("lo que devuelve nunca sale del dominio", () => {
+    for (const v of ["/%09/evil.com", "/./evil.com", "/../evil.com", "/a/../../evil.com"]) {
+      expect(new URL(safeNext(decodeURIComponent(v)), "https://www.reboard.es").origin).toBe("https://www.reboard.es");
+    }
+  });
+  it.each([
+    "https://evil.com",
+    "//evil.com",
+    "/\\evil.com",
+    "javascript:alert(1)",
+    "",
+    null,
+    undefined,
+    // El navegador ignora tabuladores y saltos de línea: «/\t/evil.com» se resolvería como //evil.com.
+    "/\t/evil.com",
+    "/\n/evil.com",
+    "/\r/evil.com",
+    "/\t\\evil.com",
+  ])(
     "rechaza %s y usa /cuenta",
     (v) => {
       expect(safeNext(v)).toBe("/cuenta");
