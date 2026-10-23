@@ -84,7 +84,7 @@ export function SortSelect({ className }: { className: string }) {
     >
       {SORTS.map(([v, l]) => (
         <option key={v} value={v}>
-          {v === "distancia" && !supportsDistance ? "Primero mi zona" : l}
+          {v === "distancia" && !supportsDistance ? "Primero mi isla" : l}
         </option>
       ))}
     </select>

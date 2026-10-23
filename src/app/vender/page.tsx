@@ -16,7 +16,7 @@ export const metadata: Metadata = {
 const BENEFITS = [
   ["Gratis y sin comisión", "Publicar no cuesta nada y no nos llevamos ningún porcentaje de la venta."],
   ["Tratas directamente con el comprador", "Te escribe por WhatsApp o te llama. Sin intermediarios: el pago y la entrega los acordáis entre vosotros."],
-  ["Te encuentran por medidas", "Litros, longitud, tipo y zona: tu tabla le sale a quien busca justo eso."],
+  ["Te encuentran por medidas", "Litros, longitud, tipo e isla: tu tabla le sale a quien busca justo eso."],
   ["Sin registrarte antes", "Empiezas por las fotos. La cuenta se crea al final, con tu email, justo antes de publicar."],
 ] as const;
 

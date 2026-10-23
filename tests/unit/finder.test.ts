@@ -226,8 +226,8 @@ describe("summaryOf («Tu perfil hasta ahora»)", () => {
 
   it("la zona sale si se ha elegido, o siempre en el resultado", () => {
     expect(summaryOf(state({ w: "75" })).some((x) => x.step === 7)).toBe(false);
-    expect(summaryOf(state({ w: "75" }), true).find((x) => x.step === 7)?.value).toBe("Toda España");
-    expect(summaryOf(state({ budget: "250" })).find((x) => x.step === 7)?.value).toBe("Toda España · hasta 250 €");
+    expect(summaryOf(state({ w: "75" }), true).find((x) => x.step === 7)?.value).toBe("Todas las islas");
+    expect(summaryOf(state({ budget: "250" })).find((x) => x.step === 7)?.value).toBe("Todas las islas · hasta 250 €");
   });
 });
 
@@ -257,9 +257,9 @@ describe("enlaces del resultado a /buscar", () => {
     const q = new URLSearchParams(toQuery(resultFilters(learnBig, "", null)));
     expect(q.get("construccion")).toBe("softboard");
     expect(q.has("forma")).toBe(false);
-    const t = new URLSearchParams(toQuery(typeFilters(r, "canarias", 150, "softboard")));
+    const t = new URLSearchParams(toQuery(typeFilters(r, "tenerife", 150, "softboard")));
     expect(t.get("construccion")).toBe("softboard");
-    expect(t.get("zona")).toBe("canarias");
+    expect(t.get("zona")).toBe("tenerife");
     expect(t.get("precio-max")).toBe("150");
   });
 
@@ -270,9 +270,14 @@ describe("enlaces del resultado a /buscar", () => {
     expect(parseFilters(Object.fromEntries(new URLSearchParams(toQuery(f))))).toEqual(f);
   });
 
-  it("zona del paso 7: región, zona y «Otras zonas»", () => {
-    expect(finderZone({ zone: "canarias", otherZone: "" })).toBe("canarias");
-    expect(finderZone({ zone: "other", otherZone: "asturias" })).toBe("asturias");
+  it("zona del paso 7: isla, «Otra isla» y nada fuera de Canarias", () => {
+    // «canarias» (perfiles antiguos) es todo el territorio: equivale a «Todas las islas».
+    expect(finderZone({ zone: "canarias", otherZone: "" })).toBe("");
+    expect(finderZone({ zone: "tenerife", otherZone: "" })).toBe("tenerife");
+    expect(finderZone({ zone: "other", otherZone: "el-hierro" })).toBe("el-hierro");
+    // Zonas fuera del lanzamiento (perfiles guardados antes): se ignoran.
+    expect(finderZone({ zone: "other", otherZone: "asturias" })).toBe("");
+    expect(finderZone({ zone: "asturias", otherZone: "" })).toBe("");
     expect(finderZone({ zone: "other", otherZone: "no-existe" })).toBe("");
     expect(finderZone({ zone: "inventada", otherZone: "" })).toBe("");
   });
@@ -294,7 +299,7 @@ describe("widenOptions (estado vacío)", () => {
     const l = pool[0];
     const near: Recommendation = { ...r, lo: l.volume.value! - 1, hi: l.volume.value! + 1, types: [l.shape as Exclude<typeof l.shape, "gun">] };
     const other = pool.find((x) => x.zone !== l.zone)!.zone;
-    // En otra zona y con presupuesto bajo no hay compatibles; ampliando a toda España, sí.
+    // En otra isla y con presupuesto bajo no hay compatibles; ampliando a todas las islas, sí.
     expect(compatible([l], near, other, null)).toHaveLength(0);
     const opts = widenOptions([l], near, other, null);
     expect(opts.map((o) => o.key)).toContain("zone");

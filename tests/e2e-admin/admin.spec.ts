@@ -128,8 +128,8 @@ test.describe.serial("panel de administración", () => {
         construction: "pu",
         condition: "buen-estado",
         price_eur: 200,
-        zone_slug: "cantabria",
-        town: "Somo",
+        zone_slug: "lanzarote",
+        town: "Famara",
       })
       .select("public_id")
       .single();

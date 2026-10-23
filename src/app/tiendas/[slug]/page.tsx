@@ -9,7 +9,7 @@ import { SHOP_TYPE_LABEL, shopPath, shopPlace } from "@/components/shops/shops";
 import { AlertButton } from "@/components/user/islands";
 import { getRepository } from "@/lib/data";
 import { ago, daysBetween } from "@/lib/domain/format";
-import { placeName } from "@/lib/domain/taxonomy";
+import { zoneLabel } from "@/lib/domain/taxonomy";
 import { toQuery, withFilters } from "@/lib/search/filters";
 import { absoluteUrl, OG_BASE } from "@/lib/site";
 import { unsplash } from "@/lib/images";
@@ -48,7 +48,7 @@ export default async function ShopPage({ params }: PageProps<"/tiendas/[slug]">)
   const listings = await repo.shopListings(s.slug);
   const now = await repo.now();
   const lastConfirmed = listings.length ? Math.min(...listings.map((l) => daysBetween(l.confirmedAt, now))) : null;
-  const zone = placeName(s.zone) ?? s.zone;
+  const zone = zoneLabel(s.zone);
   const label = SHOP_TYPE_LABEL[s.type];
 
   // No hay filtro por tienda en /buscar: la alerta cubre las tablas de tiendas (o escuelas) de su zona.

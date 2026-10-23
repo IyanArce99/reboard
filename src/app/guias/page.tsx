@@ -29,7 +29,7 @@ const TOOLS: { t: string; d: string; href: string; photo: PhotoSlug; cta: string
   },
   {
     t: "Comparar tablas",
-    d: "Hasta cuatro tablas, una al lado de otra: litros, medidas, estado, precio y zona.",
+    d: "Hasta cuatro tablas, una al lado de otra: litros, medidas, estado, precio e isla.",
     href: "/comparar",
     photo: "tablas-orilla",
     cta: "Abrir el comparador",

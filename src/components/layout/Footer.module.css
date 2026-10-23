@@ -9,7 +9,7 @@
   margin: 0 auto;
   padding: 56px var(--rb-pad-x) 36px;
   display: grid;
-  grid-template-columns: 1.6fr 1fr 1fr 1fr;
+  grid-template-columns: 1.6fr 1fr 1fr 1fr 1fr;
   gap: 32px;
   font-size: 15px;
 }
@@ -80,7 +80,7 @@
 
 @media (max-width: 1099px) {
   .inner {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-columns: repeat(4, minmax(0, 1fr));
   }
   .brand {
     grid-column: 1 / -1;

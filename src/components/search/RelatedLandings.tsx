@@ -1,8 +1,8 @@
 import Link from "next/link";
 import { getRepository } from "@/lib/data";
-import { REGIONS, ZONES, placeName } from "@/lib/domain/taxonomy";
+import { LAUNCH, placeName } from "@/lib/domain/taxonomy";
 import { landingIndexable } from "@/lib/search/indexing";
-import { LANDING_FORMS, formLabel, landingFilters, landingPath, type LandingForm } from "@/lib/search/landings";
+import { LANDING_FORMS, LANDING_PLACES, formLabel, landingFilters, landingPath, type LandingForm } from "@/lib/search/landings";
 import styles from "./Search.module.css";
 
 interface LinkItem {
@@ -18,18 +18,19 @@ interface LinkItem {
  */
 export async function RelatedLandings({ place, form }: { place: string | null; form: LandingForm | null }) {
   const repo = getRepository();
-  const zones = [...REGIONS.map((r) => r.slug), ...ZONES.map((z) => z.slug)];
+  // Solo lugares del territorio activo con landing propia (las 8 islas).
+  const zones = LANDING_PLACES;
   const candidates: { group: string; place: string | null; form: LandingForm | null; label: string }[] = [];
 
   if (place) {
     for (const f of LANDING_FORMS) if (f !== form) candidates.push({ group: `Por tipo en ${placeName(place)}`, place, form: f, label: formLabel(f) });
   }
   if (form) {
-    for (const p of zones) if (p !== place) candidates.push({ group: `${formLabel(form)} en otras zonas`, place: p, form, label: placeName(p)! });
+    for (const p of zones) if (p !== place) candidates.push({ group: `${formLabel(form)} en otras ${LAUNCH.zoneNoun}s`, place: p, form, label: placeName(p)! });
   }
   if (place && form) {
     candidates.push({ group: "Ampliar la búsqueda", place, form: null, label: `Todas las tablas en ${placeName(place)}` });
-    candidates.push({ group: "Ampliar la búsqueda", place: null, form, label: `${formLabel(form)} en toda España` });
+    candidates.push({ group: "Ampliar la búsqueda", place: null, form, label: `${formLabel(form)} ${LAUNCH.inAll}` });
   }
   if (!candidates.length) return null;
 

@@ -13,7 +13,7 @@ export interface SummaryItem {
 /**
  * Respuestas ya dadas, en orden de paso. Solo se listan las contestadas: nada de filas «—» o
  * «Sin indicar». Con `withScope`, la zona y el presupuesto aparecen siempre (el resultado
- * siempre filtra por una zona, aunque sea «Toda España»).
+ * siempre filtra por una zona, aunque sea «Todas las islas»).
  */
 export function summaryOf(W: FinderState, withScope = false): SummaryItem[] {
   const items: (SummaryItem | null)[] = [
@@ -27,7 +27,7 @@ export function summaryOf(W: FinderState, withScope = false): SummaryItem[] {
       : null,
     withScope || W.zone || W.budget
       ? {
-          label: "Zona y presupuesto",
+          label: "Isla y presupuesto",
           value: `${finderZoneName(W).replace(/^toda/, "Toda")}${W.budget ? ` · hasta ${W.budget} €` : ""}`,
           step: 7,
         }

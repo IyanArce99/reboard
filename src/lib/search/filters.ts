@@ -5,6 +5,8 @@ import {
   CONDITIONS,
   CONSTRUCTIONS,
   FIN_SYSTEMS,
+  isActivePlace,
+  coversTerritory,
   SELLER_TYPES,
   SHAPES,
   slugify,
@@ -15,7 +17,7 @@ import {
 } from "@/lib/domain/taxonomy";
 
 export interface Filters {
-  /** Slug de zona o de región ('' = toda España). */
+  /** Slug de zona o de región activa ('' = todo el territorio activo, «Todas las islas»). */
   zone: string;
   /** Distancia máxima en km; solo aplica con una zona concreta. */
   dist: number | null;
@@ -112,7 +114,7 @@ const slug = (v: string | string[] | undefined) => {
 export function parseFilters(raw: Raw): Filters {
   const fitRaw = first(raw["para-mi"]).match(/^(\d{1,3})-(\d{1,3})$/);
   return {
-    zone: slug(raw.zona),
+    zone: isActivePlace(slug(raw.zona)) && !coversTerritory(slug(raw.zona)) ? slug(raw.zona) : "",
     dist: numOrNull(raw.distancia),
     volMin: numOrNull(raw["litros-min"]),
     volMax: numOrNull(raw["litros-max"]),

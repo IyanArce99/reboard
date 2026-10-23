@@ -46,7 +46,7 @@ select throws_ok($$ select public.admin_moderate_listing('a1', 'hide', 'motivo')
 -- (creado por el servidor: el recorrido de publicar se prueba en 02_listings)
 reset role;
 insert into public.listings (seller_id, slug, status, size_label, length_in, shape, construction, condition, price_eur, zone_slug, town)
-values ('cccccccc-0000-0000-0000-000000000003', 't-admin-pub', 'published', '7''0"', 84, 'evolutiva', 'pu', 'buen-estado', 200, 'cantabria', 'Somo');
+values ('cccccccc-0000-0000-0000-000000000003', 't-admin-pub', 'published', '7''0"', 84, 'evolutiva', 'pu', 'buen-estado', 200, 'lanzarote', 'Famara');
 set local role authenticated;
 
 -- ───────── Admin ─────────
@@ -100,7 +100,7 @@ select is(public.admin_suspend_user('cccccccc-0000-0000-0000-000000000003', 'Est
 set local request.jwt.claims to '{"sub":"cccccccc-0000-0000-0000-000000000003","role":"authenticated","aal":"aal1"}';
 select throws_ok($$
   insert into public.listings (slug, status, size_label, length_in, shape, construction, condition, price_eur, zone_slug, town)
-  values ('t-suspendido', 'draft', '6''0"', 72, 'fish', 'pu', 'buen-estado', 150, 'cantabria', 'Somo') $$,
+  values ('t-suspendido', 'draft', '6''0"', 72, 'fish', 'pu', 'buen-estado', 150, 'lanzarote', 'Famara') $$,
   '42501', null, 'suspendido: no publica');
 select throws_ok($$
   insert into storage.objects (bucket_id, name, owner)
@@ -155,8 +155,8 @@ select throws_ok($$ delete from public.admin_audit_log $$, 'P0001', null, 'la au
 -- ───────── Reportes contra el abuso ─────────
 update public.app_settings set value = '1' where key = 'report_daily_limit';
 insert into public.listings (slug, status, seller_id, size_label, length_in, shape, construction, condition, price_eur, zone_slug, town)
-values ('t-otro-1', 'published', 'bbbbbbbb-0000-0000-0000-000000000002', '7''0"', 84, 'fish', 'pu', 'buen-estado', 200, 'cantabria', 'Somo'),
-       ('t-otro-2', 'published', 'bbbbbbbb-0000-0000-0000-000000000002', '7''0"', 84, 'fish', 'pu', 'buen-estado', 200, 'cantabria', 'Somo');
+values ('t-otro-1', 'published', 'bbbbbbbb-0000-0000-0000-000000000002', '7''0"', 84, 'fish', 'pu', 'buen-estado', 200, 'lanzarote', 'Famara'),
+       ('t-otro-2', 'published', 'bbbbbbbb-0000-0000-0000-000000000002', '7''0"', 84, 'fish', 'pu', 'buen-estado', 200, 'lanzarote', 'Famara');
 set local role authenticated;
 set local request.jwt.claims to '{"sub":"cccccccc-0000-0000-0000-000000000003","role":"authenticated","aal":"aal1"}';
 select throws_ok($$ insert into public.reports (listing_id, reason) values ((select id from public.listings where slug = 't-admin-pub'), 'fraude') $$,
@@ -168,7 +168,7 @@ select throws_ok($$ insert into public.reports (listing_id, reason) values ((sel
 
 -- ───────── Tiendas ─────────
 reset role;
-insert into public.shops (slug, name, type, zone_slug, town) values ('tienda-pendiente', 'Tienda pendiente', 'tienda', 'cantabria', 'Somo');
+insert into public.shops (slug, name, type, zone_slug, town) values ('tienda-pendiente', 'Tienda pendiente', 'tienda', 'lanzarote', 'Famara');
 set local role anon;
 set local request.jwt.claims to '{"role":"anon"}';
 select is((select count(*) from public.shops where slug = 'tienda-pendiente'), 0::bigint, 'una tienda pendiente no es pública');

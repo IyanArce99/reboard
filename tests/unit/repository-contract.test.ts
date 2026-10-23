@@ -52,7 +52,9 @@ describe("ListingRepository (contrato)", () => {
     const facets = await repo.facets(f);
     expect(facets.anyZone).toBe(countMatches(active, { ...f, zone: "", dist: null }));
     expect(facets.zones["canarias"]).toBe(countMatches(active, { ...f, zone: "canarias", dist: null }));
-    expect(facets.zones["asturias"]).toBe(countMatches(active, { ...f, zone: "asturias", dist: null }));
+    expect(facets.zones["la-palma"]).toBe(countMatches(active, { ...f, zone: "la-palma", dist: null }));
+    // Fuera del territorio activo no hay faceta (la península no se muestra).
+    expect(facets.zones["asturias"]).toBeUndefined();
     expect(facets.shapes["evolutiva"]).toBe(countMatches(active, { ...f, shapes: ["evolutiva"] }));
     expect(facets.brands["sin-marca"]).toBe(countMatches(active, { ...f, brand: "sin-marca", model: "" }));
   });

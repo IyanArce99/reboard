@@ -329,14 +329,14 @@ isOneToOne: false
                   ]
                 },"zones": {
                   Row: {
-                    "name": string,"region_slug": string | null,"slug": string,"sort_order": number
+                    "active": boolean,"name": string,"region_slug": string | null,"slug": string,"sort_order": number
                   }
                   ComputedFields: never
                   Insert: {
-                    "name": string,"region_slug"?: string | null,"slug": string,"sort_order"?: number
+                    "active"?: boolean,"name": string,"region_slug"?: string | null,"slug": string,"sort_order"?: number
                   }
                   Update: {
-                    "name"?: string,"region_slug"?: string | null,"slug"?: string,"sort_order"?: number
+                    "active"?: boolean,"name"?: string,"region_slug"?: string | null,"slug"?: string,"sort_order"?: number
                   }
                   Relationships: [
                     
@@ -420,6 +420,9 @@ isOneToOne: false
 { Args: { "p": Json }; Returns: {
               "dimension": string,"key": string,"n": number
             }[]
+                           },
+"listing_photo_quota_ok":
+{ Args: { "p_name": string }; Returns: boolean
                            },
 "matching_listings":
 { Args: { "p": Json,"p_exclude_zone"?: string,"p_statuses"?: (Database["public"]['Enums']["listing_status"])[],"p_unknown_volume"?: boolean,"skip"?: string }; Returns: {

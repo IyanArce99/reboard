@@ -1,7 +1,7 @@
 // Traducción entre la base de datos y el dominio de la UI. Módulo puro (sin red), con tests.
 // Esquema: supabase/migrations · Mapeo documentado en docs/DATABASE.md.
 
-import { regionBySlug } from "@/lib/domain/taxonomy";
+import { ACTIVE_ZONE_SLUGS, regionBySlug } from "@/lib/domain/taxonomy";
 import type { CatalogModel, DataSource, Listing, Measured, Shop } from "@/lib/domain/types";
 import { finLabel, type Filters } from "@/lib/search/filters";
 import type { Database } from "@/lib/supabase/database.types";
@@ -33,7 +33,8 @@ export const PENDING_AFTER_DAYS = 14;
 
 /** Filtros de la URL → parámetro `p` de listing_matches (supabase/migrations/…_functions.sql). */
 export function toRpcParams(f: Filters) {
-  const zones = f.zone ? (regionBySlug(f.zone)?.zones ?? [f.zone]) : [];
+  // Sin zona: todo el territorio activo («Todas las islas»), nunca zonas fuera del lanzamiento.
+  const zones = f.zone ? (regionBySlug(f.zone)?.zones ?? [f.zone]) : ACTIVE_ZONE_SLUGS;
   return {
     zones,
     vol_min: f.volMin,

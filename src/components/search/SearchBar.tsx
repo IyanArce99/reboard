@@ -7,12 +7,12 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { Fragment, useEffect, useRef, useState } from "react";
 import { useDialogFocus } from "@/lib/a11y/useDialogFocus";
 import { createPortal } from "react-dom";
 import { BoardShape } from "@/components/brand/BoardShape";
 import { SlidersIcon } from "@/components/icons";
-import { REGIONS, SHAPES, SHAPE_INFO, ZONES, zoneBySlug, type Shape } from "@/lib/domain/taxonomy";
+import { LAUNCH, SHAPES, SHAPE_INFO, ZONES, zoneBySlug, type Shape } from "@/lib/domain/taxonomy";
 import { num } from "@/lib/domain/format";
 import { HERE_COOKIE } from "@/lib/here";
 import { searchCtaText } from "@/lib/search/describe";
@@ -47,13 +47,12 @@ const SHAPE_HINT: Record<Shape, string> = {
   longboard: "Olas pequeñas y estilo",
   gun: "Olas grandes",
 };
-const CANARIAS = REGIONS.find((r) => r.slug === "canarias")?.zones ?? [];
 
 type Panel = "zona" | "litros" | "tipo";
 const PANEL_WIDTH: Record<Panel, number> = { zona: 560, litros: 520, tipo: 700 };
 
 interface Props {
-  /** Zona elegida por el usuario (cookie) o "" para toda España. Nunca una zona por defecto. */
+  /** Zona elegida por el usuario (cookie) o "" para todo el territorio activo. Nunca una zona por defecto. */
   here: string;
   /** Hay km por anuncio (solo DEMO): muestra los chips de distancia. */
   supportsDistance?: boolean;
@@ -137,7 +136,7 @@ export function SearchBar({ here, initialCount, supportsDistance = true, zoneCou
     setPanel(null);
   };
 
-  const zn = zone ? (zoneBySlug(zone)?.name ?? zone) : "Toda España";
+  const zn = zone ? (zoneBySlug(zone)?.name ?? zone) : LAUNCH.allLabel;
   const hasVol = Boolean(volMin || volMax);
   const where = `${zn}${zone && dist ? ` · < ${dist} km` : ""}`;
   const vol = hasVol ? (volMin && volMax ? `${volMin}–${volMax} L` : volMin ? `Desde ${volMin} L` : `Hasta ${volMax} L`) : null;
@@ -162,7 +161,7 @@ export function SearchBar({ here, initialCount, supportsDistance = true, zoneCou
     setZone(z);
     if (!z) setDist(null);
     try {
-      // «Toda España» borra la zona guardada: sin cookie, la home no presupone ninguna zona.
+      // «Todas las islas» borra la zona guardada: sin cookie, la home no presupone ninguna zona.
       document.cookie = z
         ? `${HERE_COOKIE}=${z}; path=/; max-age=31536000; samesite=lax`
         : `${HERE_COOKIE}=; path=/; max-age=0; samesite=lax`;
@@ -233,7 +232,7 @@ export function SearchBar({ here, initialCount, supportsDistance = true, zoneCou
   return (
     <div ref={wrapRef} className={styles.wrap}>
       <div className={styles.bar} data-open={panel ? true : undefined}>
-        {seg("zona", "Zona", where, "", styles.segZona)}
+        {seg("zona", LAUNCH.zoneTitle, where, "", styles.segZona)}
         <span className={`${styles.sep} ${styles.sep1}`} />
         {seg("litros", "Litros", vol, "¿Cuántos litros?", styles.segLitros)}
         <span className={`${styles.sep} ${styles.sep2}`} />
@@ -253,7 +252,7 @@ export function SearchBar({ here, initialCount, supportsDistance = true, zoneCou
           ref={panelRef}
           id="hero-panel"
           role="dialog"
-          aria-label={panel === "zona" ? "Zona" : panel === "litros" ? "Litros" : "Tipo de tabla"}
+          aria-label={panel === "zona" ? LAUNCH.zoneTitle : panel === "litros" ? "Litros" : "Tipo de tabla"}
           className={styles.panel}
           style={{ left, width: PANEL_WIDTH[panel] }}
         >
@@ -317,18 +316,14 @@ function ZoneOptions({
         ¿Dónde buscas?
       </h2>
       <p className={styles.groupHint}>
-        {showCounts ? "Por isla o provincia, con las tablas publicadas en cada una." : "Por isla o provincia."}
+        {showCounts ? "Elige tu isla. Al lado, las tablas publicadas en cada una." : "Elige tu isla."}
       </p>
-      {option("", "Toda España", showCounts ? total : undefined)}
+      {option("", LAUNCH.allLabel, showCounts ? total : undefined)}
       <div className={styles.zoneCols}>
-        {group(
-          "Canarias",
-          ZONES.filter((z) => CANARIAS.includes(z.slug)),
-        )}
-        {group(
-          "Península",
-          ZONES.filter((z) => !CANARIAS.includes(z.slug)),
-        )}
+        {/* Columnas por agrupación (en Canarias, la provincia), en el orden del catálogo. */}
+        {[...new Set(ZONES.map((z) => z.group ?? ""))].map((g) => (
+          <Fragment key={g || "zonas"}>{group(g, ZONES.filter((z) => (z.group ?? "") === g))}</Fragment>
+        ))}
       </div>
       {supportsDistance && zone && (
         <div className={styles.chips} role="group" aria-label="Distancia">

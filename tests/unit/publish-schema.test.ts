@@ -9,7 +9,7 @@ const size = torq.sizes.find((s) => s.label === `7'2"`)!;
 
 function catalogDraft(): PublishDraft {
   const d: PublishDraft = {
-    ...emptyDraft("asturias"),
+    ...emptyDraft("la-palma"),
     brand: "Torq",
     model: torq.model,
     shape: torq.shape,
@@ -69,7 +69,7 @@ describe("draftToInput (origen de cada medida)", () => {
 describe("listingSlugFor", () => {
   const v = { brandText: null, sizeLabel: `6'4"`, zoneSlug: "cantabria", shape: "fish" as const };
   it("con marca y modelo, como los anuncios del catálogo", () => {
-    expect(listingSlugFor({ ...v, sizeLabel: `7'2"`, zoneSlug: "asturias" }, "Torq", "Fun TET")).toBe("torq-fun-tet-7-2-asturias");
+    expect(listingSlugFor({ ...v, sizeLabel: `7'2"`, zoneSlug: "la-palma" }, "Torq", "Fun TET")).toBe("torq-fun-tet-7-2-la-palma");
   });
   it("artesanal o shaper local", () => {
     expect(listingSlugFor(v, null, null)).toBe("fish-artesanal-6-4-cantabria");

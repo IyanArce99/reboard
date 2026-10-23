@@ -10,7 +10,7 @@ export const OG_IMAGE = {
   url: "/og-reboard.png",
   width: 1200,
   height: 630,
-  alt: "Reboard · Tu próxima tabla ya existe. Tablas de surf de segunda mano en España.",
+  alt: "Reboard · Tu próxima tabla ya existe. Tablas de surf de segunda mano en Canarias.",
 };
 
 /**

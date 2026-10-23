@@ -476,3 +476,45 @@ Detalle en `docs/ADMIN.md`.
 **Tests.** 10 nuevos en pgTAP (`02_listings`, `04_storage_photos`). Los tests que preparaban anuncios publicados como usuario ahora siguen el camino real o los crea el servidor.
 
 **Pendiente:** el resto de hallazgos de la auditoría (S4–S14).
+
+## Lanzamiento solo en Canarias (23-10-2026)
+
+**Decisión del titular.** El lanzamiento público se centra exclusivamente en las Islas Canarias: captar inventario en las islas y validar el negocio antes de ampliar.
+
+**Configuración centralizada** (`src/lib/domain/taxonomy.ts`):
+- `ALL_ZONES`: catálogo completo de zonas, igual que la tabla `zones`. Las de la península se conservan.
+- `LAUNCH`: territorio activo (`regions: ["canarias"]`) y sus textos: «Todas las islas», «en Canarias», «isla».
+- `ZONES` / `REGIONS` / `ACTIVE_ZONE_SLUGS`: solo lo activo. Todo lo visible sale de aquí (buscador, filtros, publicar, TablaFinder, landings, sitemap, pie de página).
+- Las 8 islas, agrupadas por provincia (Las Palmas / Santa Cruz de Tenerife): Gran Canaria, Tenerife, Lanzarote, Fuerteventura, La Palma, La Gomera, El Hierro y La Graciosa.
+
+**Servidor y base de datos** (migración `20261028090000_launch_canarias`, solo añade):
+- Inserta La Palma, La Gomera, El Hierro y La Graciosa.
+- Añade `zones.active`: las islas, activas; la península, inactiva y sin borrar. Una zona nueva nace inactiva.
+- Disparador `listings_zone_guard`: un usuario no puede crear ni mover un anuncio a una zona inactiva, tampoco por la API REST (`zone_not_active`). El servidor no tiene esta restricción.
+- Validación zod: `zoneSlug` solo admite zonas activas, con un mensaje claro.
+
+**Búsqueda:**
+- Sin isla elegida = las 8 islas (`toRpcParams`, `inZone`). Los anuncios de zonas inactivas no aparecen.
+- La URL ignora zonas fuera del territorio.
+- `zona=canarias` equivale a «Todas las islas».
+
+**SEO:**
+- Titles, H1 y meta dicen «… en Canarias».
+- Hay landings por isla y por isla × tipo; no hay landings de la península (404).
+- `/tablas/canarias` → 308 a `/` y `/tablas/canarias/{tipo}` → 308 a `/tablas/{tipo}`: la región es todo el territorio y duplicaría las generales.
+- `Organization.areaServed` = Islas Canarias.
+- `SITE_INDEXABLE` no cambia.
+
+**Datos DEMO (tests y local):** los anuncios que el prototipo ponía en la península pasan a las islas nuevas, con los mismos ids y la misma secuencia (`tests/fixtures/demo-inventory.ts`).
+
+**Ampliar más adelante:**
+1. Añadir la región o zonas a `LAUNCH.regions`.
+2. Activarlas con una migración (`update zones set active = true …`).
+3. Revisar los textos de `LAUNCH`.
+
+No hay que rehacer la arquitectura.
+
+**Tests:**
+- `tests/unit/territory.test.ts`;
+- `supabase/tests/database/09_launch_territory.test.sql`;
+- e2e de rutas (404 de la península y 308 de `/tablas/canarias`).

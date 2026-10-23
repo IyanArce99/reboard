@@ -84,7 +84,7 @@ describe("parseFilters", () => {
 
 describe("toQuery / searchHref", () => {
   it("ida y vuelta: parse(toQuery(f)) === f", () => {
-    const f = withFilters({ zone: "asturias", dist: 25, shapes: ["shortboard"], volMin: 28, volMax: 32, fit: { lo: 30, hi: 34 } });
+    const f = withFilters({ zone: "la-palma", dist: 25, shapes: ["shortboard"], volMin: 28, volMax: 32, fit: { lo: 30, hi: 34 } });
     const back = parseFilters(Object.fromEntries(new URLSearchParams(toQuery(f))));
     expect(back).toEqual(f);
   });
@@ -102,10 +102,10 @@ describe("toQuery / searchHref", () => {
   });
 
   it("serializa la vista solo si no es la de por defecto", () => {
-    const f = withFilters({ zone: "cadiz" });
-    expect(toQuery(f, { sort: "recientes", view: "grid", limit: PAGE_SIZE })).toBe("zona=cadiz");
+    const f = withFilters({ zone: "lanzarote" });
+    expect(toQuery(f, { sort: "recientes", view: "grid", limit: PAGE_SIZE })).toBe("zona=lanzarote");
     expect(toQuery(f, { sort: "precio", view: "list", limit: 48, showUnknown: true })).toBe(
-      "zona=cadiz&orden=precio&vista=lista&ver=48&sin-litros=1",
+      "zona=lanzarote&orden=precio&vista=lista&ver=48&sin-litros=1",
     );
   });
 });
@@ -122,6 +122,6 @@ describe("parseView", () => {
 describe("activeFilterCount", () => {
   it("cuenta como los chips aplicados", () => {
     expect(activeFilterCount(emptyFilters())).toBe(0);
-    expect(activeFilterCount(withFilters({ zone: "cadiz", dist: 10, shapes: ["fish", "hibrida"], volMin: 30 }))).toBe(5);
+    expect(activeFilterCount(withFilters({ zone: "lanzarote", dist: 10, shapes: ["fish", "hibrida"], volMin: 30 }))).toBe(5);
   });
 });

@@ -1,6 +1,6 @@
 "use client";
 
-import { LENGTH_STEPS } from "@/lib/domain/taxonomy";
+import { LAUNCH, LENGTH_STEPS } from "@/lib/domain/taxonomy";
 import { ftLabel } from "@/lib/domain/format";
 import { BUDGETS, FINDER_ZONES, OTHER_ZONES } from "@/lib/finder/listings";
 import {
@@ -189,7 +189,7 @@ export function FinderStep({ state: W, set, weightError, levelError, onEnter, he
                 value={W.otherZone}
                 onChange={(e) => set({ otherZone: e.target.value })}
                 className={`${styles.select} ${styles.otherZone}`}
-                aria-label="Otra zona"
+                aria-label={`Otra ${LAUNCH.zoneNoun}`}
               >
                 {OTHER_ZONES.map((z) => (
                   <option key={z.slug} value={z.slug}>

@@ -33,7 +33,7 @@ export interface SearchPage {
  * - zones[slug]: con esa zona o región y sin distancia.
  * - shapes[forma]: con solo esa forma.
  * - brands[slug]: con esa marca y sin modelo.
- * - anyZone: en toda España (sin zona ni distancia).
+ * - anyZone: en todo el territorio activo, «Todas las islas» (sin zona ni distancia).
  */
 export interface Facets {
   anyZone: number;

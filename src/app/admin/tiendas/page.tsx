@@ -17,7 +17,7 @@ export default async function AdminShops(props: PageProps<"/admin/tiendas">) {
 
   const [shopsRes, zonesRes] = await Promise.all([
     sb.from("shops").select("id, slug, name, type, zone_slug, town, status, status_reason, reviewed_at, profile_id, created_at").order("name").limit(2000),
-    sb.from("zones").select("slug, name").order("sort_order"),
+    sb.from("zones").select("slug, name, active").order("sort_order"),
   ]);
   if (shopsRes.error) return <Notice tone="error">{adminErrorText(shopsRes.error)}</Notice>;
   const all = shopsRes.data ?? [];
@@ -57,7 +57,7 @@ export default async function AdminShops(props: PageProps<"/admin/tiendas">) {
       <details className={`${s.card} ${c.disclosure}`}>
         <summary>Nueva tienda o escuela</summary>
         <p className={s.muted}>Se crea como pendiente: no es pública hasta que la apruebes.</p>
-        <ShopForm action={createShop} zones={zones} submitLabel="Crear" />
+        <ShopForm action={createShop} zones={zones.filter((z) => z.active)} submitLabel="Crear" />
       </details>
 
       <form className={s.filters} method="get" role="search" aria-label="Filtrar tiendas">

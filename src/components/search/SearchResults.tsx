@@ -29,7 +29,7 @@ import styles from "./Search.module.css";
 const PRESETS: [string, Partial<Filters>][] = [
   ["Evolutiva 7'0–7'6 · 45–60 L · <200 € · Gran Canaria", { shapes: ["evolutiva"], lenMin: 84, lenMax: 90, volMin: 45, volMax: 60, priceMax: 200, zone: "gran-canaria" }],
   ["Torq en Tenerife", { brand: "torq", zone: "tenerife" }],
-  ["Shortboard 28–32 L cerca de Gijón", { shapes: ["shortboard"], volMin: 28, volMax: 32, zone: "asturias", dist: 25 }],
+  ["Shortboard 28–32 L en La Palma", { shapes: ["shortboard"], volMin: 28, volMax: 32, zone: "la-palma", dist: 25 }],
   ["Búsqueda sin resultados", { shapes: ["longboard"], zone: "lanzarote", priceMax: 150 }],
 ];
 

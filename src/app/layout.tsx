@@ -39,10 +39,10 @@ const plexMono = IBM_Plex_Mono({
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
-    default: "Tablas de surf de segunda mano en España · Reboard",
+    default: "Tablas de surf de segunda mano en Canarias · Reboard",
     template: "%s · Reboard",
   },
-  description: "Compra y vende tablas de surf de segunda mano en España. Busca por litros, medidas, tipo y zona, sin comisiones.",
+  description: "Compra y vende tablas de surf de segunda mano en Canarias. Busca por litros, medidas, tipo e isla, sin comisiones.",
   applicationName: SITE_NAME,
   icons: {
     icon: [

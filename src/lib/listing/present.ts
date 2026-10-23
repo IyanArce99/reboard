@@ -1,6 +1,6 @@
 // Textos de un anuncio para la interfaz (equivalente a card() y fichaVals() del prototipo).
 
-import { CONSTRUCTION_INFO, SHAPE_INFO, isActiveStatus, zoneBySlug } from "@/lib/domain/taxonomy";
+import { CONSTRUCTION_INFO, SHAPE_INFO, isActiveStatus, zoneLabel } from "@/lib/domain/taxonomy";
 import type { DataSource, Listing } from "@/lib/domain/types";
 import { ago, daysBetween } from "@/lib/domain/format";
 
@@ -17,7 +17,7 @@ export const listingPath = (l: Listing) => `/anuncio/${l.slug}-${l.id}`;
 /** Extrae el id del final de /anuncio/[slug-id]. */
 export const idFromSlugId = (slugId: string) => slugId.match(/-(a\d+)$/)?.[1] ?? null;
 
-export const zoneName = (l: Listing) => zoneBySlug(l.zone)?.name ?? l.zone;
+export const zoneName = (l: Listing) => zoneLabel(l.zone);
 
 export const volumeShort = (l: Listing) => (l.volume.value != null ? `${l.volume.value} L` : "Litros sin indicar");
 

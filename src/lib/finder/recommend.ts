@@ -47,7 +47,7 @@ export interface FinderState {
   freq: FreqKey | null;
   waves: WavesKey | null;
   goals: GoalKey[];
-  /** '' = toda España · 'canarias' · 'gran-canaria' · 'tenerife' · 'other'. */
+  /** '' = todas las islas · slug de isla · 'other' (desplegable con el resto de islas). */
   zone: string;
   otherZone: string;
   budget: string;
@@ -64,7 +64,7 @@ export const initialFinderState = (): FinderState => ({
   waves: null,
   goals: [],
   zone: "",
-  otherZone: "asturias",
+  otherZone: "la-palma",
   budget: "",
 });
 
@@ -331,6 +331,8 @@ export function sanitizeFinderState(raw: unknown): FinderState {
     freq: pick(p.freq, FREQS.map((f) => f[0])),
     waves: pick(p.waves, WAVES.map((w) => w[0])),
     goals: Array.isArray(p.goals) ? [...new Set(p.goals.map((g) => pick(g, GOALS.map((x) => x[0]))).filter((g): g is GoalKey => !!g))] : [],
+    // Las zonas que ya no están en el paso (p. ej., «canarias» o «toda España» de perfiles antiguos)
+    // se resuelven en finderZone(); aquí solo se limpia el texto.
     zone: str(p.zone, 30).replace(/[^a-z-]/g, ""),
     otherZone: str(p.otherZone, 30).replace(/[^a-z-]/g, "") || d.otherZone,
     budget: str(p.budget, 6).replace(/[^0-9]/g, ""),

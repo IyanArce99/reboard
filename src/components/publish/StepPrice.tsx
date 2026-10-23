@@ -1,10 +1,10 @@
 "use client";
 
-// Paso 4 · Precio y ubicación: el precio manda; zona con chips (Canarias / Península), localidad
+// Paso 4 · Precio y ubicación: el precio manda; isla con chips agrupados por provincia (solo el territorio activo, LAUNCH), localidad
 // con sugerencias de la zona (nunca una dirección exacta) y contacto por WhatsApp o llamada
 // con el teléfono privado (solo lo ve quien pulsa «Mostrar contacto»).
 
-import { REGIONS, ZONES, zoneBySlug } from "@/lib/domain/taxonomy";
+import { LAUNCH, ZONES, zoneBySlug } from "@/lib/domain/taxonomy";
 import { eur } from "@/lib/domain/format";
 import type { CatalogModel } from "@/lib/domain/types";
 import type { ContactMethod } from "@/lib/publish/draft";
@@ -18,11 +18,11 @@ const CONTACTS: [ContactMethod, string][] = [
   ["phone", "Llamada"],
 ];
 
-const ISLANDS = REGIONS.find((r) => r.slug === "canarias")?.zones ?? [];
-const ZONE_GROUPS = [
-  { name: "Canarias", zones: ZONES.filter((z) => ISLANDS.includes(z.slug)) },
-  { name: "Península", zones: ZONES.filter((z) => !ISLANDS.includes(z.slug)) },
-];
+// Solo zonas activas (LAUNCH), agrupadas como en el buscador (en Canarias, por provincia).
+const ZONE_GROUPS = [...new Set(ZONES.map((z) => z.group ?? ""))].map((g) => ({
+  name: g,
+  zones: ZONES.filter((z) => (z.group ?? "") === g),
+}));
 
 interface Props extends StepProps {
   model: CatalogModel | undefined;
@@ -70,7 +70,7 @@ export function StepPrice({ d, set, model, refs, dataIsDemo, live }: Props) {
         )}
       </div>
 
-      <Group id="pub-zone" title="Zona" hint="De momento solo publicamos en estas zonas.">
+      <Group id="pub-zone" title={LAUNCH.zoneTitle} hint={`De momento, Reboard funciona solo ${LAUNCH.inAll}.`}>
         {ZONE_GROUPS.map((g) => (
           <div key={g.name} className={styles.zoneGroup}>
             <span className={styles.zoneName}>{g.name}</span>

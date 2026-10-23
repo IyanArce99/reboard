@@ -139,31 +139,82 @@ export const POPULAR_BRANDS = [
 export interface Zone {
   slug: string;
   name: string;
+  /** Región a la que pertenece (null = zona suelta de la península). */
+  region: string | null;
+  /** Agrupación en los selectores (en Canarias, la provincia). */
+  group?: string;
   towns: string[];
 }
 
-export const ZONES: Zone[] = [
-  { slug: "gran-canaria", name: "Gran Canaria", towns: ["Las Palmas de G.C.", "Gáldar", "Telde", "Arucas"] },
-  { slug: "tenerife", name: "Tenerife", towns: ["Santa Cruz de Tenerife", "Las Américas", "El Médano"] },
-  { slug: "lanzarote", name: "Lanzarote", towns: ["Famara", "Arrecife"] },
-  { slug: "fuerteventura", name: "Fuerteventura", towns: ["Corralejo", "El Cotillo"] },
-  { slug: "asturias", name: "Asturias", towns: ["Gijón", "Salinas", "Rodiles"] },
-  { slug: "cantabria", name: "Cantabria", towns: ["Somo", "Santander", "Liencres"] },
-  { slug: "galicia", name: "Galicia", towns: ["A Coruña", "Razo", "Pantín"] },
-  { slug: "pais-vasco", name: "País Vasco", towns: ["Zarautz", "Mundaka", "Sopelana"] },
-  { slug: "cadiz", name: "Cádiz", towns: ["El Palmar", "Tarifa", "Conil"] },
+/**
+ * Catálogo COMPLETO de zonas, igual que la tabla `zones` de la base de datos. Las de fuera del
+ * territorio activo se conservan para ampliar más adelante: no se muestran ni se pueden publicar.
+ */
+export const ALL_ZONES: Zone[] = [
+  { slug: "gran-canaria", name: "Gran Canaria", region: "canarias", group: "Las Palmas", towns: ["Las Palmas de G.C.", "Gáldar", "Telde", "Arucas"] },
+  { slug: "tenerife", name: "Tenerife", region: "canarias", group: "Santa Cruz de Tenerife", towns: ["Santa Cruz de Tenerife", "Las Américas", "El Médano"] },
+  { slug: "lanzarote", name: "Lanzarote", region: "canarias", group: "Las Palmas", towns: ["Famara", "Arrecife"] },
+  { slug: "fuerteventura", name: "Fuerteventura", region: "canarias", group: "Las Palmas", towns: ["Corralejo", "El Cotillo"] },
+  { slug: "la-palma", name: "La Palma", region: "canarias", group: "Santa Cruz de Tenerife", towns: ["Santa Cruz de La Palma", "Los Llanos de Aridane"] },
+  { slug: "la-gomera", name: "La Gomera", region: "canarias", group: "Santa Cruz de Tenerife", towns: ["San Sebastián de La Gomera", "Valle Gran Rey"] },
+  { slug: "el-hierro", name: "El Hierro", region: "canarias", group: "Santa Cruz de Tenerife", towns: ["Valverde", "La Restinga"] },
+  { slug: "la-graciosa", name: "La Graciosa", region: "canarias", group: "Las Palmas", towns: ["Caleta de Sebo"] },
+  { slug: "asturias", name: "Asturias", region: null, towns: ["Gijón", "Salinas", "Rodiles"] },
+  { slug: "cantabria", name: "Cantabria", region: null, towns: ["Somo", "Santander", "Liencres"] },
+  { slug: "galicia", name: "Galicia", region: null, towns: ["A Coruña", "Razo", "Pantín"] },
+  { slug: "pais-vasco", name: "País Vasco", region: null, towns: ["Zarautz", "Mundaka", "Sopelana"] },
+  { slug: "cadiz", name: "Cádiz", region: null, towns: ["El Palmar", "Tarifa", "Conil"] },
 ];
 
 /** Agrupaciones de zonas con landing propia (docs/SEO.md: /tablas/canarias). */
-export const REGIONS: { slug: string; name: string; zones: string[] }[] = [
-  { slug: "canarias", name: "Canarias", zones: ["gran-canaria", "tenerife", "lanzarote", "fuerteventura"] },
+export const ALL_REGIONS: { slug: string; name: string; zones: string[] }[] = [
+  { slug: "canarias", name: "Canarias", zones: ALL_ZONES.filter((z) => z.region === "canarias").map((z) => z.slug) },
 ];
 
+/**
+ * TERRITORIO ACTIVO del lanzamiento (docs/DECISIONS.md, «Lanzamiento solo en Canarias»).
+ * Es la única fuente de verdad en la web: selectores, filtros, publicar, landings, sitemap y textos
+ * salen de aquí. Para ampliar a otra región o zona: añádela aquí y actívala también en la base de
+ * datos (`zones.active`), que es quien impide publicar fuera del territorio.
+ */
+export const LAUNCH = {
+  regions: ["canarias"] as readonly string[],
+  /** «Tablas de surf de segunda mano en Canarias». */
+  name: "Canarias",
+  /** Opción «sin zona» de los selectores. */
+  allLabel: "Todas las islas",
+  /** Complemento de lugar sin zona elegida: «13 tablas en Canarias». */
+  inAll: "en Canarias",
+  /** Nombre de cada zona en los textos: «elige tu isla». */
+  zoneNoun: "isla",
+  /** Título de los selectores de zona. */
+  zoneTitle: "Isla",
+};
+
+/** Zonas activas (las únicas que ve y puede elegir el usuario), en el orden del catálogo. */
+export const ZONES: Zone[] = ALL_ZONES.filter((z) => z.region != null && LAUNCH.regions.includes(z.region));
+export const REGIONS = ALL_REGIONS.filter((r) => LAUNCH.regions.includes(r.slug));
+export const ACTIVE_ZONE_SLUGS = ZONES.map((z) => z.slug);
+
+/** Zona o región ACTIVA por slug (undefined si no existe o está fuera del territorio). */
 export const zoneBySlug = (slug: string) => ZONES.find((z) => z.slug === slug);
 export const regionBySlug = (slug: string) => REGIONS.find((r) => r.slug === slug);
+export const isActivePlace = (slug: string) => Boolean(zoneBySlug(slug) || regionBySlug(slug));
 
-/** Nombre de una zona o región, o undefined si el slug no existe. */
+/**
+ * Región que abarca TODO el territorio activo (hoy, Canarias). Filtrar por ella es lo mismo que no
+ * filtrar: se trata como «Todas las islas» y su landing redirige a la general (sin contenido duplicado).
+ */
+export const coversTerritory = (slug: string) => {
+  const r = regionBySlug(slug);
+  return Boolean(r) && ACTIVE_ZONE_SLUGS.every((z) => r!.zones.includes(z));
+};
+
+/** Nombre de una zona o región ACTIVA, o undefined si el slug no existe o está fuera del territorio. */
 export const placeName = (slug: string) => zoneBySlug(slug)?.name ?? regionBySlug(slug)?.name;
+
+/** Nombre para mostrar de cualquier zona del catálogo (también las inactivas: anuncios antiguos). */
+export const zoneLabel = (slug: string) => ALL_ZONES.find((z) => z.slug === slug)?.name ?? slug;
 
 /** Longitudes de los selectores, en pulgadas (prototipo: LENS). */
 export const LENGTH_STEPS = [66, 68, 70, 72, 74, 76, 78, 80, 82, 84, 86, 88, 90, 94, 96, 102, 108, 114];

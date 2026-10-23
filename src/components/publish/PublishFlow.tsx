@@ -62,7 +62,7 @@ function stepIssue(step: number, d: PublishDraft, processing: number): string {
       return d.condition ? "" : "Elige el estado de la tabla.";
     case 4:
       if (!(Number(d.price) > 0)) return "Pon un precio para continuar.";
-      if (!d.zone) return "Elige la zona donde está la tabla.";
+      if (!d.zone) return "Elige la isla donde está la tabla.";
       if (d.town.trim().length < 2) return "Indica la localidad donde está la tabla.";
       return toE164(d.phone) ? "" : "Revisa el teléfono: por ejemplo, 600 000 000 o +34 600 000 000.";
     default:

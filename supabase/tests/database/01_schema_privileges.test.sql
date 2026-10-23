@@ -57,8 +57,8 @@ select results_eq(
   'bucket listing-photos configurado');
 
 -- Datos de referencia: 9 zonas, sin anuncios ni tiendas ni catálogo cargados
-select is((select count(*) from public.zones), 9::bigint, '9 zonas de referencia');
-select is((select count(*) from public.zones where region_slug = 'canarias'), 4::bigint, '4 zonas en Canarias');
+select is((select count(*) from public.zones), 13::bigint, '13 zonas de referencia (8 islas y 5 de la península, inactivas)');
+select is((select count(*) from public.zones where region_slug = 'canarias'), 8::bigint, '8 islas en Canarias');
 select is((select count(*) from public.listings), 0::bigint, 'sin anuncios precargados');
 select is((select count(*) from public.shops), 0::bigint, 'sin tiendas precargadas');
 -- Marcas: solo nombres de referencia (migración 20261024090000). Modelos y medidas, ninguno: exigen

@@ -17,7 +17,8 @@ const CASES: [string, Partial<Filters>][] = [
   ["todo", {}],
   ["preset evolutiva GC", { shapes: ["evolutiva"], lenMin: 84, lenMax: 90, volMin: 45, volMax: 60, priceMax: 200, zone: "gran-canaria" }],
   ["preset Torq Tenerife", { brand: "torq", zone: "tenerife" }],
-  ["preset shortboard Gijón", { shapes: ["shortboard"], volMin: 28, volMax: 32, zone: "asturias", dist: 25 }],
+  // Lanzamiento en Canarias: el preset de Gijón del prototipo pasa a La Palma (adonde se movieron esos anuncios DEMO).
+  ["preset shortboard La Palma", { shapes: ["shortboard"], volMin: 28, volMax: 32, zone: "la-palma", dist: 25 }],
   ["preset sin resultados", { shapes: ["longboard"], zone: "lanzarote", priceMax: 150 }],
   ["región canarias", { zone: "canarias" }],
   ["región ignora distancia", { zone: "canarias", dist: 5 }],
@@ -55,7 +56,8 @@ describe("búsqueda (caracterización)", () => {
     expect(countMatches(active, withFilters({}))).toBe(100);
     expect(countMatches(active, withFilters({ shapes: ["evolutiva"], zone: "gran-canaria" }))).toBe(11);
     expect(countMatches(active, withFilters(CASES[1][1]))).toBe(5);
-    expect(countMatches(active, withFilters(CASES[2][1]))).toBe(4);
+    // Torq en Tenerife: 4 del prototipo + 2 que estaban en Cádiz (los DEMO de la península pasan a las islas).
+    expect(countMatches(active, withFilters(CASES[2][1]))).toBe(6);
     expect(countMatches(active, withFilters(CASES[4][1]))).toBe(0);
   });
 

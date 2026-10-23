@@ -32,6 +32,22 @@ const ZONE_WEIGHT: Record<string, number> = {
   cadiz: 10,
 };
 
+/**
+ * Lanzamiento solo en Canarias: los anuncios DEMO que el prototipo ponía en la península pasan a
+ * las islas que no tenían inventario. Mismas tablas, mismos ids y mismas búsquedas; solo cambia la
+ * isla. (Las claves de ZONE_WEIGHT y de las manos siguen siendo las del prototipo.)
+ */
+const DEMO_ZONE: Record<string, string> = {
+  asturias: "la-palma",
+  cantabria: "la-gomera",
+  galicia: "el-hierro",
+  "pais-vasco": "la-graciosa",
+  cadiz: "tenerife",
+};
+const demoZone = (z: string) => DEMO_ZONE[z] ?? z;
+/** Zona de las tiendas DEMO en el prototipo (antes de moverlas a las islas). */
+const SHOP_PROTO_ZONE: Record<string, string> = { "escuela-ola-brava": "asturias" };
+
 export const BOARD_PHOTOS = [
   "1531722569936-825d3dd91b15",
   "1621951289270-b942dc5f4320",
@@ -51,7 +67,7 @@ export const DEMO_SHOPS: Shop[] = [
   { name: "Escuela Playa Chica", slug: "escuela-playa-chica", type: "escuela", zone: "gran-canaria", town: "Telde", address: "Paseo de la playa, Telde (demo)", hours: "Todos los días · 9:00–18:00", image: "1761347465188-0ff91dfee062", inventorySource: "Carga asistida" },
   { name: "Norte Surf Shop", slug: "norte-surf-shop", type: "tienda", zone: "tenerife", town: "Santa Cruz de Tenerife", address: "Av. Anaga, Santa Cruz (demo)", hours: "L–V · 10:00–20:00 · S 10:00–14:00", image: "1586996292898-71f4036c4e07", inventorySource: "CSV semanal" },
   { name: "Barlovento Surf", slug: "barlovento-surf", type: "tienda", zone: "lanzarote", town: "Famara", address: "Urb. Famara (demo)", hours: "Todos los días · 10:00–19:00", image: "1632299768491-51d27b80d088", inventorySource: "Carga asistida" },
-  { name: "Escuela Ola Brava", slug: "escuela-ola-brava", type: "escuela", zone: "asturias", town: "Salinas", address: "Playa de Salinas (demo)", hours: "Mar–Oct · 9:00–19:00", image: "1767167838805-78929dab5052", inventorySource: "CSV" },
+  { name: "Escuela Ola Brava", slug: "escuela-ola-brava", type: "escuela", zone: "la-palma", town: "Santa Cruz de La Palma", address: "Av. Marítima, Santa Cruz de La Palma (demo)", hours: "Mar–Oct · 9:00–19:00", image: "1767167838805-78929dab5052", inventorySource: "CSV" },
 ];
 
 type Size = [label: string, lengthIn: number, widthIn: number, thickIn: number, volume: number];
@@ -147,7 +163,7 @@ const daysBefore = (d: number) => new Date(DEMO_REFERENCE_DATE.getTime() - d * D
 function mk(h: Hand, i: number): Listing {
   const m = MODELS[h.mi];
   const [sizeLabel, lengthIn, widthIn, thickIn, catalogVol] = m.sizes[h.si];
-  const zone = ZONES.find((z) => z.slug === h.zone)!;
+  const zone = ZONES.find((z) => z.slug === demoZone(h.zone))!;
   const town = zone.towns[h.town % zone.towns.length];
   const vol = "vol" in h ? null : catalogVol;
   const dimSource = m.b ? "manufacturer" : "seller";
@@ -165,7 +181,7 @@ function mk(h: Hand, i: number): Listing {
 
   return {
     id,
-    slug: slugify([m.b ?? SHAPE_NAME[m.shape], m.m ?? "artesanal", sizeLabel, h.zone].join(" ")),
+    slug: slugify([m.b ?? SHAPE_NAME[m.shape], m.m ?? "artesanal", sizeLabel, zone.slug].join(" ")),
     brand: m.b,
     model: m.m,
     modelSlug: m.b ? m.slug : null,
@@ -180,7 +196,7 @@ function mk(h: Hand, i: number): Listing {
     constructionSource: m.b ? "manufacturer" : "seller",
     fins: fins ? { value: fins, source: "seller" } : { value: null, source: null },
     accessories: acc ? { value: acc, source: "seller" } : { value: null, source: null },
-    zone: h.zone,
+    zone: zone.slug,
     town,
     distanceKm: h.km,
     price: h.price,
@@ -211,7 +227,7 @@ export function buildDemoInventory(n: number): Listing[] {
     if (n === 20) zone = FIX20[i];
     else {
       let x = r() * totalWeight;
-      zone = ZONES.find((z) => (x -= ZONE_WEIGHT[z.slug]) < 0)!.slug;
+      zone = Object.keys(ZONE_WEIGHT).find((z) => (x -= ZONE_WEIGHT[z]) < 0)!;
     }
     const mi = Math.floor(r() * MODELS.length);
     const m = MODELS[mi];
@@ -219,7 +235,8 @@ export function buildDemoInventory(n: number): Listing[] {
     const cond = CONDS[Math.floor(r() * 4)];
     const sp = r();
     let seller: SellerType = sp < 0.8 ? "particular" : sp < 0.94 ? "tienda" : "escuela";
-    const shop = DEMO_SHOPS.find((s) => s.zone === zone && s.type === seller);
+    // Se busca la tienda por la zona del PROTOTIPO para que la secuencia aleatoria no cambie.
+    const shop = DEMO_SHOPS.find((s) => (SHOP_PROTO_ZONE[s.slug] ?? s.zone) === zone && s.type === seller);
     if (!shop) seller = "particular";
     let price = BASE_PRICE[m.shape] * (m.cons === "softboard" ? 0.6 : 1) * COND_FACTOR[cond] * (0.8 + r() * 0.45);
     price = Math.round(price / 5) * 5;

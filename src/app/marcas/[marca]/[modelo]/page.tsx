@@ -66,7 +66,7 @@ export default async function ModelPage({ params }: PageProps<"/marcas/[marca]/[
       volumeText: vol(s.volume),
       count: units.length,
       cards: units.map((l) => <ListingCard key={l.id} listing={l} now={now} hereZone="" layout="responsive" />),
-      alert: { text: `${m.brand} ${m.model} ${s.label} de segunda mano, en toda España`, query: toQuery(f) },
+      alert: { text: `${m.brand} ${m.model} ${s.label} de segunda mano, en Canarias`, query: toQuery(f) },
     };
   });
 

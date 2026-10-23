@@ -10,9 +10,9 @@ const OK = [
   "/tablas/softboard",
   "/tablas/principiantes",
   "/tablas/gran-canaria",
-  "/tablas/canarias",
   "/tablas/gran-canaria/evolutiva",
-  "/tablas/pais-vasco/principiantes",
+  "/tablas/la-gomera/principiantes",
+  "/tablas/la-graciosa",
   "/anuncio/torq-fun-tet-7-2-gran-canaria-a1040",
   "/calculadora-litros",
   "/comparar",
@@ -51,6 +51,10 @@ const NOT_FOUND = [
   "/marcas/torq/nope",
   "/tiendas/nope",
   "/guias/nope",
+  // Lanzamiento solo en Canarias: sin landings de la península (decisión en docs/DECISIONS.md).
+  "/tablas/asturias",
+  "/tablas/pais-vasco/principiantes",
+  "/tablas/cadiz/fish",
 ];
 
 test.describe("códigos HTTP", () => {
@@ -72,6 +76,16 @@ test.describe("códigos HTTP", () => {
     const res = await request.get("/anuncio/slug-viejo-a1040", { maxRedirects: 0 });
     expect(res.status()).toBe(308);
     expect(res.headers()["location"]).toMatch(/\/anuncio\/torq-fun-tet-7-2-gran-canaria-a1040$/);
+  });
+
+  // «Canarias» es todo el territorio activo: su landing duplicaría las generales (proxy.ts).
+  test("308 de /tablas/canarias a la home y de /tablas/canarias/{tipo} a /tablas/{tipo}", async ({ request }) => {
+    const all = await request.get("/tablas/canarias", { maxRedirects: 0 });
+    expect(all.status()).toBe(308);
+    expect(new URL(all.headers()["location"], "http://x").pathname).toBe("/");
+    const fish = await request.get("/tablas/canarias/fish", { maxRedirects: 0 });
+    expect(fish.status()).toBe(308);
+    expect(fish.headers()["location"]).toMatch(/\/tablas\/fish$/);
   });
 });
 

@@ -15,6 +15,7 @@ import {
   SHAPES,
   SHAPE_INFO,
   ZONES,
+  LAUNCH,
   regionBySlug,
 } from "@/lib/domain/taxonomy";
 import { ftLabel, inToCm, num } from "@/lib/domain/format";
@@ -195,19 +196,25 @@ export function FilterPanel({ counts, showCounts = true, resultCount, brands, mo
       <div className={styles.panelBody}>
         <div className={styles.group}>
           <label className={ui.label} htmlFor="f-zona">
-            Zona
+            {LAUNCH.zoneTitle}
           </label>
           <select id="f-zona" className={ui.select} value={f.zone} onChange={(e) => set({ zone: e.target.value, ...(e.target.value ? {} : { dist: null }) })}>
-            <option value="">{`Toda España${n(counts.total)}`}</option>
-            {REGIONS.map((r) => (
-              <option key={r.slug} value={r.slug}>
-                {`${r.name}${n(counts.zones[r.slug])}`}
-              </option>
-            ))}
-            {ZONES.map((z) => (
-              <option key={z.slug} value={z.slug}>
-                {`${z.name}${n(counts.zones[z.slug])}`}
-              </option>
+            <option value="">{`${LAUNCH.allLabel}${n(counts.total)}`}</option>
+            {/* Con una sola región activa, la región es lo mismo que «Todas las islas»: no se repite. */}
+            {REGIONS.length > 1 &&
+              REGIONS.map((r) => (
+                <option key={r.slug} value={r.slug}>
+                  {`${r.name}${n(counts.zones[r.slug])}`}
+                </option>
+              ))}
+            {[...new Set(ZONES.map((z) => z.group ?? ""))].map((g) => (
+              <optgroup key={g || "zonas"} label={g || "Zonas"}>
+                {ZONES.filter((z) => (z.group ?? "") === g).map((z) => (
+                  <option key={z.slug} value={z.slug}>
+                    {`${z.name}${n(counts.zones[z.slug])}`}
+                  </option>
+                ))}
+              </optgroup>
             ))}
           </select>
           {supportsDistance && (

@@ -283,9 +283,9 @@ async function fillToReview(page: Page) {
 
   await expect(h1(page)).toHaveText("¿Por cuánto la vendes?");
   await page.getByRole("textbox", { name: "Precio" }).fill("280");
-  await page.getByRole("button", { name: "Asturias" }).click();
-  await page.getByRole("button", { name: "Gijón" }).click();
-  await expect(page.getByLabel("Localidad", { exact: true })).toHaveValue("Gijón");
+  await page.getByRole("button", { name: "La Palma" }).click();
+  await page.getByRole("button", { name: "Los Llanos de Aridane" }).click();
+  await expect(page.getByLabel("Localidad", { exact: true })).toHaveValue("Los Llanos de Aridane");
   await page.getByLabel("Tu teléfono").fill("600 000 000");
   expect(await noOverflow(page)).toBe(0);
   await page.getByRole("button", { name: "Revisar anuncio" }).click();
@@ -301,7 +301,7 @@ test("publicar (escritorio): 5 pasos con vista previa en vivo hasta el anuncio d
   await expect(preview).toBeVisible();
   await expect(preview.getByText("280 €")).toBeVisible();
   await expect(preview.getByText(`Híbrida sin marca 6'4"`)).toBeVisible();
-  await expect(preview.getByText("Gijón, Asturias · Muy buen estado")).toBeVisible();
+  await expect(preview.getByText("Los Llanos de Aridane, La Palma · Muy buen estado")).toBeVisible();
   await expect(page.getByText(/no se publica nada/)).toBeVisible();
   await page.getByRole("button", { name: "Terminar la prueba" }).click();
   await expect(page.getByRole("heading", { name: "Prueba terminada" })).toBeVisible();

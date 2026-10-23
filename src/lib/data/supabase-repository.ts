@@ -1,6 +1,6 @@
 import "server-only";
 import { cacheLife, cacheTag } from "next/cache";
-import { REGIONS, type ListingStatus } from "@/lib/domain/taxonomy";
+import { REGIONS, ZONES, type ListingStatus } from "@/lib/domain/taxonomy";
 import type { Listing } from "@/lib/domain/types";
 import type { Filters } from "@/lib/search/filters";
 import { photoUrl } from "@/lib/supabase/env";
@@ -102,6 +102,8 @@ async function facetsCached(f: Filters): Promise<Facets> {
   }
   // Regiones: suma de sus zonas (mismo resultado que filtrar por la región).
   for (const region of REGIONS) out.zones[region.slug] = region.zones.reduce((s, z) => s + (out.zones[z] ?? 0), 0);
+  // Sin zona = todo el territorio activo: no cuenta anuncios de zonas fuera del lanzamiento.
+  out.anyZone = ZONES.reduce((s, z) => s + (out.zones[z.slug] ?? 0), 0);
   return out;
 }
 

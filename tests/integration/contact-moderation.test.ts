@@ -41,8 +41,8 @@ const input: Input = {
   repairs: "",
   description: "",
   priceEur: 210,
-  zoneSlug: "cadiz",
-  town: "El Palmar",
+  zoneSlug: "fuerteventura",
+  town: "Corralejo",
   contactMethod: "whatsapp",
   phone: "611 000 111",
 };

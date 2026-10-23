@@ -18,7 +18,7 @@ import { absoluteUrl, SITE_NAME, OG_BASE } from "@/lib/site";
 import styles from "@/components/home/Home.module.css";
 
 const DESCRIPTION =
-  "Compra y vende tablas de surf de segunda mano en España. Busca por litros, medidas, tipo y zona y habla directamente con quien vende, sin comisiones.";
+  "Compra y vende tablas de surf de segunda mano en Canarias, en todas las islas. Busca por litros, medidas, tipo e isla y habla directamente con quien vende, sin comisiones.";
 
 export const metadata: Metadata = {
   description: DESCRIPTION,
@@ -40,7 +40,7 @@ const CATEGORIES: { label: string; form: LandingForm; shape: Shape; soft?: boole
 ];
 
 const STEPS = [
-  { n: "01", t: "Filtra por lo que importa", d: "Litros, longitud, tipo, precio y zona. En cada medida ves de dónde sale: del vendedor, del fabricante o «sin indicar»." },
+  { n: "01", t: "Filtra por lo que importa", d: "Litros, longitud, tipo, precio e isla. En cada medida ves de dónde sale: del vendedor, del fabricante o «sin indicar»." },
   { n: "02", t: "Escribe o llama a quien vende", d: "Por WhatsApp o por teléfono, sin intermediarios. Reboard no se lleva comisión." },
   { n: "03", t: "Mírala bien antes de pagar", d: "Quedad en un sitio público, revisa cantos, fondo y quillas, y paga en mano al llevártela. Nunca por adelantado." },
 ];
@@ -60,7 +60,7 @@ const GUIDES: { t: string; d: string; href: string; photo: PhotoSlug }[] = [
   },
   {
     t: "Compara antes de decidir",
-    d: "Pon hasta cuatro tablas una al lado de otra: litros, medidas, estado, precio y zona.",
+    d: "Pon hasta cuatro tablas una al lado de otra: litros, medidas, estado, precio e isla.",
     href: "/comparar",
     photo: "entrando-al-agua",
   },
@@ -91,7 +91,7 @@ export default async function Home() {
   ]);
 
   // Sin ninguna tabla publicada (beta sin base de datos), la página no repite «0» ni «crear alerta» en
-  // cada tarjeta y da más peso a publicar. Las zonas y marcas solo se listan si tienen tablas.
+  // cada tarjeta y da más peso a publicar. Las islas y marcas solo se listan si tienen tablas.
   const inventoryEmpty = facets.anyZone === 0;
   const cats = catFilters.map((c, i) => ({ ...c, n: catCounts[i] })).sort((a, b) => Number(b.n > 0) - Number(a.n > 0));
   const zones = ZONES.map((z) => ({ ...z, n: facets.zones[z.slug] ?? 0 }))
@@ -114,14 +114,14 @@ export default async function Home() {
           <Photo slug="hero-surfistas-orilla" sizes="100vw" preload position="62% 55%" decorative />
         </div>
         <section className={`container ${styles.hero}`}>
-          <p className={styles.kicker}>Compra y vende en toda España</p>
+          <p className={styles.kicker}>Compra y vende en todas las islas</p>
           <h1 className={styles.h1}>
             Tablas de surf{" "}
             <br />
-            <span>de segunda mano</span>
+            <span>de segunda mano</span> en&nbsp;Canarias
           </h1>
           <p className={styles.lead}>
-            Tablas de surfistas, tiendas y escuelas. Filtra por litros, medidas y zona, y habla directamente con quien vende. Sin
+            Tablas de surfistas, tiendas y escuelas de las ocho islas. Filtra por litros, medidas e isla, y habla directamente con quien vende. Sin
             comisiones.
           </p>
 
@@ -241,10 +241,10 @@ export default async function Home() {
       </section>
 
       {(zones.length > 0 || brands.length > 0) && (
-        <section className={`container ${styles.section} ${styles.explore}`} aria-label="Explorar por zona y marca">
+        <section className={`container ${styles.section} ${styles.explore}`} aria-label="Explorar por isla y marca">
           {zones.length > 0 && (
             <div>
-              <h2 className={styles.h3}>Por zona</h2>
+              <h2 className={styles.h3}>Por isla</h2>
               <div className={styles.zones}>
                 {zones.map((z) => (
                   <Link key={z.slug} href={landingPath(z.slug, null)} className={styles.zone}>
@@ -289,6 +289,8 @@ export default async function Home() {
               url: absoluteUrl("/"),
               logo: absoluteUrl("/brand/reboard-icon-512.png"),
               description: DESCRIPTION,
+              // Lanzamiento solo en Canarias (LAUNCH en src/lib/domain/taxonomy.ts).
+              areaServed: { "@type": "AdministrativeArea", name: "Islas Canarias" },
             },
           ],
         }}

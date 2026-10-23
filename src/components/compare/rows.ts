@@ -51,7 +51,7 @@ const DEFS: Def[] = [
   ["Estado", (l) => CONDITION_LABEL[l.condition]],
   ["Reparaciones", (l) => (l.repairs ? "Sí · ver anuncio" : "Ninguna indicada")],
   ["Ubicación", (l) => `${l.town}, ${zoneName(l)}`],
-  ["Distancia", (l, c) => (l.zone !== c.here ? "Otra zona" : l.distanceKm != null ? `${l.distanceKm} km` : null), true],
+  ["Distancia", (l, c) => (l.zone !== c.here ? "Otra isla" : l.distanceKm != null ? `${l.distanceKm} km` : null), true],
   ["Disponibilidad", (l, c) => availability(l, c.now).text],
   ["Vendedor", (l) => SELLER_LABEL[l.seller.type]],
   [

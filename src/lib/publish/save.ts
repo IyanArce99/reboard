@@ -5,6 +5,7 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@/lib/supabase/database.types";
 import { listingDbId } from "@/lib/auth/shared";
+import { LAUNCH } from "@/lib/domain/taxonomy";
 import { PHOTOS_BUCKET } from "@/lib/supabase/env";
 import { listingSlugFor, type ListingData } from "./schema";
 
@@ -110,6 +111,9 @@ export async function saveListing(sb: Sb, userId: string, v: ListingData, editin
       .select("id, public_id, slug, status")
       .single();
     // Límite de la base de datos: 15 anuncios nuevos por usuario y día (migración 20261027090000).
+    if (error?.message.includes("zone_not_active")) {
+      throw new PublishError("state", `De momento, Reboard funciona solo ${LAUNCH.inAll}. Elige una ${LAUNCH.zoneNoun} en «Precio y ubicación».`);
+    }
     if (error?.message.includes("listing_daily_limit")) {
       throw new PublishError("state", "Has llegado al máximo de 15 anuncios nuevos en 24 horas. Podrás publicar más dentro de unas horas; este se queda guardado en tu dispositivo.");
     }

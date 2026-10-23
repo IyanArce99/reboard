@@ -5,6 +5,8 @@ import {
   SHAPES,
   SHAPE_INFO,
   ZONES,
+  LAUNCH,
+  coversTerritory,
   placeName,
   type Shape,
 } from "@/lib/domain/taxonomy";
@@ -18,8 +20,11 @@ export type LandingForm = (typeof LANDING_FORMS)[number];
 export const BEGINNER_MIN_VOLUME = 55;
 
 export const isLandingForm = (s: string): s is LandingForm => (LANDING_FORMS as readonly string[]).includes(s);
-export const isLandingPlace = (s: string) => ZONES.some((z) => z.slug === s) || REGIONS.some((r) => r.slug === s);
-export const LANDING_PLACES = [...REGIONS.map((r) => r.slug), ...ZONES.map((z) => z.slug)];
+// Una región que abarca todo el territorio activo no tiene landing propia: duplicaría las generales
+// (proxy.ts redirige /tablas/canarias → / y /tablas/canarias/{tipo} → /tablas/{tipo}).
+const REGION_PLACES = REGIONS.filter((r) => !coversTerritory(r.slug)).map((r) => r.slug);
+export const isLandingPlace = (s: string) => ZONES.some((z) => z.slug === s) || REGION_PLACES.includes(s);
+export const LANDING_PLACES = [...REGION_PLACES, ...ZONES.map((z) => z.slug)];
 
 export function formFilters(form: LandingForm): Partial<Filters> {
   if (form === "softboard") return { constructions: ["softboard"] };
@@ -37,7 +42,7 @@ export const formLabel = (form: LandingForm) =>
 /** Título de la landing; las de forma y zona reutilizan el H1 de /buscar. */
 export function landingTitle(place: string | null, form: LandingForm | null, fallback: string) {
   if (form !== "principiantes") return fallback;
-  return `Tablas de surf de segunda mano para principiantes${place ? ` en ${placeName(place)}` : ""}`;
+  return `Tablas de surf de segunda mano para principiantes ${place ? `en ${placeName(place)}` : LAUNCH.inAll}`;
 }
 
 const SHAPE_INTROS: Partial<Record<LandingForm, string>> = {
@@ -72,7 +77,7 @@ const tablas = (n: number) => `${n} ${n === 1 ? "tabla" : "tablas"}`;
  * todas las zonas. Sin anuncios no se cita un número (la página es noindex).
  */
 export function landingDescription(place: string | null, form: LandingForm | null, count: number) {
-  const where = place ? ` en ${placeName(place)}` : " en España";
+  const where = place ? ` en ${placeName(place)}` : ` ${LAUNCH.inAll}`;
   const what = form ? (form === "principiantes" ? "tablas de surf para principiantes" : formLabel(form).toLowerCase()) : "tablas de surf";
   const head = count > 0 ? `${tablas(count)} de segunda mano${where}` : `Tablas de segunda mano${where}`;
   const kind = form ? `${FORM_SHORT[form]}. ` : "";

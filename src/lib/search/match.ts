@@ -1,11 +1,11 @@
-import { NO_BRAND, regionBySlug, slugify } from "@/lib/domain/taxonomy";
+import { ACTIVE_ZONE_SLUGS, NO_BRAND, regionBySlug, slugify } from "@/lib/domain/taxonomy";
 import type { Listing } from "@/lib/domain/types";
 import { finLabel, hasVolumeFilter, type Filters, type Sort } from "./filters";
 
 export const brandSlugOf = (l: Listing) => (l.brand ? slugify(l.brand) : NO_BRAND.slug);
 
 export function inZone(l: Listing, zone: string) {
-  if (!zone) return true;
+  if (!zone) return ACTIVE_ZONE_SLUGS.includes(l.zone);
   const region = regionBySlug(zone);
   return region ? region.zones.includes(l.zone) : l.zone === zone;
 }

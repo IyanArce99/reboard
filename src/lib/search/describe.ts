@@ -6,6 +6,7 @@ import {
   NO_BRAND,
   SELLER_LABEL,
   SHAPE_INFO,
+  LAUNCH,
   placeName,
   type Shape,
 } from "@/lib/domain/taxonomy";
@@ -43,7 +44,8 @@ const SHAPE_HEAD: Record<Shape, string> = {
 export function resultsTitle(f: Filters, names: CatalogNames) {
   const shape = singleShape(f);
   const z = f.zone ? placeName(f.zone) : null;
-  const where = z ? ` en ${z}` : "";
+  // Sin zona: todo el territorio activo («… en Canarias»), también en el H1 y el <title>.
+  const where = z ? ` en ${z}` : ` ${LAUNCH.inAll}`;
   if (shape) return `${SHAPE_HEAD[shape]} de segunda mano${where}`;
   const head = onlySoftboard(f)
       ? "Softboards (tablas de espuma)"
@@ -107,7 +109,7 @@ export function alertText(f: Filters, names: CatalogNames) {
   const len = lengthPhrase(f);
   const b = f.brand ? ` ${brandName(f.brand, names)}` : "";
   const p = f.priceMax != null ? `, por menos de ${f.priceMax} €` : "";
-  const z = f.zone ? `, en ${placeName(f.zone) ?? f.zone}` : ", en toda España";
+  const z = f.zone ? `, en ${placeName(f.zone) ?? f.zone}` : `, ${LAUNCH.inAll}`;
   return `${t}${b}${len}${v}${p}${z}`;
 }
 
@@ -157,7 +159,7 @@ export function appliedChips(f: Filters, names: CatalogNames): AppliedChip[] {
 export function emptySuggestions(f: Filters): { label: string; filters: Filters }[] {
   const out: { label: string; filters: Filters }[] = [];
   if (f.zone && f.dist) out.push({ label: "Cualquier distancia", filters: { ...f, dist: null } });
-  if (f.zone) out.push({ label: "Toda España", filters: { ...f, zone: "", dist: null } });
+  if (f.zone) out.push({ label: LAUNCH.allLabel, filters: { ...f, zone: "", dist: null } });
   if (f.priceMax != null) {
     const p = f.priceMax + 50;
     out.push({ label: `Hasta ${p} €`, filters: { ...f, priceMax: p } });

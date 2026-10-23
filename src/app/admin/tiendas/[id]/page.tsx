@@ -47,7 +47,7 @@ export default async function AdminShop(props: PageProps<"/admin/tiendas/[id]">)
 
   const [shopRes, zonesRes] = await Promise.all([
     sb.from("shops").select("*").eq("id", id.data).maybeSingle(),
-    sb.from("zones").select("slug, name").order("sort_order"),
+    sb.from("zones").select("slug, name, active").order("sort_order"),
   ]);
   if (shopRes.error) return <Notice tone="error">{adminErrorText(shopRes.error)}</Notice>;
   const shop = shopRes.data;
@@ -124,7 +124,8 @@ export default async function AdminShop(props: PageProps<"/admin/tiendas/[id]">)
         </h2>
         <ShopForm
           action={updateShop.bind(null, shop.id)}
-          zones={zonesRes.data ?? []}
+          // Solo zonas activas (y la actual, si una tienda antigua está en una inactiva).
+          zones={(zonesRes.data ?? []).filter((z) => z.active || z.slug === shopRes.data?.zone_slug)}
           submitLabel="Guardar cambios"
           values={{
             name: shop.name,

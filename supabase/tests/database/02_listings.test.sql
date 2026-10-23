@@ -44,7 +44,7 @@ select lives_ok($$ update public.listings set status = 'published' where slug = 
   'A publica un anuncio');
 select lives_ok($$
   insert into public.listings (slug, size_label, length_in, shape, construction, condition, price_eur, zone_slug, town)
-  values ('t-borrador', '6''0"', 72, 'shortboard', 'pu', 'como-nueva', 300, 'asturias', 'Gijón')
+  values ('t-borrador', '6''0"', 72, 'shortboard', 'pu', 'como-nueva', 300, 'la-palma', 'Los Llanos de Aridane')
 $$, 'A guarda un borrador');
 
 select is((select seller_id from public.listings where slug = 't-publicado'),
@@ -63,7 +63,7 @@ select throws_ok($$ update public.listings set published_at = now() - interval '
   '42501', null, 'A no puede cambiar published_at');
 select throws_ok($$
   insert into public.listings (slug, size_label, length_in, shape, construction, condition, price_eur, zone_slug, town, seller_id)
-  values ('t-ajeno', '6''0"', 72, 'fish', 'pu', 'como-nueva', 300, 'asturias', 'Gijón', '22222222-2222-2222-2222-222222222222')
+  values ('t-ajeno', '6''0"', 72, 'fish', 'pu', 'como-nueva', 300, 'la-palma', 'Los Llanos de Aridane', '22222222-2222-2222-2222-222222222222')
 $$, '42501', null, 'A no puede crear anuncios a nombre de B');
 -- Eliminar: permitido al dueño sin moderación desde 20261024100000 (comprobado al final del archivo).
 
@@ -109,7 +109,7 @@ select is((select count(*) from public.listings where slug in ('t-publicado','t-
   'anon solo ve el anuncio publicado');
 select throws_ok($$
   insert into public.listings (slug, size_label, length_in, shape, construction, condition, price_eur, zone_slug, town)
-  values ('t-anon', '6''0"', 72, 'fish', 'pu', 'como-nueva', 300, 'asturias', 'Gijón')
+  values ('t-anon', '6''0"', 72, 'fish', 'pu', 'como-nueva', 300, 'la-palma', 'Los Llanos de Aridane')
 $$, '42501', null, 'anon no puede publicar');
 
 -- ───────── Comprobaciones como postgres ─────────
@@ -161,11 +161,11 @@ set local role authenticated;
 set local request.jwt.claims to '{"sub":"22222222-2222-2222-2222-222222222222","role":"authenticated"}';
 select throws_ok($$
   insert into public.listings (slug, size_label, length_in, shape, construction, condition, price_eur, zone_slug, town)
-  select 't-lote-' || g, '6''0"', 72, 'fish', 'pu', 'buen-estado', 200, 'asturias', 'Gijón' from generate_series(1, 16) g
+  select 't-lote-' || g, '6''0"', 72, 'fish', 'pu', 'buen-estado', 200, 'la-palma', 'Los Llanos de Aridane' from generate_series(1, 16) g
 $$, 'P0001', 'listing_daily_limit', 'máximo 15 anuncios nuevos al día por usuario');
 select lives_ok($$
   insert into public.listings (slug, size_label, length_in, shape, construction, condition, price_eur, zone_slug, town)
-  select 't-lote-' || g, '6''0"', 72, 'fish', 'pu', 'buen-estado', 200, 'asturias', 'Gijón' from generate_series(1, 15) g
+  select 't-lote-' || g, '6''0"', 72, 'fish', 'pu', 'buen-estado', 200, 'la-palma', 'Los Llanos de Aridane' from generate_series(1, 15) g
 $$, 'hasta 15 sí');
 reset role;
 

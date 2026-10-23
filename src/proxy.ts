@@ -5,6 +5,7 @@ import { GUIDES, PENDING_GUIDES } from "@/lib/content/guides";
 import { legalDoc } from "@/lib/content/legal";
 import { catalogSlugs, listingSlug, shopSlugs } from "@/lib/data/lookup";
 import { idFromSlugId } from "@/lib/listing/present";
+import { coversTerritory } from "@/lib/domain/taxonomy";
 import { isLandingForm, isLandingPlace } from "@/lib/search/landings";
 import { refreshSession, withSessionCookies } from "@/lib/supabase/proxy-session";
 
@@ -82,6 +83,12 @@ export async function proxy(request: NextRequest) {
       return NextResponse.redirect(new URL(canonical, request.url), 308);
     }
     return NextResponse.next();
+  }
+
+  // /tablas/canarias(/tipo): la región es todo el territorio activo → la landing general (308).
+  if (parts[0] === "tablas" && parts.length >= 2 && coversTerritory(parts[1])) {
+    if (parts.length === 2) return NextResponse.redirect(new URL("/", request.url), 308);
+    if (parts.length === 3 && isLandingForm(parts[2])) return NextResponse.redirect(new URL(`/tablas/${parts[2]}`, request.url), 308);
   }
 
   // Los índices (/tiendas, /guias) son rutas estáticas; solo se validan los segmentos dinámicos.

@@ -31,8 +31,8 @@ async function makeListing(client: Sb, userId: string) {
       construction: "pu",
       condition: "buen-estado",
       price_eur: 200,
-      zone_slug: "cantabria",
-      town: "Somo",
+      zone_slug: "lanzarote",
+      town: "Famara",
     })
     .select("id, public_id")
     .single();
@@ -169,8 +169,8 @@ describe("administrador", () => {
       construction: "pu",
       condition: "buen-estado",
       price_eur: 150,
-      zone_slug: "cantabria",
-      town: "Somo",
+      zone_slug: "lanzarote",
+      town: "Famara",
     });
     expect(insertError).not.toBeNull();
     const { error: uploadError } = await seller.client.storage
@@ -191,8 +191,8 @@ describe("administrador", () => {
       construction: "pu",
       condition: "buen-estado",
       price_eur: 150,
-      zone_slug: "cantabria",
-      town: "Somo",
+      zone_slug: "lanzarote",
+      town: "Famara",
     });
     expect(afterError).toBeNull();
     const { error: hiddenEdit } = await seller.client.from("listings").update({ price_eur: 190 }).eq("id", listingId);

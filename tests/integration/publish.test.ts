@@ -41,8 +41,8 @@ const base: Input = {
   repairs: "",
   description: "Prueba de integración: tabla de test.",
   priceEur: 333,
-  zoneSlug: "asturias",
-  town: "Salinas",
+  zoneSlug: "la-palma",
+  town: "Los Llanos de Aridane",
   contactMethod: "whatsapp",
   phone: "600 111 222",
 };
@@ -102,7 +102,7 @@ describe("publicar (E3, E4)", () => {
     publicId = r.publicId;
     listingId = r.id;
     expect(r.status).toBe("draft");
-    expect(r.slug).toBe("torq-fun-tet-7-2-asturias");
+    expect(r.slug).toBe("torq-fun-tet-7-2-la-palma");
     const { data: row } = await sb.from("listings").select("model_size_id, volume_source, length_source").eq("id", listingId).single();
     expect(row?.model_size_id).not.toBeNull();
     expect(row).toMatchObject({ volume_source: "seller", length_source: "manufacturer" });
@@ -138,7 +138,7 @@ describe("publicar (E3, E4)", () => {
     );
     expect(r.publicId).toBe(publicId);
 
-    const found = await db.search(withFilters({ zone: "asturias", brand: "torq", volMin: 47, volMax: 48, priceMax: 333 }), { sort: "recientes", limit: 50 });
+    const found = await db.search(withFilters({ zone: "la-palma", brand: "torq", volMin: 47, volMax: 48, priceMax: 333 }), { sort: "recientes", limit: 50 });
     const mine = found.items.find((l) => l.id === publicId);
     expect(mine, "el anuncio publicado aparece en /buscar").toBeTruthy();
     expect(mine!.photos).toHaveLength(2);

@@ -3,7 +3,7 @@
 // de datos también. Módulo puro: lo usan la isla cliente (para avisar antes) y las Server Actions.
 
 import { z } from "zod";
-import { CONDITIONS, CONSTRUCTIONS, SHAPES, ZONES, slugify, type Shape } from "@/lib/domain/taxonomy";
+import { CONDITIONS, CONSTRUCTIONS, LAUNCH, SHAPES, ZONES, slugify, type Shape } from "@/lib/domain/taxonomy";
 import type { CatalogModel } from "@/lib/domain/types";
 import { ftLabel } from "@/lib/domain/format";
 import { OTHER_MODEL, SHAPER_LOCAL, type FieldSource, type PublishDraft, OTHER_BRAND, isListedBrand } from "./draft";
@@ -104,6 +104,7 @@ export const FIELD_TEXT: Record<string, string> = {
   repairs: "El texto de golpes y reparaciones puede tener hasta 600 caracteres.",
   description: "La descripción puede tener hasta 2.000 caracteres.",
   sizeLabel: "Indica la longitud de la tabla.",
+  zoneSlug: `Elige la ${LAUNCH.zoneNoun} donde está la tabla. De momento, Reboard funciona solo ${LAUNCH.inAll}.`,
 };
 
 export function firstIssueText(error: z.ZodError): string {

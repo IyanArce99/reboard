@@ -7,7 +7,7 @@ export default function manifest(): MetadataRoute.Manifest {
   return {
     name: `${SITE_NAME} · Tablas de surf de segunda mano`,
     short_name: SITE_NAME,
-    description: "Compra y vende tablas de surf de segunda mano en España.",
+    description: "Compra y vende tablas de surf de segunda mano en Canarias.",
     lang: "es",
     start_url: "/",
     display: "standalone",
