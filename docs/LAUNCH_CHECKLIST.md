@@ -1,6 +1,6 @@
 # Lista de comprobación de lanzamiento
 
-Pasos para llevar la rama `mvp` a producción. Cada paso indica **quién** lo hace:
+Pasos para llevar `main` a producción. **La guía paso a paso actualizada está en `docs/PRODUCTION_SETUP.md`**; esta lista resume y marca el progreso. Cada paso indica **quién** lo hace:
 - 🧑 **Titular:** cuentas, pagos, datos legales y decisiones.
 - 🤖 **Desarrollo:** se puede hacer con acceso delegado.
 
@@ -41,7 +41,7 @@ Nada de esto se ha ejecutado aún en remoto.
 ## 4. Variables de entorno en Vercel (🧑 o 🤖)
 | Variable | Production | Preview | Notas |
 |---|---|---|---|
-| `REBOARD_DATA_SOURCE` | `supabase` | `mock` | Los Preview nunca tocan la base de datos real |
+| `SITE_INDEXABLE` | `false` → `true` al abrir | — | Indexación solo con el dominio definitivo y los textos legales revisados |
 | `NEXT_PUBLIC_SITE_URL` | `https://reboard.es` | — | |
 | `NEXT_PUBLIC_SUPABASE_URL` | URL del proyecto | — | Pública |
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | clave anon o publishable | — | Pública (va bajo RLS) |
@@ -56,7 +56,7 @@ Nada de esto se ha ejecutado aún en remoto.
 
 ## 5. Antes de abrir (🤖 + 🧑)
 - [ ] **Textos legales revisados por un profesional**, con los datos del titular (`src/lib/content/legal.ts`). Quitar el aviso de borrador y el `noindex` de `/legal/*`.
-- [ ] Sin banner DEMO y `robots.txt` con indexación activa (`isDemo = false` en producción).
+- [ ] `SITE_INDEXABLE=true` y `robots.txt` con indexación activa. La app ya no tiene datos DEMO: sin Supabase muestra la interfaz vacía.
 - [ ] La lista de SECURITY.md §9 completa.
 - [ ] **Prueba de humo en producción con un email real:**
   - entrar con el código;

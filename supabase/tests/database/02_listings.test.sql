@@ -46,8 +46,7 @@ select throws_ok($$
   insert into public.listings (slug, size_label, length_in, shape, construction, condition, price_eur, zone_slug, town, seller_id)
   values ('t-ajeno', '6''0"', 72, 'fish', 'pu', 'como-nueva', 300, 'asturias', 'Gijón', '22222222-2222-2222-2222-222222222222')
 $$, '42501', null, 'A no puede crear anuncios a nombre de B');
-select throws_ok($$ delete from public.listings where slug = 't-borrador' $$,
-  '42501', null, 'no se borran anuncios (se retiran)');
+-- Eliminar: permitido al dueño sin moderación desde 20261024100000 (comprobado al final del archivo).
 
 -- Origen de los datos: nunca valor sin origen ni origen sin valor
 select throws_ok($$ update public.listings set width_in = 21.5 where slug = 't-publicado' $$,
@@ -116,6 +115,27 @@ set local role service_role;
 select is(public.expire_listings(), 1, 'expire_listings caduca los no confirmados en 30 días');
 reset role;
 select is((select status::text from public.listings where slug = 't-publicado'), 'expired', 'el anuncio queda caducado');
+
+-- Eliminar (migración 20261024100000): solo el dueño y solo sin moderación
+set local role authenticated;
+set local request.jwt.claims to '{"sub":"22222222-2222-2222-2222-222222222222","role":"authenticated"}';
+delete from public.listings where slug = 't-publicado';
+reset role;
+select is((select count(*) from public.listings where slug = 't-publicado'), 1::bigint, 'B no puede eliminar el anuncio de A');
+
+update public.listings set moderation = 'flagged' where slug = 't-publicado';
+set local role authenticated;
+set local request.jwt.claims to '{"sub":"11111111-1111-1111-1111-111111111111","role":"authenticated"}';
+delete from public.listings where slug = 't-publicado';
+reset role;
+select is((select count(*) from public.listings where slug = 't-publicado'), 1::bigint, 'un anuncio con moderación no se puede eliminar (se conserva el registro)');
+
+update public.listings set moderation = 'visible' where slug = 't-publicado';
+set local role authenticated;
+set local request.jwt.claims to '{"sub":"11111111-1111-1111-1111-111111111111","role":"authenticated"}';
+delete from public.listings where slug = 't-publicado';
+reset role;
+select is((select count(*) from public.listings where slug = 't-publicado'), 0::bigint, 'el dueño elimina su anuncio sin moderación');
 
 select * from finish();
 rollback;

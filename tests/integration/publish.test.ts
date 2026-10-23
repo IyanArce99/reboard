@@ -7,7 +7,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { supabaseRepository as db } from "@/lib/data/supabase-repository";
 import type { Database } from "@/lib/supabase/database.types";
 import { ListingInput, type ListingInput as Input } from "@/lib/publish/schema";
-import { PublishError, finalizeListing, panelAction, saveListing } from "@/lib/publish/save";
+import { PublishError, deleteOwnListing, finalizeListing, panelAction, saveListing } from "@/lib/publish/save";
 import { withFilters } from "@/lib/search/filters";
 import { buildDemoInventory } from "../fixtures/demo-inventory";
 import { clearDemo, loadDemo } from "./demo-loader";
@@ -186,5 +186,20 @@ describe("publicar (E3, E4)", () => {
     const own = await seller.client.from("listings").select("public_id").neq("status", "draft");
     expect(own.data?.map((r) => r.public_id)).toContain(publicId);
     await expect(panelAction(seller.client, seller.userId, publicId, "price", 0)).rejects.toThrow(/precio entre 1 y 20.000/);
+  });
+
+  it("eliminar: otro usuario no puede; el dueño borra el anuncio y sus fotos de Storage", async () => {
+    await expect(deleteOwnListing(other.client, other.userId, publicId)).rejects.toThrow(/No encontramos/);
+    const folder = `${seller.userId}/${listingId}`;
+    const before = (await sb.storage.from("listing-photos").list(folder)).data ?? [];
+    expect(before.length).toBeGreaterThan(0);
+
+    const r = await deleteOwnListing(seller.client, seller.userId, publicId);
+    expect(r.photosDeleted).toBe(before.length);
+    const { data } = await sb.from("listings").select("id").eq("id", listingId);
+    expect(data).toEqual([]);
+    const after = (await sb.storage.from("listing-photos").list(folder)).data ?? [];
+    expect(after).toEqual([]);
+    expect(await db.byId(publicId)).toBeNull();
   });
 });

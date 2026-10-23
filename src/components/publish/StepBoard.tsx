@@ -14,6 +14,7 @@ import {
   SHAPER_LOCAL,
   applyCatalogSize,
   convertUnits,
+  orderBrands,
   type FieldSource,
   type PublishDraft,
 } from "@/lib/publish/draft";
@@ -42,11 +43,8 @@ export function StepBoard({ d, set, setD, catalog, brands: known, toast }: Props
   // Error fijo bajo el campo (no un toast que desaparece): DESIGN_AUDIT §8.
   const [pasteError, setPasteError] = useState("");
   const [allBrands, setAllBrands] = useState(false);
-  const brands = useMemo(() => {
-    const withModels = [...new Set(catalog.map((m) => m.brand))];
-    const rest = known.filter((b) => !withModels.includes(b)).sort((a, b) => a.localeCompare(b, "es"));
-    return [...withModels, ...rest];
-  }, [catalog, known]);
+  // Torq, NSP, Softech… primero; el listado completo, tras «Ver todas las marcas».
+  const brands = useMemo(() => orderBrands(known, [...new Set(catalog.map((m) => m.brand))]), [catalog, known]);
   // Al editar un anuncio con una marca escrita a mano que no está en la lista, se muestra igual.
   const special = [SHAPER_LOCAL, NO_BRAND_OPTION, OTHER_BRAND];
   const shownBrands = [

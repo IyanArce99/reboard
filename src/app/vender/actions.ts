@@ -8,7 +8,7 @@ import { headers } from "next/headers";
 import { z } from "zod";
 import { authEnabled } from "@/lib/auth/config";
 import { ListingInput, firstIssueText } from "@/lib/publish/schema";
-import { PublishError, finalizeListing, panelAction, saveListing, type PanelAction, type PhotoRef } from "@/lib/publish/save";
+import { deleteOwnListing, PublishError, finalizeListing, panelAction, saveListing, type PanelAction, type PhotoRef } from "@/lib/publish/save";
 import { verifyTurnstile } from "@/lib/security/turnstile";
 import { createUserClient } from "@/lib/supabase/server";
 
@@ -92,6 +92,23 @@ export async function finalizeListingAction(args: z.input<typeof FinalizeArgs>):
     const r = await finalizeListing(s.sb!, s.user!.id, a.data.publicId, a.data.photos as PhotoRef[], a.data.publish);
     invalidate(r.publicId);
     return { ok: true, path: `/anuncio/${r.slug}-${r.publicId}` };
+  } catch (e) {
+    return failure(e);
+  }
+}
+
+const DeleteArgs = z.object({ publicId: z.string().regex(/^a\d{1,15}$/) });
+
+/** Eliminar un anuncio propio desde «Mis anuncios» (con sus fotos). */
+export async function deleteListingServer(args: { publicId: string }): Promise<ActionResult<object>> {
+  const a = DeleteArgs.safeParse(args);
+  if (!a.success) return { ok: false, message: "Algo no ha ido bien. Recarga la página y vuelve a intentarlo." };
+  const s = await session();
+  if ("error" in s) return s.error!;
+  try {
+    const r = await deleteOwnListing(s.sb!, s.user!.id, a.data.publicId);
+    invalidate(r.publicId);
+    return { ok: true };
   } catch (e) {
     return failure(e);
   }

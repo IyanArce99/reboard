@@ -2,7 +2,7 @@
 // Módulo puro: lo usan el Server Component (editar desde el panel) y la isla cliente.
 
 import type { Condition, Construction, Shape } from "@/lib/domain/taxonomy";
-import { zoneBySlug } from "@/lib/domain/taxonomy";
+import { POPULAR_BRANDS, zoneBySlug } from "@/lib/domain/taxonomy";
 import type { CatalogModel, Listing, Measured, Photo } from "@/lib/domain/types";
 import { fmtIn, ftLabel } from "@/lib/domain/format";
 import { fieldToInches, parseLitres, type MeasureKey, type Unit } from "./parse";
@@ -21,6 +21,18 @@ export const OTHER_MODEL = "Otro";
 /** Marca que no está en la lista: el vendedor la escribe (se guarda como texto). */
 export const OTHER_BRAND = "Otra marca";
 /** Opciones de marca que no son una marca de la lista. */
+/**
+ * Orden de las marcas al publicar: primero las habituales (POPULAR_BRANDS, en ese orden), luego las
+ * que tienen modelos en el catálogo y después el resto por orden alfabético. Sin duplicados.
+ */
+export function orderBrands(known: string[], withModels: string[]): string[] {
+  const all = [...new Set([...known, ...withModels])];
+  const popular = POPULAR_BRANDS.filter((b) => all.includes(b));
+  const models = withModels.filter((b) => !popular.includes(b));
+  const rest = all.filter((b) => !popular.includes(b) && !models.includes(b)).sort((a, b) => a.localeCompare(b, "es"));
+  return [...popular, ...models, ...rest];
+}
+
 export const isListedBrand = (b: string) => Boolean(b) && b !== SHAPER_LOCAL && b !== NO_BRAND_OPTION && b !== OTHER_BRAND;
 
 export type ContactMethod = "whatsapp" | "phone" | "email";

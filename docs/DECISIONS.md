@@ -424,3 +424,12 @@ Detalle y verificación en `docs/BETA_AUDIT.md`.
   - textos orientativos.
 - **Turnstile:** la publicación espera el token en lugar de pedir otro clic.
 - **Marcas de referencia:** los tests ya no las borran. pgTAP comprueba que existen y que no hay modelos ni medidas precargados.
+
+## Preparación de producción
+- **Eliminar un anuncio** (antes solo se podía retirar). Migración `20261024100000_listings_delete_own`:
+  - el dueño puede borrar su anuncio, pero solo si no tiene moderación (marcado, retirado o con acciones registradas): `moderation_actions` se borra en cascada y se perdería ese registro;
+  - la acción del servidor borra después los archivos de Storage;
+  - el test pgTAP «no se borran anuncios» se sustituye por los de la nueva regla.
+- **Indexación con interruptor explícito.** `SITE_INDEXABLE=true` (además de Supabase): no se indexa en `*.vercel.app` ni con los textos legales en borrador.
+- **Marcas al publicar.** `POPULAR_BRANDS` (Torq, NSP, Softech…) va primero; el listado completo queda tras «Ver todas las marcas». Es un orden de conveniencia, sustituible por el recuento de anuncios reales.
+- **Guía de producción:** `docs/PRODUCTION_SETUP.md`. Los secretos solo van en los paneles y no se copian datos de prueba.

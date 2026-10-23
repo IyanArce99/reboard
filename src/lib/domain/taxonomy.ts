@@ -79,6 +79,25 @@ export const FIN_SYSTEMS = ["FCS II", "Futures", "Quillas blandas"] as const;
 // «Shaper local» o «Sin marca»; las dos acaban aquí.
 export const NO_BRAND = { slug: "sin-marca", label: "Sin marca", short: "Sin marca" };
 
+/**
+ * Marcas que más se ven en tablas de segunda mano en España: van primero al publicar. Es un orden de
+ * conveniencia (no un dato que se muestre); con anuncios reales se puede sustituir por su recuento.
+ */
+export const POPULAR_BRANDS = [
+  "Torq",
+  "NSP",
+  "Softech",
+  "Firewire",
+  "Channel Islands",
+  "Lost",
+  "Pukas",
+  "JS Industries",
+  "Pyzel",
+  "Catch Surf",
+  "Olaian",
+  "BIC",
+];
+
 export interface Zone {
   slug: string;
   name: string;

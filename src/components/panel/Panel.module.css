@@ -275,3 +275,12 @@
 .priceError:empty {
   display: none;
 }
+
+/* «Eliminar»: acción destructiva, en tono de error y sin relleno (no compite con las demás). */
+.act[data-danger] {
+  color: var(--rb-error);
+  border-color: color-mix(in srgb, var(--rb-error) 35%, transparent);
+}
+.act[data-danger]:hover {
+  border-color: var(--rb-error);
+}

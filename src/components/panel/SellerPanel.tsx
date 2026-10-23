@@ -11,7 +11,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { panelActionServer } from "@/app/vender/actions";
+import { deleteListingServer, panelActionServer } from "@/app/vender/actions";
 import { EmptyState } from "@/components/brand/EmptyState";
 import { useUserState } from "@/components/user/UserStateProvider";
 import { SHAPE_INFO } from "@/lib/domain/taxonomy";
@@ -112,6 +112,20 @@ export function SellerPanel({ listings, nowIso, live = false, sellerName, contac
       return;
     }
     toast(DONE_TEXT[action]);
+    router.refresh();
+  }
+
+  async function remove(l: Listing) {
+    if (!window.confirm("¿Eliminar el anuncio y sus fotos? No se puede deshacer. Si solo quieres que no se vea, retíralo.")) return;
+    setBusy(l.id);
+    const r = await deleteListingServer({ publicId: l.id });
+    setBusy(null);
+    if (!r.ok) {
+      toast(r.message);
+      if (r.login) router.push("/entrar?siguiente=/panel");
+      return;
+    }
+    toast("Anuncio eliminado, con sus fotos.");
     router.refresh();
   }
 
@@ -291,6 +305,11 @@ export function SellerPanel({ listings, nowIso, live = false, sellerName, contac
                         <button type="button" className={styles.act} disabled={working} onClick={() => void run(l, "republish")}>
                           Volver a publicar
                         </button>
+                        {live && (
+                          <button type="button" className={styles.act} data-danger disabled={working} onClick={() => void remove(l)}>
+                            Eliminar
+                          </button>
+                        )}
                       </>
                     ) : (
                       <>
@@ -334,6 +353,11 @@ export function SellerPanel({ listings, nowIso, live = false, sellerName, contac
                         >
                           Retirar
                         </button>
+                        {live && (
+                          <button type="button" className={styles.act} data-danger disabled={working} onClick={() => void remove(l)}>
+                            Eliminar
+                          </button>
+                        )}
                       </>
                     )}
                   </div>

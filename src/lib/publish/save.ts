@@ -5,6 +5,7 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@/lib/supabase/database.types";
 import { listingDbId } from "@/lib/auth/shared";
+import { PHOTOS_BUCKET } from "@/lib/supabase/env";
 import { listingSlugFor, type ListingData } from "./schema";
 
 type Sb = SupabaseClient<Database>;
@@ -173,6 +174,29 @@ export async function finalizeListing(sb: Sb, userId: string, publicId: string, 
 export type PanelAction = "confirm" | "sold" | "republish" | "withdraw" | "price";
 
 /** Acciones del panel. Las transiciones válidas y las fechas las impone la base de datos. */
+/**
+ * Elimina un anuncio propio y sus fotos de Storage. RLS (listings_delete_own) solo lo permite si no
+ * hay moderación: en ese caso se explica que se puede retirar.
+ */
+export async function deleteOwnListing(sb: Sb, userId: string, publicId: string) {
+  const own = await ownListing(sb, userId, publicId);
+  if (!own) throw new PublishError("not-found", "No encontramos ese anuncio en tu cuenta.");
+  const { data: deleted, error } = await sb.from("listings").delete().eq("id", own.id).select("id");
+  if (error || !deleted?.length) {
+    if (error) console.error("[eliminar]", error.message);
+    throw new PublishError("state", "Este anuncio está en revisión y no se puede eliminar. Puedes retirarlo para que no se vea.");
+  }
+  // Fotos: después de borrar la fila (si fallara, quedan archivos sin anuncio, no un anuncio sin fotos).
+  const folder = `${userId}/${own.id}`;
+  const { data: files } = await sb.storage.from(PHOTOS_BUCKET).list(folder, { limit: 100 });
+  const paths = (files ?? []).map((f) => `${folder}/${f.name}`);
+  if (paths.length) {
+    const { error: rmError } = await sb.storage.from(PHOTOS_BUCKET).remove(paths);
+    if (rmError) console.error("[eliminar] fotos", folder, rmError.message);
+  }
+  return { publicId: own.public_id ?? publicId, photosDeleted: paths.length };
+}
+
 export async function panelAction(sb: Sb, userId: string, publicId: string, action: PanelAction, price?: number) {
   const own = await ownListing(sb, userId, publicId);
   if (!own) throw new PublishError("not-found", "No encontramos ese anuncio en tu cuenta.");
