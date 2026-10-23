@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import { BoardShape } from "@/components/brand/BoardShape";
 import { CONDITION_LABEL, SELLER_LABEL } from "@/lib/domain/taxonomy";
 import type { Listing } from "@/lib/domain/types";
 import { eur } from "@/lib/domain/format";
@@ -68,7 +69,7 @@ function Card({ listing: l, now, hereZone, layout = "vertical", preload = false,
     return (
       <article className={styles.h}>
         <Link href={href} prefetch={prefetch} className={styles.hPhoto} tabIndex={-1} aria-hidden="true">
-          {photo && (
+          {photo ? (
             <Image
               src={photo.url}
               alt=""
@@ -78,6 +79,10 @@ function Card({ listing: l, now, hereZone, layout = "vertical", preload = false,
               data-off={off || undefined}
               fetchPriority={eager ? "high" : undefined}
             />
+          ) : (
+            <span className={styles.noPhoto}>
+              <BoardShape shape={l.shape} size={64} />
+            </span>
           )}
           {pro && <span className={`${ui.proBadge} ${styles.hPro}`}>{SELLER_LABEL[l.seller.type]}</span>}
           {off && <span className={`${ui.offBadge} ${styles.hOff}`}>{av.text}</span>}
@@ -121,7 +126,7 @@ function Card({ listing: l, now, hereZone, layout = "vertical", preload = false,
   return (
     <article className={styles.v}>
       <Link href={href} prefetch={prefetch} className={styles.vPhoto} tabIndex={-1} aria-hidden="true">
-        {photo && (
+        {photo ? (
           <Image
             src={photo.url}
             alt=""
@@ -132,6 +137,11 @@ function Card({ listing: l, now, hereZone, layout = "vertical", preload = false,
             preload={preload}
             fetchPriority={eager && !preload ? "high" : undefined}
           />
+        ) : (
+          // Sin fotos (raro: publicar exige al menos una): la silueta de su tipo, como en la ficha.
+          <span className={styles.noPhoto}>
+            <BoardShape shape={l.shape} size={120} />
+          </span>
         )}
         <span className={styles.vBadges}>
           {pro && <span className={ui.proBadge}>{SELLER_LABEL[l.seller.type]}</span>}
@@ -142,7 +152,9 @@ function Card({ listing: l, now, hereZone, layout = "vertical", preload = false,
             <span className={styles.kmDot} />
             {near ? `A ${l.distanceKm} km` : zoneName(l)}
           </span>
-          <span className={styles.count}>{l.photos.length === 1 ? "1 foto" : `${l.photos.length} fotos`}</span>
+          {l.photos.length > 0 && (
+            <span className={styles.count}>{l.photos.length === 1 ? "1 foto" : `${l.photos.length} fotos`}</span>
+          )}
         </span>
       </Link>
       <SaveButton id={l.id} name={title} className={styles.vSave} />

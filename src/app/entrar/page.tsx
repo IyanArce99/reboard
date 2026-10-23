@@ -40,7 +40,7 @@ export default function EntrarPage() {
         ) : (
           <>
             <p className={styles.lead}>
-              Las cuentas todavía no están activas en esta versión de demostración. Tus tablas guardadas, alertas y comparaciones
+              Las cuentas todavía no están activas. Tus tablas guardadas, alertas y comparaciones
               se guardan en este dispositivo.
             </p>
             <div className={styles.actions}>

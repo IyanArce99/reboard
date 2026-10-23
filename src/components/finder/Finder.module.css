@@ -215,8 +215,11 @@ button.seg::after {
 .weightInput:focus-visible {
   outline: none;
 }
+/* El ejemplo no debe parecer un peso ya escrito: texto, más pequeño y en la fuente de UI. */
 .weightInput::placeholder {
   color: var(--rb-faint);
+  font-family: var(--rb-font-ui);
+  font-size: 22px;
 }
 
 .weightUnit {

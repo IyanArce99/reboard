@@ -53,7 +53,7 @@ export function FinderStep({ state: W, set, weightError, levelError, onEnter, he
             <input
               inputMode="numeric"
               pattern="[0-9]*"
-              placeholder="75"
+              placeholder="Tu peso"
               value={W.w}
               onChange={(e) => set({ w: digits(e.target.value) })}
               onKeyDown={(e) => {

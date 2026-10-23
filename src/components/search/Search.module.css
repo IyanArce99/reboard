@@ -604,7 +604,8 @@
     background: rgba(239, 246, 245, 0.97);
     border-bottom: 1px solid var(--rb-line);
     display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
+    /* El orden («Más recientes», «Más baratas primero»…) necesita más ancho que «Filtros». */
+    grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.3fr) minmax(0, 1fr);
     gap: 8px;
   }
   /* Sin resultados solo queda «Filtros». */

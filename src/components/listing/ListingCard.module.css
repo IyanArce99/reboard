@@ -358,3 +358,12 @@
 .hCmp {
   font-size: 12px;
 }
+
+/* Sin fotos: silueta centrada sobre el fondo de la foto. */
+.noPhoto {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}

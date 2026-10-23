@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
+import { EmptyState } from "@/components/brand/EmptyState";
 import { Photo } from "@/components/brand/Photo";
 import { Breadcrumbs } from "@/components/seo/Breadcrumbs";
 import { ShopDirectory } from "@/components/shops/ShopIslands";
@@ -65,7 +66,22 @@ export default async function ShopsPage() {
         </div>
       </div>
       <div className={`container ${styles.page}`}>
-        <ShopDirectory cards={cards} />
+        {cards.length ? (
+          <ShopDirectory cards={cards} />
+        ) : (
+          // Sin establecimientos todavía: ni filtros vacíos ni huecos, un estado honesto con lo que sí se puede hacer.
+          <EmptyState
+            title="Todavía no hay tiendas ni escuelas"
+            actions={
+              <Link href="/buscar" className={ui.btnPrimary}>
+                Ver tablas
+              </Link>
+            }
+          >
+            Cuando se den de alta, verás aquí sus tablas usadas, su dirección y su horario. Mientras tanto, las tablas de
+            particulares están en la búsqueda.
+          </EmptyState>
+        )}
       </div>
     </main>
   );

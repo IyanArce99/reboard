@@ -569,10 +569,16 @@
   line-height: 0.98;
 }
 
+/* 4 columnas fijas: con auto-fill quedaba una quinta vacía y las tarjetas ocupaban media página. */
 .similarGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 16px;
+}
+@media (max-width: 1023px) {
+  .similarGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 
 /* ——— Barra de contacto (móvil) ——— */

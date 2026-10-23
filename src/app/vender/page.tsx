@@ -54,9 +54,11 @@ export default function VenderPage() {
               <Link href="/vender/publicar" className={styles.cta}>
                 Publicar mi tabla
               </Link>
-              <Link href="/panel" className={styles.secondary}>
-                Ver mis anuncios
-              </Link>
+              {!closed && (
+                <Link href="/panel" className={styles.secondary}>
+                  Ver mis anuncios
+                </Link>
+              )}
             </div>
             {closed && (
               <p className={styles.demo}>
