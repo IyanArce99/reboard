@@ -54,7 +54,7 @@ export function Footer() {
         ))}
       </div>
       <div className={styles.bottom}>
-        <span>Reboard · Hecho para surfistas en España</span>
+        <span>© Reboard · Hecho para surfistas en España</span>
         <nav className={styles.legal} aria-label="Legal">
           <Link href="/legal/aviso-legal">Aviso legal</Link>
           <Link href="/legal/privacidad">Privacidad</Link>

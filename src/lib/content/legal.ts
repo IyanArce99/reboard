@@ -1,6 +1,6 @@
 // Textos legales · BORRADORES pendientes de revisión por un profesional (fase G).
-// No contienen datos del titular (van entre corchetes) ni afirman cumplimiento legal: describen
-// solo lo que la aplicación hace de verdad. No se indexan hasta que estén revisados.
+// Los datos del titular son los que ha dado el titular; lo que falta va entre corchetes. No afirman
+// cumplimiento legal: describen solo lo que la aplicación hace de verdad. No se indexan hasta que estén revisados.
 
 export interface LegalSection {
   h: string;
@@ -14,10 +14,10 @@ export interface LegalDoc {
   sections: LegalSection[];
 }
 
-const TITULAR = "[NOMBRE O RAZÓN SOCIAL DEL TITULAR]";
-const NIF = "[NIF/CIF]";
-const DOMICILIO = "[DOMICILIO]";
-const EMAIL = "[EMAIL DE CONTACTO]";
+const TITULAR = "[RAZÓN SOCIAL COMPLETA, p. ej. «… S.L.»]";
+const NIF = "B23869027";
+const DOMICILIO = "C/ Lepanto 23, 35010 Las Palmas de Gran Canaria (Las Palmas)";
+const EMAIL = "hola@reboard.es";
 
 export const LEGAL_DOCS: LegalDoc[] = [
   {
@@ -27,7 +27,7 @@ export const LEGAL_DOCS: LegalDoc[] = [
     sections: [
       {
         h: "Titular",
-        p: [`Titular: ${TITULAR}. NIF: ${NIF}. Domicilio: ${DOMICILIO}. Contacto: ${EMAIL}.`, "[Datos registrales, si aplican.]"],
+        p: [`Titular: ${TITULAR}. NIF: ${NIF}. Domicilio: ${DOMICILIO}. Contacto: ${EMAIL}.`, "[Datos de inscripción en el Registro Mercantil de Las Palmas: tomo, folio y hoja.]"],
       },
       {
         h: "Qué es Reboard",
@@ -55,6 +55,7 @@ export const LEGAL_DOCS: LegalDoc[] = [
         h: "Datos que tratamos",
         p: [
           "Si creas una cuenta: tu email (para entrar con un código de un solo uso) y el nombre visible que elijas.",
+          "Si entras con Google o con Apple: recibimos de ellos tu email y tu nombre. Usamos solo el nombre de pila como nombre visible inicial (puedes cambiarlo en «Mi cuenta»). Si en Apple eliges ocultar tu email, recibimos una dirección de reenvío de Apple.",
           "Si publicas un anuncio: los datos de la tabla, la localidad (nunca una dirección exacta), las fotos (se les quitan en tu dispositivo los datos de ubicación y de la cámara antes de subirlas) y tu teléfono de contacto. El teléfono no aparece en el anuncio: se muestra a quien pulsa «Mostrar contacto».",
           "Cuando alguien pide el contacto de un anuncio: registramos el anuncio, la fecha y un código derivado de la dirección IP (HMAC) que no permite recuperar la IP. Sirve para limitar abusos y para que el vendedor vea cuántas veces se ha pedido su contacto.",
           "Si guardas tablas con tu cuenta: la lista de anuncios guardados. Si reportas un anuncio: el motivo y el detalle que escribas.",
@@ -71,6 +72,7 @@ export const LEGAL_DOCS: LegalDoc[] = [
           "Supabase (base de datos, autenticación y almacenamiento de fotos; proyecto alojado en la Unión Europea).",
           "Vercel (alojamiento de la web). [Región y garantías pendientes de confirmar.]",
           "Cloudflare Turnstile (comprobación anti-robots en el acceso, el contacto, publicar y reportar).",
+          "Google y Apple, solo si eliges entrar con su cuenta: verifican tu identidad y nos envían tu email y tu nombre.",
           "Resend (envío del email con el código de acceso). [Pendiente de contratar y configurar.]",
           "[Revisar contratos de encargo de tratamiento y transferencias internacionales.]",
         ],
@@ -98,13 +100,14 @@ export const LEGAL_DOCS: LegalDoc[] = [
       {
         h: "Cookies y almacenamiento que usamos",
         p: [
+          "Todas son propias y técnicas: sin ellas la función que pides no funciona. Por eso no te pedimos consentimiento ni mostramos un banner de cookies.",
           "Sesión (cookies «sb-…» de Supabase): solo si entras con tu cuenta. Mantienen la sesión iniciada.",
-          "Zona de referencia («rb_zona»): recuerda la zona para mostrar «cerca de ti».",
-          "Almacenamiento local del navegador («rb-usuario-v1» y el borrador de publicación): guardados, alertas, comparación y el anuncio a medias. No salen de tu dispositivo salvo que entres con tu cuenta (los guardados).",
-          "Cloudflare Turnstile puede usar almacenamiento técnico propio para comprobar que no eres un robot. [Revisar con la documentación de Cloudflare.]",
+          "Zona de referencia (cookie «rb_zona»): solo si eliges tu zona. Recuerda la zona para mostrar «cerca de ti».",
+          "Almacenamiento local del navegador: guardados, alertas y comparación («rb-usuario-v1»), las respuestas de TablaFinder («rb-asistente-v1»), «Mis anuncios» en este dispositivo («rb-panel-v1») y el anuncio a medias (IndexedDB). No salen de tu dispositivo salvo que entres con tu cuenta (los guardados).",
+          "Cloudflare Turnstile se carga solo en el acceso, al pedir un contacto, al publicar y al reportar, para comprobar que no eres un robot. [Revisar con la documentación de Cloudflare qué almacena.]",
         ],
       },
-      { h: "Analítica", p: ["Ahora no hay analítica. Si se añade, se describirá aquí antes de activarla. [Decisión pendiente.]"] },
+      { h: "Analítica", p: ["No hay analítica, publicidad ni seguimiento de terceros. Si algún día se añade, se describirá aquí y se pedirá tu consentimiento antes de activarla."] },
     ],
   },
   {
