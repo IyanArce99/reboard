@@ -11,7 +11,6 @@ import { Turnstile, type TurnstileHandle } from "@/components/security/Turnstile
 import { CONDITION_LABEL, CONSTRUCTION_INFO, SHAPE_INFO, zoneBySlug } from "@/lib/domain/taxonomy";
 import type { CatalogModel } from "@/lib/domain/types";
 import type { PublishDraft } from "@/lib/publish/draft";
-import ui from "@/styles/ui.module.css";
 import { LivePreview, previewTexts } from "./LivePreview";
 import styles from "./Publish.module.css";
 
@@ -131,8 +130,8 @@ export function StepReview({ d, catalog, now, live, editing, pending, needsLogin
           </ul>
         ) : (
           <p className={styles.demoNote}>
-            <span className={ui.demoTag}>DEMO</span> Esto es una demostración: al pulsar no se publica nada, no se guarda tu número y
-            las fotos no salen de tu dispositivo.
+            La publicación todavía no está abierta: al pulsar no se publica nada, no se guarda tu número y las fotos no salen de tu
+            dispositivo.
           </p>
         )}
 
@@ -154,7 +153,7 @@ export function StepReview({ d, catalog, now, live, editing, pending, needsLogin
             )}
             {live && <Turnstile ref={turnstile} action="publicar" onToken={onCaptcha} />}
             <button type="button" className={styles.publishBtn} onClick={onPublish} disabled={busy} aria-busy={busy || undefined}>
-              {busy ? progress || "Publicando…" : !live ? "Probar (no se publica)" : editing ? "Guardar cambios" : "Publicar gratis"}
+              {busy ? progress || "Publicando…" : !live ? "Terminar la prueba" : editing ? "Guardar cambios" : "Publicar gratis"}
             </button>
           </>
         )}

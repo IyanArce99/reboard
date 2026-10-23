@@ -20,7 +20,7 @@ export function DoneScreen({ done, editing, onAgain }: { done: Done; editing: bo
           {real ? "✓" : "i"}
         </span>
         <h1 ref={ref} tabIndex={-1} className={styles.doneH1}>
-          {real ? (editing ? "Cambios guardados" : "Tu tabla está publicada") : editing ? "Cambios revisados (demo)" : "Anuncio listo (demo)"}
+          {real ? (editing ? "Cambios guardados" : "Tu tabla está publicada") : "Prueba terminada"}
         </h1>
         {real ? (
           <p className={styles.doneText}>
@@ -30,8 +30,8 @@ export function DoneScreen({ done, editing, onAgain }: { done: Done; editing: bo
           </p>
         ) : (
           <p className={styles.doneText}>
-            Esto es una demostración: el anuncio no se ha publicado y las fotos no han salido de tu dispositivo. Con el servicio activo,
-            aparecería en las búsquedas por sus medidas.
+            La publicación todavía no está abierta, así que el anuncio no se ha guardado y las fotos no han salido de tu dispositivo.
+            Cuando abramos, aparecerá en las búsquedas por sus medidas.
           </p>
         )}
         <div className={styles.doneBtns}>

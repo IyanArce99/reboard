@@ -113,6 +113,18 @@
 .heroLinks a.mOnly {
   display: none;
 }
+/* Sin tablas publicadas: «Publícala gratis» va primero, como píldora clara (no amarilla: la acción
+   principal del hero sigue siendo Buscar). */
+.heroLinks a.heroSell {
+  padding: 0 16px;
+  border: 1px solid rgba(255, 255, 255, 0.55);
+  border-radius: 999px;
+  background: rgba(16, 45, 59, 0.45);
+  font-weight: 600;
+}
+.heroLinks a.heroSell:hover {
+  border-color: var(--rb-white);
+}
 
 /* ───────── Tipos de tabla ───────── */
 .types {
@@ -630,9 +642,6 @@
   color: var(--rb-muted);
   font-weight: 400;
 }
-.zone .zoneAlert {
-  color: var(--rb-teal-text);
-}
 
 .brands {
   display: flex;
@@ -717,6 +726,10 @@
     flex-direction: column;
     gap: 0;
     margin-top: 10px;
+  }
+  .heroLinks a.heroSell {
+    align-self: flex-start;
+    margin: 6px 0;
   }
 
   .near {

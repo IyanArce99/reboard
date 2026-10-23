@@ -5,14 +5,10 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useUserState } from "@/components/user/UserStateProvider";
-import { finderZoneName } from "@/lib/finder/listings";
+import { summaryOf } from "@/lib/finder/summary";
 import {
-  FREQS,
-  GOALS,
-  LEVELS,
   RESULT_STEP,
   TOTAL_STEPS,
-  WAVES,
   initialFinderState,
   isValidWeight,
   recommend,
@@ -24,33 +20,6 @@ import { FinderStep } from "./FinderStep";
 import styles from "./Finder.module.css";
 
 const KEY = "rb-asistente-v1";
-
-export interface SummaryItem {
-  label: string;
-  value: string;
-  step: number;
-}
-
-function summaryOf(W: FinderState): SummaryItem[] {
-  const lv = W.lvl ? LEVELS.find((l) => l[0] === W.lvl)![1] : "—";
-  return [
-    { label: "Peso", value: W.w ? `${W.w} kg` : "—", step: 1 },
-    { label: "Nivel", value: lv, step: 2 },
-    { label: "Tabla actual", value: W.cur ?? "Sin indicar", step: 3 },
-    { label: "Frecuencia", value: W.freq ? FREQS.find((f) => f[0] === W.freq)![1] : "Sin indicar", step: 4 },
-    { label: "Olas", value: W.waves ? WAVES.find((w) => w[0] === W.waves)![1] : "Sin indicar", step: 5 },
-    {
-      label: "Objetivo",
-      value: W.goals.length ? W.goals.map((g) => GOALS.find((x) => x[0] === g)![1]).join(", ") : "Sin indicar",
-      step: 6,
-    },
-    {
-      label: "Zona y presupuesto",
-      value: `${finderZoneName(W).replace(/^toda/, "Toda")}${W.budget ? ` · hasta ${W.budget} €` : ""}`,
-      step: 7,
-    },
-  ];
-}
 
 export function FinderWizard({ intro }: { intro: React.ReactNode }) {
   const { setProfile } = useUserState();
@@ -143,10 +112,17 @@ export function FinderWizard({ intro }: { intro: React.ReactNode }) {
   };
 
   const summary = summaryOf(W);
+  const scope = summaryOf(W, true);
   const hasProgress = step > 1 || !!W.w;
   const optional = step >= 3 && step <= TOTAL_STEPS;
   const blocked = (step === 1 && !weightOk) || (step === 2 && !W.lvl);
-  const live = r ? `${r.lo}–${r.hi} L` : weightOk ? "Elige tu nivel" : "—";
+  const hint = !summary.length
+    ? "Tus respuestas aparecerán aquí."
+    : !r
+      ? weightOk
+        ? "Elige tu nivel para ver el volumen orientativo."
+        : "Indica tu peso para ver el volumen orientativo."
+      : null;
   const shown = Math.min(step, TOTAL_STEPS);
 
   return (
@@ -161,7 +137,7 @@ export function FinderWizard({ intro }: { intro: React.ReactNode }) {
       </div>
 
       {isResult && r ? (
-        <FinderResult state={W} rec={r} summary={summary} onEdit={goTo} onRestart={restart} set={set} />
+        <FinderResult state={W} rec={r} summary={scope} onEdit={goTo} onRestart={restart} set={set} />
       ) : (
         <div className={styles.layout}>
           <section className={styles.card} aria-labelledby="finder-question">
@@ -224,11 +200,17 @@ export function FinderWizard({ intro }: { intro: React.ReactNode }) {
                   <span className={styles.srOnly}> · Editar</span>
                 </button>
               ))}
-              <div className={styles.live}>
-                <div className={styles.liveLabel}>Volumen orientativo</div>
-                <div className={styles.liveValue} aria-live="polite">
-                  {live}
-                </div>
+              {hint && <p className={styles.profileHint}>{hint}</p>}
+              {/* Región viva siempre montada: el volumen se anuncia cuando se puede calcular. */}
+              <div aria-live="polite">
+                {r && (
+                  <div className={styles.live}>
+                    <div className={styles.liveLabel}>Volumen orientativo</div>
+                    <div className={styles.liveValue}>
+                      {r.lo}–{r.hi} L
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           </aside>

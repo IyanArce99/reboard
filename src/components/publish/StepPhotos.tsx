@@ -192,7 +192,7 @@ export function StepPhotos({ photos, processing, live, onFiles, onRemove, onMove
         </strong>{" "}
         {live
           ? "Las reducimos en tu dispositivo y les quitamos la ubicación y los datos de la cámara antes de subirlas."
-          : "Demo: las fotos se preparan en tu dispositivo y no se suben a ningún sitio."}
+          : "Las fotos se preparan en tu dispositivo y no se suben a ningún sitio."}
       </p>
     </div>
   );

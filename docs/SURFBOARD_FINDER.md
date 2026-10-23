@@ -47,17 +47,21 @@ En cada paso:
 - Las respuestas se guardan en `localStorage`, así que sobreviven a una recarga.
 - «Empezar de nuevo» lo resetea todo.
 
-## Reglas de recomendación (lógica **simplificada de demostración**, sin validar técnicamente)
+## Reglas de recomendación (lógica **orientativa y simplificada**, sin validar por surfistas ni shapers)
+Fuente de verdad: `src/lib/finder/recommend.ts`, cubierta por `tests/unit/finder.test.ts`.
 ```
 factor[nivel] = aprendiendo [0.85, 1.05] · cojo olas [0.60, 0.78] · giros [0.46, 0.58] · experiencia [0.36, 0.44]
 k = 1
 frecuencia: <1/sem ×1.08 · ≥3/sem ×0.95
 olas: pequeñas ×1.05 · grandes ×0.92
-objetivos: aprender|softboard ×1.03 · maniobrabilidad ×0.94 · giros ×0.97 · olas pequeñas ×1.04
+objetivos: aprender|softboard ×1.03 (no se acumulan) · maniobrabilidad ×0.94 · giros ×0.97 · olas pequeñas ×1.04
+k se limita a [0.90, 1.20]   (antes, acumulando reducciones, un avanzado de 75 kg bajaba a ≈0,29 L/kg)
 rango = round(peso × factor × k)
-si hay litros de la tabla actual y el nivel no es experto: no bajar más de un 20 % (lo ≥ actual × 0.78)
-hi ≥ lo + 4
+tabla actual (solo si se ha elegido una, tiene 10–200 L y el nivel no es experto):
+  no bajar más de un 20 %: lo ≥ round(actual × 0.80)   (antes ×0.78, que era un 22 %)
+rango final entre 15 y 120 L; hi ≥ lo + 4; por encima de 120 L, nota de que es más de lo habitual en tablas de serie
 ```
+**Comparación con reglas generales habituales** (orientativas, no una fuente concreta): principiante ≈0,8–1,0+ L/kg · intermedio ≈0,55–0,7 · avanzado ≈0,38–0,45. «Aprendiendo» y «experiencia» caen dentro; «cojo olas» queda algo por encima del intermedio (es intermedio bajo); «giros», entre intermedio y avanzado.
 **Tipos por nivel:**
 - Aprendiendo: Softboard, Evolutiva, Longboard.
 - Cojo olas: Evolutiva, Midlength, Fish.
@@ -81,11 +85,11 @@ hi ≥ lo + 4
   - Chips de respuestas editables (✎ lleva al paso).
   - Tres tarjetas: **volumen** (número grande en mono) más la longitud, **qué buscar** y **qué evitar**.
   - Explicación del porqué, con el aviso del 20 % si aplica.
-- **Tipos de tabla para ti:** 3 tarjetas con foto, «La que más encaja» o «También encaja», medidas orientativas, por qué, a tener en cuenta y CTA «Ver N [tipo]», o «crear alerta» si no hay anuncios.
+- **Tipos de tabla para ti:** 3 tarjetas con foto, «Primera opción» o «También puede encajar» (sin prometer que encaja), medidas orientativas, por qué, a tener en cuenta y CTA «Ver N [tipo]», o «Sin anuncios · crear alerta» si no hay ninguno.
 - **Tablas de segunda mano para ti:**
-  - Anuncios que cumplen volumen, tipo, zona y presupuesto. Cada uno lleva su motivo: «Encaja: 47 L dentro de 69–85 L · Evolutiva».
+  - Anuncios que cumplen volumen, tipo, zona y presupuesto. Cada uno lleva su motivo: «En tu rango: 47 L dentro de 69–85 L · Evolutiva».
   - CTA amarillo «Ver todas las tablas compatibles», que lleva a `/buscar` con los filtros y el perfil aplicados.
-  - **Sin anuncios:** «No hay tablas disponibles ahora mismo con estas características.» Opciones: Ampliar a toda España (N) · Subir presupuesto +100 € (N) · Ver alternativas con tu volumen (N) · Crear alerta.
+  - **Sin anuncios:** «Todavía no hay tablas publicadas entre X y Y L.» (o «No hay tablas…» si lo que excluye es la zona o el presupuesto). Opciones para ampliar **solo si dan resultados** (nunca «(0)»), «Crear alerta» una sola vez y un enlace para publicar.
 - **Alerta con este perfil:** email opcional.
 - **Guardar mi perfil de surfista:** sin registro, en local. Activa:
   - «Te encaja» en las tarjetas, si los litros están en el rango.

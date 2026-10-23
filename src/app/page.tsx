@@ -8,13 +8,11 @@ import { SectionHeader } from "@/components/brand/SectionHeader";
 import { NearSection, NearSkeleton, getHere } from "@/components/home/NearSection";
 import { SearchBar } from "@/components/search/SearchBar";
 import { JsonLd } from "@/components/seo/JsonLd";
-import { AlertButton } from "@/components/user/islands";
 import { getRepository } from "@/lib/data";
 import { getCatalogNames } from "@/lib/data/names";
 import { NO_BRAND, ZONES, slugify, type Shape } from "@/lib/domain/taxonomy";
 import type { PhotoSlug } from "@/lib/photos";
-import { alertText } from "@/lib/search/describe";
-import { emptyFilters, toQuery, withFilters } from "@/lib/search/filters";
+import { emptyFilters, withFilters } from "@/lib/search/filters";
 import { formFilters, landingPath, type LandingForm } from "@/lib/search/landings";
 import { absoluteUrl, SITE_NAME } from "@/lib/site";
 import styles from "@/components/home/Home.module.css";
@@ -92,12 +90,21 @@ export default async function Home() {
     Promise.all(catFilters.map((c) => repo.count(c.f))),
   ]);
 
+  // Sin ninguna tabla publicada (beta sin base de datos), la página no repite «0» ni «crear alerta» en
+  // cada tarjeta y da más peso a publicar. Las zonas y marcas solo se listan si tienen tablas.
+  const inventoryEmpty = facets.anyZone === 0;
   const cats = catFilters.map((c, i) => ({ ...c, n: catCounts[i] })).sort((a, b) => Number(b.n > 0) - Number(a.n > 0));
-  const zones = ZONES.map((z) => ({ ...z, n: facets.zones[z.slug] ?? 0 })).sort((a, b) => b.n - a.n);
-  const brands = [...names.brands, { slug: NO_BRAND.slug, name: NO_BRAND.short }].map((b) => ({
-    ...b,
-    n: facets.brands[b.slug] ?? 0,
-  }));
+  const zones = ZONES.map((z) => ({ ...z, n: facets.zones[z.slug] ?? 0 }))
+    .filter((z) => z.n > 0)
+    .sort((a, b) => b.n - a.n);
+  const brands = [...names.brands, { slug: NO_BRAND.slug, name: NO_BRAND.short }]
+    .map((b) => ({ ...b, n: facets.brands[b.slug] ?? 0 }))
+    .filter((b) => b.n > 0);
+  const sellLink = (
+    <Link key="vender" href="/vender/publicar" className={inventoryEmpty ? styles.heroSell : undefined}>
+      ¿Vendes una tabla? <span>Publícala gratis</span>
+    </Link>
+  );
 
   return (
     <main>
@@ -123,12 +130,12 @@ export default async function Home() {
           </Suspense>
 
           <div className={styles.heroLinks}>
+            {/* Mientras no hay tablas publicadas, vender va primero y más visible. */}
+            {inventoryEmpty && sellLink}
             <Link href="/calculadora-litros">
               ¿No sabes cuántos litros? <span>Calcúlalo en 7 preguntas</span>
             </Link>
-            <Link href="/vender/publicar">
-              ¿Vendes una tabla? <span>Publícala gratis</span>
-            </Link>
+            {!inventoryEmpty && sellLink}
             <Link href="/buscar?avanzados=1" className={styles.mOnly}>
               Más filtros: <span>marca, estado, quillas…</span>
             </Link>
@@ -140,29 +147,24 @@ export default async function Home() {
       <section className={`container ${styles.section}`} aria-labelledby="tipos-title">
         <SectionHeader id="tipos-title" eyebrow="Explora por tipo" title="¿Qué tipo de tabla buscas?" action={{ href: "/buscar", label: "Ver todas las tablas" }} />
         <div data-rail="1" className={styles.types}>
-          {cats.map((c) =>
-            c.n ? (
-              <Link key={c.form} href={landingPath(null, c.form)} className={styles.type}>
-                <span className={styles.typeShape}>
-                  <BoardShape shape={c.shape} size={96} tone={c.soft ? "soft" : "light"} />
-                </span>
-                <span className={styles.typeName}>{c.label}</span>
-                <span className={styles.typeHint}>{c.hint}</span>
+          {cats.map((c) => (
+            // Sin anuncios, la tarjeta lleva igualmente a su página (allí se puede crear la alerta):
+            // nada de «crear alerta» repetido en cada tarjeta.
+            <Link key={c.form} href={landingPath(null, c.form)} className={`${styles.type} ${c.n || inventoryEmpty ? "" : styles.typeEmpty}`}>
+              <span className={styles.typeShape}>
+                <BoardShape shape={c.shape} size={96} tone={c.soft || (!c.n && !inventoryEmpty) ? "soft" : "light"} />
+              </span>
+              <span className={styles.typeName}>{c.label}</span>
+              <span className={styles.typeHint}>{c.hint}</span>
+              {c.n > 0 ? (
                 <span className={styles.typeCount}>
                   {c.n} {c.n === 1 ? "tabla" : "tablas"}
                 </span>
-              </Link>
-            ) : (
-              <AlertButton key={c.form} text={alertText(c.f, names)} query={toQuery(c.f)} className={`${styles.type} ${styles.typeEmpty}`}>
-                <span className={styles.typeShape}>
-                  <BoardShape shape={c.shape} size={96} tone="soft" />
-                </span>
-                <span className={styles.typeName}>{c.label}</span>
-                <span className={styles.typeHint}>{c.hint}</span>
-                <span className={styles.typeCount}>Sin anuncios · crear alerta</span>
-              </AlertButton>
-            ),
-          )}
+              ) : (
+                !inventoryEmpty && <span className={styles.typeCount}>Sin anuncios todavía</span>
+              )}
+            </Link>
+          ))}
         </div>
       </section>
 
@@ -241,42 +243,40 @@ export default async function Home() {
         </div>
       </section>
 
-      <section className={`container ${styles.section} ${styles.explore}`} aria-label="Explorar por zona y marca">
-        <div>
-          <h2 className={styles.h3}>Por zona</h2>
-          <div className={styles.zones}>
-            {zones.map((z) => {
-              const f = withFilters({ zone: z.slug });
-              return z.n ? (
-                <Link key={z.slug} href={landingPath(z.slug, null)} className={styles.zone}>
-                  {z.name}
-                  <span>{z.n}</span>
-                </Link>
-              ) : (
-                <AlertButton key={z.slug} text={alertText(f, names)} query={toQuery(f)} className={styles.zone}>
-                  {z.name}
-                  <span className={styles.zoneAlert}>Crear alerta</span>
-                </AlertButton>
-              );
-            })}
-          </div>
-        </div>
-        <div>
-          <h2 className={styles.h3}>Por marca</h2>
-          <div className={styles.brands}>
-            {brands.map((b) => (
-              <Link
-                key={b.slug}
-                href={b.slug === NO_BRAND.slug ? `/buscar?marca=${NO_BRAND.slug}` : `/marcas/${slugify(b.name)}`}
-                className={styles.brand}
-              >
-                {b.name}
-                <span>{b.n}</span>
-              </Link>
-            ))}
-          </div>
-        </div>
-      </section>
+      {(zones.length > 0 || brands.length > 0) && (
+        <section className={`container ${styles.section} ${styles.explore}`} aria-label="Explorar por zona y marca">
+          {zones.length > 0 && (
+            <div>
+              <h2 className={styles.h3}>Por zona</h2>
+              <div className={styles.zones}>
+                {zones.map((z) => (
+                  <Link key={z.slug} href={landingPath(z.slug, null)} className={styles.zone}>
+                    {z.name}
+                    <span>{z.n}</span>
+                  </Link>
+                ))}
+              </div>
+            </div>
+          )}
+          {brands.length > 0 && (
+            <div>
+              <h2 className={styles.h3}>Por marca</h2>
+              <div className={styles.brands}>
+                {brands.map((b) => (
+                  <Link
+                    key={b.slug}
+                    href={b.slug === NO_BRAND.slug ? `/buscar?marca=${NO_BRAND.slug}` : `/marcas/${slugify(b.name)}`}
+                    className={styles.brand}
+                  >
+                    {b.name}
+                    <span>{b.n}</span>
+                  </Link>
+                ))}
+              </div>
+            </div>
+          )}
+        </section>
+      )}
 
       <ClosingBand />
 

@@ -5,7 +5,7 @@
 import { ZONES, placeName } from "@/lib/domain/taxonomy";
 import type { Listing } from "@/lib/domain/types";
 import { matches } from "@/lib/search/match";
-import { withFilters, type Filters } from "@/lib/search/filters";
+import { searchHref, withFilters, type Filters } from "@/lib/search/filters";
 import type { FinderState, FinderType, Recommendation } from "./recommend";
 
 /** Zonas del paso 7. 'other' abre el desplegable con el resto de zonas. */
@@ -51,6 +51,12 @@ export const typeOk = (l: Listing, types: FinderType[]) =>
 export const baseFilters = (r: Recommendation, zone: string, priceMax: number | null): Filters =>
   withFilters({ volMin: r.lo, volMax: r.hi, zone, priceMax });
 
+/** Filtros de la tarjeta de un tipo: litros, zona, presupuesto y ese tipo. */
+export const typeFilters = (r: Recommendation, zone: string, priceMax: number | null, t: FinderType): Filters => ({
+  ...baseFilters(r, zone, priceMax),
+  ...typeFilter(t),
+});
+
 /**
  * Filtros de «Ver N tablas» y de la alerta. /buscar no combina forma O construcción,
  * así que, como en el prototipo, la softboard se deja fuera cuando hay otras formas.
@@ -68,3 +74,34 @@ export const compatible = (pool: Listing[], r: Recommendation, zone: string, pri
   pool.filter((l) => typeOk(l, types) && matches(l, baseFilters(r, zone, priceMax)));
 
 export const countFor = (pool: Listing[], f: Filters) => pool.reduce((n, l) => n + (matches(l, f) ? 1 : 0), 0);
+
+export interface WidenOption {
+  key: "zone" | "budget" | "alt";
+  label: string;
+  count: number;
+  /** Solo «alt»: enlace a /buscar. Las otras dos cambian la respuesta del paso 7. */
+  href?: string;
+  /** Solo «budget»: el presupuesto ampliado. */
+  budget?: number;
+}
+
+/**
+ * Formas de ampliar la búsqueda cuando no hay tablas compatibles. Solo se ofrecen las que
+ * de verdad encuentran algo: nada de «Ampliar a toda España (0)».
+ */
+export function widenOptions(pool: Listing[], r: Recommendation, zone: string, priceMax: number | null): WidenOption[] {
+  const out: WidenOption[] = [];
+  if (zone) {
+    const count = compatible(pool, r, "", priceMax).length;
+    out.push({ key: "zone", label: `Ampliar a toda España (${count})`, count });
+  }
+  if (priceMax != null) {
+    const nb = priceMax + 100;
+    const count = compatible(pool, r, zone, nb).length;
+    out.push({ key: "budget", label: `Subir presupuesto a ${nb} € (${count})`, count, budget: nb });
+  }
+  const alt = baseFilters(r, zone, priceMax);
+  const count = countFor(pool, alt);
+  out.push({ key: "alt", label: `Ver alternativas con tu volumen (${count})`, count, href: searchHref(alt) });
+  return out.filter((o) => o.count > 0);
+}

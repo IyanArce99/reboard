@@ -303,8 +303,8 @@ test("publicar (escritorio): 5 pasos con vista previa en vivo hasta el anuncio d
   await expect(preview.getByText(`Híbrida sin marca 6'4"`)).toBeVisible();
   await expect(preview.getByText("Gijón, Asturias · Muy buen estado")).toBeVisible();
   await expect(page.getByText(/no se publica nada/)).toBeVisible();
-  await page.getByRole("button", { name: "Probar (no se publica)" }).click();
-  await expect(page.getByRole("heading", { name: "Anuncio listo (demo)" })).toBeVisible();
+  await page.getByRole("button", { name: "Terminar la prueba" }).click();
+  await expect(page.getByRole("heading", { name: "Prueba terminada" })).toBeVisible();
   expect(errors).toEqual([]);
 });
 
@@ -315,8 +315,8 @@ test("publicar (móvil): 5 pasos en una columna sin desbordar hasta el anuncio d
   await fillToReview(page);
   // En móvil la vista previa lateral no se muestra: va arriba de la revisión.
   await expect(page.getByRole("complementary", { name: "Vista previa" })).toBeHidden();
-  await page.getByRole("button", { name: "Probar (no se publica)" }).click();
-  await expect(page.getByRole("heading", { name: "Anuncio listo (demo)" })).toBeVisible();
+  await page.getByRole("button", { name: "Terminar la prueba" }).click();
+  await expect(page.getByRole("heading", { name: "Prueba terminada" })).toBeVisible();
   expect(errors).toEqual([]);
   await ctx.close();
 });

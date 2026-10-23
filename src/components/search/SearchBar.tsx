@@ -15,6 +15,7 @@ import { SlidersIcon } from "@/components/icons";
 import { REGIONS, SHAPES, SHAPE_INFO, ZONES, zoneBySlug, type Shape } from "@/lib/domain/taxonomy";
 import { num } from "@/lib/domain/format";
 import { HERE_COOKIE } from "@/lib/here";
+import { searchCtaText } from "@/lib/search/describe";
 import { searchHref, toQuery, withFilters, type Filters } from "@/lib/search/filters";
 import styles from "./SearchBar.module.css";
 
@@ -52,6 +53,7 @@ type Panel = "zona" | "litros" | "tipo";
 const PANEL_WIDTH: Record<Panel, number> = { zona: 560, litros: 520, tipo: 700 };
 
 interface Props {
+  /** Zona elegida por el usuario (cookie) o "" para toda España. Nunca una zona por defecto. */
   here: string;
   /** Hay km por anuncio (solo DEMO): muestra los chips de distancia. */
   supportsDistance?: boolean;
@@ -140,7 +142,8 @@ export function SearchBar({ here, initialCount, supportsDistance = true, zoneCou
   const where = `${zn}${zone && dist ? ` · < ${dist} km` : ""}`;
   const vol = hasVol ? (volMin && volMax ? `${volMin}–${volMax} L` : volMin ? `Desde ${volMin} L` : `Hasta ${volMax} L`) : null;
   const type = shapes.length ? shapes.map((s) => SHAPE_INFO[s].label).join(", ") : null;
-  const goText = count === 0 ? "Ver alternativas" : `Buscar ${num(count)} ${count === 1 ? "tabla" : "tablas"}`;
+  // Sin ninguna tabla publicada no hay alternativas que ver: «Buscar tablas» (lleva al estado vacío honesto).
+  const goText = searchCtaText(count, totalCount, num);
   const href = searchHref(filters);
 
   const open = (p: Panel) => {
@@ -155,15 +158,17 @@ export function SearchBar({ here, initialCount, supportsDistance = true, zoneCou
   };
 
   const pickZone = (z: string) => {
+    if (z === zone) return;
     setZone(z);
     if (!z) setDist(null);
-    if (z) {
-      try {
-        document.cookie = `${HERE_COOKIE}=${z}; path=/; max-age=31536000; samesite=lax`;
-      } catch {}
-      // La sección «Cerca de ti» de la home usa esta zona.
-      router.refresh();
-    }
+    try {
+      // «Toda España» borra la zona guardada: sin cookie, la home no presupone ninguna zona.
+      document.cookie = z
+        ? `${HERE_COOKIE}=${z}; path=/; max-age=31536000; samesite=lax`
+        : `${HERE_COOKIE}=; path=/; max-age=0; samesite=lax`;
+    } catch {}
+    // La sección «Recién publicadas» de la home usa esta zona.
+    router.refresh();
   };
   const toggleShape = (s: Shape) => setShapes((a) => (a.includes(s) ? a.filter((x) => x !== s) : [...a, s]));
   const pickVolume = (a: number, b: number | null) => {
@@ -297,10 +302,12 @@ function ZoneOptions({
       {n != null && <span className={styles.zoneCount}>{num(n)}</span>}
     </button>
   );
+  // Sin ninguna tabla publicada, los recuentos serían «0» en todas las zonas: no se muestran.
+  const showCounts = total !== 0;
   const group = (title: string, list: typeof ZONES) => (
     <div className={styles.zoneGroup}>
       <span className={styles.zoneGroupTitle}>{title}</span>
-      {list.map((z) => option(z.slug, z.name, counts[z.slug] ?? 0))}
+      {list.map((z) => option(z.slug, z.name, showCounts ? (counts[z.slug] ?? 0) : undefined))}
     </div>
   );
   return (
@@ -308,8 +315,10 @@ function ZoneOptions({
       <h2 id="sb-zona" className={styles.groupTitle}>
         ¿Dónde buscas?
       </h2>
-      <p className={styles.groupHint}>Por isla o provincia. El número son las tablas publicadas.</p>
-      {option("", "Toda España", total)}
+      <p className={styles.groupHint}>
+        {showCounts ? "Por isla o provincia. El número son las tablas publicadas." : "Por isla o provincia."}
+      </p>
+      {option("", "Toda España", showCounts ? total : undefined)}
       <div className={styles.zoneCols}>
         {group(
           "Canarias",

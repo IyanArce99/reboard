@@ -26,7 +26,7 @@ export function previewTexts(d: PublishDraft, catalog: CatalogModel[], now: Date
     .filter(Boolean)
     .join(" · ");
   const zone = zoneBySlug(d.zone)?.name ?? "";
-  const place = d.town.trim() ? `${d.town.trim()}, ${zone}` : zone;
+  const place = [d.town.trim(), zone].filter(Boolean).join(", ");
   const meta = [place, d.condition ? CONDITION_LABEL[d.condition] : null].filter(Boolean).join(" · ");
   const price = Number(d.price) > 0 ? eur(Number(d.price)) : null;
   return { title, spec, meta, price, hasVolume: l.volume.value != null };

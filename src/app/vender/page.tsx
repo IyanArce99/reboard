@@ -1,9 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { authEnabled } from "@/lib/auth/config";
 import { Photo } from "@/components/brand/Photo";
 import { SectionHeader } from "@/components/brand/SectionHeader";
-import { getRepository } from "@/lib/data";
-import ui from "@/styles/ui.module.css";
 import styles from "@/components/publish/SellLanding.module.css";
 
 // Landing de venta indexable (docs/SEO.md). Con datos DEMO hereda el noindex global del layout.
@@ -37,7 +36,8 @@ const TIPS = [
 ];
 
 export default function VenderPage() {
-  const isDemo = getRepository().isDemo;
+  // Sin base de datos no se puede publicar: se dice antes de entrar al formulario.
+  const closed = !authEnabled();
   return (
     <main>
       <section className={styles.heroWrap}>
@@ -58,9 +58,9 @@ export default function VenderPage() {
                 Ver mis anuncios
               </Link>
             </div>
-            {isDemo && (
+            {closed && (
               <p className={styles.demo}>
-                <span className={ui.demoTag}>DEMO</span> Puedes probar el formulario, pero todavía no se publican anuncios reales.
+                La publicación todavía no está abierta: puedes recorrer el formulario, pero aún no se guarda ningún anuncio.
               </p>
             )}
           </div>

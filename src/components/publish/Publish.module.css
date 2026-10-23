@@ -1416,3 +1416,18 @@ button.slot:hover {
   text-underline-offset: 3px;
   cursor: pointer;
 }
+
+/* Publicación cerrada (sin base de datos): un único aviso fijo, no un toast ni «demo» por pasos. */
+.closedNote {
+  margin-top: 10px;
+  padding: 10px 14px;
+  border-radius: 12px;
+  background: var(--rb-white);
+  border: 1px solid var(--rb-line-strong);
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--rb-muted);
+}
+.closedNote strong {
+  color: var(--rb-petrol);
+}

@@ -60,6 +60,7 @@ function stepIssue(step: number, d: PublishDraft, processing: number): string {
       return d.condition ? "" : "Elige el estado de la tabla.";
     case 4:
       if (!(Number(d.price) > 0)) return "Pon un precio para continuar.";
+      if (!d.zone) return "Elige la zona donde está la tabla.";
       if (d.town.trim().length < 2) return "Indica la localidad donde está la tabla.";
       return toE164(d.phone) ? "" : "Revisa el teléfono: por ejemplo, 600 000 000 o +34 600 000 000.";
     default:
@@ -84,6 +85,8 @@ export function PublishFlow({ catalog, brands, priceRefs, nowIso, dataIsDemo, in
   // Anuncio ya creado en un intento anterior que falló a mitad (para no duplicarlo al reintentar).
   const [createdId, setCreatedId] = useState<string | null>(null);
   const turnstile = useRef<TurnstileHandle>(null);
+  const [waitingCaptcha, setWaitingCaptcha] = useState(false);
+  const waitingRef = useRef(false);
   const headingRef = useRef<HTMLHeadingElement>(null);
   const now = useMemo(() => new Date(nowIso), [nowIso]);
 
@@ -222,7 +225,7 @@ export function PublishFlow({ catalog, brands, priceRefs, nowIso, dataIsDemo, in
     return parsed.success ? "" : firstIssueText(parsed.error);
   }, [d, catalog]);
 
-  const publish = async () => {
+  const publish = async (token: string | null = captcha) => {
     setError("");
     if (!toE164(d.phone)) {
       setError("Indica tu teléfono en «Precio y ubicación»: es como te contactarán (no aparece en el anuncio).");
@@ -238,8 +241,13 @@ export function PublishFlow({ catalog, brands, priceRefs, nowIso, dataIsDemo, in
       window.scrollTo({ top: 0 });
       return;
     }
-    if (TURNSTILE_SITE_KEY && !captcha) {
-      setError("Espera un momento: estamos comprobando que no eres un robot.");
+    if (TURNSTILE_SITE_KEY && !token) {
+      // Turnstile aún no ha dado el token (es invisible y tarda unos segundos): en vez de pedir que
+      // se vuelva a pulsar, se espera y se publica solo en cuanto llega (efecto de abajo).
+      waitingRef.current = true;
+      setWaitingCaptcha(true);
+      setBusy(true);
+      setProgress("Comprobando que no eres un robot…");
       return;
     }
     setBusy(true);
@@ -249,7 +257,7 @@ export function PublishFlow({ catalog, brands, priceRefs, nowIso, dataIsDemo, in
         catalog,
         editingId: editingId ?? createdId,
         isNew: !editingId,
-        turnstileToken: captcha,
+        turnstileToken: token,
         onProgress: setProgress,
       });
       if (r.ok) {
@@ -269,6 +277,30 @@ export function PublishFlow({ catalog, brands, priceRefs, nowIso, dataIsDemo, in
       setProgress("");
     }
   };
+
+  // Token de Turnstile: si había una publicación esperándolo, sigue sola.
+  const onCaptcha = (token: string | null) => {
+    setCaptcha(token);
+    if (token && waitingRef.current) {
+      waitingRef.current = false;
+      setWaitingCaptcha(false);
+      setBusy(false);
+      void publish(token);
+    }
+  };
+
+  // Si el token no llega en 20 s, se deja de esperar con un aviso claro.
+  useEffect(() => {
+    if (!waitingCaptcha) return;
+    const t = setTimeout(() => {
+      waitingRef.current = false;
+      setWaitingCaptcha(false);
+      setBusy(false);
+      setProgress("");
+      setError("No hemos podido comprobar que no eres un robot. Recarga la página y vuelve a intentarlo: tu anuncio sigue guardado.");
+    }, 20_000);
+    return () => clearTimeout(t);
+  }, [waitingCaptcha]);
 
   const restart = async () => {
     for (const p of d.photos) if (p.local) URL.revokeObjectURL(p.url);
@@ -329,6 +361,12 @@ export function PublishFlow({ catalog, brands, priceRefs, nowIso, dataIsDemo, in
             );
           })}
         </ol>
+        {!live && (
+          <p className={styles.closedNote} role="note">
+            <strong>La publicación todavía no está abierta.</strong> Puedes recorrer los pasos para ver cómo funciona, pero no se
+            guarda nada: las fotos no salen de tu dispositivo y el anuncio no se publica.
+          </p>
+        )}
         {restored && (
           <div className={styles.restored} role="status">
             <span>Hemos recuperado el anuncio que dejaste a medias en este dispositivo.</span>
@@ -404,7 +442,7 @@ export function PublishFlow({ catalog, brands, priceRefs, nowIso, dataIsDemo, in
                 progress={progress}
                 error={error}
                 turnstile={turnstile}
-                onCaptcha={setCaptcha}
+                onCaptcha={onCaptcha}
                 onEdit={(n) => goTo(n, { fromReview: true })}
                 onPublish={() => void publish()}
                 onLogin={() => toast("Email confirmado. Ya puedes publicar.")}

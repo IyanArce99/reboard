@@ -44,8 +44,8 @@ describe("recommend (asistente, lógica orientativa)", () => {
   });
 
   it("no propone bajar más de un 20 % de golpe", () => {
-    const r = recommend({ ...base, lvl: "turn", freq: "mid", waves: "med", goals: [], curVol: "60" })!;
-    expect(r.lo).toBe(47);
+    const r = recommend({ ...base, lvl: "turn", freq: "mid", waves: "med", goals: [], cur: "Shortboard", curVol: "60" })!;
+    expect(r.lo).toBe(48);
     expect(r.hi).toBeGreaterThanOrEqual(r.lo + 4);
     expect(r.note).toContain("20 %");
   });

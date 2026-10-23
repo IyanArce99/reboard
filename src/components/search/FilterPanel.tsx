@@ -34,6 +34,8 @@ export interface PanelCounts {
 
 interface Props {
   counts: PanelCounts;
+  /** false si no hay ninguna tabla publicada: sin recuentos («0» en todo) ni opciones atenuadas. */
+  showCounts?: boolean;
   resultCount: number;
   brands: { slug: string; name: string }[];
   models: { slug: string; name: string; brandSlug: string }[];
@@ -86,7 +88,7 @@ function NumField({
   );
 }
 
-export function FilterPanel({ counts, resultCount, brands, models, openAdvanced }: Props) {
+export function FilterPanel({ counts, showCounts = true, resultCount, brands, models, openAdvanced }: Props) {
   const { filters, navigate, sheetOpen, setSheetOpen, supportsDistance } = useSearchNav();
   const { profile } = useUserState();
   const [draft, setDraft] = useState(filters);
@@ -97,16 +99,24 @@ export function FilterPanel({ counts, resultCount, brands, models, openAdvanced 
   const timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   const sheetRef = useRef<HTMLElement>(null);
 
-  // Si los filtros cambian desde fuera (chips, sugerencias), se descarta el borrador.
+  // Si los filtros cambian desde fuera (chips, sugerencias, atrás/adelante), se descarta el borrador.
   const q = toQuery(filters);
   const [lastQ, setLastQ] = useState(q);
+  const [resets, setResets] = useState(0);
   if (q !== lastQ) {
     setLastQ(q);
     if (q !== committed) {
       setCommitted(q);
       setDraft(filters);
+      setResets((n) => n + 1);
     }
   }
+  // …y también el envío pendiente de un campo de texto: si no, al quitar un chip mientras se escribe,
+  // el temporizador volvía a navegar con el borrador antiguo y deshacía el cambio.
+  useEffect(() => {
+    if (resets) clearTimeout(timer.current);
+  }, [resets]);
+  useEffect(() => () => clearTimeout(timer.current), []);
 
   useEffect(() => {
     if (openAdvanced && window.matchMedia(MOBILE).matches) setSheetOpen(true);
@@ -153,6 +163,8 @@ export function FilterPanel({ counts, resultCount, brands, models, openAdvanced 
   const shownBrands = allBrands ? brandChips : brandChips.filter((b, i) => i < TOP_BRANDS || b.slug === f.brand);
   const noBrandCount = counts.brands[NO_BRAND.slug] ?? 0;
   const hasFilters = toQuery(f) !== toQuery(emptyFilters());
+  const n = (v: number | undefined) => (showCounts ? ` (${num(v ?? 0)})` : "");
+  const showBrands = shownBrands.length > 0 || noBrandCount > 0 || Boolean(f.brand);
   const lens = LENGTH_STEPS.map((i) => ({ v: String(i), l: `${ftLabel(i)} · ${inToCm(i)} cm` }));
 
   return (
@@ -186,15 +198,15 @@ export function FilterPanel({ counts, resultCount, brands, models, openAdvanced 
             Zona
           </label>
           <select id="f-zona" className={ui.select} value={f.zone} onChange={(e) => set({ zone: e.target.value, ...(e.target.value ? {} : { dist: null }) })}>
-            <option value="">Toda España ({counts.total})</option>
+            <option value="">{`Toda España${n(counts.total)}`}</option>
             {REGIONS.map((r) => (
               <option key={r.slug} value={r.slug}>
-                {r.name} ({counts.zones[r.slug] ?? 0})
+                {`${r.name}${n(counts.zones[r.slug])}`}
               </option>
             ))}
             {ZONES.map((z) => (
               <option key={z.slug} value={z.slug}>
-                {z.name} ({counts.zones[z.slug] ?? 0})
+                {`${z.name}${n(counts.zones[z.slug])}`}
               </option>
             ))}
           </select>
@@ -310,16 +322,19 @@ export function FilterPanel({ counts, resultCount, brands, models, openAdvanced 
               <button
                 key={s}
                 type="button"
-                className={`${ui.chip} ${counts.shapes[s] ? "" : styles.empty}`}
+                className={`${ui.chip} ${showCounts && !counts.shapes[s] ? styles.zero : ""}`}
                 aria-pressed={f.shapes.includes(s)}
                 onClick={() => set({ shapes: toggle(f.shapes, s) })}
               >
-                {SHAPE_INFO[s].label} <span className={styles.count}>{counts.shapes[s] ?? 0}</span>
+                {SHAPE_INFO[s].label}
+                {showCounts && <span className={styles.optCount}>{num(counts.shapes[s] ?? 0)}</span>}
               </button>
             ))}
           </div>
         </div>
 
+        {/* Marca: solo con marcas que tengan tablas (o la elegida). Sin inventario, el grupo no aparece. */}
+        {showBrands && (
         <div className={styles.group} role="group" aria-labelledby="f-marca">
           <span className={ui.label} id="f-marca">
             Marca
@@ -333,17 +348,19 @@ export function FilterPanel({ counts, resultCount, brands, models, openAdvanced 
                 aria-pressed={f.brand === b.slug}
                 onClick={() => set({ brand: f.brand === b.slug ? "" : b.slug, model: "" })}
               >
-                {b.name} <span className={styles.count}>{b.n}</span>
+                {b.name}
+                {showCounts && <span className={styles.optCount}>{num(b.n)}</span>}
               </button>
             ))}
             {(noBrandCount > 0 || f.brand === NO_BRAND.slug) && (
               <button
                 type="button"
-                className={`${ui.chip} ${noBrandCount ? "" : styles.empty}`}
+                className={`${ui.chip} ${showCounts && !noBrandCount ? styles.zero : ""}`}
                 aria-pressed={f.brand === NO_BRAND.slug}
                 onClick={() => set({ brand: f.brand === NO_BRAND.slug ? "" : NO_BRAND.slug, model: "" })}
               >
-                {NO_BRAND.label} <span className={styles.count}>{noBrandCount}</span>
+                {NO_BRAND.label}
+                {showCounts && <span className={styles.optCount}>{num(noBrandCount)}</span>}
               </button>
             )}
           </div>
@@ -366,6 +383,7 @@ export function FilterPanel({ counts, resultCount, brands, models, openAdvanced 
             </label>
           )}
         </div>
+        )}
 
         <div className={styles.group}>
           <span className={ui.label}>Precio (€)</span>
@@ -509,7 +527,7 @@ export function FilterPanel({ counts, resultCount, brands, models, openAdvanced 
           Limpiar
         </button>
         <button type="button" className={ui.btnPrimary} onClick={() => setSheetOpen(false)}>
-          {resultCount === 0 ? "Sin resultados" : resultCount === 1 ? "Ver 1 tabla" : `Ver ${num(resultCount)} tablas`}
+          {resultCount === 0 ? "Ver resultados" : resultCount === 1 ? "Ver 1 tabla" : `Ver ${num(resultCount)} tablas`}
         </button>
       </div>
     </aside>

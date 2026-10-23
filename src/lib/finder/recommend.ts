@@ -1,7 +1,21 @@
 // «¿Qué tabla necesito?»: preguntas, estado y recomendador (docs/SURFBOARD_FINDER.md).
 // Port de WZ0, WLV, WCUR, WFQ, WWV, WGL, WQ, TINFO y wzRec() de design/source/prototype-logic.js.
-// ⚠ Lógica SIMPLIFICADA DE DEMOSTRACIÓN: los factores no están validados por surfistas ni shapers.
+// ⚠ Lógica SIMPLIFICADA Y ORIENTATIVA: los factores no están validados por surfistas ni shapers.
 // Módulo puro: sin React ni servidor, lo usan la isla del asistente y el contenido SEO.
+//
+// Fórmula (recommend):
+//   1. factor[nivel] en L/kg: learn 0,85–1,05 · ride 0,60–0,78 · turn 0,46–0,58 · pro 0,36–0,44.
+//      Contraste con reglas orientativas habituales del sector (no son una fuente única ni validada):
+//      principiante ≈ 0,8–1,0+ L/kg, intermedio ≈ 0,55–0,7 L/kg, avanzado ≈ 0,38–0,45 L/kg.
+//      «ride» (intermedio bajo) queda algo por encima del intermedio y «turn», entre intermedio y avanzado.
+//   2. k = producto de ajustes: frecuencia baja ×1,08 / alta ×0,95 · olas pequeñas ×1,05 / potentes ×0,92 ·
+//      objetivo aprender o dejar la softboard ×1,03 · maniobrabilidad ×0,94 · giros ×0,97 · olas pequeñas ×1,04.
+//      k se limita a [0,90, 1,20]: sin el límite, sumar todos los recortes daba ×0,80 (un avanzado de 75 kg
+//      a 22–26 L, ≈ 0,29 L/kg, por debajo de cualquier regla habitual). El máximo sin límite es ×1,21.
+//   3. lo = round(peso × factor_min × k), hi = round(peso × factor_max × k).
+//   4. Tabla actual (solo si se ha elegido una tabla y sus litros son plausibles, 10–200 L; no aplica a «pro»):
+//      lo ≥ round(litros × 0,80), es decir, no bajar más de un 20 % de golpe.
+//   5. Límites: el rango se acota a 15–120 L (tablas de serie habituales) y siempre hi ≥ lo + 4.
 
 import type { Shape } from "@/lib/domain/taxonomy";
 
@@ -56,9 +70,11 @@ export const initialFinderState = (): FinderState => ({
 
 export const WEIGHT_MIN = 30;
 export const WEIGHT_MAX = 160;
+/** Peso en kg: solo dígitos (el campo no admite decimales) y dentro de [WEIGHT_MIN, WEIGHT_MAX]. */
 export const isValidWeight = (w: string) => {
+  if (!/^\d{1,3}$/.test(w)) return false;
   const n = Number(w);
-  return w !== "" && n >= WEIGHT_MIN && n <= WEIGHT_MAX;
+  return n >= WEIGHT_MIN && n <= WEIGHT_MAX;
 };
 
 /** [clave, título, descripción, nombre corto del nivel]. */
@@ -82,9 +98,9 @@ export const CURRENT_BOARDS: [string, string][] = [
 ];
 
 export const FREQS: [FreqKey, string, string][] = [
-  ["low", "Menos de una vez a la semana", "Con menos práctica, algo más de volumen te dará más olas."],
-  ["mid", "Una o dos veces por semana", "El ritmo habitual: usamos el rango estándar."],
-  ["high", "Tres o más veces por semana", "Estás en forma: puedes ir algo más ajustado."],
+  ["low", "Menos de una vez a la semana", "Con menos práctica, algo más de volumen suele ayudar a coger olas."],
+  ["mid", "Una o dos veces por semana", "El ritmo habitual: usamos el rango de referencia."],
+  ["high", "Tres o más veces por semana", "Con más práctica se suele poder ir algo más ajustado."],
 ];
 
 export const WAVES: [WavesKey, string, string][] = [
@@ -105,13 +121,13 @@ export const GOALS: [GoalKey, string][] = [
 
 /** [pregunta, ayuda] de cada paso. */
 export const QUESTIONS: [string, string][] = [
-  ["¿Cuánto pesas?", "El peso es el dato que más influye en el volumen que necesitas. Solo lo usamos para calcular."],
-  ["¿Cuál es tu nivel?", "Responde con sinceridad: un poco más de volumen te hará progresar más rápido."],
+  ["¿Cuánto pesas?", "El peso suele ser el dato que más influye en el volumen. Solo lo usamos para calcular."],
+  ["¿Cuál es tu nivel?", "Responde con sinceridad: un poco más de volumen suele ayudar a progresar."],
   ["¿Qué tabla usas ahora?", "Nos ayuda a entender de dónde vienes, para no proponerte un salto demasiado brusco."],
-  ["¿Con qué frecuencia surfeas?", "Quien surfea poco agradece más volumen. Con más práctica puedes ajustar."],
-  ["¿Qué olas sueles surfear?", "Las olas pequeñas piden más volumen y superficie; las potentes, más control."],
+  ["¿Con qué frecuencia surfeas?", "Quien surfea poco suele agradecer más volumen. Con más práctica se puede ajustar."],
+  ["¿Qué olas sueles surfear?", "Las olas pequeñas suelen pedir más volumen y superficie; las potentes, más control."],
   ["¿Qué quieres conseguir?", "Puedes elegir más de una opción."],
-  ["¿Dónde buscas y cuánto quieres gastar?", "Solo filtra las tablas que te enseñamos: no cambia la recomendación técnica."],
+  ["¿Dónde buscas y cuánto quieres gastar?", "Solo filtra las tablas que te enseñamos: no cambia el rango de litros."],
 ];
 
 export interface TypeInfo {
@@ -127,13 +143,13 @@ export interface TypeInfo {
 }
 
 export const TYPE_INFO: Record<FinderType, TypeInfo> = {
-  softboard: { label: "Softboard", singular: "softboard", plural: "softboards", why: "Máxima estabilidad y seguridad mientras aprendes.", cons: "Se queda corta cuando empiezas a ir por la pared.", lens: "7'0\"–8'6\"", shape: "evolutiva" },
-  evolutiva: { label: "Evolutiva", singular: "evolutiva", plural: "evolutivas", why: "Rígida, con mucho volumen y remada fácil: el paso natural después de la softboard.", cons: "Menos ágil en olas potentes.", lens: "7'0\"–8'0\"", shape: "evolutiva" },
-  longboard: { label: "Longboard", singular: "longboard", plural: "longboards", why: "Coge olas muy pequeñas y es muy estable.", cons: "Pesada, y cuesta más pasar la rompiente y transportarla.", lens: "9'0\"–9'6\"", shape: "longboard" },
+  softboard: { label: "Softboard", singular: "softboard", plural: "softboards", why: "Muy estable y más segura mientras aprendes.", cons: "Suele quedarse corta cuando empiezas a ir por la pared.", lens: "7'0\"–8'6\"", shape: "evolutiva" },
+  evolutiva: { label: "Evolutiva", singular: "evolutiva", plural: "evolutivas", why: "Rígida, con mucho volumen y remada fácil: un paso habitual después de la softboard.", cons: "Menos ágil en olas potentes.", lens: "7'0\"–8'0\"", shape: "evolutiva" },
+  longboard: { label: "Longboard", singular: "longboard", plural: "longboards", why: "Suele coger con facilidad olas muy pequeñas y es muy estable.", cons: "Pesada, y cuesta más pasar la rompiente y transportarla.", lens: "9'0\"–9'6\"", shape: "longboard" },
   midlength: { label: "Midlength", singular: "midlength", plural: "midlengths", why: "Deslizamiento y remada con un surf fluido y tranquilo.", cons: "Menos reactiva en giros cerrados.", lens: "6'10\"–7'10\"", shape: "midlength" },
   fish: { label: "Fish", singular: "fish", plural: "fish", why: "Corta y ancha: rápida y divertida en olas pequeñas y medianas.", cons: "Puede costar en olas grandes y huecas.", lens: "5'6\"–6'4\"", shape: "fish" },
   hibrida: { label: "Híbrida", singular: "híbrida", plural: "híbridas", why: "Equilibrio entre facilidad y rendimiento para progresar en maniobras.", cons: "Exige ya cierta técnica.", lens: "5'8\"–6'6\"", shape: "hibrida" },
-  shortboard: { label: "Shortboard", singular: "shortboard", plural: "shortboards", why: "Máxima respuesta en olas con fuerza.", cons: "Poco volumen: penaliza mucho en olas pequeñas.", lens: "5'8\"–6'4\"", shape: "shortboard" },
+  shortboard: { label: "Shortboard", singular: "shortboard", plural: "shortboards", why: "Mucha respuesta en olas con fuerza.", cons: "Poco volumen: suele costar en olas pequeñas.", lens: "5'8\"–6'4\"", shape: "shortboard" },
 };
 
 
@@ -160,7 +176,7 @@ const LENGTHS: Record<LevelKey, string> = {
 };
 
 const LOOK: Record<LevelKey, string[]> = {
-  learn: ["Anchura de 22\" o más y cantos gruesos", "Mucho volumen repartido a lo largo de la tabla", "Construcción resistente: epoxy o softboard"],
+  learn: ["Anchura en torno a 22\" o más y cantos gruesos", "Mucho volumen repartido a lo largo de la tabla", "Construcción resistente: epoxy o softboard"],
   ride: ["Volumen dentro de tu rango, sin bajar de golpe", "Cantos medios y algo de rocker", "Quillas thruster o 2+1 versátiles"],
   turn: ["Volumen algo más ajustado para girar", "Cola squash o swallow según el tipo de ola", "Rocker moderado"],
   pro: ["Volumen ajustado a tus olas habituales", "Rocker adaptado a la fuerza de la ola", "Cantos finos para más agarre"],
@@ -195,11 +211,25 @@ const parseNum = (s: string) => {
   return Number.isFinite(n) ? n : 0;
 };
 
-/** Recomendación orientativa. null si falta un peso válido o el nivel. Port de wzRec(). */
-export function recommend(W: Pick<FinderState, "w" | "lvl" | "freq" | "waves" | "goals" | "curVol">): Recommendation | null {
-  const w = Number(W.w);
-  if (!isValidWeight(W.w) || !W.lvl) return null;
-  const [a, b] = FACTORS[W.lvl];
+/** Límites del ajuste combinado k (ver cabecera). */
+export const K_MIN = 0.9;
+export const K_MAX = 1.2;
+/** Rango de volumen que se propone, en litros: tablas de serie habituales. */
+export const VOL_MIN = 15;
+export const VOL_MAX = 120;
+/** Anchura mínima del rango, en litros. */
+export const MIN_SPAN = 4;
+/** No bajar más de un 20 % respecto a la tabla actual. */
+export const MAX_DROP = 0.2;
+/** Litros de la tabla actual que se consideran plausibles; fuera de ahí se ignoran. */
+const CUR_VOL_MIN = 10;
+const CUR_VOL_MAX = 200;
+
+const clamp = (n: number, lo: number, hi: number) => Math.min(hi, Math.max(lo, n));
+const litres = (n: number) => n.toLocaleString("es-ES", { maximumFractionDigits: 1 });
+
+/** Ajuste combinado por frecuencia, olas y objetivo, acotado a [K_MIN, K_MAX]. */
+export function adjustment(W: Pick<FinderState, "freq" | "waves" | "goals">): number {
   const g = W.goals;
   let k = 1;
   if (W.freq === "low") k *= 1.08;
@@ -210,16 +240,37 @@ export function recommend(W: Pick<FinderState, "w" | "lvl" | "freq" | "waves" | 
   if (g.includes("manio")) k *= 0.94;
   if (g.includes("turns")) k *= 0.97;
   if (g.includes("small")) k *= 1.04;
+  return clamp(k, K_MIN, K_MAX);
+}
+
+/** Recomendación orientativa. null si falta un peso válido o el nivel. Port de wzRec(). */
+export function recommend(
+  W: Pick<FinderState, "w" | "lvl" | "freq" | "waves" | "goals" | "curVol"> & Partial<Pick<FinderState, "cur">>,
+): Recommendation | null {
+  if (!isValidWeight(W.w) || !W.lvl || !FACTORS[W.lvl]) return null;
+  const w = Number(W.w);
+  const [a, b] = FACTORS[W.lvl];
+  const g = W.goals;
+  const k = adjustment(W);
 
   let lo = Math.round(w * a * k);
   let hi = Math.round(w * b * k);
   let note = "";
-  const cv = parseNum(W.curVol);
-  if (cv && W.lvl !== "pro" && lo < cv * 0.78) {
-    lo = Math.round(cv * 0.78);
-    note = ` Partes de una tabla de ${cv} L: no te proponemos bajar más de un 20 % de golpe.`;
+  // Los litros de la tabla actual solo cuentan si se ha elegido una tabla: con «No tengo tabla»
+  // el campo se oculta, pero el valor escrito antes podía seguir en el estado.
+  const cv = W.cur && W.cur !== NO_BOARD ? parseNum(W.curVol) : 0;
+  if (cv >= CUR_VOL_MIN && cv <= CUR_VOL_MAX && W.lvl !== "pro") {
+    const floor = Math.round(cv * (1 - MAX_DROP));
+    if (lo < floor) {
+      lo = floor;
+      note = ` Partes de una tabla de ${litres(cv)} L: no te proponemos bajar más de un 20 % de golpe.`;
+    }
   }
-  if (hi < lo + 4) hi = lo + 4;
+  if (lo > VOL_MAX - MIN_SPAN || hi > VOL_MAX) {
+    note += ` El cálculo pasa de ${VOL_MAX} L, más de lo que suelen tener las tablas de serie: lo limitamos ahí y conviene consultar medidas concretas en una tienda.`;
+  }
+  lo = clamp(lo, VOL_MIN, VOL_MAX - MIN_SPAN);
+  hi = clamp(hi, lo + MIN_SPAN, VOL_MAX);
 
   let types = BASE_TYPES[W.lvl].slice();
   if (g.includes("soft")) types = ["evolutiva", ...types.filter((t) => t !== "softboard" && t !== "evolutiva"), "midlength"];

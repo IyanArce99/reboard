@@ -61,7 +61,11 @@ select is((select count(*) from public.zones), 9::bigint, '9 zonas de referencia
 select is((select count(*) from public.zones where region_slug = 'canarias'), 4::bigint, '4 zonas en Canarias');
 select is((select count(*) from public.listings), 0::bigint, 'sin anuncios precargados');
 select is((select count(*) from public.shops), 0::bigint, 'sin tiendas precargadas');
-select is((select count(*) from public.brands), 0::bigint, 'sin catálogo precargado');
+-- Marcas: solo nombres de referencia (migración 20261024090000). Modelos y medidas, ninguno: exigen
+-- la tabla del fabricante y no se inventan.
+select ok((select count(*) from public.brands) >= 30, 'marcas de referencia cargadas');
+select is((select count(*) from public.board_models), 0::bigint, 'sin modelos de catálogo precargados');
+select is((select count(*) from public.board_model_sizes), 0::bigint, 'sin medidas de catálogo precargadas');
 
 select * from finish();
 rollback;

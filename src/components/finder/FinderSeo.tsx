@@ -27,13 +27,15 @@ export function FinderSeo() {
           Cómo interpretar los litros y las medidas
         </h2>
         <p>
-          El volumen (en litros) indica cuánto flota una tabla. Más litros dan más estabilidad y remada; menos litros, más
-          respuesta en los giros. La longitud, la anchura y el grosor reparten ese volumen: dos tablas de 47 L pueden
+          El volumen (en litros) indica cuánto flota una tabla. Más litros suelen dar más estabilidad y remada; menos litros,
+          más respuesta en los giros. La longitud, la anchura y el grosor reparten ese volumen: dos tablas de 47 L pueden
           comportarse distinto si una es una evolutiva de 7&apos;2&quot; y otra una fish de 6&apos;0&quot;.
         </p>
         <p>
-          Como referencia, quien aprende suele ir con entre {dec(learnLo)} y {dec(learnHi)} litros por kilo de peso (con 75 kg,
-          unos {ex.lo}–{ex.hi} L), y quien surfea a nivel avanzado, con algo menos de la mitad de su peso.
+          Como referencia orientativa, quien aprende suele ir con entre {dec(learnLo)} y {dec(learnHi)} litros por kilo de peso
+          (con 75 kg, unos {ex.lo}–{ex.hi} L), y quien surfea a nivel avanzado, con algo menos de la mitad de su peso en litros.
+          Son reglas generales habituales en el sector, no una medida exacta: la tabla adecuada depende también de tu forma
+          física, de las olas y del modelo.
         </p>
         <p>
           El asistente calcula un rango orientativo a partir de tu peso y tu nivel, y lo ajusta según la frecuencia con la que

@@ -146,18 +146,21 @@
   padding: 8px 0;
 }
 
-/* Recuento en las opciones: discreto, y atenuado si no hay ninguna tabla. */
-.count {
+/* Recuento en las opciones: discreto. Las opciones sin tablas se atenúan (solo si hay inventario;
+   con cero tablas en total no se muestran recuentos). Antes compartía nombre con .count (recuento
+   de resultados) y .empty (estado vacío): por eso tiene nombres propios. */
+.optCount {
   font-size: 12px;
   color: var(--rb-muted);
   font-variant-numeric: tabular-nums;
 }
-[aria-pressed="true"] > .count {
+[aria-pressed="true"] > .optCount {
   color: inherit;
   opacity: 0.85;
 }
-.empty {
-  opacity: 0.55;
+.zero:not([aria-pressed="true"]) {
+  color: var(--rb-muted);
+  border-style: dashed;
 }
 
 .group {
@@ -373,10 +376,10 @@
   gap: 10px;
 }
 
-.count {
+.resultCount {
   font-size: 16px;
 }
-.count strong {
+.resultCount strong {
   font-family: var(--rb-font-mono);
   font-size: 18px;
 }
@@ -554,6 +557,17 @@
   gap: 8px;
   margin-top: 16px;
 }
+.emptyActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 20px;
+}
+.emptyBtn {
+  height: 48px;
+  font-size: 15px;
+  padding: 0 20px;
+}
 .emptyAlert {
   margin-top: 20px;
   padding-top: 18px;
@@ -592,6 +606,10 @@
     display: grid;
     grid-template-columns: 1fr 1fr 1fr;
     gap: 8px;
+  }
+  /* Sin resultados solo queda «Filtros». */
+  .mBar[data-solo] {
+    grid-template-columns: 1fr;
   }
 
   .layout {

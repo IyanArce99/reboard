@@ -411,3 +411,16 @@ Detalle en `docs/seo-ux-audit.md`.
 - **El inventario DEMO se mueve a `tests/fixtures`** (`demo-inventory.ts`, `mock-repository.ts`). Lo siguen usando los tests unitarios, los de integración y `scripts/seed-local-demo.mts`, pero nunca llega a la app.
 - **CI:** se mantienen tipos, lint, tests unitarios y build. Los e2e (Playwright) y el job de base de datos quedan desactivados hasta configurar Supabase, por decisión del titular. Para reactivarlos: Supabase local, `npm run env:local`, `npx tsx scripts/seed-local-demo.mts`, ejecutar los e2e contra esos datos y quitar `if: false` del job `database`.
 - **Pendiente:** los e2e y visuales asumen el inventario DEMO (recuentos, ids como `a1040`). Hay que adaptarlos al cargarlo en Supabase local.
+
+## Auditoría de la beta (sin inventario)
+Detalle y verificación en `docs/BETA_AUDIT.md`.
+- **Sin base de datos, la publicación «no está abierta»:** un aviso único, sin la palabra «demo» (la app ya no tiene datos demo).
+- **Sin inventario no hay recuentos a 0:** se ocultan los recuentos y los grupos vacíos, y se separa el estado «no hay ninguna tabla» del de «no hay coincidencias». Como mucho, una «Crear alerta» por pantalla.
+- **Ninguna zona se presupone:** ni en el buscador ni al publicar. Por defecto, «Toda España».
+- **TablaFinder:**
+  - k limitado a [0,90, 1,20];
+  - el tope de la tabla actual es exactamente un 20 %;
+  - el rango queda entre 15 y 120 L;
+  - textos orientativos.
+- **Turnstile:** la publicación espera el token en lugar de pedir otro clic.
+- **Marcas de referencia:** los tests ya no las borran. pgTAP comprueba que existen y que no hay modelos ni medidas precargados.

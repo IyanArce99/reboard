@@ -3,4 +3,5 @@
 // Hoy la zona se guarda en una cookie cuando el usuario la elige en el buscador.
 
 export const HERE_COOKIE = "rb_zona";
-export const DEFAULT_HERE = "gran-canaria";
+// Sin zona elegida: «Toda España». No se presupone una ubicación que el usuario no ha dado.
+export const DEFAULT_HERE = "";

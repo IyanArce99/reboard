@@ -9,9 +9,10 @@ import { brandOptions, getCatalogNames } from "@/lib/data/names";
 import { num } from "@/lib/domain/format";
 import { listingPath, listingTitle } from "@/lib/listing/present";
 import { absoluteUrl } from "@/lib/site";
-import { alertText, appliedChips, emptySuggestions } from "@/lib/search/describe";
+import { alertText, appliedChips, emptyStateCopy, emptySuggestions } from "@/lib/search/describe";
 import {
   PAGE_SIZE,
+  emptyFilters,
   hasVolumeFilter,
   searchHref,
   toQuery,
@@ -49,14 +50,20 @@ interface Props {
 export async function SearchResults({ filters: f, view, here, title, intro, crumbs, current, isSearchPage, openAdvanced = false, related }: Props) {
   const repo = getRepository();
   const suggestions = emptySuggestions(f);
-  const [names, res, unknown, facets] = await Promise.all([
+  const [names, res, unknown, facets, inventoryTotal] = await Promise.all([
     getCatalogNames(repo),
     repo.search(f, { sort: view.sort, limit: view.limit, here }),
     hasVolumeFilter(f) ? repo.unknownVolume(f, 12) : Promise.resolve({ items: [], total: 0 }),
     repo.facets(f),
+    // Tablas activas en total, sin filtros: distingue «aún no hay tablas» de «ninguna coincide».
+    repo.count(emptyFilters()),
   ]);
-  // Recuentos de las sugerencias: solo hacen falta en el estado vacío.
-  const suggestionCounts = res.total === 0 ? await Promise.all(suggestions.map((s) => repo.count(s.filters))) : [];
+  const inventoryEmpty = inventoryTotal === 0;
+  const noResults = res.total === 0;
+  // Sugerencias del estado vacío, con su recuento; las que tampoco darían resultados no se muestran.
+  const suggestionCounts = noResults && !inventoryEmpty ? await Promise.all(suggestions.map((s) => repo.count(s.filters))) : [];
+  const usefulSuggestions = suggestions.map((s, i) => ({ ...s, n: suggestionCounts[i] ?? 0 })).filter((s) => s.n > 0);
+  const empty = emptyStateCopy(f, inventoryTotal);
   const now = await repo.now();
   const shown = res.items;
   const counts = { total: facets.anyZone, zones: facets.zones, shapes: facets.shapes, brands: facets.brands };
@@ -85,16 +92,22 @@ export async function SearchResults({ filters: f, view, here, title, intro, crum
       )}
 
       <SearchNavProvider filters={f} view={view} isSearchPage={isSearchPage} supportsDistance={repo.capabilities.distance}>
-        {/* Móvil: el botón de alerta va en esta barra; en escritorio, en la cabecera de resultados (.dControls). */}
-        <div className={styles.mBar}>
+        {/* Móvil: el botón de alerta va en esta barra; en escritorio, en la cabecera de resultados (.dControls).
+            Sin resultados, ordenar no sirve y la alerta va en el estado vacío (una sola «Crear alerta» a la vista). */}
+        <div className={styles.mBar} data-solo={noResults || undefined}>
           <OpenFiltersButton count={applied.length} />
-          <SortSelect className={styles.mSort} />
-          <AlertButton text={alert.text} query={alert.query} className={styles.mAlert} />
+          {!noResults && (
+            <>
+              <SortSelect className={styles.mSort} />
+              <AlertButton text={alert.text} query={alert.query} className={styles.mAlert} />
+            </>
+          )}
         </div>
 
         <div className={styles.layout}>
           <FilterPanel
             counts={counts}
+            showCounts={!inventoryEmpty}
             resultCount={res.total}
             brands={brandOptions(names)}
             models={names.models}
@@ -104,14 +117,17 @@ export async function SearchResults({ filters: f, view, here, title, intro, crum
           <PendingArea className={styles.results}>
             <h2 className="visually-hidden">Resultados</h2>
             <div className={styles.resultsHead}>
-              <div className={styles.count} aria-live="polite">
+              {/* Sin ninguna tabla publicada, «0 tablas coinciden» solo repite el estado vacío. */}
+              <div className={inventoryEmpty ? "visually-hidden" : styles.resultCount} aria-live="polite">
                 <strong>{num(res.total)}</strong> {res.total === 1 ? "tabla coincide" : "tablas coinciden"}
               </div>
-              <div className={styles.dControls}>
-                <SortSelect className={styles.dSort} />
-                <ViewToggle />
-                <AlertButton text={alert.text} query={alert.query} className={`${ui.btnStrong} ${styles.dAlert}`} />
-              </div>
+              {!noResults && (
+                <div className={styles.dControls}>
+                  <SortSelect className={styles.dSort} />
+                  <ViewToggle />
+                  <AlertButton text={alert.text} query={alert.query} className={`${ui.btnStrong} ${styles.dAlert}`} />
+                </div>
+              )}
             </div>
 
             {applied.length > 0 && (
@@ -176,27 +192,34 @@ export async function SearchResults({ filters: f, view, here, title, intro, crum
             ) : (
               <div className={styles.empty}>
                 <BoardsIllustration />
-                <h2 className={styles.emptyTitle}>No encontramos tablas con estos filtros</h2>
-                {suggestions.length > 0 ? (
+                <h2 className={styles.emptyTitle}>{empty.title}</h2>
+                <p className={styles.emptyText}>{empty.text}</p>
+                {empty.kind === "inventory" ? (
+                  <div className={styles.emptyActions}>
+                    <Link href="/vender/publicar" className={`${ui.btnPrimary} ${styles.emptyBtn}`}>
+                      Publicar mi tabla
+                    </Link>
+                    <AlertButton text={alert.text} query={alert.query} className={`${ui.btnOutline} ${styles.emptyBtn}`} />
+                  </div>
+                ) : (
                   <>
-                    <p className={styles.emptyText}>Amplía la búsqueda (entre paréntesis, las tablas que verías):</p>
-                    <div className={styles.suggestions}>
-                      {suggestions.map((s, i) => (
-                        <Link key={s.label} href={searchHref(s.filters, viewKeep)} scroll={false} className={ui.btnNeutral}>
-                          {s.label} ({suggestionCounts[i]})
-                        </Link>
-                      ))}
+                    {usefulSuggestions.length > 0 && (
+                      <div className={styles.suggestions}>
+                        {usefulSuggestions.map((s) => (
+                          <Link key={s.label} href={searchHref(s.filters, viewKeep)} scroll={false} className={ui.btnNeutral}>
+                            {s.label} ({num(s.n)})
+                          </Link>
+                        ))}
+                      </div>
+                    )}
+                    <div className={styles.emptyAlert}>
+                      <div>
+                        <strong>O guarda la búsqueda como alerta.</strong> «{alert.text}»
+                      </div>
+                      <AlertButton text={alert.text} query={alert.query} className={`${ui.btnStrong} ${styles.emptyAlertBtn}`} />
                     </div>
                   </>
-                ) : (
-                  <p className={styles.emptyText}>Todavía no hay tablas publicadas.</p>
                 )}
-                <div className={styles.emptyAlert}>
-                  <div>
-                    <strong>O guarda la búsqueda como alerta.</strong> «{alert.text}»
-                  </div>
-                  <AlertButton text={alert.text} query={alert.query} className={`${ui.btnStrong} ${styles.emptyAlertBtn}`} />
-                </div>
               </div>
             )}
           </PendingArea>

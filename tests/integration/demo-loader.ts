@@ -22,13 +22,13 @@ const must = <T,>(r: { data: T | null; error: { message: string } | null }, what
   return r.data as T;
 };
 
-/** Borra TODO lo cargado por loadDemo (anuncios, catálogo, tiendas y usuarios @demo.invalid). */
+/** Borra lo cargado por loadDemo (anuncios, modelos, tiendas y usuarios @demo.invalid). Las marcas se quedan. */
 export async function clearDemo(sb: Sb) {
   must(await sb.from("listings").delete().gte("id", 0), "delete listings");
   must(await sb.from("shops").delete().gte("id", 0), "delete shops");
   must(await sb.from("board_model_sizes").delete().gte("id", 0), "delete sizes");
   must(await sb.from("board_models").delete().gte("id", 0), "delete models");
-  must(await sb.from("brands").delete().gte("id", 0), "delete brands");
+  // Las marcas NO se borran: son datos de referencia de la migración 20261024090000_reference_brands.
   for (let page = 1; ; page++) {
     const { data, error } = await sb.auth.admin.listUsers({ page, perPage: 1000 });
     if (error) throw error;
@@ -45,7 +45,11 @@ export async function clearDemo(sb: Sb) {
 export async function loadDemo(sb: Sb, listings: Listing[]) {
   // Catálogo
   const brandNames = [...new Set(DEMO_CATALOG.map((m) => m.brand))];
-  const brands = must(await sb.from("brands").insert(brandNames.map((name) => ({ slug: slugify(name), name }))).select("id, name"), "brands");
+  // upsert: las marcas de referencia ya existen (migración); se reutilizan por slug.
+  const brands = must(
+    await sb.from("brands").upsert(brandNames.map((name) => ({ slug: slugify(name), name })), { onConflict: "slug" }).select("id, name"),
+    "brands",
+  );
   const brandId = new Map(brands.map((b) => [b.name, b.id]));
   const models = must(
     await sb

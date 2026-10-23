@@ -6,23 +6,24 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { BoardShape } from "@/components/brand/BoardShape";
 import { ListingCard } from "@/components/listing/ListingCard";
+import { AlertButton } from "@/components/user/islands";
 import { useUserState } from "@/components/user/UserStateProvider";
 import { SHAPE_INFO } from "@/lib/domain/taxonomy";
 import type { Listing } from "@/lib/domain/types";
 import {
-  baseFilters,
   budgetOf,
   compatible,
   countFor,
   finderZone,
   finderZoneName,
   resultFilters,
-  typeFilter,
+  typeFilters,
+  widenOptions,
 } from "@/lib/finder/listings";
 import { TYPE_INFO, WAVES, levelOf, type FinderState, type Recommendation } from "@/lib/finder/recommend";
 import { alertText } from "@/lib/search/describe";
 import { searchHref, toQuery, withFilters, type Filters } from "@/lib/search/filters";
-import type { SummaryItem } from "./FinderWizard";
+import type { SummaryItem } from "@/lib/finder/summary";
 import styles from "./Finder.module.css";
 
 /** Aviso único por pantalla (asistente o resultado): el cálculo no está validado. */
@@ -69,7 +70,7 @@ function usePool(lo: number, hi: number) {
 }
 
 export function FinderResult({ state: W, rec: r, summary, onEdit, onRestart, set }: Props) {
-  const { profile, setProfile, addAlert } = useUserState();
+  const { profile, setProfile } = useUserState();
   const { pool, failed } = usePool(r.lo, r.hi);
   const listings = pool?.listings ?? [];
   const zone = finderZone(W);
@@ -81,20 +82,13 @@ export function FinderResult({ state: W, rec: r, summary, onEdit, onRestart, set
   const comp = compatible(listings, r, zone, budget);
   const all = resultFilters(r, zone, budget);
   const allCount = countFor(listings, all);
-  const alert = (f: Filters) => addAlert(alertText(f, NO_NAMES), toQuery(f));
+  const alertProps = (f: Filters) => ({ text: alertText(f, NO_NAMES), query: toQuery(f) });
   const saved = !!profile && profile.lo === r.lo && profile.hi === r.hi;
-
-  const widen: { label: string; href?: string; onClick?: () => void }[] = [];
-  if (pool) {
-    if (zone) widen.push({ label: `Ampliar a toda España (${compatible(listings, r, "", budget).length})`, onClick: () => set({ zone: "" }) });
-    if (budget != null) {
-      const nb = budget + 100;
-      widen.push({ label: `Subir presupuesto a ${nb} € (${compatible(listings, r, zone, nb).length})`, onClick: () => set({ budget: String(nb) }) });
-    }
-    const alt = baseFilters(r, zone, budget);
-    widen.push({ label: `Ver alternativas con tu volumen (${countFor(listings, alt)})`, href: searchHref(alt) });
-    widen.push({ label: "Crear alerta", onClick: () => alert(all) });
-  }
+  // Sin tablas compatibles: estado vacío honesto (sin contadores a cero), con alerta y enlace a publicar.
+  const empty = !!pool && comp.length === 0;
+  // Ninguna tabla publicada en todo el rango de litros (lo normal mientras la beta no tenga anuncios).
+  const noneInRange = !!pool && listings.length === 0;
+  const widen = pool && !noneInRange ? widenOptions(listings, r, zone, budget) : [];
 
   return (
     <>
@@ -107,8 +101,9 @@ export function FinderResult({ state: W, rec: r, summary, onEdit, onRestart, set
           </span>
         </h2>
         <p className={styles.resSub}>
-          Con {r.weight} kg y el nivel «{lvName.toLowerCase()}»{waves ? `, en olas ${waves}` : ""}, estas son las opciones con
-          más sentido. Tómalas como orientación, no como una medida exacta.
+          Con {r.weight} kg y el nivel «{lvName.toLowerCase()}»{waves ? `, en olas ${waves}` : ""}, estas son las opciones que
+          suelen tener más sentido. Tómalas como orientación, no como una medida exacta: también dependen de tu forma
+          física, del modelo y de cómo reparte el volumen.
         </p>
         <div className={styles.resChips}>
           {summary.map((s) => (
@@ -145,7 +140,8 @@ export function FinderResult({ state: W, rec: r, summary, onEdit, onRestart, set
           </div>
         </div>
         <p className={styles.why}>
-          Por qué: el volumen sale de tu peso y nivel, ajustado por frecuencia, tipo de ola y objetivo.{r.note}
+          Por qué: el volumen sale de tu peso y nivel, ajustado por frecuencia, tipo de ola y objetivo, con factores
+          orientativos habituales.{r.note}
         </p>
       </section>
 
@@ -156,13 +152,13 @@ export function FinderResult({ state: W, rec: r, summary, onEdit, onRestart, set
         <div className={styles.types}>
           {r.types.map((t, i) => {
             const info = TYPE_INFO[t];
-            const f = { ...baseFilters(r, zone, null), ...typeFilter(t) };
+            const f = typeFilters(r, zone, budget, t);
             const n = pool ? countFor(listings, f) : null;
             return (
               <article key={t} className={styles.type} data-first={i === 0 || undefined}>
                 <div className={styles.typePhoto}>
                   <BoardShape shape={info.shape} size={140} tone={t === "softboard" ? "soft" : "light"} className={styles.typeImg} />
-                  <span className={styles.typeTag}>{i === 0 ? "La que más encaja" : "También encaja"}</span>
+                  <span className={styles.typeTag}>{i === 0 ? "Primera opción" : "También puede encajar"}</span>
                 </div>
                 <div className={styles.typeBody}>
                   <div className={styles.typeHead}>
@@ -175,9 +171,9 @@ export function FinderResult({ state: W, rec: r, summary, onEdit, onRestart, set
                   </p>
                   <div className={styles.grow} />
                   {n === 0 ? (
-                    <button type="button" className={styles.typeCta} onClick={() => alert(f)}>
+                    <AlertButton {...alertProps(f)} className={styles.typeCta}>
                       Sin anuncios · crear alerta
-                    </button>
+                    </AlertButton>
                   ) : (
                     <Link href={searchHref(f)} className={styles.typeCta}>
                       {n == null ? `Ver ${info.plural}` : `Ver ${n} ${n === 1 ? info.singular : info.plural}`}
@@ -198,7 +194,7 @@ export function FinderResult({ state: W, rec: r, summary, onEdit, onRestart, set
             </h2>
             <div className={styles.listSub} aria-live="polite">
               {pool
-                ? `${comp.length} tabla${comp.length === 1 ? "" : "s"} entre ${r.lo} y ${r.hi} L · ${r.types.map((t) => TYPE_INFO[t].label).join(", ")} · ${zoneName}${budget != null ? ` · hasta ${budget} €` : ""}`
+                ? `${comp.length ? `${comp.length} tabla${comp.length === 1 ? "" : "s"}` : "Ninguna tabla por ahora"} entre ${r.lo} y ${r.hi} L · ${r.types.map((t) => TYPE_INFO[t].label).join(", ")} · ${zoneName}${budget != null ? ` · hasta ${budget} €` : ""}`
                 : failed
                   ? "No hemos podido cargar las tablas."
                   : "Buscando tablas en tu rango…"}
@@ -217,7 +213,7 @@ export function FinderResult({ state: W, rec: r, summary, onEdit, onRestart, set
               <div key={l.id} className={styles.cardWrap}>
                 <ListingCard listing={l} now={pool.now} hereZone={pool.here} layout="responsive" />
                 <span className={styles.reason}>
-                  Encaja: {l.volume.value} L dentro de {r.lo}–{r.hi} L · {SHAPE_INFO[l.shape].label}
+                  En tu rango: {l.volume.value} L dentro de {r.lo}–{r.hi} L · {SHAPE_INFO[l.shape].label}
                   {l.construction === "softboard" ? " · Softboard" : ""}
                 </span>
               </div>
@@ -234,37 +230,59 @@ export function FinderResult({ state: W, rec: r, summary, onEdit, onRestart, set
           </div>
         )}
 
-        {pool && comp.length === 0 && (
+        {empty && (
           <div className={styles.none}>
-            <div className={styles.noneTitle}>No hay tablas disponibles ahora mismo con estas características.</div>
-            <div className={styles.noneText}>Prueba a ampliar la búsqueda:</div>
-            <div className={styles.widenRow}>
-              {widen.map((w) =>
-                w.href ? (
-                  <Link key={w.label} href={w.href} className={styles.widen}>
-                    {w.label}
-                  </Link>
-                ) : (
-                  <button key={w.label} type="button" className={styles.widen} onClick={w.onClick}>
-                    {w.label}
-                  </button>
-                ),
-              )}
+            <div className={styles.noneTitle}>
+              {noneInRange
+                ? `Todavía no hay tablas publicadas entre ${r.lo} y ${r.hi} L.`
+                : "No hay tablas disponibles ahora mismo con estas características."}
+            </div>
+            <div className={styles.noneText}>
+              {noneInRange
+                ? "Reboard acaba de empezar y aún hay pocos anuncios. Crea una alerta con este perfil: se guarda en este dispositivo (los avisos por email aún no están activos)."
+                : "Prueba a ampliar la búsqueda o crea una alerta con este perfil (se guarda en este dispositivo)."}
+            </div>
+            {widen.length > 0 && (
+              <div className={styles.widenRow}>
+                {widen.map((w) =>
+                  w.href ? (
+                    <Link key={w.key} href={w.href} className={styles.widen}>
+                      {w.label}
+                    </Link>
+                  ) : (
+                    <button
+                      key={w.key}
+                      type="button"
+                      className={styles.widen}
+                      onClick={() => set(w.key === "zone" ? { zone: "" } : { budget: String(w.budget) })}
+                    >
+                      {w.label}
+                    </button>
+                  ),
+                )}
+              </div>
+            )}
+            <span className={styles.boxText}>«{alertText(all, NO_NAMES)}»</span>
+            <div className={styles.noneActions}>
+              <AlertButton {...alertProps(all)} className={styles.alertBtn} />
+              <Link href="/vender/publicar" className={styles.widen}>
+                ¿Tienes una tabla que no usas? Publícala gratis
+              </Link>
             </div>
           </div>
         )}
 
-        <div className={styles.twoCols}>
-          <div className={styles.alertBox}>
-            <strong className={styles.boxTitle}>Crea una alerta con este perfil</strong>
-            <span className={styles.boxText}>«{alertText(all, NO_NAMES)}»</span>
-            <span className={styles.boxText}>Se guarda en este dispositivo. Los avisos por email aún no están activos.</span>
-            <div>
-              <button type="button" className={styles.alertBtn} onClick={() => alert(all)}>
-                Crear alerta
-              </button>
+        <div className={styles.twoCols} data-single={empty || undefined}>
+          {!empty && (
+            <div className={styles.alertBox}>
+              <strong className={styles.boxTitle}>Crea una alerta con este perfil</strong>
+              <span className={styles.boxText}>«{alertText(all, NO_NAMES)}»</span>
+              <span className={styles.boxText}>Se guarda en este dispositivo. Los avisos por email aún no están activos.</span>
+              <div>
+                <AlertButton {...alertProps(all)} className={styles.alertBtn} />
+              </div>
             </div>
-          </div>
+          )}
           <div className={styles.saveBox}>
             {/* El perfil se guarda solo al llegar al resultado (FinderWizard): aquí se avisa y se puede borrar. */}
             <strong className={styles.boxTitle}>{saved ? "Tu perfil está guardado" : "No hay ningún perfil guardado"}</strong>

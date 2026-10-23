@@ -62,7 +62,8 @@ export interface PublishDraft {
   phone: string;
 }
 
-export const emptyDraft = (zone = "gran-canaria"): PublishDraft => ({
+// Sin zona por defecto: quien vende la elige (no se presupone Gran Canaria).
+export const emptyDraft = (zone = ""): PublishDraft => ({
   photos: [],
   brand: "",
   brandOther: "",

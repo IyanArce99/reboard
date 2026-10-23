@@ -173,3 +173,31 @@ export function emptySuggestions(f: Filters): { label: string; filters: Filters 
   if (toQuery(f) !== toQuery(emptyFilters())) out.push({ label: "Quitar todos los filtros", filters: emptyFilters() });
   return out;
 }
+
+/** Hay algún filtro activo (distinto de la búsqueda vacía). */
+export const hasActiveFilters = (f: Filters) => toQuery(f) !== toQuery(emptyFilters());
+
+export type EmptyKind = "inventory" | "filters";
+
+/**
+ * Texto del estado sin resultados. Distingue «no hay ninguna tabla publicada» (inventario vacío)
+ * de «ninguna coincide con estos filtros», y no habla de filtros si no hay ninguno activo.
+ */
+export function emptyStateCopy(f: Filters, inventoryTotal: number): { kind: EmptyKind; title: string; text: string } {
+  if (inventoryTotal === 0)
+    return {
+      kind: "inventory",
+      title: "Todavía no hay tablas publicadas",
+      text: "Reboard está empezando y aún no hay anuncios activos. Si tienes una tabla parada, publícala gratis; si buscas, guarda esta búsqueda como alerta y vuelve a mirar cuántas coinciden.",
+    };
+  return hasActiveFilters(f)
+    ? { kind: "filters", title: "No encontramos tablas con estos filtros", text: "Amplía la búsqueda (entre paréntesis, las tablas que verías):" }
+    : { kind: "filters", title: "No encontramos tablas", text: "Prueba con otra búsqueda." };
+}
+
+/** Texto del botón amarillo del buscador de la home según el recuento. */
+export function searchCtaText(count: number, inventoryTotal: number | undefined, fmt: (n: number) => string = String) {
+  if (inventoryTotal === 0) return "Buscar tablas";
+  if (count === 0) return "Ver alternativas";
+  return `Buscar ${fmt(count)} ${count === 1 ? "tabla" : "tablas"}`;
+}

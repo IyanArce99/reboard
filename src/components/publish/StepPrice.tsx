@@ -136,7 +136,7 @@ export function StepPrice({ d, set, model, refs, dataIsDemo, live }: Props) {
           />
           <span id="pub-phone-help" className={styles.small}>
             No aparece escrito en el anuncio: lo ve quien pulsa «Mostrar contacto», con protección contra robots.
-            {!live && " Demo: no se guarda."}
+            {!live && " Todavía no se guarda."}
           </span>
         </div>
       </div>

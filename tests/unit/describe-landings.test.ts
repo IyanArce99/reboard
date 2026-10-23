@@ -1,5 +1,15 @@
 import { describe, expect, it } from "vitest";
-import { alertText, appliedChips, emptySuggestions, resultsShortTitle, resultsTitle, type CatalogNames } from "@/lib/search/describe";
+import {
+  alertText,
+  appliedChips,
+  emptyStateCopy,
+  emptySuggestions,
+  hasActiveFilters,
+  resultsShortTitle,
+  resultsTitle,
+  searchCtaText,
+  type CatalogNames,
+} from "@/lib/search/describe";
 import { emptyFilters, withFilters } from "@/lib/search/filters";
 import {
   LANDING_FORMS,
@@ -110,5 +120,41 @@ describe("landings", () => {
     expect(landingPathFor(withFilters({ volMin: 55 }))).toBe("/tablas/principiantes");
     expect(landingPathFor(withFilters({ shapes: ["evolutiva"], priceMax: 200 }))).toBeNull();
     expect(landingPathFor(emptyFilters())).toBeNull();
+  });
+});
+
+describe("estado sin resultados", () => {
+  it("inventario vacío: no habla de filtros, con o sin ellos", () => {
+    for (const f of [emptyFilters(), withFilters({ shapes: ["fish"], zone: "tenerife" })]) {
+      const e = emptyStateCopy(f, 0);
+      expect(e.kind).toBe("inventory");
+      expect(e.title).toBe("Todavía no hay tablas publicadas");
+      expect(`${e.title} ${e.text}`).not.toMatch(/filtros/);
+    }
+  });
+
+  it("con inventario: «con estos filtros» solo si hay filtros activos", () => {
+    expect(emptyStateCopy(withFilters({ shapes: ["fish"] }), 12)).toMatchObject({ kind: "filters", title: "No encontramos tablas con estos filtros" });
+    const none = emptyStateCopy(emptyFilters(), 12);
+    expect(none.kind).toBe("filters");
+    expect(`${none.title} ${none.text}`).not.toMatch(/estos filtros/);
+  });
+
+  it("filtros activos", () => {
+    expect(hasActiveFilters(emptyFilters())).toBe(false);
+    expect(hasActiveFilters(withFilters({ zone: "tenerife" }))).toBe(true);
+  });
+});
+
+describe("botón del buscador de la home", () => {
+  it("sin inventario: «Buscar tablas», nunca «Ver alternativas»", () => {
+    expect(searchCtaText(0, 0)).toBe("Buscar tablas");
+  });
+  it("con inventario", () => {
+    expect(searchCtaText(0, 30)).toBe("Ver alternativas");
+    expect(searchCtaText(1, 30)).toBe("Buscar 1 tabla");
+    expect(searchCtaText(1200, 3000, (n) => n.toLocaleString("es-ES"))).toMatch(/^Buscar 1.?200 tablas$/);
+    // Sin total conocido, se comporta como antes.
+    expect(searchCtaText(0, undefined)).toBe("Ver alternativas");
   });
 });
