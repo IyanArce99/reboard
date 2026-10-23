@@ -6,7 +6,7 @@ import { createUserClient } from "@/lib/supabase/server";
 
 // Enlaces de los emails de Supabase Auth (cambio de email, invitaciones, enlace mágico…). El acceso
 // normal es con el código de 6 cifras en /entrar; este enlace es la alternativa cuando el email trae
-// token_hash o, en el flujo PKCE, ?code=.
+// token_hash o, en el flujo PKCE, ?code=. También es la vuelta del acceso con Google o Apple (?code=).
 const TYPES: EmailOtpType[] = ["email", "magiclink", "signup", "invite", "recovery", "email_change"];
 
 export async function GET(request: NextRequest) {
@@ -30,6 +30,8 @@ export async function GET(request: NextRequest) {
     if (!error) return NextResponse.redirect(new URL(next, request.url));
   }
   const fail = new URL("/entrar", request.url);
-  fail.searchParams.set("error", "enlace");
+  // Vuelta de Google/Apple con error (cancelado, cuenta rechazada…): mensaje propio.
+  fail.searchParams.set("error", url.searchParams.has("error") ? "social" : "enlace");
+  if (next !== "/cuenta") fail.searchParams.set("siguiente", next);
   return NextResponse.redirect(fail);
 }

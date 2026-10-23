@@ -443,3 +443,17 @@ Detalle en `docs/ADMIN.md`.
 - **Último admin:** lo protege un disparador. La service role puede saltárselo; es la vía de recuperación.
 - **Aviso de la web** por `/api/aviso` y no en el layout raíz, porque los datos en el layout rompían la regeneración de las páginas prerenderizadas.
 - **Región de Vercel `dub1`**, junto a Supabase `eu-west-1` (Irlanda).
+
+## Entrar con Google y Apple (23-10-2026)
+
+- **Qué:** además del código por email (y la contraseña para quien ya tiene una), botones «Continuar con Google» y «Continuar con Apple» en `/entrar` y en el último paso de publicar.
+- **Cómo:**
+  - Supabase Auth OAuth con PKCE: `signInWithOAuth` en el navegador y vuelta por `/auth/confirm?code=`, que ya canjeaba el código de los enlaces del correo;
+  - desde publicar se vuelve a la misma página, porque el borrador sigue en IndexedDB.
+- **Interruptor:** `NEXT_PUBLIC_AUTH_PROVIDERS` (`google,apple`). Sin ella no hay botones, así que no se enseña un botón que lleve a un error mientras el proveedor no esté configurado.
+- **Nombre del perfil:** la migración `20261026090000_profile_name_from_oauth` usa el **nombre de pila** que da el proveedor (`given_name`, el `firstName` de Apple o la primera palabra de `full_name`). Nunca el apellido ni el email, para no exponer más de lo necesario en los anuncios. Si no hay nombre, se queda «Surfista». Test: `supabase/tests/database/08_oauth_profile.test.sql`.
+- **CAPTCHA:** no aplica a OAuth; el control antiabuso lo hacen Google y Apple.
+- **Pendiente:**
+  - configurar los proveedores (`docs/PRODUCTION_SETUP.md` §3b);
+  - renovar cada 6 meses la clave de Apple;
+  - **revisar la política de privacidad** para mencionar Google y Apple como vía de acceso y los datos que recibimos (email y nombre).

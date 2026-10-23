@@ -88,7 +88,7 @@ Toda la UI se mantiene. Lo que cambia es de dónde vienen los datos y adónde va
 Se **acepta la arquitectura propuesta** (Next.js + Supabase Postgres, Auth y Storage, Vercel y Resend), con estos ajustes técnicos:
 
 1. **Resend es necesario desde el MVP, no solo «para futuros emails».** Supabase Auth envía los emails de acceso (código o enlace) y su SMTP por defecto tiene límites muy bajos y no sirve para producción. Hay que configurar un SMTP propio en Supabase Auth: Resend es el candidato natural. Sin eso, el registro no es fiable.
-2. **Acceso por email con código (OTP) y sin contraseña** como único método del MVP. Encaja con «registro al final», no exige gestionar contraseñas y evita SMS. Google OAuth es opcional y posterior.
+2. **Acceso por email con código (OTP) y sin contraseña** como único método del MVP. Encaja con «registro al final», no exige gestionar contraseñas y evita SMS. Google y Apple (OAuth) se añadieron después como vías opcionales (ver DECISIONS.md, «Entrar con Google y Apple»).
 3. **Un único proyecto Supabase (`reboard`, UE, plan gratuito).** No hay staging: las pruebas se hacen contra Supabase local en Docker. Los datos DEMO nunca entran en Supabase.
 4. **Búsqueda en Postgres puro (B-tree y consultas parametrizadas) más una función RPC para los recuentos de facetas.** No hace falta motor de búsqueda externo (Algolia, Meilisearch) con el volumen previsto (miles de anuncios).
 5. **Sin PostGIS ni coordenadas.** La ubicación es provincia/isla + municipio (§4).

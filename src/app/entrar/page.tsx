@@ -4,6 +4,7 @@ import { Suspense } from "react";
 import { Photo } from "@/components/brand/Photo";
 import { LoginForm } from "@/components/auth/LoginForm";
 import { authEnabled } from "@/lib/auth/config";
+import { enabledProviders } from "@/lib/auth/providers";
 import { noindexRobots } from "@/lib/seo";
 import ui from "@/styles/ui.module.css";
 import styles from "@/components/auth/Auth.module.css";
@@ -27,14 +28,16 @@ export default function EntrarPage() {
         {enabled ? (
           <>
             <p className={styles.lead}>
-              Sin contraseñas: te enviamos un código de 6 cifras a tu email. Si es la primera vez, la cuenta se crea al confirmarlo.
+              {enabledProviders().length > 0
+                ? "Sin contraseñas: entra con tu cuenta de Google o Apple, o con un código de 6 cifras que te enviamos por email. Si es la primera vez, la cuenta se crea al entrar."
+                : "Sin contraseñas: te enviamos un código de 6 cifras a tu email. Si es la primera vez, la cuenta se crea al confirmarlo."}
             </p>
             <Suspense fallback={<div className={styles.formSkeleton} />}>
               <LoginForm />
             </Suspense>
             <p className={styles.fine}>
               Con la cuenta, tus tablas guardadas se sincronizan entre dispositivos y puedes gestionar tus anuncios. Solo usamos
-              tu email para que entres en tu cuenta.
+              tu email para que entres en tu cuenta{enabledProviders().length > 0 && " y, si entras con Google o Apple, tu nombre de pila para tu perfil (puedes cambiarlo)"}.
             </p>
           </>
         ) : (

@@ -152,3 +152,53 @@ button.btnDanger:disabled {
   background: var(--rb-line-strong);
   color: var(--rb-muted);
 }
+
+/* Acceso con Google / Apple (por encima del email). */
+.social {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.socialBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  height: 48px;
+  border-radius: 10px;
+  border: 1px solid var(--rb-line-strong);
+  background: var(--rb-white);
+  color: var(--rb-petrol);
+  font-size: 15px;
+  font-weight: 700;
+}
+.socialBtn:hover {
+  border-color: var(--rb-teal);
+}
+/* Apple pide su botón en negro o blanco: negro. */
+.socialBtn[data-provider="apple"] {
+  border-color: #000;
+  background: #000;
+  color: #fff;
+}
+.socialBtn[data-provider="apple"]:hover {
+  background: #1f1f1f;
+}
+.socialBtn:disabled {
+  opacity: 0.6;
+}
+.divider {
+  margin: 18px 0 14px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 14px;
+  color: var(--rb-muted);
+}
+.divider::before,
+.divider::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: var(--rb-line);
+}

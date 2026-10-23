@@ -71,6 +71,76 @@ En **Authentication** del proyecto:
 | **Attack Protection → CAPTCHA** | activado, proveedor **Turnstile**, con la *secret key* del paso 4 |
 | **Moderador inicial** (SQL Editor, cuando hayas entrado una vez) | `update public.profiles set role = 'admin' where id = '<tu uuid de Authentication → Users>';` |
 
+## 3b. Entrar con Google y con Apple 🧑
+
+Opcional. Los botones solo aparecen cuando el proveedor está activado en Supabase **y** está en `NEXT_PUBLIC_AUTH_PROVIDERS` (Vercel). Si un proveedor se pone en Vercel sin activarlo antes en Supabase, el botón lleva a una página de error de Supabase.
+
+Datos de este proyecto:
+- **Callback de Supabase** (lo piden Google y Apple): `https://ogatmhplmnfetcgdtdge.supabase.co/auth/v1/callback`.
+- **Vuelta a la web:** `/auth/confirm` (la misma ruta que los enlaces del correo).
+
+### Supabase, antes que nada
+
+En **Authentication → URL Configuration → Redirect URLs**, añade:
+- `https://reboard-gamma.vercel.app/auth/confirm**`;
+- y, cuando tengas dominio, `https://reboard.es/auth/confirm**`.
+
+El `**` hace falta porque la vuelta lleva `?siguiente=…`.
+
+### Google
+
+1. En https://console.cloud.google.com, crea un proyecto `Reboard`.
+2. En **APIs y servicios → Pantalla de consentimiento de OAuth** (Google Auth Platform):
+   - tipo **Externo**;
+   - nombre `Reboard` y correo de asistencia;
+   - dominios autorizados: `supabase.co` y, cuando lo tengas, tu dominio;
+   - permisos: `openid`, `email` y `profile` (los básicos, sin revisión de Google);
+   - **Publica la app** (de «Prueba» a «En producción»). En «Prueba» solo entran los usuarios de prueba.
+3. En **Credenciales → Crear credenciales → ID de cliente de OAuth**:
+   - tipo **Aplicación web**;
+   - orígenes de JavaScript autorizados: `https://reboard-gamma.vercel.app`;
+   - URI de redireccionamiento autorizados: el **callback de Supabase** de arriba.
+4. Copia el **ID de cliente** y el **secreto del cliente**. El secreto es **secreto**: va solo en Supabase.
+5. En **Supabase → Authentication → Sign In / Providers → Google**, actívalo y pega el ID y el secreto.
+
+### Apple (necesita la cuenta de Apple Developer de pago)
+
+En https://developer.apple.com/account, ve a **Certificates, Identifiers & Profiles**:
+
+1. **Identifiers → App IDs → +** (si no tienes uno):
+   - descripción `Reboard`;
+   - Bundle ID `es.reboard.app`;
+   - marca **Sign in with Apple**.
+2. **Identifiers → Services IDs → +**. Es el «Client ID» de la web:
+   - descripción `Reboard web`;
+   - identificador `es.reboard.web`.
+3. Abre ese Services ID, marca **Sign in with Apple → Configure**:
+   - Primary App ID: el del paso 1;
+   - **Domains**: `ogatmhplmnfetcgdtdge.supabase.co`;
+   - **Return URLs**: el callback de Supabase.
+4. **Keys → +**: marca **Sign in with Apple**, asocia el App ID y descarga el `.p8`.
+   - Solo se descarga una vez: guárdalo en tu gestor de contraseñas.
+   - Anota el **Key ID** y tu **Team ID** (arriba a la derecha).
+5. En **Supabase → Authentication → Sign In / Providers → Apple**, actívalo:
+   - **Client IDs:** `es.reboard.web`;
+   - **Secret Key:** la que se genera a partir del `.p8`, el Key ID, el Team ID y el Services ID. Supabase enlaza un generador en ese mismo formulario; el `.p8` no sale de tu navegador.
+6. ⚠️ **Esa clave caduca a los 6 meses como máximo** (límite de Apple). Pon un recordatorio para generarla de nuevo; si caduca, el botón de Apple deja de funcionar, pero el resto de accesos siguen.
+7. **Ocultar mi email:** quien lo elija entra con una dirección `@privaterelay.appleid.com`.
+   - Para que le lleguen correos de Reboard, registra el dominio de envío (el de Resend) en **Services → Sign in with Apple for Email Communication**.
+   - Para entrar no le hace falta: entra con Apple.
+
+### Activar los botones
+
+En Vercel, añade `NEXT_PUBLIC_AUTH_PROVIDERS` (Production) con el valor `google`, `apple` o `google,apple`, según lo que hayas activado, y vuelve a desplegar: es una variable `NEXT_PUBLIC_*`, se fija al compilar.
+
+Para comprobarlo:
+1. En `/entrar`, «Continuar con Google» te lleva a Google y vuelve a `/cuenta` con la sesión iniciada.
+2. El perfil empieza con tu nombre de pila, no con «Surfista».
+3. Lo mismo con Apple.
+4. Si cancelas en la pantalla del proveedor, vuelves a `/entrar` con el aviso «No se ha podido entrar con esa cuenta».
+
+**Mismo email por dos vías:** si alguien entró antes con código y luego entra con Google usando el mismo email (verificado), Supabase enlaza las dos identidades en la **misma cuenta**. No se duplican anuncios ni guardadas.
+
 ## 4. Cloudflare Turnstile 🧑
 
 1. En https://dash.cloudflare.com, ve a **Turnstile → Add widget**:
