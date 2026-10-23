@@ -20,7 +20,13 @@ async function Account() {
   const { data } = await supabase.auth.getUser();
   const user = data.user;
   if (!user) redirect("/entrar?siguiente=/cuenta");
-  const { data: profile } = await supabase.from("profiles").select("display_name, seller_type").eq("id", user.id).maybeSingle();
+  // Rol del equipo (lo decide la base de datos; el enlace solo es un atajo, el panel vuelve a comprobarlo).
+  const [{ data: profile }, { data: adminStatus }, { data: isModerator }] = await Promise.all([
+    supabase.from("profiles").select("display_name, seller_type").eq("id", user.id).maybeSingle(),
+    supabase.rpc("admin_status"),
+    supabase.rpc("is_moderator"),
+  ]);
+  const isAdmin = adminStatus === "admin" || adminStatus === "needs_mfa";
   const name = profile?.display_name ?? "Surfista";
 
   return (
@@ -48,6 +54,16 @@ async function Account() {
           <Link href="/alertas">
             Alertas<span>Guardadas en este dispositivo, no en tu cuenta.</span>
           </Link>
+          {isAdmin && (
+            <Link href="/admin">
+              Panel de administración<span>Usuarios, anuncios, reportes, catálogo y configuración.</span>
+            </Link>
+          )}
+          {!isAdmin && isModerator && (
+            <Link href="/moderacion">
+              Moderación<span>Anuncios reportados pendientes de revisar.</span>
+            </Link>
+          )}
         </div>
       </section>
 
