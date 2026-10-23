@@ -80,6 +80,44 @@ export const FIN_SYSTEMS = ["FCS II", "Futures", "Quillas blandas"] as const;
 export const NO_BRAND = { slug: "sin-marca", label: "Sin marca", short: "Sin marca" };
 
 /**
+ * Marcas de referencia (solo nombres reales; sin modelos ni medidas). Copia de la migración
+ * 20261024090000_reference_brands: la usa la interfaz sin base de datos para que el selector de
+ * marca no salga vacío. tests/unit/brand-order.test.ts comprueba que ambas listas coinciden.
+ */
+export const REFERENCE_BRANDS = [
+  "Torq",
+  "NSP",
+  "Softech",
+  "Firewire",
+  "Channel Islands",
+  "Lost",
+  "Pukas",
+  "JS Industries",
+  "Pyzel",
+  "Rusty",
+  "Sharp Eye",
+  "Haydenshapes",
+  "Christenson",
+  "Chilli",
+  "DHD",
+  "Superbrand",
+  "Album",
+  "Catch Surf",
+  "Olaian",
+  "BIC",
+  "Mick Fanning Softboards",
+  "McTavish",
+  "Bing",
+  "Takayama",
+  "Slater Designs",
+  "Aipa",
+  "Global Surf Industries",
+  "Lib Tech",
+  "Tokoro",
+  "Clayton",
+];
+
+/**
  * Marcas que más se ven en tablas de segunda mano en España: van primero al publicar. Es un orden de
  * conveniencia (no un dato que se muestre); con anuncios reales se puede sustituir por su recuento.
  */

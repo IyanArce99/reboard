@@ -1,5 +1,6 @@
 import "server-only";
 import { cacheLife } from "next/cache";
+import { REFERENCE_BRANDS, slugify } from "@/lib/domain/taxonomy";
 import type { ListingRepository } from "./repository";
 
 const none = { items: [], total: 0 };
@@ -33,6 +34,7 @@ export const emptyRepository: ListingRepository = {
   sellerListings: async () => [],
   listingParams: async () => [],
   catalog: async () => [],
-  brands: async () => [],
+  // Nombres de marca de referencia (no son datos de anuncios): el selector de publicar no sale vacío.
+  brands: async () => REFERENCE_BRANDS.map((name) => ({ slug: slugify(name), name })),
   shops: async () => [],
 };
