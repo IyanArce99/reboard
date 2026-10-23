@@ -1,6 +1,7 @@
 import "server-only";
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
+import { connection } from "next/server";
 import type { Database } from "./database.types";
 import { requireSupabaseEnv } from "./env";
 
@@ -11,6 +12,8 @@ import { requireSupabaseEnv } from "./env";
  */
 export async function createUserClient() {
   const { url, key } = requireSupabaseEnv();
+  // Siempre en tiempo de petición: el cliente de Auth lee Date.now() y no debe evaluarse al prerenderizar.
+  await connection();
   const store = await cookies();
   return createServerClient<Database>(url, key, {
     cookies: {

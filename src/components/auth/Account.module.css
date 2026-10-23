@@ -1,0 +1,372 @@
+/* /cuenta: resumen de la actividad y accesos (columna principal) + perfil, sesión y zona de peligro
+   (columna lateral). En móvil, una sola columna en ese orden. */
+
+.page {
+  padding: 36px 0 72px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+/* ——— Cabecera ——— */
+.head {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  flex-wrap: wrap;
+}
+.avatar {
+  width: 64px;
+  height: 64px;
+  flex: none;
+  border-radius: 999px;
+  background: var(--rb-petrol);
+  color: var(--rb-teal-light);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--rb-font-display);
+  font-size: 30px;
+  font-weight: 800;
+}
+.headText {
+  flex: 1 1 260px;
+  min-width: 0;
+}
+.eyebrow {
+  font-family: var(--rb-font-mono);
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--rb-teal-text);
+}
+.title {
+  font-family: var(--rb-font-display);
+  font-size: clamp(32px, 4vw, 44px);
+  font-weight: 800;
+  text-transform: uppercase;
+  line-height: 1;
+  margin-top: 2px;
+}
+.email {
+  margin-top: 6px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  font-size: 15px;
+  color: var(--rb-muted);
+  word-break: break-all;
+}
+.role {
+  padding: 2px 9px;
+  border-radius: 999px;
+  background: var(--rb-petrol);
+  color: var(--rb-warm-white);
+  font-size: 12px;
+  font-weight: 700;
+  word-break: normal;
+}
+
+/* ——— Aviso ——— */
+.notice {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 16px;
+  flex-wrap: wrap;
+  padding: 12px 16px;
+  border-radius: 14px;
+  background: var(--rb-warning-tint);
+  color: var(--rb-warning-ink);
+  font-size: 15px;
+}
+.notice a {
+  font-weight: 700;
+  color: var(--rb-warning-ink);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+}
+
+/* ——— Rejilla ——— */
+.grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 360px;
+  gap: 24px;
+  align-items: start;
+}
+.mainCol,
+.side {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-width: 0;
+}
+
+.card {
+  padding: 20px;
+  border: 1px solid var(--rb-line);
+  border-radius: 16px;
+  background: var(--rb-white);
+}
+.cardTitle {
+  font-size: 17px;
+  font-weight: 800;
+  color: var(--rb-petrol);
+}
+.cardText {
+  margin-top: 4px;
+  font-size: 14px;
+  color: var(--rb-muted);
+}
+
+/* ——— Resumen ——— */
+.stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+.stat {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 16px;
+  border: 1px solid var(--rb-line);
+  border-radius: 14px;
+  background: var(--rb-white);
+  color: var(--rb-petrol);
+  min-height: 44px;
+}
+.stat:hover {
+  border-color: var(--rb-teal);
+}
+.statValue {
+  font-family: var(--rb-font-mono);
+  font-size: 30px;
+  font-weight: 600;
+  line-height: 1.1;
+}
+.statLabel {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--rb-muted);
+}
+
+/* ——— Accesos ——— */
+.list {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--rb-line);
+  border-radius: 16px;
+  background: var(--rb-white);
+  overflow: hidden;
+}
+.item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-height: 64px;
+  padding: 12px 16px;
+  color: var(--rb-petrol);
+}
+.item + .item {
+  border-top: 1px solid var(--rb-line-soft);
+}
+.item:hover {
+  background: var(--rb-hover);
+}
+.item:focus-visible {
+  outline-offset: -2px;
+}
+.itemIcon {
+  width: 40px;
+  height: 40px;
+  flex: none;
+  border-radius: 12px;
+  background: var(--rb-teal-tint);
+  color: var(--rb-teal-ink);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.itemText {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+.itemTitle {
+  font-weight: 700;
+}
+.itemDesc {
+  font-size: 14px;
+  color: var(--rb-muted);
+}
+.chevron {
+  flex: none;
+  color: var(--rb-faint);
+}
+/* Acceso del equipo (admin o moderación): destacado en petróleo. */
+.itemStaff {
+  background: var(--rb-petrol);
+  color: var(--rb-warm-white);
+}
+.itemStaff:hover {
+  background: var(--rb-petrol-2);
+}
+.itemStaff .itemIcon {
+  background: var(--rb-petrol-2);
+  color: var(--rb-teal-light);
+}
+.itemStaff .itemDesc,
+.itemStaff .chevron {
+  color: var(--rb-on-petrol-muted);
+}
+
+/* ——— Perfil público ——— */
+.preview {
+  margin: 14px 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: var(--rb-water);
+}
+.previewAvatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 999px;
+  background: var(--rb-teal-tint);
+  color: var(--rb-teal-ink);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+}
+.previewName {
+  font-weight: 700;
+  color: var(--rb-petrol);
+}
+.previewType {
+  display: block;
+  font-size: 13px;
+  color: var(--rb-muted);
+}
+.hint {
+  margin-top: 8px;
+  font-size: 14px;
+  color: var(--rb-warning-ink);
+}
+
+/* ——— Zona de peligro (plegada) ——— */
+.danger {
+  border: 1px solid color-mix(in srgb, var(--rb-error) 30%, var(--rb-line));
+  border-radius: 16px;
+  background: var(--rb-white);
+}
+.danger summary {
+  list-style: none;
+  cursor: pointer;
+  min-height: 52px;
+  padding: 14px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  font-weight: 700;
+  color: var(--rb-error);
+}
+.danger summary::-webkit-details-marker {
+  display: none;
+}
+.danger summary::after {
+  content: "+";
+  font-size: 20px;
+  line-height: 1;
+}
+.danger[open] summary::after {
+  content: "−";
+}
+.dangerBody {
+  padding: 0 20px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+@media (max-width: 899px) {
+  .grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 759px) {
+  .page {
+    padding-top: 24px;
+    gap: 18px;
+  }
+  .avatar {
+    width: 52px;
+    height: 52px;
+    font-size: 24px;
+  }
+  .headCta {
+    width: 100%;
+  }
+  .stats {
+    gap: 8px;
+  }
+  .stat {
+    padding: 12px;
+  }
+  .statValue {
+    font-size: 24px;
+  }
+  .statLabel {
+    font-size: 13px;
+  }
+}
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+.skeleton {
+  height: 320px;
+  border-radius: 16px;
+  background: var(--rb-line-soft);
+}
+
+/* Formularios en la columna lateral: campo y botón a todo el ancho. */
+.stack {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.stack button {
+  width: 100%;
+}
+.ok {
+  font-size: 14px;
+  color: var(--rb-success);
+}
+.error {
+  font-size: 14px;
+  color: var(--rb-error);
+}
+.ok:empty,
+.error:empty {
+  display: none;
+}
+.sessionBtn {
+  margin-top: 14px;
+  width: 100%;
+}

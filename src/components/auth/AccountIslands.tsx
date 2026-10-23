@@ -6,6 +6,7 @@ import { deleteAccountAction, updateDisplayName, type ProfileState } from "@/app
 import { useUserState } from "@/components/user/UserStateProvider";
 import ui from "@/styles/ui.module.css";
 import styles from "./Auth.module.css";
+import account from "./Account.module.css";
 
 export function ProfileForm({ initialName }: { initialName: string }) {
   const { setAccountName } = useUserState();
@@ -16,7 +17,7 @@ export function ProfileForm({ initialName }: { initialName: string }) {
   }, { ok: false, message: "" });
 
   return (
-    <form action={action} className={styles.row}>
+    <form action={action} className={account.stack}>
       <div>
         <label htmlFor="display-name" className={ui.label}>
           Nombre visible
@@ -33,9 +34,9 @@ export function ProfileForm({ initialName }: { initialName: string }) {
         />
       </div>
       <button type="submit" className={ui.btnStrong} disabled={pending}>
-        {pending ? "Guardando…" : "Guardar"}
+        {pending ? "Guardando…" : "Guardar nombre"}
       </button>
-      <p className={state.ok ? styles.ok : styles.error} role="status" style={{ flexBasis: "100%" }}>
+      <p className={state.ok ? account.ok : account.error} role="status">
         {state.message}
       </p>
     </form>
@@ -49,7 +50,7 @@ export function SignOutButton() {
   return (
     <button
       type="button"
-      className={ui.btnNeutral}
+      className={`${ui.btnNeutral} ${account.sessionBtn}`}
       disabled={busy}
       onClick={async () => {
         setBusy(true);
@@ -58,7 +59,7 @@ export function SignOutButton() {
         router.refresh();
       }}
     >
-      {busy ? "Saliendo…" : "Salir"}
+      {busy ? "Saliendo…" : "Cerrar sesión"}
     </button>
   );
 }
@@ -66,20 +67,12 @@ export function SignOutButton() {
 export function DeleteAccount() {
   const { signOut } = useUserState();
   const router = useRouter();
-  const [open, setOpen] = useState(false);
   const [text, setText] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
-  if (!open) {
-    return (
-      <button type="button" className={ui.btnNeutral} onClick={() => setOpen(true)}>
-        Borrar mi cuenta
-      </button>
-    );
-  }
   return (
     <form
-      className={styles.row}
+      className={account.stack}
       onSubmit={async (e) => {
         e.preventDefault();
         setBusy(true);
@@ -104,7 +97,7 @@ export function DeleteAccount() {
       <button type="submit" className={`${ui.btnStrong} ${styles.btnDanger}`} disabled={busy || text.trim().toUpperCase() !== "BORRAR"}>
         {busy ? "Borrando…" : "Borrar definitivamente"}
       </button>
-      <p className={styles.error} role="alert" style={{ flexBasis: "100%" }}>
+      <p className={account.error} role="alert">
         {error}
       </p>
     </form>

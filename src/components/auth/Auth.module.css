@@ -127,78 +127,6 @@
   gap: 8px;
 }
 
-/* ——— /cuenta ——— */
-.account {
-  max-width: 760px;
-  padding: 40px 0 72px;
-}
-
-.card {
-  margin-top: 24px;
-  padding: 22px;
-  border: 1px solid var(--rb-line);
-  border-radius: 16px;
-  background: var(--rb-white);
-}
-.card h2 {
-  font-family: var(--rb-font-display);
-  font-size: 24px;
-  font-weight: 800;
-  text-transform: uppercase;
-  line-height: 1;
-  margin-bottom: 12px;
-}
-
-.row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  align-items: flex-end;
-}
-.row > div {
-  flex: 1 1 240px;
-}
-
-.meta {
-  font-size: 15px;
-  color: var(--rb-muted);
-}
-.meta strong {
-  color: var(--rb-petrol);
-}
-
-.links {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 10px;
-}
-.links a {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  padding: 16px;
-  border: 1px solid var(--rb-line);
-  border-radius: 12px;
-  background: var(--rb-white);
-  font-weight: 700;
-  color: var(--rb-petrol);
-}
-.links a:hover {
-  border-color: var(--rb-petrol);
-}
-.links span {
-  font-size: 14px;
-  font-weight: 400;
-  color: var(--rb-muted);
-}
-
-.ok {
-  min-height: 1.5em;
-  margin-top: 8px;
-  font-size: 14px;
-  color: var(--rb-success);
-}
-
 @media (max-width: 899px) {
   .wrap {
     grid-template-columns: 1fr;
@@ -209,9 +137,6 @@
   }
   .panel {
     padding-top: 36px;
-  }
-  .links {
-    grid-template-columns: 1fr;
   }
 }
 
