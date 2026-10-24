@@ -13,7 +13,8 @@ type Sb = SupabaseClient<Database>;
 type Status = Database["public"]["Enums"]["listing_status"];
 
 export const MAX_PHOTOS = 8;
-export const PHOTO_LABELS = ["cubierta", "fondo", "cola y quillas", "nose", "canto", "quillas", "detalle", "funda"];
+/** Etiqueta neutra por posición: no sabemos qué muestra cada foto (antes se inventaba «cubierta», «nose»…). */
+export const photoLabel = (i: number) => `foto ${i + 1}`;
 
 export class PublishError extends Error {
   constructor(
@@ -159,7 +160,7 @@ export async function finalizeListing(sb: Sb, userId: string, publicId: string, 
       listing_id: own.id,
       storage_path: p.path,
       position: i,
-      label: PHOTO_LABELS[i] ?? "foto",
+      label: photoLabel(i),
       width: Math.round(p.width) || null,
       height: Math.round(p.height) || null,
     })),

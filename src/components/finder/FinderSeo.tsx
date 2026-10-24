@@ -38,7 +38,7 @@ export function FinderSeo() {
           física, de las olas y del modelo.
         </p>
         <p>
-          El asistente calcula un rango orientativo a partir de tu peso y tu nivel, y lo ajusta según la frecuencia con la que
+          La calculadora da un rango orientativo a partir de tu peso y tu nivel, y lo ajusta según la frecuencia con la que
           surfeas, el tipo de ola y tu objetivo. Si nos dices los litros de tu tabla actual, no te propone bajar más de un 20 %
           de golpe.
         </p>

@@ -22,7 +22,7 @@ export function SavedScreen({ tab }: { tab: Tab }) {
   const { saved, alerts, ready } = useUserState();
   const tabs: [Tab, string, string][] = [
     ["saved", "/guardado", ready ? `Tablas guardadas · ${saved.length}` : "Tablas guardadas"],
-    ["alerts", "/alertas", ready ? `Búsquedas · ${alerts.length}` : "Búsquedas"],
+    ["alerts", "/alertas", ready ? `Búsquedas guardadas · ${alerts.length}` : "Búsquedas guardadas"],
   ];
   return (
     <>
@@ -47,7 +47,7 @@ function similarHref(l: Listing) {
 function savedNote(l: Listing, now: Date): { text: string; tone: "sold" | "drop" | "reserved" } | null {
   if (l.status === "vendida") return { text: "Vendida", tone: "sold" };
   if (l.status === "caducada" || l.status === "retirada") return { text: "Ya no está a la venta", tone: "sold" };
-  if (isReserved(l, now)) return { text: "Reservada · si no se cierra, vuelve a estar disponible", tone: "reserved" };
+  if (isReserved(l, now)) return { text: "Reservada por otra persona · puede quedar libre", tone: "reserved" };
   if (l.previousPrice != null && l.previousPrice > l.price)
     return { text: `Ha bajado de ${eur(l.previousPrice)} a ${eur(l.price)}`, tone: "drop" };
   return null;
@@ -180,7 +180,7 @@ function useCount(query: string) {
 }
 
 function AlertRow({ alert: a }: { alert: SavedAlert }) {
-  const { toggleAlert, removeAlert } = useUserState();
+  const { removeAlert } = useUserState();
   const res = useCount(a.query);
   const textId = `alerta-${a.id}`;
   const count =
@@ -192,29 +192,16 @@ function AlertRow({ alert: a }: { alert: SavedAlert }) {
           ? "1 tabla coincide ahora"
           : `${res.count} tablas coinciden ahora`;
   return (
-    <div className={styles.alert} data-off={!a.on || undefined}>
+    <div className={styles.alert}>
       <div className={styles.alertBody}>
         <div id={textId} className={styles.alertText}>
           {a.text}
         </div>
-        <div className={styles.alertMeta}>{a.on ? `Activa · ${count}` : `Pausada · ${count}`}</div>
+        <div className={styles.alertMeta}>{count}</div>
       </div>
       <Link href={a.query ? `/buscar?${a.query}` : "/buscar"} className={styles.view}>
         Ver resultados
       </Link>
-      <button
-        type="button"
-        role="switch"
-        aria-checked={a.on}
-        aria-label="Búsqueda activa"
-        aria-describedby={textId}
-        className={styles.switch}
-        onClick={() => toggleAlert(a.id)}
-      >
-        <span className={styles.track} aria-hidden="true">
-          <span className={styles.knob} />
-        </span>
-      </button>
       <button type="button" className={styles.del} aria-label={`Eliminar búsqueda: ${a.text}`} onClick={() => removeAlert(a.id)}>
         <span aria-hidden="true">✕</span>
       </button>

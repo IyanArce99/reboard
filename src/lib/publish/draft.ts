@@ -177,7 +177,6 @@ export function draftFromListing(l: Listing): PublishDraft {
   };
 }
 
-const PHOTO_LABELS = ["cubierta", "fondo", "cola y quillas", "nose", "canto", "quillas", "detalle", "funda"];
 
 const seller = <T,>(value: T | null): Measured<T> => (value == null ? { value: null, source: null } : { value, source: "seller" });
 
@@ -224,7 +223,7 @@ export function previewListing(d: PublishDraft, catalog: CatalogModel[], now: Da
     status: "disponible",
     publishedAt: iso,
     confirmedAt: iso,
-    photos: d.photos.map((p, i): Photo => ({ url: p.url, label: PHOTO_LABELS[i] ?? "foto" })),
+    photos: d.photos.map((p, i): Photo => ({ url: p.url, label: `foto ${i + 1}` })),
     description: d.description,
     isDemo: true,
   };

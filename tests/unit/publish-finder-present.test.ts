@@ -181,7 +181,7 @@ describe("reservada (7 días, solo anuncios a la venta)", () => {
     expect(isReserved({ ...base, status: "vendida", reservedAt: hace(1) }, now)).toBe(false);
     expect(isReserved({ ...base, status: "disponible", reservedAt: null }, now)).toBe(false);
     expect(availability({ ...base, status: "disponible", reservedAt: hace(1) }, now)).toEqual({
-      text: "Reservada · si no se cierra, vuelve a estar disponible",
+      text: "Reservada · puedes preguntar si sigue en pie",
       tone: "warning",
     });
   });

@@ -101,7 +101,7 @@ function rangeChip(min: number | null, max: number | null, unit: string) {
 /** Texto de la alerta: «Evolutivas de 45 a 60 L, por menos de 200 €, en Gran Canaria». */
 export function alertText(f: Filters, names: CatalogNames) {
   const t = f.shapes.length
-    ? f.shapes.map((s) => SHAPE_INFO[s].plural).join(" o ")
+    ? f.shapes.map((s, i) => (i ? SHAPE_INFO[s].plural.toLowerCase() : SHAPE_INFO[s].plural)).join(" o ")
     : f.constructions.includes("softboard")
       ? "Softboards"
       : "Tablas";
@@ -196,7 +196,7 @@ export function emptyStateCopy(f: Filters, inventoryTotal: number): { kind: Empt
       text: "Reboard acaba de arrancar y aún no hay tablas publicadas. ¿Tienes una parada? Publícala gratis. ¿Buscas? Guarda esta búsqueda y vuelve cuando quieras.",
     };
   return hasActiveFilters(f)
-    ? { kind: "filters", title: "No encontramos tablas con estos filtros", text: "Amplía un poco la búsqueda. Entre paréntesis, cuántas tablas saldrían:" }
+    ? { kind: "filters", title: "No encontramos tablas con estos filtros", text: "Prueba a ampliar la búsqueda (entre paréntesis, las tablas que verías):" }
     : { kind: "filters", title: "No encontramos tablas", text: "Prueba con otra búsqueda." };
 }
 

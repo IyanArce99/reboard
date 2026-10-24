@@ -36,9 +36,12 @@
   color: var(--rb-petrol);
   transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
-.v:hover {
-  border-color: #9cc7c6;
-  box-shadow: var(--rb-shadow-card-hover);
+/* Solo con ratón: en táctil el hover se queda pegado y parece una selección. */
+@media (hover: hover) {
+  .v:hover {
+    border-color: #9cc7c6;
+    box-shadow: var(--rb-shadow-card-hover);
+  }
 }
 
 .vPhoto {
@@ -252,8 +255,11 @@
   color: var(--rb-petrol);
   transition: border-color 0.15s ease;
 }
-.h:hover {
-  border-color: #9cc7c6;
+/* Solo con ratón: en táctil el hover se queda pegado y parece una selección. */
+@media (hover: hover) {
+  .h:hover {
+    border-color: #9cc7c6;
+  }
 }
 
 .hPhoto {

@@ -42,7 +42,7 @@ const SHAPE_HINT: Record<Shape, string> = {
   shortboard: "Olas con fuerza",
   fish: "Rápida en olas pequeñas",
   hibrida: "Para progresar",
-  evolutiva: "Para dejar la espuma",
+  evolutiva: "Para salir de la softboard",
   midlength: "Remada fácil",
   longboard: "Olas pequeñas y estilo",
   gun: "Olas grandes",

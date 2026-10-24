@@ -59,8 +59,10 @@ export function FinderWizard({ intro }: { intro: React.ReactNode }) {
     if (!moved.current) return;
     moved.current = false;
     // Al cambiar de pantalla, el scroll vuelve arriba al instante (DESIGN_SYSTEM.md).
-    const top = topRef.current;
-    if (top && top.getBoundingClientRect().top < 0) top.scrollIntoView({ block: "start", behavior: "instant" });
+    // En móvil la intro empuja la pregunta fuera de la pantalla: se lleva la tarjeta del paso arriba.
+    const card = headingRef.current?.closest("section") ?? topRef.current;
+    const y = card?.getBoundingClientRect().top ?? 0;
+    if (card && (y < 0 || y > window.innerHeight * 0.35)) card.scrollIntoView({ block: "start", behavior: "instant" });
     const target = W.step === RESULT_STEP ? document.getElementById("finder-result-title") : headingRef.current;
     target?.focus({ preventScroll: true });
   }, [W.step]);
@@ -175,7 +177,8 @@ export function FinderWizard({ intro }: { intro: React.ReactNode }) {
                 Atrás
               </button>
               <div className={styles.navRight}>
-                {optional && (
+                {/* En el último paso sobra «Saltar»: el botón principal ya avanza (y a 360 px se pisaban). */}
+                {optional && step < TOTAL_STEPS && (
                   <button type="button" className={styles.skip} onClick={() => (step === TOTAL_STEPS ? next() : goTo(step + 1))}>
                     Saltar
                   </button>

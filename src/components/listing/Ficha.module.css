@@ -772,6 +772,15 @@
   color: var(--rb-white);
   font-size: 16px;
 }
+/* Acción principal de la hoja que no es el enlace real de WhatsApp (ver teléfono, entrar, enviar): amarillo. */
+.sheetBtn {
+  background: var(--rb-sand);
+  color: var(--rb-petrol);
+}
+.sheetBtn:disabled {
+  background: var(--rb-line-strong);
+  color: var(--rb-muted);
+}
 .callBtn {
   height: 48px;
   border: 1px solid var(--rb-line-strong);

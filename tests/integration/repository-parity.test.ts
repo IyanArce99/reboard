@@ -54,7 +54,8 @@ const KEY: Record<Exclude<Sort, "distancia">, (l: Listing) => number> = {
   recientes: (l) => -new Date(l.publishedAt).getTime(),
   precio: (l) => l.price,
   "precio-desc": (l) => -l.price,
-  litros: (l) => l.volume.value ?? 0,
+  litros: (l) => l.volume.value ?? Infinity,
+  "litros-desc": (l) => -(l.volume.value ?? -Infinity),
 };
 
 describe("paridad mock ↔ Supabase (inventario DEMO en local)", () => {

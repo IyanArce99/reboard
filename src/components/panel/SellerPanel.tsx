@@ -331,8 +331,8 @@ export function SellerPanel({ listings, nowIso, live = false, sellerName, contac
                         </p>
                         {(saves[l.id] ?? 0) > 0 && Number(pricing.value) < l.price && (
                           <p className={styles.priceHint}>
-                            {saves[l.id] === 1 ? "1 persona la tiene guardada" : `${saves[l.id]} personas la tienen guardada`}: en «Guardadas» verá que ha
-                            bajado de precio.
+                            {saves[l.id] === 1 ? "1 persona la tiene guardada" : `${saves[l.id]} personas la tienen guardada`}: en «Guardadas»{" "}
+                            {saves[l.id] === 1 ? "verá" : "verán"} que ha bajado de precio.
                           </p>
                         )}
                       </form>

@@ -92,8 +92,7 @@ export default async function ShopPage({ params }: PageProps<"/tiendas/[slug]">)
               {s.hours}
             </div>
             <div>
-              <span className={styles.factK}>Tablas en venta · </span>
-              {s.inventorySource}
+              <span className={styles.factK}>Tablas en venta</span>
               {lastConfirmed != null ? ` · disponibilidad confirmada ${ago(lastConfirmed)}` : ""}
             </div>
           </div>

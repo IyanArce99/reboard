@@ -162,7 +162,7 @@ export async function SearchResults({ filters: f, view, here, title, intro, crum
             {unknown.total > 0 && (
               <div className={styles.unknown}>
                 <span>
-                  Hay {unknown.total} {unknown.total === 1 ? "tabla más" : "tablas más"} con estas medidas, pero sin los litros indicados.
+                  Hay {unknown.total} {unknown.total === 1 ? "tabla más que no indica" : "tablas más que no indican"} los litros.
                 </span>
                 <Link href={searchHref(f, { ...view, showUnknown: !view.showUnknown })} scroll={false}>
                   {unknown.total === 1 ? (view.showUnknown ? "Ocultarla" : "Verla") : view.showUnknown ? "Ocultarlas" : "Verlas"}
@@ -203,7 +203,7 @@ export async function SearchResults({ filters: f, view, here, title, intro, crum
                 <div className={styles.alertBox}>
                   <div>
                     <div className={styles.alertTitle}>¿No ves la tabla que buscas?</div>
-                    <div className={styles.alertText}>Guárdala y vuelve cuando quieras a ver cuántas coinciden: «{alert.text}»</div>
+                    <div className={styles.alertText}>Guarda esta búsqueda y vuelve cuando quieras para ver cuántas hay: «{alert.text}»</div>
                   </div>
                   <AlertButton text={alert.text} query={alert.query} className={ui.btnStrong} />
                 </div>

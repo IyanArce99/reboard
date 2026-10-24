@@ -292,7 +292,7 @@ export function UserStateProvider({ children, authEnabled = false }: { children:
               alerts: [{ id: crypto.randomUUID(), text, query, on: true, createdAt: new Date().toISOString() }, ...s.alerts],
             },
       );
-      toast("Búsqueda guardada en este dispositivo. No envía avisos: en «Búsquedas» verás cuántas tablas coinciden cuando vuelvas.");
+      toast("Búsqueda guardada en este dispositivo. No envía avisos: mírala en «Búsquedas guardadas».");
     },
     [toast],
   );

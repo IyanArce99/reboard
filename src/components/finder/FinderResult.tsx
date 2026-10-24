@@ -175,12 +175,12 @@ export function FinderResult({ state: W, rec: r, summary, onEdit, onRestart, set
                   </div>
                   <p className={styles.typeWhy}>{info.why}</p>
                   <p className={styles.typeCons}>
-                    <strong>A tener en cuenta:</strong> {info.cons}
+                    <strong>A tener en cuenta:</strong> {info.cons.charAt(0).toLowerCase() + info.cons.slice(1)}
                   </p>
                   <div className={styles.grow} />
                   {n === 0 ? (
                     <AlertButton {...alertProps(f)} className={styles.typeCta}>
-                      Sin anuncios · guardar búsqueda
+                      Ninguna en tu rango ahora · guardar búsqueda
                     </AlertButton>
                   ) : (
                     <Link href={searchHref(f)} className={styles.typeCta}>
@@ -288,7 +288,7 @@ export function FinderResult({ state: W, rec: r, summary, onEdit, onRestart, set
             <div className={styles.alertBox}>
               <strong className={styles.boxTitle}>Guarda la búsqueda con este perfil</strong>
               <span className={styles.boxText}>«{alertText(all, NO_NAMES)}»</span>
-              <span className={styles.boxText}>Se guarda en este dispositivo. Los avisos por email aún no están activos.</span>
+              <span className={styles.boxText}>Se guarda en este dispositivo. No envía avisos: vuelve a «Búsquedas guardadas» para ver cuántas coinciden.</span>
               <div>
                 <AlertButton {...alertProps(all)} className={styles.alertBtn} />
               </div>

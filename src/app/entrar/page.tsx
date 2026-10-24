@@ -23,6 +23,8 @@ export default function EntrarPage() {
   const social = enabledProviders().map((p) => PROVIDER_NAME[p]).join(" o ");
   return (
     <main className={styles.wrap}>
+      {/* Esta página tiene su propia acción principal: «Vender» de la cabecera pasa a contorno. */}
+      <span data-own-cta="other" hidden />
       <div className={styles.photo}>
         <Photo slug="tablas-orilla" sizes="45vw" position="50% 50%" decorative />
       </div>
@@ -33,8 +35,8 @@ export default function EntrarPage() {
           <>
             <p className={styles.lead}>
               {social
-                ? `Entra con ${social} o con tu email: te mandamos un código de 6 cifras, no necesitas contraseña. Si es tu primera vez, la cuenta se crea al entrar.`
-                : "Escribe tu email y te mandamos un código de 6 cifras para entrar. No necesitas contraseña. Si es tu primera vez, la cuenta se crea al confirmarlo."}
+                ? `Entra con ${social} o con tu email: te mandamos un código de 6 cifras, no necesitas contraseña. Si es tu primera vez, la cuenta se crea al poner el código.`
+                : "Escribe tu email y te mandamos un código de 6 cifras para entrar. No necesitas contraseña. Si es tu primera vez, la cuenta se crea al poner el código."}
             </p>
             <Suspense fallback={<div className={styles.formSkeleton} />}>
               <LoginForm />
@@ -47,7 +49,7 @@ export default function EntrarPage() {
         ) : (
           <>
             <p className={styles.lead}>
-              Todavía no se pueden crear cuentas. Mientras tanto, tus guardadas, alertas y comparaciones
+              Todavía no se pueden crear cuentas. Mientras tanto, tus tablas guardadas, búsquedas guardadas y comparaciones
               se quedan en este dispositivo.
             </p>
             <div className={styles.actions}>

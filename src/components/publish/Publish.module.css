@@ -1531,3 +1531,10 @@ button.slot:hover {
 .closedNote strong {
   color: var(--rb-petrol);
 }
+
+/* En ordenador (ratón) «Hacer foto» no tiene sentido: queda solo elegir o arrastrar fotos. */
+@media (hover: hover) and (pointer: fine) {
+  .cameraBtn {
+    display: none;
+  }
+}

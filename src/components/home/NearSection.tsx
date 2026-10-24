@@ -83,7 +83,7 @@ export async function NearSection() {
         <div className={styles.lowInv}>
           <div>
             <strong>Reboard acaba de arrancar.</strong> Si tienes una tabla parada, publícala gratis y será de las primeras.
-            Si buscas, guarda la búsqueda y vuelve cuando quieras a ver cuántas coinciden.
+            Si buscas, guarda la búsqueda y vuelve cuando quieras para ver cuántas coinciden.
           </div>
           <div className={styles.emptyActions}>
             <Link href="/vender/publicar" className={ui.btnPrimary}>
@@ -101,7 +101,7 @@ export async function NearSection() {
       <NearSwitcher
         heading={
           <div>
-            <p className={styles.nearEyebrow}>{chosen ? `Cerca de ti · ${zn}` : `${LAUNCH.allLabel} · elige tu ${LAUNCH.zoneNoun} arriba`}</p>
+            <p className={styles.nearEyebrow}>{chosen ? `Cerca de ti · ${zn}` : `En ${LAUNCH.allLabel.toLowerCase()}`}</p>
             <h2 id="near-title" className={styles.h2}>
               {chosen ? "Recién publicadas cerca de ti" : "Recién publicadas"}
             </h2>

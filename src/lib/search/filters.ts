@@ -51,6 +51,7 @@ export const SORTS = [
   ["precio", "Más baratas"],
   ["precio-desc", "Más caras"],
   ["litros", "Menos litros"],
+  ["litros-desc", "Más litros"],
   ["distancia", "Más cerca"],
 ] as const;
 export type Sort = (typeof SORTS)[number][0];

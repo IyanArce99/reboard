@@ -128,6 +128,8 @@ type Value = string | null | { text: string; tone: CellTone };
 type Def = { key: string; label: string; numeric?: boolean; value: (l: Listing, c: Ctx, all: Listing[]) => Value };
 
 const cm = (inches: number) => `${inToCm(inches)} cm`;
+/** Anchura y grosor con un decimal, como en la ficha (redondeando, 2 7/8" y 2 5/8" parecían iguales). */
+const cm1 = (inches: number) => `${(inches * 2.54).toFixed(1).replace(".", ",")} cm`;
 
 const GROUPS: { title: string; defs: Def[] }[] = [
   {
@@ -158,10 +160,11 @@ const GROUPS: { title: string; defs: Def[] }[] = [
   {
     title: "Medidas y volumen",
     defs: [
-      { key: "longitud", label: "Longitud", numeric: true, value: (l) => (l.length.value != null ? `${l.sizeLabel} · ${cm(l.length.value)}` : l.sizeLabel || null) },
-      { key: "anchura", label: "Anchura", numeric: true, value: (l) => (l.width.value != null ? `${fmtIn(l.width.value)} · ${cm(l.width.value)}` : null) },
-      { key: "grosor", label: "Grosor", numeric: true, value: (l) => (l.thickness.value != null ? `${fmtIn(l.thickness.value)} · ${cm(l.thickness.value)}` : null) },
+      // Litros primero: es el dato con el que se busca.
       { key: "litros", label: "Litros", numeric: true, value: (l) => (l.volume.value != null ? `${dec(l.volume.value)} L` : null) },
+      { key: "longitud", label: "Longitud", numeric: true, value: (l) => (l.length.value != null ? `${l.sizeLabel} · ${cm(l.length.value)}` : l.sizeLabel || null) },
+      { key: "anchura", label: "Anchura", numeric: true, value: (l) => (l.width.value != null ? `${fmtIn(l.width.value)} · ${cm1(l.width.value)}` : null) },
+      { key: "grosor", label: "Grosor", numeric: true, value: (l) => (l.thickness.value != null ? `${fmtIn(l.thickness.value)} · ${cm1(l.thickness.value)}` : null) },
       {
         key: "rango",
         label: "Tu rango de litros",

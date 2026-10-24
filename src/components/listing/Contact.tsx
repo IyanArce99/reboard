@@ -109,7 +109,7 @@ function RevealContact({ data, onClose }: { data: ContactData; onClose: () => vo
   return (
     <>
       <Turnstile ref={turnstile} action="contacto" onToken={onToken} />
-      <button type="button" className={styles.waBtn} disabled={busy || waiting} onClick={() => void reveal(token)}>
+      <button type="button" className={`${styles.waBtn} ${styles.sheetBtn}`} disabled={busy || waiting} onClick={() => void reveal(token)}>
         {busy ? "Un momento…" : waiting ? "Comprobando que no eres un robot…" : data.method === "whatsapp" ? "Ver teléfono y WhatsApp" : "Ver teléfono"}
       </button>
       <p className={styles.modalError} role="alert">
@@ -317,7 +317,7 @@ export function ReportButton({ className }: { className: string }) {
     setBusy(false);
     if (r.ok) {
       setOpen(false);
-      toast("Gracias. Vamos a revisar el anuncio.");
+      toast("Gracias por avisar. Si varias personas lo reportan, lo revisamos.");
     } else setError(r.message);
   };
 
@@ -342,7 +342,7 @@ export function ReportButton({ className }: { className: string }) {
                   <p className={styles.modalHint}>Para reportar un anuncio tienes que entrar en tu cuenta. Después volverás aquí.</p>
                   <button
                     type="button"
-                    className={styles.waBtn}
+                    className={`${styles.waBtn} ${styles.sheetBtn}`}
                     onClick={() => router.push(`/entrar?siguiente=${encodeURIComponent(pathname)}`)}
                   >
                     Entrar
@@ -364,7 +364,7 @@ export function ReportButton({ className }: { className: string }) {
                   <textarea className={ui.input} maxLength={1000} rows={3} value={details} onChange={(e) => setDetails(e.target.value)} />
                 </label>
                 <Turnstile ref={turnstile} action="reportar" onToken={setToken} />
-                <button type="submit" className={styles.waBtn} disabled={busy || (!!TURNSTILE_SITE_KEY && !token)}>
+                <button type="submit" className={`${styles.waBtn} ${styles.sheetBtn}`} disabled={busy || (!!TURNSTILE_SITE_KEY && !token)}>
                   {busy ? "Enviando…" : "Enviar reporte"}
                 </button>
                 <p className={styles.modalError} role="alert">

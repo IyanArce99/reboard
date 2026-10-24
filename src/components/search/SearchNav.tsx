@@ -4,7 +4,8 @@
 // vuelve a renderizar los resultados. Mientras tanto, los resultados se atenúan.
 
 import { useRouter } from "next/navigation";
-import { createContext, useCallback, useContext, useMemo, useState, useTransition } from "react";
+import { createContext, useCallback, useContext, useMemo, useState, useSyncExternalStore, useTransition } from "react";
+import { HERE_COOKIE } from "@/lib/here";
 import { SORTS, searchHref, type Filters, type Sort, type ViewState } from "@/lib/search/filters";
 import styles from "./Search.module.css";
 
@@ -26,6 +27,16 @@ export const useSearchNav = () => {
   if (!v) throw new Error("useSearchNav debe usarse dentro de SearchNavProvider");
   return v;
 };
+
+const noSubscribe = () => () => {};
+/** ¿Hay isla de referencia elegida (cookie)? En el servidor, no. */
+function useHasHere() {
+  return useSyncExternalStore(
+    noSubscribe,
+    () => new RegExp(`(?:^|; )${HERE_COOKIE}=[^;]+`).test(document.cookie),
+    () => false,
+  );
+}
 
 export function SearchNavProvider({
   filters,
@@ -78,6 +89,8 @@ export function PendingArea({ children, className }: { children: React.ReactNode
 
 export function SortSelect({ className }: { className: string }) {
   const { filters, view, navigate, supportsDistance } = useSearchNav();
+  // «Primero mi isla» solo tiene sentido si hay isla elegida (o si ya está activo).
+  const hasHere = useHasHere();
   return (
     <select
       aria-label="Ordenar"
@@ -85,7 +98,7 @@ export function SortSelect({ className }: { className: string }) {
       value={view.sort}
       onChange={(e) => navigate(filters, { sort: e.target.value as Sort, limit: view.limit })}
     >
-      {SORTS.map(([v, l]) => (
+      {SORTS.filter(([v]) => v !== "distancia" || supportsDistance || hasHere || view.sort === v).map(([v, l]) => (
         <option key={v} value={v}>
           {v === "distancia" && !supportsDistance ? "Primero mi isla" : l}
         </option>

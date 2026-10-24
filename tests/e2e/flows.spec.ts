@@ -400,3 +400,10 @@ test("home: «Softboard» está entre los tipos del buscador y filtra por constr
   await panel.getByRole("button", { name: /^Evolutiva/ }).click();
   await expect(page.getByRole("link", { name: /^Buscar \d+ tablas?$/ })).toHaveAttribute("href", /forma=evolutiva.*construccion=softboard|construccion=softboard.*forma=evolutiva/);
 });
+
+test("orden «Menos litros»: las tablas sin litros van al final", async ({ page }) => {
+  await page.goto("/buscar?orden=litros");
+  const cards = page.locator("main article");
+  await expect(cards.first()).toBeVisible();
+  await expect(cards.first()).not.toContainText("Litros sin indicar");
+});

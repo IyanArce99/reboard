@@ -201,12 +201,12 @@ export function describeMeasure(key: MeasureKey, text: string, unit: Unit): { ok
   if (!text.trim()) return null;
   if (key === "vol") {
     const l = parseLitres(text);
-    if (l == null) return { ok: false, text: `No lo entendemos. Escribe solo el número, como ${EXAMPLE.vol.ft}.` };
+    if (l == null) return { ok: false, text: `No lo hemos entendido. Escribe solo el número, como ${EXAMPLE.vol.ft}.` };
     if (!inRange("vol", l)) return { ok: false, text: `${l.toLocaleString("es-ES")} L no cuadra: una tabla tiene entre 10 y 150 L.` };
     return { ok: true, text: `${l.toLocaleString("es-ES")} litros` };
   }
   const r = readMeasure(key, text, unit);
-  if (!r) return { ok: false, text: `No lo entendemos. Escríbelo como ${EXAMPLE[key][unit]}.` };
+  if (!r) return { ok: false, text: `No lo hemos entendido. Escríbelo así: ${EXAMPLE[key][unit]}.` };
   const shown =
     key === "len"
       ? `${Math.floor(r.inches / 12)}'${fmtIn(r.inches % 12)} · ${cmText(r.inches, 0)}`

@@ -72,7 +72,7 @@ export function StepPhotos({ photos, processing, live, onFiles, onRemove, onMove
 
   const buttons = (
     <div className={styles.photoBtns}>
-      <button type="button" className={styles.btnPetrol} onClick={() => open(cameraRef)}>
+      <button type="button" className={`${styles.btnPetrol} ${styles.cameraBtn}`} onClick={() => open(cameraRef)}>
         <CameraIcon />
         Hacer foto
       </button>

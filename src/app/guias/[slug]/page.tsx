@@ -75,6 +75,8 @@ export default async function GuidePage({ params }: PageProps<"/guias/[slug]">) 
 
   return (
     <main className={styles.article}>
+      {/* Esta página tiene su propia acción principal: «Vender» de la cabecera pasa a contorno. */}
+      <span data-own-cta="other" hidden />
       <div className="container">
         <header className={styles.head}>
           <Breadcrumbs

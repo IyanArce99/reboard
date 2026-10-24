@@ -28,7 +28,7 @@ async function model(marca: string, modelo: string) {
   return m;
 }
 
-const vol = (v: number | null) => (v == null ? "litros sin publicar" : `${v.toLocaleString("es-ES")} L`);
+const vol = (v: number | null) => (v == null ? "litros sin indicar" : `${v.toLocaleString("es-ES")} L`);
 
 export async function generateMetadata({ params }: PageProps<"/marcas/[marca]/[modelo]">): Promise<Metadata> {
   const { marca, modelo } = await params;

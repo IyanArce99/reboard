@@ -24,7 +24,7 @@ export function modelRange(m: CatalogModel) {
   const first = m.sizes[0].label;
   const last = m.sizes[m.sizes.length - 1].label;
   const lens = first === last ? first : `${first}–${last}`;
-  if (!vols.length) return `${lens} · litros sin publicar`;
+  if (!vols.length) return `${lens} · litros sin indicar`;
   const lo = Math.min(...vols).toLocaleString("es-ES");
   const hi = Math.max(...vols).toLocaleString("es-ES");
   return `${lens} · ${lo === hi ? lo : `${lo}–${hi}`} L`;

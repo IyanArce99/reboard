@@ -253,8 +253,11 @@ button.seg::after {
   font-size: 14px;
   transition: border-color 0.15s ease, background 0.15s ease;
 }
-.quickChip:hover {
-  border-color: var(--rb-teal);
+/* Solo con ratón: en táctil el hover se queda pegado y parece una selección. */
+@media (hover: hover) {
+  .quickChip:hover {
+    border-color: var(--rb-teal);
+  }
 }
 .quickChip[aria-pressed="true"] {
   background: var(--rb-teal);
@@ -284,8 +287,11 @@ button.seg::after {
   color: var(--rb-petrol);
   transition: border-color 0.15s ease, background 0.15s ease;
 }
-.option:hover {
-  border-color: var(--rb-teal);
+/* Solo con ratón: en táctil el hover se queda pegado y parece una selección. */
+@media (hover: hover) {
+  .option:hover {
+    border-color: var(--rb-teal);
+  }
 }
 .option:focus-visible {
   outline: 2px solid var(--rb-teal);
@@ -412,8 +418,11 @@ button.seg::after {
   font-weight: 600;
   transition: border-color 0.15s ease, background 0.15s ease;
 }
-.choice:hover {
-  border-color: var(--rb-teal);
+/* Solo con ratón: en táctil el hover se queda pegado y parece una selección. */
+@media (hover: hover) {
+  .choice:hover {
+    border-color: var(--rb-teal);
+  }
 }
 .choice[aria-pressed="true"] {
   background: var(--rb-teal);
@@ -695,8 +704,11 @@ button.seg::after {
   text-overflow: ellipsis;
   transition: border-color 0.15s ease;
 }
-.resChip:hover {
-  border-color: var(--rb-teal-light);
+/* Solo con ratón: en táctil el hover se queda pegado y parece una selección. */
+@media (hover: hover) {
+  .resChip:hover {
+    border-color: var(--rb-teal-light);
+  }
 }
 .resChip:focus-visible {
   outline-color: var(--rb-teal-light);

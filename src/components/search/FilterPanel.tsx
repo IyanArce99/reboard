@@ -300,7 +300,7 @@ export function FilterPanel({ counts, showCounts = true, resultCount, brands, mo
                 <strong>Solo mi rango de litros</strong>
                 <br />
                 <span className={styles.onlyMeText}>
-                  {profile.lo}–{profile.hi} L, según el asistente ({profile.level.toLowerCase()}, {profile.weight} kg)
+                  {profile.lo}–{profile.hi} L, según la calculadora de litros ({profile.level.toLowerCase()}, {profile.weight} kg)
                 </span>
               </span>
             </button>

@@ -56,7 +56,9 @@ export function sortListings(listings: Listing[], sort: Sort, hereZone: string) 
     recientes: (a, b) => time(b.publishedAt) - time(a.publishedAt),
     precio: (a, b) => a.price - b.price,
     "precio-desc": (a, b) => b.price - a.price,
-    litros: (a, b) => (a.volume.value ?? 0) - (b.volume.value ?? 0),
+    // Sin litros, al final (no como 0 L).
+    litros: (a, b) => (a.volume.value ?? Infinity) - (b.volume.value ?? Infinity) || 0,
+    "litros-desc": (a, b) => (b.volume.value ?? -Infinity) - (a.volume.value ?? -Infinity) || 0,
     distancia: (a, b) => dist(a) - dist(b),
   };
   return [...listings].sort(cmp[sort]);

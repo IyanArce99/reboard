@@ -28,7 +28,7 @@ export function Gallery({
     return (
       <div className={`${styles.galMain} ${styles.galEmpty}`}>
         {shape && <BoardShape shape={shape} size={180} />}
-        <span>Sin fotos · pídeselas al vendedor</span>
+        <span>{off ? "Sin fotos" : "Sin fotos · pídeselas al vendedor"}</span>
       </div>
     );
   const p = photos[ix % n];
@@ -60,10 +60,11 @@ export function Gallery({
           // LCP de la ficha: la primera foto se pide enseguida y con prioridad alta.
           {...(ix === 0 ? { loading: "eager" as const, fetchPriority: "high" as const } : {})}
         />
-        <span className={styles.galLabel}>
-          {p.label}
-          {isDemo ? " · foto de stock (demo)" : ""}
-        </span>
+        {(n > 1 || isDemo) && (
+          <span className={styles.galLabel}>
+            {[n > 1 ? `${(ix % n) + 1} de ${n}` : "", isDemo ? "foto de stock (demo)" : ""].filter(Boolean).join(" · ")}
+          </span>
+        )}
         {n > 1 && (
           <>
             <button type="button" aria-label="Foto anterior" className={`${styles.galArrow} ${styles.galPrev}`} onClick={() => go(-1)}>

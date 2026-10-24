@@ -7,7 +7,7 @@ import { ago, daysBetween, litres } from "@/lib/domain/format";
 export const listingTitle = (l: Listing) =>
   l.brand
     ? [l.brand, l.model, l.sizeLabel].filter(Boolean).join(" ")
-    : `${SHAPE_INFO[l.shape].label} sin marca ${l.sizeLabel}`;
+    : `${SHAPE_INFO[l.shape].short} sin marca ${l.sizeLabel}`;
 
 /** Etiqueta corta para la bandeja de comparación. */
 export const listingShortLabel = (l: Listing) => `${l.brand ?? "Sin marca"} ${l.sizeLabel}`;
@@ -53,9 +53,9 @@ export function availability(l: Listing, now: Date): { text: string; tone: Tone 
   const since = new Date(Math.max(new Date(l.confirmedAt).getTime(), new Date(l.publishedAt).getTime())).toISOString();
   const d = ago(daysBetween(since, now));
   // Reservada: sigue a la venta (si la reserva no sale adelante), pero que se vea antes que nada.
-  if (isReserved(l, now)) return { text: "Reservada · si no se cierra, vuelve a estar disponible", tone: "warning" };
+  if (isReserved(l, now)) return { text: "Reservada · puedes preguntar si sigue en pie", tone: "warning" };
   if (l.status === "disponible") return { text: `Disponible · confirmada ${d}`, tone: "success" };
-  if (l.status === "pendiente") return { text: `Sin confirmar desde ${d}`, tone: "warning" };
+  if (l.status === "pendiente") return { text: `Confirmada por última vez ${d}`, tone: "warning" };
   return { text: { vendida: "Vendida", caducada: "Caducada", retirada: "Retirada" }[l.status], tone: "error" };
 }
 

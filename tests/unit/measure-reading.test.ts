@@ -89,7 +89,7 @@ describe("describeMeasure: lo que se enseña bajo cada campo", () => {
   });
   it("avisa de lo que no cuadra", () => {
     expect(describeMeasure("len", "3'", "ft")?.ok).toBe(false);
-    expect(describeMeasure("width", "xx", "ft")?.text).toMatch(/No lo entendemos/);
+    expect(describeMeasure("width", "xx", "ft")?.text).toMatch(/No lo hemos entendido/);
     expect(describeMeasure("vol", "300", "ft")?.ok).toBe(false);
     expect(describeMeasure("len", "", "ft")).toBeNull();
   });

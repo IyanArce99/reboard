@@ -344,7 +344,7 @@ for (const kind of Object.keys(VIEWPORTS) as Kind[]) {
       await expect(row.getByRole("button", { name: "Quitar reserva" })).toHaveAttribute("aria-pressed", "true");
       await expect(async () => {
         await page.goto(path!);
-        await expect(page.getByText(/^Reservada · si no se cierra/).first()).toBeVisible({ timeout: 1000 });
+        await expect(page.getByText(/^Reservada · puedes preguntar/).first()).toBeVisible({ timeout: 1000 });
       }).toPass({ timeout: 15_000 });
       if (!mobile) await expect(page.getByRole("button", { name: "Preguntar si queda libre" })).toBeVisible();
       else await expect(page.getByRole("button", { name: "Preguntar", exact: true })).toBeVisible();

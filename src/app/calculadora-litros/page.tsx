@@ -20,6 +20,8 @@ export const metadata: Metadata = {
 export default function Page() {
   return (
     <main className={styles.page}>
+      {/* Esta página tiene su propia acción principal: «Vender» de la cabecera pasa a contorno. */}
+      <span data-own-cta="other" hidden />
       <FinderWizard
         intro={
           <>

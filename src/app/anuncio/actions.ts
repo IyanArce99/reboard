@@ -70,7 +70,7 @@ export async function reportListingAction(args: z.input<typeof Report>): Promise
   const id = Number(a.data.publicId.slice(1));
   const { error } = await sb.from("reports").insert({ listing_id: id, reason: a.data.reason, details: a.data.details });
   if (error) {
-    if (error.code === "23505") return { ok: false, message: "Ya has reportado este anuncio. Lo vamos a revisar." };
+    if (error.code === "23505") return { ok: false, message: "Ya has reportado este anuncio. Gracias." };
     // Errores de reports_guard (base de datos): anuncio propio y límite diario contra el abuso.
     if (/own_listing/.test(error.message)) return { ok: false, message: "No puedes reportar tu propio anuncio." };
     if (/report_limit/.test(error.message)) return { ok: false, message: "Has enviado muchos reportes hoy. Inténtalo mañana." };

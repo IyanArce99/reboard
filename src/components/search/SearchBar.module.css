@@ -272,8 +272,11 @@
   color: var(--rb-petrol);
   text-align: left;
 }
-.zoneOpt:hover {
-  background: var(--rb-hover);
+/* Solo con ratón: en táctil el hover se queda pegado y parece una selección. */
+@media (hover: hover) {
+  .zoneOpt:hover {
+    background: var(--rb-hover);
+  }
 }
 .zoneOpt[aria-pressed="true"] {
   background: var(--rb-teal-tint);
@@ -308,8 +311,11 @@
   text-align: left;
   color: var(--rb-petrol);
 }
-.volOpt:hover {
-  border-color: var(--rb-teal);
+/* Solo con ratón: en táctil el hover se queda pegado y parece una selección. */
+@media (hover: hover) {
+  .volOpt:hover {
+    border-color: var(--rb-teal);
+  }
 }
 .volOpt[aria-pressed="true"] {
   border-color: var(--rb-teal);
@@ -390,8 +396,11 @@
   color: var(--rb-petrol);
   text-align: left;
 }
-.shapeOpt:hover {
-  border-color: var(--rb-teal);
+/* Solo con ratón: en táctil el hover se queda pegado y parece una selección. */
+@media (hover: hover) {
+  .shapeOpt:hover {
+    border-color: var(--rb-teal);
+  }
 }
 .shapeOpt[aria-pressed="true"] {
   border-color: var(--rb-teal);

@@ -56,7 +56,7 @@ function HeartSmall() {
 
 const UNAVAILABLE: Partial<Record<Listing["status"], [string, string]>> = {
   vendida: ["Esta tabla ya se ha vendido", "El vendedor la ha marcado como vendida. Abajo tienes tablas con medidas parecidas."],
-  caducada: ["Este anuncio ha caducado", "El vendedor lleva 30 días sin confirmar que sigue a la venta. Puede que ya no la tenga."],
+  caducada: ["Este anuncio ha caducado", "El vendedor no confirmó en 30 días que seguía a la venta. Puede que ya no la tenga."],
   retirada: ["Anuncio retirado", "El vendedor ha quitado este anuncio."],
 };
 
@@ -278,7 +278,7 @@ export default async function FichaPage({ params }: PageProps<"/anuncio/[slugId]
               </div>
             )}
             <div className={styles.soldBy}>
-              Lo vende {by.name ? <strong>{by.name}</strong> : by.rest}
+              {off ? "La vendía" : "Lo vende"} {by.name ? <strong>{by.name}</strong> : by.rest}
               {by.name && by.rest} · {postedText(l, now).toLowerCase()}
             </div>
             {!off && <FitNotice volume={vol} />}
@@ -327,9 +327,9 @@ export default async function FichaPage({ params }: PageProps<"/anuncio/[slugId]
               </dl>
               <p className={styles.sourceNote}>
                 {mixed
-                  ? "«Fabricante»: dato de la tabla oficial del modelo. El resto lo indica el vendedor; si algo no cuadra, pregúntale."
+                  ? "«Fabricante»: dato de la ficha técnica oficial del modelo. El resto lo indica el vendedor; si algo no cuadra, pregúntale."
                   : fromMaker > 0
-                    ? "Medidas de la tabla oficial del fabricante para este modelo."
+                    ? "Medidas de la ficha técnica del fabricante para este modelo."
                     : "Datos que indica el vendedor. Si algo no cuadra, pregúntale antes de ir a verla."}
               </p>
             </section>
@@ -402,7 +402,7 @@ export default async function FichaPage({ params }: PageProps<"/anuncio/[slugId]
               <ul>
                 <li>Queda en un sitio público y mira la tabla con calma.</li>
                 <li>Revisa cantos, fondo y cajas de quillas. Presiona la cubierta: no debe ceder.</li>
-                <li>Paga cuando te la lleves. Desconfía si te piden una señal, pagar por adelantado o enviártela por mensajería.</li>
+                <li>Paga cuando te la lleves. Desconfía si te piden una señal, que pagues por adelantado o que te la envíen por mensajería.</li>
               </ul>
               <p>
                 Reboard no gestiona pagos ni envíos.{" "}
