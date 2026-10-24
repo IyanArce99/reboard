@@ -10,6 +10,7 @@ export interface OwnOverride {
   status?: ListingStatus;
   confirmedAt?: string;
   price?: number;
+  reservedAt?: string | null;
 }
 
 export type PanelState = Record<string, OwnOverride>;

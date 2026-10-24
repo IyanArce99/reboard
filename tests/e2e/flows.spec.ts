@@ -123,7 +123,11 @@ test("ficha: contacto y anuncio vendido", async ({ page }) => {
 
   await page.goto(sold.path);
   await expect(page.getByText("Esta tabla ya se ha vendido")).toBeVisible();
-  await expect(page.getByRole("button", { name: "Vendida" }).first()).toBeDisabled();
+  // Vendida: sin botón de contacto; las parecidas suben bajo el aviso y la barra móvil lleva a ellas.
+  await expect(page.getByRole("button", { name: /Contactar|Llamar/ })).toHaveCount(0);
+  await expect(page.getByRole("heading", { name: "Tablas parecidas a la venta" })).toBeVisible();
+  await expect(page.locator('a[href="#similares"]', { hasText: "Ver parecidas" })).toHaveCount(1); // barra móvil (oculta en escritorio)
+  await expect(page.getByText(/^Pedía /).first()).toBeVisible();
 });
 
 test("sin errores de hidratación con estado guardado", async ({ page }) => {
@@ -199,7 +203,7 @@ test("cabecera: el corazón muestra el contador solo con guardadas", async ({ pa
     [STATE_KEY, JSON.stringify({ saved: ["a1040", "a1096"], compare: [], alerts: [], profile: null })] as const,
   );
   await page.goto("/guias");
-  await expect(page.locator("header").getByRole("link", { name: "Guardadas (2)" })).toBeVisible();
+  await expect(page.locator("header").getByRole("link", { name: "Guardadas 2" })).toBeVisible();
 });
 
 for (const width of [375, 768, 1024, 1440]) {
@@ -352,6 +356,7 @@ test("publicar: editar una sección desde la revisión no pierde datos", async (
 });
 
 test("publicar: recupera el borrador (con fotos) al recargar", async ({ page }) => {
+  test.slow(); // recarga, /vender y vuelta: con la suite en paralelo pasa de 30 s
   const errors = trackErrors(page);
   await page.goto("/vender/publicar");
   await page.getByTestId("foto-galeria").setInputFiles(await photoFiles(["#336699"]));
@@ -369,6 +374,13 @@ test("publicar: recupera el borrador (con fotos) al recargar", async ({ page }) 
   await expect(page.getByRole("button", { name: "Sin marca" })).toHaveAttribute("aria-pressed", "true");
   await page.getByRole("button", { name: "Volver al paso 1: Fotos" }).click();
   await expect(page.getByRole("img", { name: /Foto 1/ })).toBeVisible();
+
+  // /vender avisa del borrador a medias y lleva de vuelta.
+  await page.goto("/vender");
+  await expect(page.getByText("Tienes una tabla a medias.")).toBeVisible();
+  await page.getByRole("link", { name: "Seguir publicando" }).click();
+  await expect(page.getByRole("img", { name: /Foto 1/ }).or(page.locator("#pub-len"))).toBeVisible();
+  await page.getByRole("button", { name: "Volver al paso 1: Fotos" }).click().catch(() => {});
 
   page.once("dialog", (d) => void d.accept());
   await page.getByRole("button", { name: "Empezar de nuevo" }).click();

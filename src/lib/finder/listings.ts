@@ -46,8 +46,16 @@ export const budgetOf = (W: Pick<FinderState, "budget">) => (W.budget ? Number(W
 export const typeFilter = (t: FinderType): Partial<Filters> =>
   t === "softboard" ? { constructions: ["softboard"] } : { shapes: [t] };
 
+/**
+ * Si la recomendación no incluye softboard (p. ej., «pasar de la softboard a una rígida»), una evolutiva
+ * de espuma no encaja aunque su forma sí: se excluyen las softboards.
+ */
 export const typeOk = (l: Listing, types: FinderType[]) =>
+  (types.includes("softboard") || l.construction !== "softboard") &&
   types.some((t) => (t === "softboard" ? l.construction === "softboard" : l.shape === t));
+
+/** Construcciones rígidas: para los enlaces a /buscar cuando la softboard no está entre los tipos. */
+const RIGID: Filters["constructions"] = ["pu", "epoxy"];
 
 /** Litros, zona y presupuesto del resultado. */
 export const baseFilters = (r: Recommendation, zone: string, priceMax: number | null): Filters =>
@@ -56,6 +64,7 @@ export const baseFilters = (r: Recommendation, zone: string, priceMax: number | 
 /** Filtros de la tarjeta de un tipo: litros, zona, presupuesto y ese tipo. */
 export const typeFilters = (r: Recommendation, zone: string, priceMax: number | null, t: FinderType): Filters => ({
   ...baseFilters(r, zone, priceMax),
+  ...(t !== "softboard" && !r.types.includes("softboard") ? { constructions: RIGID } : {}),
   ...typeFilter(t),
 });
 
@@ -68,6 +77,7 @@ export function resultFilters(r: Recommendation, zone: string, priceMax: number 
   return {
     ...baseFilters(r, zone, priceMax),
     ...(shapes.length ? { shapes } : r.types.includes("softboard") ? { constructions: ["softboard"] } : {}),
+    ...(shapes.length && !r.types.includes("softboard") ? { constructions: RIGID } : {}),
   };
 }
 

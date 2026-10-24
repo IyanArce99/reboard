@@ -64,6 +64,8 @@ export interface ListingRepository {
   byId(id: string): Promise<Listing | null>;
   /** Anuncios por id público, en el orden pedido y en cualquier estado. Ignora los que no existen. */
   byIds(ids: string[]): Promise<Listing[]>;
+  /** Cuántas cuentas tienen guardado el anuncio (solo el número; los guardados sin cuenta no cuentan). */
+  saveCount(id: string): Promise<number>;
   /** Alternativas activas: misma forma o volumen parecido (±8 L), primero de la misma zona. */
   similar(l: Listing, limit: number): Promise<Listing[]>;
   /** Anuncios activos del mismo vendedor (incluido este si está activo). */

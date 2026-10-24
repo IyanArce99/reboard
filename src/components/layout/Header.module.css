@@ -43,7 +43,7 @@
   position: relative;
   display: inline-flex;
   align-items: center;
-  height: 40px;
+  height: 44px;
   padding: 0 12px;
   border-radius: 10px;
   font-size: 15px;
@@ -167,7 +167,7 @@
 
 .publish {
   margin-left: 8px;
-  height: 42px;
+  height: 44px;
   padding: 0 18px;
   border-radius: 10px;
   background: var(--rb-sand);
@@ -278,7 +278,7 @@
   /* En móvil, «Vender» corto: vender tiene que verse sin abrir el menú. */
   .publish {
     margin-left: 4px;
-    height: 40px;
+    height: 44px;
     padding: 0 14px;
     font-size: 14px;
   }

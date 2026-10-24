@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { DraftResume } from "@/components/publish/DraftResume";
 import { authEnabled } from "@/lib/auth/config";
 import { Photo } from "@/components/brand/Photo";
 import { SectionHeader } from "@/components/brand/SectionHeader";
@@ -40,6 +41,8 @@ export default function VenderPage() {
   const closed = !authEnabled();
   return (
     <main>
+      {/* Esta página ya tiene su «Publicar mi tabla»: sin el «Vender» de la cabecera (globals.css). */}
+      <span data-own-cta="sell" hidden />
       <section className={styles.heroWrap}>
         <div className={`container ${styles.hero}`}>
           <div className={styles.heroText}>
@@ -60,6 +63,7 @@ export default function VenderPage() {
                 </Link>
               )}
             </div>
+            <DraftResume />
             {closed && (
               <p className={styles.demo}>
                 Todavía no se puede publicar: puedes recorrer el formulario para ver cómo es, pero no se guarda ningún anuncio.

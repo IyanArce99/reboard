@@ -201,6 +201,7 @@ function mk(h: Hand, i: number): Listing {
     distanceKm: h.km,
     price: h.price,
     previousPrice: h.old ?? null,
+    reservedAt: null,
     condition: h.cond,
     repairs,
     seller: { id: null, type: h.seller, name: sname, shopSlug: shop?.slug ?? null },

@@ -104,7 +104,7 @@
   padding: 12px 14px;
   border: 1px solid var(--rb-petrol-3);
   border-radius: var(--rb-r-card);
-  background: rgba(27, 66, 82, 0.72);
+  background: rgba(27, 66, 82, 0.9);
   color: var(--rb-warm-white);
   transition: border-color 0.15s, background-color 0.15s;
 }

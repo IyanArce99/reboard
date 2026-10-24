@@ -10,6 +10,8 @@ import { ListingCard } from "@/components/listing/ListingCard";
 import { useUserState, type SavedAlert } from "@/components/user/UserStateProvider";
 import { eur } from "@/lib/domain/format";
 import type { Listing } from "@/lib/domain/types";
+import { isReserved } from "@/lib/listing/present";
+import { searchHref, withFilters } from "@/lib/search/filters";
 import { useHereZone, useListings } from "./useListings";
 import ui from "@/styles/ui.module.css";
 import styles from "./Saved.module.css";
@@ -20,11 +22,11 @@ export function SavedScreen({ tab }: { tab: Tab }) {
   const { saved, alerts, ready } = useUserState();
   const tabs: [Tab, string, string][] = [
     ["saved", "/guardado", ready ? `Tablas guardadas · ${saved.length}` : "Tablas guardadas"],
-    ["alerts", "/alertas", ready ? `Alertas · ${alerts.length}` : "Alertas"],
+    ["alerts", "/alertas", ready ? `Búsquedas · ${alerts.length}` : "Búsquedas"],
   ];
   return (
     <>
-      <nav className={styles.tabs} aria-label="Guardadas y alertas">
+      <nav className={styles.tabs} aria-label="Guardadas y búsquedas">
         {tabs.map(([v, href, label]) => (
           <Link key={v} href={href} className={styles.tab} aria-current={tab === v ? "page" : undefined} scroll={false}>
             {label}
@@ -36,10 +38,16 @@ export function SavedScreen({ tab }: { tab: Tab }) {
   );
 }
 
-function savedNote(l: Listing): { text: string; tone: "sold" | "drop" } | null {
-  if (l.status === "vendida") return { text: "Vendida · en su anuncio tienes tablas parecidas", tone: "sold" };
-  if (l.status === "caducada" || l.status === "retirada")
-    return { text: "Ya no está a la venta · en su anuncio tienes tablas parecidas", tone: "sold" };
+/** Tablas parecidas a una guardada que ya no está: mismo tipo y ±5 L si los indica. */
+function similarHref(l: Listing) {
+  const v = l.volume.value;
+  return searchHref(withFilters({ shapes: [l.shape], ...(v != null ? { volMin: Math.max(0, Math.round(v - 5)), volMax: Math.round(v + 5) } : {}) }));
+}
+
+function savedNote(l: Listing, now: Date): { text: string; tone: "sold" | "drop" | "reserved" } | null {
+  if (l.status === "vendida") return { text: "Vendida", tone: "sold" };
+  if (l.status === "caducada" || l.status === "retirada") return { text: "Ya no está a la venta", tone: "sold" };
+  if (isReserved(l, now)) return { text: "Reservada · si no se cierra, vuelve a estar disponible", tone: "reserved" };
   if (l.previousPrice != null && l.previousPrice > l.price)
     return { text: `Ha bajado de ${eur(l.previousPrice)} a ${eur(l.price)}`, tone: "drop" };
   return null;
@@ -79,15 +87,25 @@ function SavedList() {
           </button>
         </p>
       )}
+      <h2 className="visually-hidden">Tablas guardadas</h2>
       <div className={styles.grid}>
         {now &&
           listings.map((l) => {
-            const note = savedNote(l);
+            const note = savedNote(l, now);
             return (
               <div key={l.id} className={styles.item}>
                 {note && (
                   <div className={styles.note} data-tone={note.tone}>
                     {note.text}
+                    {/* Vendida o retirada: salida directa a tablas parecidas (mismo tipo, litros cercanos). */}
+                    {note.tone === "sold" && (
+                      <>
+                        {" · "}
+                        <Link href={similarHref(l)} className={styles.noteLink}>
+                          Ver parecidas
+                        </Link>
+                      </>
+                    )}
                   </div>
                 )}
                 <ListingCard listing={l} now={now} hereZone={here} layout="responsive" />
@@ -119,7 +137,7 @@ function AlertList() {
   return (
     <div className={styles.alerts}>
       <p className={styles.alertInfo}>
-        Tus alertas se guardan solo en este dispositivo y no envían emails ni notificaciones. Vuelve aquí cuando quieras para ver cuántas tablas coinciden con cada una.
+        Tus búsquedas se guardan solo en este dispositivo y no envían avisos. Vuelve aquí cuando quieras para ver cuántas tablas coinciden con cada una.
       </p>
       {!ready ? (
         <div className={styles.alertSkeleton} aria-hidden="true" />
@@ -127,7 +145,7 @@ function AlertList() {
         alerts.map((a) => <AlertRow key={a.id} alert={a} />)
       ) : (
         <EmptyState
-          title="No tienes alertas"
+          title="No tienes búsquedas guardadas"
           actions={
             <>
               <Link href="/buscar" className={ui.btnPrimary}>
@@ -139,7 +157,7 @@ function AlertList() {
             </>
           }
         >
-          Busca con tus medidas y pulsa «Crear alerta». La alerta se queda aquí, en este dispositivo, y cada vez que entres verás cuántas tablas coinciden.
+          Busca con tus medidas y pulsa «Guardar búsqueda». Se queda aquí, en este dispositivo, y cada vez que entres verás cuántas tablas coinciden.
         </EmptyState>
       )}
     </div>
@@ -188,7 +206,7 @@ function AlertRow({ alert: a }: { alert: SavedAlert }) {
         type="button"
         role="switch"
         aria-checked={a.on}
-        aria-label="Alerta activa"
+        aria-label="Búsqueda activa"
         aria-describedby={textId}
         className={styles.switch}
         onClick={() => toggleAlert(a.id)}
@@ -197,7 +215,7 @@ function AlertRow({ alert: a }: { alert: SavedAlert }) {
           <span className={styles.knob} />
         </span>
       </button>
-      <button type="button" className={styles.del} aria-label={`Eliminar alerta: ${a.text}`} onClick={() => removeAlert(a.id)}>
+      <button type="button" className={styles.del} aria-label={`Eliminar búsqueda: ${a.text}`} onClick={() => removeAlert(a.id)}>
         <span aria-hidden="true">✕</span>
       </button>
     </div>

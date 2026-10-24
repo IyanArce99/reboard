@@ -8,8 +8,6 @@ import { BoardShape } from "@/components/brand/BoardShape";
 import { ListingCard } from "@/components/listing/ListingCard";
 import { AlertButton, CompareLink } from "@/components/user/islands";
 import { useUserState } from "@/components/user/UserStateProvider";
-import { litres } from "@/lib/domain/format";
-import { SHAPE_INFO } from "@/lib/domain/taxonomy";
 import type { Listing } from "@/lib/domain/types";
 import {
   budgetOf,
@@ -182,7 +180,7 @@ export function FinderResult({ state: W, rec: r, summary, onEdit, onRestart, set
                   <div className={styles.grow} />
                   {n === 0 ? (
                     <AlertButton {...alertProps(f)} className={styles.typeCta}>
-                      Sin anuncios · crear alerta
+                      Sin anuncios · guardar búsqueda
                     </AlertButton>
                   ) : (
                     <Link href={searchHref(f)} className={styles.typeCta}>
@@ -227,11 +225,8 @@ export function FinderResult({ state: W, rec: r, summary, onEdit, onRestart, set
           <div className={styles.grid}>
             {comp.slice(0, 8).map((l) => (
               <div key={l.id} className={styles.cardWrap}>
+                {/* «Te encaja» ya va en la tarjeta: sin repetir el porqué en una línea suelta. */}
                 <ListingCard listing={l} now={pool.now} hereZone={pool.here} layout="responsive" />
-                <span className={styles.reason}>
-                  {litres(l.volume.value ?? 0)} · dentro de tu rango ({r.lo}–{r.hi} L) · {SHAPE_INFO[l.shape].label}
-                  {l.construction === "softboard" ? " · Softboard" : ""}
-                </span>
               </div>
             ))}
           </div>
@@ -255,8 +250,8 @@ export function FinderResult({ state: W, rec: r, summary, onEdit, onRestart, set
             </div>
             <div className={styles.noneText}>
               {noneInRange
-                ? "Reboard acaba de empezar y aún hay pocos anuncios. Crea una alerta con este perfil: se guarda en este dispositivo (los avisos por email aún no están activos)."
-                : "Prueba a ampliar la búsqueda o crea una alerta con este perfil (se guarda en este dispositivo)."}
+                ? "Reboard acaba de empezar y aún hay pocos anuncios. Guarda la búsqueda con este perfil: se queda en este dispositivo (no envía avisos)."
+                : "Prueba a ampliar la búsqueda o guárdala con este perfil (se queda en este dispositivo)."}
             </div>
             {widen.length > 0 && (
               <div className={styles.widenRow}>
@@ -291,7 +286,7 @@ export function FinderResult({ state: W, rec: r, summary, onEdit, onRestart, set
         <div className={styles.twoCols} data-single={empty || undefined}>
           {!empty && (
             <div className={styles.alertBox}>
-              <strong className={styles.boxTitle}>Crea una alerta con este perfil</strong>
+              <strong className={styles.boxTitle}>Guarda la búsqueda con este perfil</strong>
               <span className={styles.boxText}>«{alertText(all, NO_NAMES)}»</span>
               <span className={styles.boxText}>Se guarda en este dispositivo. Los avisos por email aún no están activos.</span>
               <div>

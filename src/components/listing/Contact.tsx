@@ -30,6 +30,8 @@ interface ContactData {
   listingId: string;
   /** Datos reales: contacto y reportes van al servidor. */
   live: boolean;
+  /** Reservada por el vendedor: se puede preguntar por si la reserva no sale adelante. */
+  reserved?: boolean;
   /** Categorías del anuncio para la analítica del embudo de contacto (sin ids ni datos personales). */
   analytics: { shape: string; island: string; price_band: PriceBand };
 }
@@ -150,6 +152,11 @@ export function ContactProvider({ data, children }: { data: ContactData; childre
                   <CloseIcon />
                 </button>
               </div>
+              {data.reserved && (
+                <p className={styles.modalNote} role="note">
+                  El vendedor la ha reservado para alguien. Pregúntale si la reserva sigue en pie.
+                </p>
+              )}
               <div className={styles.modalHint}>{byWhatsApp ? "Mensaje sugerido (puedes editarlo en WhatsApp):" : "Puedes preguntarle esto:"}</div>
               <div className={styles.modalMsg}>{data.message}</div>
               {data.live ? (
@@ -186,7 +193,10 @@ export function ContactProvider({ data, children }: { data: ContactData; childre
                   Llamar
                 </button>
               )}
-              <div className={styles.modalNote}>No pagues nada por adelantado, ni siquiera una señal. Reboard no gestiona pagos ni envíos.</div>
+              <div className={styles.modalNote}>
+                Antes de pagar, mírala en persona y en un sitio público. No pagues por adelantado, ni una señal, ni por un enlace que te
+                manden por WhatsApp: Reboard no gestiona pagos ni envíos.
+              </div>
             </div>
           </>,
           document.body,
@@ -213,14 +223,28 @@ export function ContactButton({ className }: { className: string }) {
         open();
       }}
     >
-      {data.unavailable ?? (data.method === "whatsapp" ? "Contactar por WhatsApp" : "Llamar al vendedor")}
+      {data.unavailable ?? (data.reserved ? "Preguntar si queda libre" : data.method === "whatsapp" ? "Contactar por WhatsApp" : "Llamar al vendedor")}
     </button>
   );
 }
 
 /** Barra fija abajo en la ficha móvil: precio + «Contactar». */
-export function ContactBar({ price, specs }: { price: string; specs: string }) {
+export function ContactBar({ price, specs, offLink }: { price: string; specs: string; offLink?: { href: string; label: string } }) {
   const { open, data } = useContact();
+  // Ya no está a la venta: la barra lleva a las alternativas en vez de un botón gris muerto.
+  if (data.unavailable && offLink) {
+    return (
+      <aside className={styles.contactBar} aria-label="Alternativas">
+        <div>
+          <div className={styles.barPrice}>{price}</div>
+          <div className={styles.barSpecs}>{data.unavailable}</div>
+        </div>
+        <a href={offLink.href} className={styles.barBtn}>
+          {offLink.label}
+        </a>
+      </aside>
+    );
+  }
   return (
     <aside className={styles.contactBar} aria-label="Contacto">
       <div>
@@ -236,7 +260,7 @@ export function ContactBar({ price, specs }: { price: string; specs: string }) {
           open();
         }}
       >
-        {data.unavailable ?? (data.method === "whatsapp" ? "WhatsApp" : "Llamar")}
+        {data.unavailable ?? (data.reserved ? "Preguntar" : data.method === "whatsapp" ? "WhatsApp" : "Llamar")}
       </button>
     </aside>
   );

@@ -136,7 +136,7 @@ export default async function ShopPage({ params }: PageProps<"/tiendas/[slug]">)
             Tablas usadas disponibles ({listings.length})
           </h2>
           <AlertButton text={alertLabel} query={toQuery(alertFilters)} className={styles.textBtn}>
-            Crear alerta: tablas de {shopsIn}
+            Guardar búsqueda: tablas de {shopsIn}
           </AlertButton>
         </div>
         {listings.length > 0 ? (

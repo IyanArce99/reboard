@@ -18,6 +18,8 @@ import { DEFAULT_SELLER_NAME } from "@/lib/listing/present";
 import ui from "@/styles/ui.module.css";
 import { LivePreview, previewTexts } from "./LivePreview";
 import styles from "./Publish.module.css";
+import { fmtIn, ftLabel, litres } from "@/lib/domain/format";
+import { fieldToInches, parseLitres } from "@/lib/publish/parse";
 
 interface Props {
   d: PublishDraft;
@@ -57,7 +59,14 @@ const CONTACT_LABEL = { whatsapp: "WhatsApp", phone: "Llamada" } as const;
 
 export function StepReview({ d, catalog, now, live, editing, pending, needsLogin, account, busy, progress, error, turnstile, onCaptcha, onEdit, onPublish, onLogin }: Props) {
   const t = previewTexts(d, catalog, now);
-  const measures = [d.len, d.width, d.thick].filter((x) => x.trim()).join(" × ");
+  // Resumen en el formato de la ficha (6'4" × 20 1/2" × 2 5/8" · 34,5 L), no tal como se escribió.
+  const canon = (k: "len" | "width" | "thick") => {
+    const v = fieldToInches(k, d[k], d.unit);
+    if (v == null) return d[k].trim();
+    return k === "len" ? ftLabel(Math.round(v)) : fmtIn(v);
+  };
+  const measures = (["len", "width", "thick"] as const).filter((k) => d[k].trim()).map(canon).join(" × ");
+  const vol = parseLitres(d.vol);
   const zone = zoneBySlug(d.zone)?.name ?? "";
   const { setAccountName } = useUserState();
   // Nombre que verán los compradores. Vacío si aún es el de por defecto («Surfista»).
@@ -130,7 +139,7 @@ export function StepReview({ d, catalog, now, live, editing, pending, needsLogin
         </Row>
         <Row title="La tabla" step={2} onEdit={onEdit}>
           <span className={styles.sumMain}>{t.title}</span>
-          {measures && <span className={styles.sumMono}>{measures}{d.vol.trim() ? ` · ${d.vol.trim()} L` : ""}</span>}
+          {measures && <span className={styles.sumMono}>{measures}{vol != null ? ` · ${litres(vol)}` : ""}</span>}
           <span className={styles.sumMeta}>
             {[d.shape && SHAPE_INFO[d.shape].label, d.construction && CONSTRUCTION_INFO[d.construction].label].filter(Boolean).join(" · ")}
           </span>

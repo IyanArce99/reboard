@@ -23,9 +23,9 @@ export default function Page() {
       <FinderWizard
         intro={
           <>
-            <Breadcrumbs items={[{ label: "Inicio", href: "/" }]} current={{ label: "TablaFinder", href: PATH }} />
+            <Breadcrumbs items={[{ label: "Inicio", href: "/" }]} current={{ label: "Calculadora de litros", href: PATH }} />
             {/* «TablaFinder» es el nombre de la herramienta en la navegación; el H1 usa la pregunta tal como se busca. */}
-            <p className={styles.kicker}>TablaFinder · Calculadora de litros</p>
+            <p className={styles.kicker}>Calculadora de litros</p>
             <h1 className={styles.h1}>¿Qué tabla de surf necesito?</h1>
             <p className={styles.lead}>
               Siete preguntas sobre tu peso, tu nivel y tus olas. Te damos un rango orientativo de litros, el tipo de tabla que

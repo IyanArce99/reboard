@@ -46,10 +46,11 @@ export interface Filters {
 }
 
 export const SORTS = [
-  ["recientes", "Más recientes"],
-  ["precio", "Más baratas primero"],
-  ["precio-desc", "Más caras primero"],
-  ["litros", "Menos litros primero"],
+  // Cortas: en móvil el selector es estrecho («Más recient…» se cortaba). El contexto lo da «Ordenar».
+  ["recientes", "Recientes"],
+  ["precio", "Más baratas"],
+  ["precio-desc", "Más caras"],
+  ["litros", "Menos litros"],
   ["distancia", "Más cerca"],
 ] as const;
 export type Sort = (typeof SORTS)[number][0];

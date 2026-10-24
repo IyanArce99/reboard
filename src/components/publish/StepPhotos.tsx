@@ -158,6 +158,10 @@ export function StepPhotos({ photos, processing, live, onFiles, onRemove, onMove
             ))}
           </ul>
           {photos.length > 1 && <p className={styles.small}>Usa las flechas para ordenarlas: la primera es la portada.</p>}
+          <p className={styles.small}>
+            Con luz de día y la tabla entera en la portada. Si tiene golpes o reparaciones, hazles una foto de cerca: da confianza y evita
+            visitas en vano.
+          </p>
           {buttons}
         </>
       )}

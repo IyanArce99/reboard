@@ -187,14 +187,14 @@ isOneToOne: false
                   ]
                 },"listings": {
                   Row: {
-                    "accessories": string | null,"brand_id": number | null,"brand_text": string | null,"condition": Database["public"]['Enums']["board_condition"],"confirmed_at": string | null,"construction": Database["public"]['Enums']["board_construction"],"construction_source": Database["public"]['Enums']["data_source"],"contact_method": Database["public"]['Enums']["contact_method"],"created_at": string,"description": string | null,"fins": string | null,"id": number,"length_in": number,"length_source": Database["public"]['Enums']["data_source"],"model_id": number | null,"model_size_id": number | null,"model_text": string | null,"moderation": Database["public"]['Enums']["moderation_state"],"previous_price_eur": number | null,"price_eur": number,"public_id": string | null,"published_at": string | null,"repairs": string | null,"seller_id": string,"shape": Database["public"]['Enums']["board_shape"],"shape_source": Database["public"]['Enums']["data_source"],"size_label": string,"slug": string,"sold_at": string | null,"status": Database["public"]['Enums']["listing_status"],"thickness_in": number | null,"thickness_source": Database["public"]['Enums']["data_source"] | null,"town": string,"updated_at": string,"volume_l": number | null,"volume_source": Database["public"]['Enums']["data_source"] | null,"width_in": number | null,"width_source": Database["public"]['Enums']["data_source"] | null,"zone_slug": string
+                    "accessories": string | null,"brand_id": number | null,"brand_text": string | null,"condition": Database["public"]['Enums']["board_condition"],"confirmed_at": string | null,"construction": Database["public"]['Enums']["board_construction"],"construction_source": Database["public"]['Enums']["data_source"],"contact_method": Database["public"]['Enums']["contact_method"],"created_at": string,"description": string | null,"fins": string | null,"id": number,"length_in": number,"length_source": Database["public"]['Enums']["data_source"],"model_id": number | null,"model_size_id": number | null,"model_text": string | null,"moderation": Database["public"]['Enums']["moderation_state"],"previous_price_eur": number | null,"price_eur": number,"public_id": string | null,"published_at": string | null,"repairs": string | null,"reserved_at": string | null,"seller_id": string,"shape": Database["public"]['Enums']["board_shape"],"shape_source": Database["public"]['Enums']["data_source"],"size_label": string,"slug": string,"sold_at": string | null,"status": Database["public"]['Enums']["listing_status"],"thickness_in": number | null,"thickness_source": Database["public"]['Enums']["data_source"] | null,"town": string,"updated_at": string,"volume_l": number | null,"volume_source": Database["public"]['Enums']["data_source"] | null,"width_in": number | null,"width_source": Database["public"]['Enums']["data_source"] | null,"zone_slug": string
                   }
                   ComputedFields: never
                   Insert: {
-                    "accessories"?: string | null,"brand_id"?: number | null,"brand_text"?: string | null,"condition": Database["public"]['Enums']["board_condition"],"confirmed_at"?: string | null,"construction": Database["public"]['Enums']["board_construction"],"construction_source"?: Database["public"]['Enums']["data_source"],"contact_method"?: Database["public"]['Enums']["contact_method"],"created_at"?: string,"description"?: string | null,"fins"?: string | null,"id"?: number,"length_in": number,"length_source"?: Database["public"]['Enums']["data_source"],"model_id"?: number | null,"model_size_id"?: number | null,"model_text"?: string | null,"moderation"?: Database["public"]['Enums']["moderation_state"],"previous_price_eur"?: number | null,"price_eur": number,"public_id"?: never,"published_at"?: string | null,"repairs"?: string | null,"seller_id"?: string,"shape": Database["public"]['Enums']["board_shape"],"shape_source"?: Database["public"]['Enums']["data_source"],"size_label": string,"slug": string,"sold_at"?: string | null,"status"?: Database["public"]['Enums']["listing_status"],"thickness_in"?: number | null,"thickness_source"?: Database["public"]['Enums']["data_source"] | null,"town": string,"updated_at"?: string,"volume_l"?: number | null,"volume_source"?: Database["public"]['Enums']["data_source"] | null,"width_in"?: number | null,"width_source"?: Database["public"]['Enums']["data_source"] | null,"zone_slug": string
+                    "accessories"?: string | null,"brand_id"?: number | null,"brand_text"?: string | null,"condition": Database["public"]['Enums']["board_condition"],"confirmed_at"?: string | null,"construction": Database["public"]['Enums']["board_construction"],"construction_source"?: Database["public"]['Enums']["data_source"],"contact_method"?: Database["public"]['Enums']["contact_method"],"created_at"?: string,"description"?: string | null,"fins"?: string | null,"id"?: number,"length_in": number,"length_source"?: Database["public"]['Enums']["data_source"],"model_id"?: number | null,"model_size_id"?: number | null,"model_text"?: string | null,"moderation"?: Database["public"]['Enums']["moderation_state"],"previous_price_eur"?: number | null,"price_eur": number,"public_id"?: never,"published_at"?: string | null,"repairs"?: string | null,"reserved_at"?: string | null,"seller_id"?: string,"shape": Database["public"]['Enums']["board_shape"],"shape_source"?: Database["public"]['Enums']["data_source"],"size_label": string,"slug": string,"sold_at"?: string | null,"status"?: Database["public"]['Enums']["listing_status"],"thickness_in"?: number | null,"thickness_source"?: Database["public"]['Enums']["data_source"] | null,"town": string,"updated_at"?: string,"volume_l"?: number | null,"volume_source"?: Database["public"]['Enums']["data_source"] | null,"width_in"?: number | null,"width_source"?: Database["public"]['Enums']["data_source"] | null,"zone_slug": string
                   }
                   Update: {
-                    "accessories"?: string | null,"brand_id"?: number | null,"brand_text"?: string | null,"condition"?: Database["public"]['Enums']["board_condition"],"confirmed_at"?: string | null,"construction"?: Database["public"]['Enums']["board_construction"],"construction_source"?: Database["public"]['Enums']["data_source"],"contact_method"?: Database["public"]['Enums']["contact_method"],"created_at"?: string,"description"?: string | null,"fins"?: string | null,"id"?: number,"length_in"?: number,"length_source"?: Database["public"]['Enums']["data_source"],"model_id"?: number | null,"model_size_id"?: number | null,"model_text"?: string | null,"moderation"?: Database["public"]['Enums']["moderation_state"],"previous_price_eur"?: number | null,"price_eur"?: number,"public_id"?: never,"published_at"?: string | null,"repairs"?: string | null,"seller_id"?: string,"shape"?: Database["public"]['Enums']["board_shape"],"shape_source"?: Database["public"]['Enums']["data_source"],"size_label"?: string,"slug"?: string,"sold_at"?: string | null,"status"?: Database["public"]['Enums']["listing_status"],"thickness_in"?: number | null,"thickness_source"?: Database["public"]['Enums']["data_source"] | null,"town"?: string,"updated_at"?: string,"volume_l"?: number | null,"volume_source"?: Database["public"]['Enums']["data_source"] | null,"width_in"?: number | null,"width_source"?: Database["public"]['Enums']["data_source"] | null,"zone_slug"?: string
+                    "accessories"?: string | null,"brand_id"?: number | null,"brand_text"?: string | null,"condition"?: Database["public"]['Enums']["board_condition"],"confirmed_at"?: string | null,"construction"?: Database["public"]['Enums']["board_construction"],"construction_source"?: Database["public"]['Enums']["data_source"],"contact_method"?: Database["public"]['Enums']["contact_method"],"created_at"?: string,"description"?: string | null,"fins"?: string | null,"id"?: number,"length_in"?: number,"length_source"?: Database["public"]['Enums']["data_source"],"model_id"?: number | null,"model_size_id"?: number | null,"model_text"?: string | null,"moderation"?: Database["public"]['Enums']["moderation_state"],"previous_price_eur"?: number | null,"price_eur"?: number,"public_id"?: never,"published_at"?: string | null,"repairs"?: string | null,"reserved_at"?: string | null,"seller_id"?: string,"shape"?: Database["public"]['Enums']["board_shape"],"shape_source"?: Database["public"]['Enums']["data_source"],"size_label"?: string,"slug"?: string,"sold_at"?: string | null,"status"?: Database["public"]['Enums']["listing_status"],"thickness_in"?: number | null,"thickness_source"?: Database["public"]['Enums']["data_source"] | null,"town"?: string,"updated_at"?: string,"volume_l"?: number | null,"volume_source"?: Database["public"]['Enums']["data_source"] | null,"width_in"?: number | null,"width_source"?: Database["public"]['Enums']["data_source"] | null,"zone_slug"?: string
                   }
                   Relationships: [
                     {
@@ -424,6 +424,9 @@ isOneToOne: false
 "listing_photo_quota_ok":
 { Args: { "p_name": string }; Returns: boolean
                            },
+"listing_save_count":
+{ Args: { "p_public_id": string }; Returns: number
+                           },
 "matching_listings":
 { Args: { "p": Json,"p_exclude_zone"?: string,"p_statuses"?: (Database["public"]['Enums']["listing_status"])[],"p_unknown_volume"?: boolean,"skip"?: string }; Returns: {
               "accessories": string | null,
@@ -449,6 +452,7 @@ isOneToOne: false
 "public_id": string | null,
 "published_at": string | null,
 "repairs": string | null,
+"reserved_at": string | null,
 "seller_id": string,
 "shape": Database["public"]['Enums']["board_shape"],
 "shape_source": Database["public"]['Enums']["data_source"],
@@ -472,6 +476,11 @@ isOneToOne: false
         isOneToOne: false
         isSetofReturn: true
       } },
+"my_listing_save_counts":
+{ Args: Record<PropertyKey, never>; Returns: {
+              "n": number,"public_id": string
+            }[]
+                           },
 "require_admin":
 { Args: Record<PropertyKey, never>; Returns: string
                            },
@@ -505,6 +514,7 @@ isOneToOne: false
 "public_id": string | null,
 "published_at": string | null,
 "repairs": string | null,
+"reserved_at": string | null,
 "seller_id": string,
 "shape": Database["public"]['Enums']["board_shape"],
 "shape_source": Database["public"]['Enums']["data_source"],
@@ -559,6 +569,7 @@ isOneToOne: false
 "public_id": string | null,
 "published_at": string | null,
 "repairs": string | null,
+"reserved_at": string | null,
 "seller_id": string,
 "shape": Database["public"]['Enums']["board_shape"],
 "shape_source": Database["public"]['Enums']["data_source"],

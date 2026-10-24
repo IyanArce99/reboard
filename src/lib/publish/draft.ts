@@ -190,7 +190,8 @@ export function previewListing(d: PublishDraft, catalog: CatalogModel[], now: Da
   const model = brand && d.model && d.model !== OTHER_MODEL ? d.model : null;
   const cm = brand && model ? catalog.find((m) => m.brand === brand && m.model === model) : undefined;
   const lenIn = fieldToInches("len", d.len, d.unit);
-  const sizeLabel = d.unit === "ft" ? d.len || "—" : lenIn != null ? ftLabel(Math.round(lenIn)) : "—";
+  // Siempre en el formato de la ficha (6'4"), aunque se haya escrito «6’4”», «6.4» o en cm.
+  const sizeLabel = lenIn != null ? ftLabel(Math.round(lenIn)) : d.len.trim() || "—";
   const iso = now.toISOString();
   const zone = zoneBySlug(d.zone);
   return {
@@ -215,6 +216,7 @@ export function previewListing(d: PublishDraft, catalog: CatalogModel[], now: Da
     distanceKm: null,
     price: Number(d.price) || 0,
     previousPrice: null,
+    reservedAt: null,
     condition: d.condition || "buen-estado",
     repairs: d.repairs || null,
     seller: { id: null, type: "particular", name: "Tú", shopSlug: null },

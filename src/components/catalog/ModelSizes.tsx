@@ -151,10 +151,10 @@ export function ModelSizes({ brand, model, intro, photo, sizes, sourceNote, tota
         ) : (
           <div className={styles.noneBox}>
             <div className={styles.noneText}>
-              Ahora mismo no hay ninguna {brand} {model} {sz.label} usada a la venta. Crea una alerta y, desde Alertas, verás si aparece alguna.
+              Ahora mismo no hay ninguna {brand} {model} {sz.label} usada a la venta. Guarda la búsqueda y, en «Búsquedas guardadas», verás si aparece alguna.
             </div>
             <AlertButton text={sz.alert.text} query={sz.alert.query} className={`${ui.btnStrong} ${styles.noneBtn}`}>
-              Crear alerta de esta medida
+              Guardar búsqueda de esta medida
             </AlertButton>
           </div>
         )}

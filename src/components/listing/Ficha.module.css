@@ -116,12 +116,15 @@
   position: absolute;
   left: 14px;
   bottom: 12px;
-  font-family: var(--rb-font-mono);
   font-size: 12px;
+  font-weight: 600;
   color: var(--rb-petrol);
   background: rgba(255, 255, 255, 0.88);
   padding: 4px 8px;
   border-radius: 6px;
+}
+.galLabel::first-letter {
+  text-transform: uppercase;
 }
 
 .galIx {
@@ -208,6 +211,14 @@
   font-weight: 800;
   letter-spacing: -0.02em;
   line-height: 1;
+}
+.price[data-off] {
+  font-size: 30px;
+  color: var(--rb-muted);
+}
+/* Parecidas arriba (tabla no disponible): pegadas al aviso. */
+.similar[data-top] {
+  margin: 0 0 28px;
 }
 
 .oldPrice {
@@ -790,6 +801,15 @@
   .backRow {
     display: none;
   }
+  /* Sin fotos: una franja baja, no un hueco de media pantalla (el precio sube). */
+  .galMain.galEmpty {
+    aspect-ratio: auto;
+    height: 160px;
+  }
+  .galEmpty svg {
+    width: auto;
+    height: 96px;
+  }
   .galMain {
     aspect-ratio: 4 / 5;
     max-height: 50svh;
@@ -870,6 +890,11 @@
     color: var(--rb-petrol);
     font-size: 15px;
     font-weight: 800;
+    /* También como enlace («Ver parecidas» en una tabla vendida). */
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
   }
   .barBtn:disabled {
     background: var(--rb-line-strong);
@@ -931,6 +956,12 @@
 }
 
 /* «Lo vende Daniel · Particular»: quién vende, junto al precio y el contacto. */
+/* «5 personas la tienen guardada»: dato real, en texto secundario (sin rojo ni urgencia). */
+.saves {
+  font-size: 14px;
+  color: var(--rb-muted);
+}
+
 .soldBy {
   font-size: 15px;
   color: var(--rb-muted);

@@ -91,6 +91,15 @@
   background: var(--rb-error-tint);
   color: var(--rb-error-ink);
 }
+.note[data-tone="reserved"] {
+  background: var(--rb-warning-tint);
+  color: var(--rb-warning-ink);
+}
+.noteLink {
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
 .note[data-tone="drop"] {
   background: var(--rb-success-tint);
   color: #1f5640;

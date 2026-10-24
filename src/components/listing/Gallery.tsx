@@ -28,7 +28,7 @@ export function Gallery({
     return (
       <div className={`${styles.galMain} ${styles.galEmpty}`}>
         {shape && <BoardShape shape={shape} size={180} />}
-        <span>Sin fotos</span>
+        <span>Sin fotos · pídeselas al vendedor</span>
       </div>
     );
   const p = photos[ix % n];

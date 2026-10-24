@@ -184,8 +184,9 @@ export function FilterPanel({ counts, showCounts = true, resultCount, brands, mo
   const showBrands = shownBrands.length > 0 || noBrandCount > 0 || Boolean(f.brand);
   const lens = LENGTH_STEPS.map((i) => ({ v: String(i), l: `${ftLabel(i)} · ${inToCm(i)} cm` }));
 
+  // <section> y no <aside>: «dialog» no es un rol permitido en <aside> (en móvil, la hoja es un diálogo).
   return (
-    <aside
+    <section
       ref={sheetRef}
       id="filtros"
       tabIndex={-1}
@@ -551,10 +552,10 @@ export function FilterPanel({ counts, showCounts = true, resultCount, brands, mo
         <button type="button" className={ui.btnNeutral} onClick={() => commit(emptyFilters(), 0)}>
           Limpiar
         </button>
-        <button type="button" className={ui.btnPrimary} onClick={() => setSheetOpen(false)}>
+        <button type="button" className={ui.btnPrimary} onClick={() => setSheetOpen(false)} aria-live="polite">
           {resultCount === 0 ? "Ver alternativas" : resultCount === 1 ? "Ver 1 tabla" : `Ver ${num(resultCount)} tablas`}
         </button>
       </div>
-    </aside>
+    </section>
   );
 }

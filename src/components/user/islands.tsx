@@ -132,7 +132,7 @@ export function AlertButton({
   text,
   query,
   className,
-  children = "Crear alerta",
+  children = "Guardar búsqueda",
 }: {
   text: string;
   query: string;

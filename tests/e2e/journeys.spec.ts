@@ -127,7 +127,7 @@ for (const kind of Object.keys(VIEWPORTS) as Kind[]) {
 
     // Ordenar por precio.
     await page.goto("/buscar");
-    await page.getByRole("combobox", { name: "Ordenar" }).selectOption({ label: "Más baratas primero" });
+    await page.getByRole("combobox", { name: "Ordenar" }).selectOption({ label: "Más baratas" });
     await page.waitForURL(/orden=precio/);
     const prices = (await page.locator("main article:visible").allInnerTexts())
       .map((t) => Number(t.match(/(\d[\d.]*)\s*€/)?.[1].replace(/\./g, "")))
@@ -142,7 +142,7 @@ for (const kind of Object.keys(VIEWPORTS) as Kind[]) {
     expect(await noOverflow(page)).toBe(0);
     await expectEvent(page, "listing_viewed");
     await page.getByRole("button", { name: /^Guardar$/ }).first().click();
-    await expect(page.locator("header").getByRole("link", { name: "Guardadas (1)" })).toBeVisible();
+    await expect(page.locator("header").getByRole("link", { name: "Guardadas 1" })).toBeVisible();
     await expectEvent(page, "listing_saved");
     await page.goto("/guardado");
     await expect(page.locator("main article:visible")).toHaveCount(1);
@@ -337,7 +337,20 @@ for (const kind of Object.keys(VIEWPORTS) as Kind[]) {
       await page.goto(path!);
       await expect(page.locator("main").first()).toContainText("250 €");
 
+      // Reservada: desde el panel; la ficha lo dice y el botón pasa a «Preguntar si queda libre».
       await page.goto("/panel");
+      await row.getByRole("button", { name: "Marcar reservada" }).click();
+      await expect(row).toContainText("Reservada");
+      await expect(row.getByRole("button", { name: "Quitar reserva" })).toHaveAttribute("aria-pressed", "true");
+      await expect(async () => {
+        await page.goto(path!);
+        await expect(page.getByText(/^Reservada · si no se cierra/).first()).toBeVisible({ timeout: 1000 });
+      }).toPass({ timeout: 15_000 });
+      if (!mobile) await expect(page.getByRole("button", { name: "Preguntar si queda libre" })).toBeVisible();
+      else await expect(page.getByRole("button", { name: "Preguntar", exact: true })).toBeVisible();
+      await page.goto("/panel");
+      await row.getByRole("button", { name: "Quitar reserva" }).click();
+      await expect(row.getByRole("button", { name: "Marcar reservada" })).toBeVisible();
       await row.getByRole("button", { name: "Marcar vendida" }).click();
       await expect(page.getByRole("tab", { name: "Vendidos · 1" })).toBeVisible();
       await page.getByRole("tab", { name: /Vendidos/ }).click();

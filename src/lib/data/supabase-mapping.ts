@@ -118,6 +118,7 @@ export function rowToListing(row: ListingWithRelations, now: Date, photoUrl: (pa
     distanceKm: null, // sin coordenadas (decisión aprobada)
     price: row.price_eur,
     previousPrice: row.previous_price_eur,
+    reservedAt: row.reserved_at ?? null,
     condition: row.condition,
     repairs: row.repairs || null,
     seller: {

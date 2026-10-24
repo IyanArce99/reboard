@@ -84,7 +84,7 @@ export default async function BrandPage({ params }: PageProps<"/marcas/[marca]">
           )}
         </div>
         <AlertButton text={alertText(f, names)} query={toQuery(f)} className={`${ui.btnStrong} ${styles.alertBtn}`}>
-          Crear alerta de {b.name}
+          Guardar búsqueda de {b.name}
         </AlertButton>
       </div>
 
@@ -111,7 +111,7 @@ export default async function BrandPage({ params }: PageProps<"/marcas/[marca]">
             )}
           </>
         ) : (
-          <div className={styles.empty}>Ahora mismo no hay ninguna {b.name} usada a la venta. Crea una alerta y, desde Alertas, verás si aparece alguna.</div>
+          <div className={styles.empty}>Ahora mismo no hay ninguna {b.name} usada a la venta. Guarda la búsqueda y, en «Búsquedas guardadas», verás si aparece alguna.</div>
         )}
       </section>
 

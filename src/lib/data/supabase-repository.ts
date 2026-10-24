@@ -123,6 +123,16 @@ async function byIdsCached(ids: string[]) {
   return ids.map((id) => found.find((l) => l.id === id)).filter((l): l is Listing => !!l);
 }
 
+async function saveCountCached(publicId: string) {
+  "use cache";
+  cacheLife("minutes");
+  cacheTag(`listing:${publicId}`);
+  const { data, error } = await createPublicClient().rpc("listing_save_count", { p_public_id: publicId });
+  // Un dato secundario: si falla, la ficha se pinta igual sin el número.
+  if (error) return 0;
+  return Number(data) || 0;
+}
+
 async function similarCached(publicId: string, limit: number) {
   "use cache";
   cacheLife("minutes");
@@ -265,6 +275,7 @@ export const supabaseRepository: ListingRepository = {
   facets: facetsCached,
 
   byId: async (id) => (await byIdsCached([id]))[0] ?? null,
+  saveCount: (id) => saveCountCached(id),
   byIds: byIdsCached,
   similar: (l, limit) => similarCached(l.id, limit),
   countBySeller: async (l) => (l.seller.id ? countBySellerCached(l.seller.id) : 1),

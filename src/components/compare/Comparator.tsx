@@ -353,7 +353,7 @@ function FitPanel({ listings, profile }: { listings: Listing[]; profile: SurferP
         <h2 id="cmp-fit" className={styles.h3}>
           ¿Cuántos litros te van bien?
         </h2>
-        <p>Responde 7 preguntas en TablaFinder y aquí verás qué tablas entran en tu rango orientativo de litros.</p>
+        <p>Responde 7 preguntas en la calculadora de litros y aquí verás qué tablas entran en tu rango orientativo de litros.</p>
         <Link href="/calculadora-litros" className={styles.fitLink}>
           Calcular mis litros
         </Link>

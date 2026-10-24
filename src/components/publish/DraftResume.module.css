@@ -1,0 +1,23 @@
+.box {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 16px;
+  margin-top: 16px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: rgba(122, 209, 206, 0.16);
+  color: var(--rb-warm-white);
+  font-size: 15px;
+  line-height: 1.4;
+}
+.link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  font-weight: 700;
+  color: var(--rb-teal-light);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}

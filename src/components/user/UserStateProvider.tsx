@@ -280,7 +280,7 @@ export function UserStateProvider({ children, authEnabled = false }: { children:
     (text: string, query: string) => {
       // Una alerta por búsqueda: si ya existe la misma `query`, no se duplica.
       if (current.current.alerts.some((a) => a.query === query)) {
-        toast("Ya tienes esta alerta.");
+        toast("Ya tienes esta búsqueda guardada.");
         return;
       }
       track("alert_created", {});
@@ -292,7 +292,7 @@ export function UserStateProvider({ children, authEnabled = false }: { children:
               alerts: [{ id: crypto.randomUUID(), text, query, on: true, createdAt: new Date().toISOString() }, ...s.alerts],
             },
       );
-      toast("Alerta guardada solo en este dispositivo. No envía emails ni avisos: entra en Alertas para ver cuántas tablas coinciden.");
+      toast("Búsqueda guardada en este dispositivo. No envía avisos: en «Búsquedas» verás cuántas tablas coinciden cuando vuelvas.");
     },
     [toast],
   );

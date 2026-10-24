@@ -39,7 +39,7 @@ export function SavedButton() {
   const { saved } = useUserState();
   const active = usePathname().startsWith("/guardado");
   const n = saved.length;
-  const label = n ? `Guardadas (${n})` : "Guardadas";
+  const label = n ? `Guardadas ${n}` : "Guardadas";
   return (
     <Link
       href="/guardado"
@@ -188,7 +188,7 @@ export function MobileMenu() {
   ]);
   const more: [string, string, string][] = [
     ["Guardadas", "/guardado", saved.length ? String(saved.length) : ""],
-    ["Alertas", "/alertas", alerts.length ? String(alerts.length) : ""],
+    ["Búsquedas guardadas", "/alertas", alerts.length ? String(alerts.length) : ""],
     ["Tiendas y escuelas", "/tiendas", ""],
     ["Mis anuncios", "/panel", ""],
   ];

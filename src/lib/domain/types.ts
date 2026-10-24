@@ -76,6 +76,8 @@ export interface Listing {
   contact: ContactInfo;
   status: ListingStatus;
   publishedAt: string;
+  /** Marcada como reservada por el vendedor (sigue publicada y se puede contactar). */
+  reservedAt: string | null;
   confirmedAt: string;
   photos: Photo[];
   description: string;

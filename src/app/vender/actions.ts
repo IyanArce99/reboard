@@ -118,7 +118,7 @@ export async function deleteListingServer(args: { publicId: string }): Promise<A
 
 const PanelArgs = z.object({
   publicId: z.string().regex(/^a\d{1,15}$/),
-  action: z.enum(["confirm", "sold", "republish", "withdraw", "price"]),
+  action: z.enum(["confirm", "sold", "republish", "withdraw", "price", "reserve", "unreserve"]),
   price: z.number().int().min(1).max(20000).optional(),
 });
 

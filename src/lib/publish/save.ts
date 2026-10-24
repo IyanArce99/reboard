@@ -179,7 +179,7 @@ export async function finalizeListing(sb: Sb, userId: string, publicId: string, 
   return { publicId: own.public_id ?? publicId, slug: own.slug };
 }
 
-export type PanelAction = "confirm" | "sold" | "republish" | "withdraw" | "price";
+export type PanelAction = "confirm" | "sold" | "republish" | "withdraw" | "price" | "reserve" | "unreserve";
 
 /** Acciones del panel. Las transiciones válidas y las fechas las impone la base de datos. */
 /**
@@ -214,12 +214,15 @@ export async function panelAction(sb: Sb, userId: string, publicId: string, acti
     republish: { status: "published" },
     withdraw: { status: "withdrawn" },
     price: { price_eur: price },
+    reserve: { reserved_at: new Date().toISOString(), confirmed_at: new Date().toISOString() },
+    unreserve: { reserved_at: null },
   };
   const patch = patches[action];
   if (action === "price" && !(Number.isInteger(price) && price! >= 1 && price! <= 20000)) {
     throw new PublishError("state", "Pon un precio entre 1 y 20.000 €.");
   }
   if (action === "confirm" && own.status !== "published") throw new PublishError("state", "Solo puedes confirmar anuncios que estén publicados.");
+  if (action === "reserve" && own.status !== "published") throw new PublishError("state", "Solo puedes reservar anuncios publicados.");
   const { error } = await sb.from("listings").update(patch).eq("id", own.id);
   if (error) {
     console.error("[panel]", action, error.message);

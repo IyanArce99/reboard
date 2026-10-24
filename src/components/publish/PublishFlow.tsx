@@ -51,6 +51,37 @@ interface Props {
 }
 
 /** Qué falta para pasar del paso `step` (vacío si está completo). */
+/** Campo o grupo que provoca el aviso del paso: el foco va allí (WCAG 3.3.1). */
+function issueTarget(step: number, d: PublishDraft): string | null {
+  if (step === 2) {
+    if (d.brand === OTHER_BRAND && !d.brandOther.trim()) return "pub-brand-other";
+    for (const k of ["len", "width", "thick", "vol"] as const) {
+      const r = describeMeasure(k, d[k], d.unit);
+      if ((k === "len" && !d.len.trim()) || (r && !r.ok)) return `pub-${k}`;
+    }
+    return !d.shape ? "pub-shape" : "pub-cons";
+  }
+  if (step === 3) return "pub-cond";
+  if (step === 4) {
+    if (!(Number(d.price) > 0)) return "pub-price";
+    if (!d.zone) return "pub-zone";
+    return d.town.trim().length < 2 ? "pub-town" : "pub-phone";
+  }
+  return null;
+}
+
+function focusIssue(id: string | null) {
+  if (!id) return;
+  requestAnimationFrame(() => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    const field = /^(INPUT|SELECT|TEXTAREA)$/.test(el.tagName)
+      ? el
+      : document.querySelector<HTMLElement>(`[aria-labelledby="${id}"] button, [aria-labelledby="${id}"] input`);
+    field?.focus();
+  });
+}
+
 function stepIssue(step: number, d: PublishDraft, processing: number): string {
   switch (step) {
     case 1:
@@ -187,6 +218,7 @@ export function PublishFlow({ catalog, brands, featuredBrands, priceRefs, nowIso
     const issue = stepIssue(step, d, processing);
     if (issue) {
       setError(issue);
+      focusIssue(issueTarget(step, d));
       return;
     }
     // Analítica: cada paso superado, una vez por paso (volver a revisarlo no cuenta de nuevo).

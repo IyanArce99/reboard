@@ -59,6 +59,7 @@
 
 .vSave {
   position: absolute;
+  z-index: 2;
   right: 10px;
   top: 10px;
   width: 44px;
@@ -108,7 +109,7 @@
   font-family: var(--rb-font-mono);
   font-size: 12px;
   color: var(--rb-white);
-  background: rgba(16, 45, 59, 0.6);
+  background: rgba(16, 45, 59, 0.8);
   padding: 2px 6px;
   border-radius: 4px;
 }
@@ -170,6 +171,11 @@
 .vSpec span,
 .hSpec span {
   color: var(--rb-muted);
+}
+/* «Litros sin indicar»: lo que falta no se resalta como si fuera un dato. */
+.vSpec .noVol,
+.hSpec .noVol {
+  font-weight: 400;
 }
 
 .vMeta {

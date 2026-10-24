@@ -108,7 +108,7 @@ export function SearchBar({ here, initialCount, supportsDistance = true, zoneCou
     };
   }, [query]);
 
-  // Panel de escritorio: se cierra con Escape (devolviendo el foco) o al pulsar fuera.
+  // Panel de escritorio: se cierra con Escape (devolviendo el foco), al pulsar fuera o al salir con el foco.
   useEffect(() => {
     if (!panel) return;
     const onKey = (e: KeyboardEvent) => {
@@ -119,11 +119,17 @@ export function SearchBar({ here, initialCount, supportsDistance = true, zoneCou
     const onDown = (e: PointerEvent) => {
       if (!wrapRef.current?.contains(e.target as Node)) setPanel(null);
     };
+    // Con Tab fuera del buscador, el panel se cierra: si no, tapa lo que viene después (WCAG 2.4.11).
+    const onFocus = (e: FocusEvent) => {
+      if (!wrapRef.current?.contains(e.target as Node)) setPanel(null);
+    };
     document.addEventListener("keydown", onKey);
     document.addEventListener("pointerdown", onDown);
+    document.addEventListener("focusin", onFocus);
     return () => {
       document.removeEventListener("keydown", onKey);
       document.removeEventListener("pointerdown", onDown);
+      document.removeEventListener("focusin", onFocus);
     };
   }, [panel]);
 

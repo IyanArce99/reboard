@@ -525,7 +525,7 @@ tr:not([data-diff]) .cell,
 }
 .cell[data-tone="missing"],
 .mCell[data-tone="missing"] {
-  color: var(--rb-faint);
+  color: var(--rb-muted);
   font-weight: 400;
   font-style: italic;
 }

@@ -268,6 +268,35 @@
   font-size: 13px;
   font-weight: 700;
 }
+.priceChips {
+  flex-basis: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.priceChip {
+  min-height: 44px;
+  padding: 0 12px;
+  border: 1px solid var(--rb-line-strong);
+  border-radius: var(--rb-r-chip);
+  background: var(--rb-white);
+  color: var(--rb-petrol);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+}
+.priceChip[aria-pressed="true"] {
+  border-color: var(--rb-teal);
+  background: var(--rb-teal-tint);
+  color: var(--rb-teal-ink);
+}
+.priceHint {
+  flex-basis: 100%;
+  font-size: 13px;
+  color: var(--rb-muted);
+}
 .priceError {
   flex-basis: 100%;
   font-size: 13px;

@@ -24,6 +24,16 @@
 html {
   scroll-behavior: smooth;
   -webkit-text-size-adjust: 100%;
+  scroll-padding-top: 81px;
+}
+/* Barras fijas abajo (comparador, contacto en la ficha móvil, «Continuar» al publicar). */
+html:has([aria-label="Comparación de tablas"]) {
+  scroll-padding-bottom: 80px;
+}
+@media (max-width: 759px) {
+  html {
+    scroll-padding-bottom: 90px;
+  }
 }
 
 body {
@@ -167,6 +177,16 @@ body:has([data-admin-shell]) [data-site-chrome] {
 body:has([data-focus-flow]) [data-site-chrome] > footer,
 body:has([data-focus-flow]) [data-header-publish] {
   display: none;
+}
+
+/* El amarillo es solo la acción principal de cada página. Donde la página ya tiene la suya
+   (contactar en la ficha, publicar en /vender), el «Vender» de la cabecera no compite. */
+body:has([data-own-cta="sell"]) [data-header-publish] {
+  display: none;
+}
+body:has([data-own-cta="other"]) [data-header-publish] {
+  background: var(--rb-white);
+  box-shadow: inset 0 0 0 1.5px var(--rb-petrol);
 }
 
 .visually-hidden {

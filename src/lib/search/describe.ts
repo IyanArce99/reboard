@@ -193,7 +193,7 @@ export function emptyStateCopy(f: Filters, inventoryTotal: number): { kind: Empt
     return {
       kind: "inventory",
       title: "Todavía no hay tablas publicadas",
-      text: "Reboard acaba de arrancar y aún no hay tablas publicadas. ¿Tienes una parada? Publícala gratis. ¿Buscas? Crea una alerta con esta búsqueda y vuelve cuando quieras.",
+      text: "Reboard acaba de arrancar y aún no hay tablas publicadas. ¿Tienes una parada? Publícala gratis. ¿Buscas? Guarda esta búsqueda y vuelve cuando quieras.",
     };
   return hasActiveFilters(f)
     ? { kind: "filters", title: "No encontramos tablas con estos filtros", text: "Amplía un poco la búsqueda. Entre paréntesis, cuántas tablas saldrían:" }

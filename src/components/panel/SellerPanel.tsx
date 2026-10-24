@@ -41,6 +41,8 @@ const DONE_TEXT: Record<PanelAction, string> = {
   republish: "Publicada de nuevo",
   withdraw: "Anuncio retirado",
   price: "Precio actualizado",
+  reserve: "Marcada como reservada: sigue a la vista con la etiqueta «Reservada»",
+  unreserve: "Reserva quitada: vuelve a estar disponible",
 };
 
 interface Props {
@@ -50,9 +52,11 @@ interface Props {
   sellerName?: string;
   /** Contactos reales por anuncio (clics en «Mostrar contacto»). */
   contacts?: Record<string, number>;
+  /** Cuántas cuentas tienen guardado cada anuncio (solo el número). */
+  saves?: Record<string, number>;
 }
 
-export function SellerPanel({ listings, nowIso, live = false, sellerName, contacts = {} }: Props) {
+export function SellerPanel({ listings, nowIso, live = false, sellerName, contacts = {}, saves = {} }: Props) {
   const { toast } = useUserState();
   const router = useRouter();
   const now = useMemo(() => new Date(nowIso), [nowIso]);
@@ -79,7 +83,13 @@ export function SellerPanel({ listings, nowIso, live = false, sellerName, contac
     ? listings
     : listings.map((l) => {
         const o = over[l.id] ?? {};
-        return { ...l, status: o.status ?? l.status, confirmedAt: o.confirmedAt ?? l.confirmedAt, price: o.price ?? l.price };
+        return {
+          ...l,
+          status: o.status ?? l.status,
+          confirmedAt: o.confirmedAt ?? l.confirmedAt,
+          price: o.price ?? l.price,
+          reservedAt: o.reservedAt !== undefined ? o.reservedAt : l.reservedAt,
+        };
       });
   const confDays = (l: Listing) => daysBetween(l.confirmedAt, now);
   const tabOf = (l: Listing): Tab => {
@@ -98,6 +108,8 @@ export function SellerPanel({ listings, nowIso, live = false, sellerName, contac
         republish: { status: "disponible", confirmedAt: now.toISOString() },
         withdraw: { status: "retirada" },
         price: { price },
+        reserve: { reservedAt: now.toISOString() },
+        unreserve: { reservedAt: null },
       };
       setOwn(l.id, demo[action]);
       toast(`${DONE_TEXT[action]} (demo: solo en este dispositivo)`);
@@ -146,6 +158,7 @@ export function SellerPanel({ listings, nowIso, live = false, sellerName, contac
     if (l.status === "retirada") return "Retirada · no aparece en búsquedas";
     if (l.status === "caducada") return "Caducada · pasaron 30 días sin confirmarla";
     if (t === "pendientes") return `Confirma que sigue a la venta · última vez ${ago(confDays(l))}`;
+    if (l.reservedAt) return `Reservada · confirmada ${ago(confDays(l))}`;
     return `Activa · confirmada ${ago(confDays(l))}`;
   };
 
@@ -255,6 +268,9 @@ export function SellerPanel({ listings, nowIso, live = false, sellerName, contac
                         <span>
                           Contacto mostrado {contacts[l.id] ?? 0} {contacts[l.id] === 1 ? "vez" : "veces"}
                         </span>
+                        <span>
+                          Guardada por {saves[l.id] ?? 0} {saves[l.id] === 1 ? "persona" : "personas"}
+                        </span>
                       </div>
                     )}
                     {pricing?.id === l.id && (
@@ -275,6 +291,26 @@ export function SellerPanel({ listings, nowIso, live = false, sellerName, contac
                         <label htmlFor={`precio-${l.id}`} className={styles.priceLabel}>
                           Nuevo precio (€)
                         </label>
+                        {/* Bajadas de un toque, en cifras redondas (la ficha muestra el precio anterior tachado). */}
+                        <div className={styles.priceChips} role="group" aria-label="Bajadas rápidas">
+                          {[
+                            ["−5 %", Math.round((l.price * 0.95) / 5) * 5],
+                            ["−10 %", Math.round((l.price * 0.9) / 5) * 5],
+                            ["−25 €", l.price - 25],
+                          ]
+                            .filter(([, v]) => (v as number) >= MIN_PRICE && (v as number) < l.price)
+                            .map(([label, v]) => (
+                              <button
+                                key={label as string}
+                                type="button"
+                                className={styles.priceChip}
+                                aria-pressed={pricing.value === String(v)}
+                                onClick={() => setPricing({ id: l.id, value: String(v) })}
+                              >
+                                {label} · {eur(v as number)}
+                              </button>
+                            ))}
+                        </div>
                         <input
                           id={`precio-${l.id}`}
                           inputMode="numeric"
@@ -293,6 +329,12 @@ export function SellerPanel({ listings, nowIso, live = false, sellerName, contac
                         <p id={`precio-${l.id}-error`} className={styles.priceError} role="alert">
                           {pricing.error}
                         </p>
+                        {(saves[l.id] ?? 0) > 0 && Number(pricing.value) < l.price && (
+                          <p className={styles.priceHint}>
+                            {saves[l.id] === 1 ? "1 persona la tiene guardada" : `${saves[l.id]} personas la tienen guardada`}: en «Guardadas» verá que ha
+                            bajado de precio.
+                          </p>
+                        )}
                       </form>
                     )}
                   </div>
@@ -333,6 +375,16 @@ export function SellerPanel({ listings, nowIso, live = false, sellerName, contac
                         <Link href={`/vender/publicar?editar=${l.id}`} className={styles.act}>
                           Editar
                         </Link>
+                        {/* Reservada: sigue a la vista (y se puede preguntar) por si la reserva no sale adelante. */}
+                        <button
+                          type="button"
+                          className={styles.act}
+                          aria-pressed={!!l.reservedAt}
+                          disabled={working}
+                          onClick={() => void run(l, l.reservedAt ? "unreserve" : "reserve")}
+                        >
+                          {l.reservedAt ? "Quitar reserva" : "Marcar reservada"}
+                        </button>
                         <button
                           type="button"
                           className={styles.act}

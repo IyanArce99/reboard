@@ -26,6 +26,7 @@ export const emptyRepository: ListingRepository = {
   count: async () => 0,
   facets: async () => ({ anyZone: 0, zones: {}, shapes: {}, brands: {} }),
   byId: async () => null,
+  saveCount: async () => 0,
   byIds: async () => [],
   similar: async () => [],
   countBySeller: async () => 0,

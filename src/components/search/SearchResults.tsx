@@ -144,7 +144,7 @@ export async function SearchResults({ filters: f, view, here, title, intro, crum
                 <div className={styles.dControls}>
                   <SortSelect className={styles.dSort} />
                   <ViewToggle />
-                  <AlertButton text={alert.text} query={alert.query} className={`${ui.btnStrong} ${styles.dAlert}`} />
+                  <AlertButton text={alert.text} query={alert.query} className={`${ui.btnOutline} ${styles.dAlert}`} />
                 </div>
               )}
             </div>
@@ -203,7 +203,7 @@ export async function SearchResults({ filters: f, view, here, title, intro, crum
                 <div className={styles.alertBox}>
                   <div>
                     <div className={styles.alertTitle}>¿No ves la tabla que buscas?</div>
-                    <div className={styles.alertText}>Guarda esta búsqueda como alerta y vuelve cuando quieras a ver cuántas coinciden: «{alert.text}»</div>
+                    <div className={styles.alertText}>Guárdala y vuelve cuando quieras a ver cuántas coinciden: «{alert.text}»</div>
                   </div>
                   <AlertButton text={alert.text} query={alert.query} className={ui.btnStrong} />
                 </div>
@@ -233,7 +233,7 @@ export async function SearchResults({ filters: f, view, here, title, intro, crum
                     )}
                     <div className={styles.emptyAlert}>
                       <div>
-                        <strong>O guarda la búsqueda como alerta.</strong> «{alert.text}»
+                        <strong>O guarda la búsqueda.</strong> «{alert.text}»
                       </div>
                       <AlertButton text={alert.text} query={alert.query} className={`${ui.btnStrong} ${styles.emptyAlertBtn}`} />
                     </div>

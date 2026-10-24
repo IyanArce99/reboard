@@ -36,8 +36,24 @@ export const volumeShort = (l: Listing) => (l.volume.value != null ? litres(l.vo
 
 export type Tone = "success" | "warning" | "error";
 
+/** Una reserva dura 7 días si el vendedor no la renueva (así no hay «reservadas eternas»). */
+export const RESERVE_DAYS = 7;
+
+/** Reservada y vigente (solo anuncios a la venta). */
+export function isReserved(l: Listing, now: Date) {
+  if (!l.reservedAt || !isActiveStatus(l.status)) return false;
+  return now.getTime() - new Date(l.reservedAt).getTime() < RESERVE_DAYS * 86_400_000;
+}
+
+/** Guardados que se enseñan al público: a partir de 3, para que «1» no suene a fracaso ni delate a nadie. */
+export const PUBLIC_SAVES_MIN = 3;
+
 export function availability(l: Listing, now: Date): { text: string; tone: Tone } {
-  const d = ago(daysBetween(l.confirmedAt, now));
+  // Nunca «confirmada» antes de publicada: se cuenta desde la más reciente de las dos fechas.
+  const since = new Date(Math.max(new Date(l.confirmedAt).getTime(), new Date(l.publishedAt).getTime())).toISOString();
+  const d = ago(daysBetween(since, now));
+  // Reservada: sigue a la venta (si la reserva no sale adelante), pero que se vea antes que nada.
+  if (isReserved(l, now)) return { text: "Reservada · si no se cierra, vuelve a estar disponible", tone: "warning" };
   if (l.status === "disponible") return { text: `Disponible · confirmada ${d}`, tone: "success" };
   if (l.status === "pendiente") return { text: `Sin confirmar desde ${d}`, tone: "warning" };
   return { text: { vendida: "Vendida", caducada: "Caducada", retirada: "Retirada" }[l.status], tone: "error" };

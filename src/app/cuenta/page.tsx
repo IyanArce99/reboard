@@ -138,7 +138,7 @@ async function Account() {
             {!isAdmin && isModerator && <Item href="/moderacion" icon="shield" title="Moderación" desc="Anuncios reportados pendientes de revisar." staff />}
             <Item href="/panel" icon="board" title="Mis anuncios" desc="Editar, confirmar que siguen a la venta, bajar el precio o marcar como vendida." />
             <Item href="/guardado" icon="heart" title="Guardadas" desc="Las tablas que has guardado, en el móvil y en el ordenador." />
-            <Item href="/alertas" icon="bell" title="Alertas" desc="Tus alertas de tablas nuevas. Se guardan solo en este dispositivo." />
+            <Item href="/alertas" icon="bell" title="Búsquedas guardadas" desc="Tus búsquedas de tablas. Se guardan solo en este dispositivo." />
           </nav>
         </div>
 

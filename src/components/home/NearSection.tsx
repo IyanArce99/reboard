@@ -67,8 +67,8 @@ export async function NearSection() {
   const lowInv = totalActive < 60 || (chosen && near.length < 8);
   const lowText =
     totalActive < 60
-      ? `Hay ${totalActive} ${totalActive === 1 ? "tabla publicada" : "tablas publicadas"} ${LAUNCH.inAll}. Guarda una alerta${chosen ? ` con tu ${LAUNCH.zoneNoun}` : ""} y pásate por Alertas de vez en cuando para ver cuántas coinciden.`
-      : `Aún hay pocas tablas en ${zn}. Guarda una alerta y mira en Alertas cuántas coinciden.`;
+      ? `Hay ${totalActive} ${totalActive === 1 ? "tabla publicada" : "tablas publicadas"} ${LAUNCH.inAll}. Guarda la búsqueda${chosen ? ` con tu ${LAUNCH.zoneNoun}` : ""} y vuelve cuando quieras: en «Búsquedas guardadas» verás cuántas coinciden.`
+      : `Aún hay pocas tablas en ${zn}. Guarda la búsqueda y mira en «Búsquedas guardadas» cuántas coinciden.`;
   const allText = chosen ? `Ver ${nearPage.total} en ${zn} →` : `Ver las ${nearPage.total} tablas →`;
   const zoneHref = chosen ? landingPath(here, null) : "/buscar";
 
@@ -83,7 +83,7 @@ export async function NearSection() {
         <div className={styles.lowInv}>
           <div>
             <strong>Reboard acaba de arrancar.</strong> Si tienes una tabla parada, publícala gratis y será de las primeras.
-            Si buscas, guarda una alerta y pásate por Alertas para ver cuántas coinciden.
+            Si buscas, guarda la búsqueda y vuelve cuando quieras a ver cuántas coinciden.
           </div>
           <div className={styles.emptyActions}>
             <Link href="/vender/publicar" className={ui.btnPrimary}>

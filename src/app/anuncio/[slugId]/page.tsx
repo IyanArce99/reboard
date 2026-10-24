@@ -30,8 +30,11 @@ import {
   availability,
   idFromSlugId,
   isOff,
+  isReserved,
+  PUBLIC_SAVES_MIN,
   listingPath,
   listingTitle,
+  postedText,
   sellerName,
   soldBy,
   zoneName,
@@ -42,6 +45,14 @@ import { landingPath } from "@/lib/search/landings";
 import { absoluteUrl, OG_BASE } from "@/lib/site";
 import ui from "@/styles/ui.module.css";
 import styles from "@/components/listing/Ficha.module.css";
+
+function HeartSmall() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true" style={{ verticalAlign: "-2px" }}>
+      <path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z" />
+    </svg>
+  );
+}
 
 const UNAVAILABLE: Partial<Record<Listing["status"], [string, string]>> = {
   vendida: ["Esta tabla ya se ha vendido", "El vendedor la ha marcado como vendida. Abajo tienes tablas con medidas parecidas."],
@@ -86,12 +97,20 @@ export async function generateMetadata({ params }: PageProps<"/anuncio/[slugId]"
 export default async function FichaPage({ params }: PageProps<"/anuncio/[slugId]">) {
   const l = await load((await params).slugId);
   const repo = getRepository();
-  const [names, similar, sameSeller] = await Promise.all([getCatalogNames(repo), repo.similar(l, 4), repo.countBySeller(l)]);
+  const [names, similar, sameSeller, saves] = await Promise.all([
+    getCatalogNames(repo),
+    repo.similar(l, 4),
+    repo.countBySeller(l),
+    repo.saveCount(l.id),
+  ]);
   const now = await repo.now();
 
   const title = listingTitle(l);
   const off = isOff(l);
   const av = availability(l, now);
+  const reserved = isReserved(l, now);
+  // Guardados: solo desde 3 y en anuncios a la venta (sin presión falsa ni «1 persona»).
+  const showSaves = !off && saves >= PUBLIC_SAVES_MIN;
   const unavailable = UNAVAILABLE[l.status];
   const vol = l.volume.value;
   const len = l.length.value;
@@ -143,6 +162,19 @@ export default async function FichaPage({ params }: PageProps<"/anuncio/[slugId]
   const message = `Hola${seller ? ` ${seller}` : ""}, he visto tu ${inSentence} en Reboard por ${eur(l.price)}. ¿Sigue disponible? ¿Cuándo podría verla?`;
   const url = absoluteUrl(listingPath(l));
 
+  const similarSection = (
+    <section id="similares" className={styles.similar} data-top={off || undefined} aria-labelledby="similar-title">
+      <h2 id="similar-title" className={styles.similarTitle}>
+        {off ? "Tablas parecidas a la venta" : "Tablas parecidas"}
+      </h2>
+      <div className={styles.similarGrid}>
+        {similar.map((x) => (
+          <ListingCard key={x.id} listing={x} now={now} hereZone={l.zone} layout="responsive" />
+        ))}
+      </div>
+    </section>
+  );
+
   return (
     <ContactProvider
       data={{
@@ -152,12 +184,15 @@ export default async function FichaPage({ params }: PageProps<"/anuncio/[slugId]
         method: l.contact.method === "phone" ? "phone" : "whatsapp",
         // «Vendida», «Caducada» o «Retirada» en el botón desactivado.
         unavailable: off ? av.text : null,
+        reserved,
         listingId: l.id,
         live: authEnabled(),
         analytics: { shape: l.shape, island: l.zone, price_band: priceBand(l.price) },
       }}
     >
       <main className={`container ${styles.page}`}>
+        {/* Su acción principal es contactar: el «Vender» de la cabecera va en contorno (globals.css). */}
+        <span data-own-cta="other" hidden />
         {/* Analítica: ficha vista (categorías; sin id, vendedor ni localidad). */}
         <TrackOnMount
           id={l.id}
@@ -191,17 +226,15 @@ export default async function FichaPage({ params }: PageProps<"/anuncio/[slugId]
               <div className={styles.unavailText}>{unavailable[1]}</div>
             </div>
             <div className={styles.unavailActions}>
-              {similar.length > 0 && (
-                <a href="#similares" className={ui.btnStrong}>
-                  {similar.length === 1 ? "Ver 1 alternativa" : `Ver ${similar.length} alternativas`}
-                </a>
-              )}
               <AlertButton text={alertText(similarFilters, names)} query={toQuery(similarFilters)} className={styles.unavailAlert}>
-                Crear alerta de tablas parecidas
+                Guardar búsqueda de tablas parecidas
               </AlertButton>
             </div>
           </div>
         )}
+
+        {/* No disponible: lo útil son las alternativas, justo aquí (antes estaban al final de la página). */}
+        {off && similar.length > 0 && similarSection}
 
         <div className={styles.grid}>
           <div className={styles.gallery}>
@@ -212,7 +245,7 @@ export default async function FichaPage({ params }: PageProps<"/anuncio/[slugId]
             <div className={styles.panelTop}>
               <div>
                 <div className={styles.priceRow}>
-                  <span className={styles.price}>{eur(l.price)}</span>
+                  <span className={styles.price} data-off={off || undefined}>{off ? `Pedía ${eur(l.price)}` : eur(l.price)}</span>
                   {l.previousPrice && <s className={styles.oldPrice}>{eur(l.previousPrice)}</s>}
                 </div>
                 <h1 className={styles.title}>{title}</h1>
@@ -239,22 +272,31 @@ export default async function FichaPage({ params }: PageProps<"/anuncio/[slugId]
               <AvailabilityDot tone={av.tone} size={9} />
               {av.text}
             </div>
+            {showSaves && (
+              <div className={styles.saves}>
+                <HeartSmall /> {saves} personas la tienen guardada
+              </div>
+            )}
             <div className={styles.soldBy}>
               Lo vende {by.name ? <strong>{by.name}</strong> : by.rest}
-              {by.name && by.rest}
+              {by.name && by.rest} · {postedText(l, now).toLowerCase()}
             </div>
-            <FitNotice volume={vol} />
-            <ContactButton className={styles.contact} />
-            <div className={styles.actions}>
-              <SaveTextButton id={l.id} className={styles.action} />
-              <ShareButton url={url} title={listingTitle(l)} text={`${listingTitle(l)} · ${eur(l.price)} en ${zoneName(l)}, en Reboard`} className={styles.action} />
-              <CompareButton item={compareItemOf(l)} name={listingTitle(l)} className={styles.action} />
-            </div>
+            {!off && <FitNotice volume={vol} />}
+            {!off && <ContactButton className={styles.contact} />}
+            {!off && (
+              <div className={styles.actions}>
+                <SaveTextButton id={l.id} className={styles.action} />
+                <ShareButton url={url} title={listingTitle(l)} text={`${listingTitle(l)} · ${eur(l.price)} en ${zoneName(l)}, en Reboard`} className={styles.action} />
+                <CompareButton item={compareItemOf(l)} name={listingTitle(l)} className={styles.action} />
+              </div>
+            )}
             {/* En móvil la barra de comparación no se muestra en la ficha (ya está la de contacto). */}
-            <CompareLink className={styles.compareLink} />
-            <div className={styles.safety}>
-              No pagues nada por adelantado, ni siquiera una señal. Ve a ver la tabla antes de pagar. <ReportButton className={styles.report} />
-            </div>
+            {!off && <CompareLink className={styles.compareLink} />}
+            {!off && (
+              <div className={styles.safety}>
+                No pagues nada por adelantado, ni siquiera una señal. Ve a ver la tabla antes de pagar. <ReportButton className={styles.report} />
+              </div>
+            )}
           </div>
 
           <div className={styles.details}>
@@ -352,6 +394,7 @@ export default async function FichaPage({ params }: PageProps<"/anuncio/[slugId]
                 )}
               </div>
             </section>
+            {!off && (
             <section className={styles.before} aria-labelledby="antes-title">
               <h2 id="antes-title" className={styles.beforeTitle}>
                 Antes de comprar
@@ -366,22 +409,18 @@ export default async function FichaPage({ params }: PageProps<"/anuncio/[slugId]
                 <Link href="/guias/que-revisar-al-comprar-una-tabla-usada">Qué revisar en una tabla usada →</Link>
               </p>
             </section>
+            )}
           </div>
         </div>
 
-        <section id="similares" className={styles.similar} aria-labelledby="similar-title">
-          <h2 id="similar-title" className={styles.similarTitle}>
-            Tablas parecidas
-          </h2>
-          <div className={styles.similarGrid}>
-            {similar.map((x) => (
-              <ListingCard key={x.id} listing={x} now={now} hereZone={l.zone} layout="responsive" />
-            ))}
-          </div>
-        </section>
+        {!off && similarSection}
       </main>
 
-      <ContactBar price={eur(l.price)} specs={`${l.sizeLabel} · ${vol != null ? litres(vol) : "sin litros"}`} />
+      <ContactBar
+        price={off ? `Pedía ${eur(l.price)}` : eur(l.price)}
+        specs={`${l.sizeLabel} · ${vol != null ? litres(vol) : "sin litros"}`}
+        offLink={off && similar.length ? { href: "#similares", label: "Ver parecidas" } : undefined}
+      />
 
       <JsonLd
         data={{
@@ -398,7 +437,7 @@ export default async function FichaPage({ params }: PageProps<"/anuncio/[slugId]
             price: l.price,
             priceCurrency: "EUR",
             itemCondition: "https://schema.org/UsedCondition",
-            availability: off ? "https://schema.org/SoldOut" : "https://schema.org/InStock",
+            availability: off ? "https://schema.org/SoldOut" : reserved ? "https://schema.org/Reserved" : "https://schema.org/InStock",
             url,
             seller: { "@type": l.seller.type === "particular" ? "Person" : "Organization", name: seller ?? SELLER_LABEL[l.seller.type] },
           },

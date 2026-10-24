@@ -195,7 +195,7 @@ export function LoginForm({ onDone }: { onDone?: () => void } = {}) {
           <button
             type="submit"
             className={`${ui.btnPrimary} ${styles.submit}`}
-            disabled={busy || !email.includes("@") || (needsCaptcha && !captcha)}
+            disabled={busy || (needsCaptcha && !captcha)}
           >
             {busy ? "Enviando…" : needsCaptcha && !captcha ? "Comprobando que no eres un robot…" : "Enviarme el código"}
           </button>
@@ -236,7 +236,7 @@ export function LoginForm({ onDone }: { onDone?: () => void } = {}) {
           <button
             type="submit"
             className={`${ui.btnPrimary} ${styles.submit}`}
-            disabled={busy || !email.includes("@") || !password || (needsCaptcha && !captcha)}
+            disabled={busy || (needsCaptcha && !captcha)}
           >
             {busy ? "Comprobando…" : needsCaptcha && !captcha ? "Comprobando que no eres un robot…" : "Entrar"}
           </button>

@@ -24,15 +24,19 @@ async function Panel() {
   const sb = await createUserClient();
   const { data } = await sb.auth.getUser();
   if (!data.user) redirect("/entrar?siguiente=/panel");
-  const [own, { data: profile }, { data: events }] = await Promise.all([
+  const [own, { data: profile }, { data: events }, { data: saveRows }] = await Promise.all([
     repo.sellerListings(data.user.id),
     sb.from("profiles").select("display_name").eq("id", data.user.id).maybeSingle(),
     // Clics reales en «Mostrar contacto» (RLS: solo los de sus anuncios). Sin visitas ni guardados inventados.
     sb.from("contact_events").select("listing_id").limit(10_000),
+    // Cuántas cuentas tienen guardado cada anuncio suyo (solo el número, nunca quién).
+    sb.rpc("my_listing_save_counts"),
   ]);
   const contacts: Record<string, number> = {};
   for (const e of events ?? []) contacts[`a${e.listing_id}`] = (contacts[`a${e.listing_id}`] ?? 0) + 1;
-  return <SellerPanel live listings={own} nowIso={now} sellerName={profile?.display_name ?? "Surfista"} contacts={contacts} />;
+  const saves: Record<string, number> = {};
+  for (const r of saveRows ?? []) saves[r.public_id] = r.n;
+  return <SellerPanel live listings={own} nowIso={now} sellerName={profile?.display_name ?? "Surfista"} contacts={contacts} saves={saves} />;
 }
 
 export default function PanelPage() {

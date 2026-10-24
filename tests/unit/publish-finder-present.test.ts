@@ -79,7 +79,9 @@ describe("present", () => {
   });
 
   it("disponibilidad y fecha", () => {
-    expect(availability(first, DEMO_REFERENCE_DATE)).toEqual({ text: "Disponible · confirmada hace 2 días", tone: "success" });
+    // Publicada hoy y «confirmada» hace 2 días en el fixture: publicar cuenta como confirmar, así que
+    // se cuenta desde la publicación (no «confirmada hace 2 días» junto a «publicada hoy»).
+    expect(availability(first, DEMO_REFERENCE_DATE)).toEqual({ text: "Disponible · confirmada hoy", tone: "success" });
     const sold = all.find((l) => l.status === "vendida")!;
     expect(availability(sold, DEMO_REFERENCE_DATE).tone).toBe("error");
     expect(postedText(first, DEMO_REFERENCE_DATE)).toBe("Publicada hoy");
@@ -165,5 +167,34 @@ describe("confirmar medidas: una sola vez y sin perder el origen (cierre de audi
     });
     expect(d.src.len).toBe("catok");
     expect(d.src.width).toBe("ok");
+  });
+});
+
+describe("reservada (7 días, solo anuncios a la venta)", () => {
+  it("vigente 7 días; caducada o en un anuncio vendido no cuenta", async () => {
+    const { isReserved, availability } = await import("@/lib/listing/present");
+    const base = buildDemoInventory(20)[0];
+    const now = new Date("2026-10-24T12:00:00Z");
+    const hace = (d: number) => new Date(now.getTime() - d * 86_400_000).toISOString();
+    expect(isReserved({ ...base, status: "disponible", reservedAt: hace(1) }, now)).toBe(true);
+    expect(isReserved({ ...base, status: "disponible", reservedAt: hace(8) }, now)).toBe(false);
+    expect(isReserved({ ...base, status: "vendida", reservedAt: hace(1) }, now)).toBe(false);
+    expect(isReserved({ ...base, status: "disponible", reservedAt: null }, now)).toBe(false);
+    expect(availability({ ...base, status: "disponible", reservedAt: hace(1) }, now)).toEqual({
+      text: "Reservada · si no se cierra, vuelve a estar disponible",
+      tone: "warning",
+    });
+  });
+});
+
+describe("TablaFinder: sin softboards si no se recomiendan (revisión UX, 24-10-2026)", () => {
+  it("una evolutiva de espuma no encaja si la recomendación es de rígidas", async () => {
+    const { typeOk } = await import("@/lib/finder/listings");
+    const base = buildDemoInventory(20)[0];
+    const soft = { ...base, shape: "evolutiva" as const, construction: "softboard" as const };
+    const rigid = { ...base, shape: "evolutiva" as const, construction: "epoxy" as const };
+    expect(typeOk(soft, ["evolutiva", "midlength"])).toBe(false);
+    expect(typeOk(rigid, ["evolutiva", "midlength"])).toBe(true);
+    expect(typeOk(soft, ["softboard", "evolutiva"])).toBe(true);
   });
 });

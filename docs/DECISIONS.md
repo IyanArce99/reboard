@@ -575,3 +575,32 @@ Rama `auditoria-final`; informe completo en `AUDIT_REBOARD.md`.
 - **Contactos:** el vendedor ve anuncio, canal y fecha, pero no quién ni el hash de IP.
 - **Ajustes:** `app_settings.updated_by` deja de ser legible.
 - **Producción:** aplicada solo en local. Necesita aprobación (`supabase db push`, después de `--dry-run`).
+
+## «Reservada» y número de guardados (24-10-2026, tarde)
+
+Migración `20261030090000_reserved_and_saves.sql` (pgTAP `11_reserved_saves`), **solo en local**: pendiente de aplicar en producción con las demás.
+
+**Reservada**, a partir de la investigación de marketplaces (Vinted: la reserva caduca a los 5 días; en Kleinanzeigen las «reservadas eternas» son un problema conocido):
+- **Qué es:** una marca del vendedor (`reserved_at`) sobre un anuncio **publicado**, no un estado nuevo. Sigue en las búsquedas y se puede contactar («Preguntar si queda libre»), por si la reserva no sale adelante.
+- **Dónde se ve:**
+  - etiqueta «Reservada» en la tarjeta (en petróleo, nunca amarilla);
+  - texto en la ficha y en Guardadas;
+  - aviso en el contacto;
+  - en los datos estructurados, `availability: https://schema.org/Reserved`.
+- **Cuánto dura:** 7 días (`RESERVE_DAYS`) si no se renueva. Pasado ese plazo deja de mostrarse sola, sin cron.
+- **Efectos:**
+  - reservar cuenta como confirmar la disponibilidad;
+  - al vender, retirar o caducar se borra (trigger);
+  - la base de datos impide reservar algo que no esté publicado.
+
+**Guardados**, siguiendo el precedente de eBay, que quitó el contador público de «watchers» por la presión que creaba:
+- **Qué se cuenta:** cuántas **cuentas** tienen guardado el anuncio. Los guardados sin cuenta se quedan en el dispositivo y no cuentan. Nunca se sabe quién.
+- **El público** lo ve solo en la ficha (nunca en las tarjetas), **a partir de 3** y solo en anuncios a la venta: «5 personas la tienen guardada», en texto secundario.
+- **El vendedor** ve el número exacto en «Mis anuncios». Al bajar el precio se le dice cuántos lo verán en Guardadas.
+
+**Otras mejoras pequeñas de la misma investigación:**
+- **Bajar precio:** propuestas de un toque (−5 %, −10 %, −25 €).
+- **Guardadas:** si la tabla se vendió o se retiró, enlace «Ver parecidas».
+- **Vender:** aviso «Tienes una tabla a medias» en `/vender` (el borrador ya se guardaba en el dispositivo).
+- **Seguridad:** el contacto avisa de los pagos por enlace de WhatsApp, el fraude típico que denuncia la Guardia Civil.
+- **Fotos:** consejo de luz y golpes en el paso 1.

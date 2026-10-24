@@ -1,10 +1,10 @@
 # Auditoría de Reboard: cierre y preparación para el lanzamiento (24-10-2026)
 
-- **Rama:** `auditoria-final`, 4 commits sobre `main`.
+- **Rama:** `auditoria-final`, 5 commits sobre `main` (el último, la sesión de mejoras de la tarde: ver A9).
 - **Estado:**
   - **nada está desplegado** y **ninguna migración se ha aplicado en producción**;
   - producción sigue en `2f347e8`, con 18 migraciones aplicadas;
-  - la rama trae **4 migraciones nuevas**, pendientes de tu autorización.
+  - la rama trae **5 migraciones nuevas**, pendientes de tu autorización.
 - **Estructura del documento:**
   - **Parte A:** el cierre de hoy. Cada punto lleva un estado: **COMPLETADO**, **PENDIENTE** o **NO VERIFICADO**.
   - **Parte B:** la auditoría de la mañana, como historial.
@@ -192,11 +192,12 @@
 2. `20261029090100_reveal_contact_needs_phone.sql`
 3. `20261029090200_storage_no_overwrite.sql`
 4. `20261029090300_listing_facets_single_pass.sql`
+5. `20261030090000_reserved_and_saves.sql`: columna `reserved_at`, trigger y dos funciones de recuento de guardados.
 
 **Cómo aplicarlas:**
 - Antes, `npx supabase db dump` como copia.
 - Después, `npx supabase db push --dry-run`, revisar la lista y `npx supabase db push`.
-- Todas son `create or replace`, `drop policy` o `revoke`/`grant`: no cambian tablas ni datos.
+- Las cuatro primeras son `create or replace`, `drop policy` o `revoke`/`grant`: no cambian tablas ni datos. La quinta **añade una columna** que admite nulos (`reserved_at`) y no toca filas existentes.
 
 ### Correo y autenticación
 - **SMTP** de DonDominio (`hola@`) en Supabase, con plantillas de código: COMPLETADO (configurado ayer).
@@ -252,6 +253,62 @@
   - `storage_no_overwrite`: volver a crear `listing_photos_owner_update` como en `20261027090000`;
   - `listing_facets_single_pass`: volver a crear la función con el cuerpo de `20261023090200_search_performance.sql`.
 - **Si algo va mal con datos:** restaurar el `db dump` del paso 1, solo como último recurso: pierde lo publicado después.
+
+## A9. Sesión de mejoras de la tarde (24-10-2026)
+
+Todo en local, sin desplegar. Detalle de las decisiones en `docs/DECISIONS.md` («Reservada» y número de guardados).
+
+**Funciones pequeñas sobre lo que ya había:**
+- **Marcar como reservada:** desde «Mis anuncios», con caducidad de 7 días. Se ve en la tarjeta, la ficha, Guardadas y el contacto.
+- **Número de guardados:** en la ficha a partir de 3 personas; el vendedor ve el número exacto en su panel.
+- **Panel:** bajadas de precio de un toque (−5 %, −10 %, −25 €).
+- **Vender:** aviso de borrador a medias en `/vender`.
+
+**Rediseños:**
+- **Ficha vendida, caducada o retirada:**
+  - las «Tablas parecidas a la venta» suben justo debajo del aviso;
+  - el precio pasa a gris («Pedía 240 €»);
+  - se quitan Guardar, Compartir, Comparar, el aviso antifraude, Reportar y «Antes de comprar»;
+  - la barra móvil lleva a las parecidas.
+- **«Alertas» pasa a «Búsquedas guardadas»:** es lo que hace de verdad, porque no envía avisos.
+
+**Ajustes de UX:**
+- La tarjeta muestra la localidad.
+- Etiquetas de orden más cortas.
+- La calculadora no recomienda softboards si no tocan.
+- Medidas canónicas en la revisión antes de publicar.
+- Sin restos del nombre «TablaFinder».
+
+**Accesibilidad** (auditoría con axe-core, teclado y lector a 390 y 1366 px):
+- **P1 arreglado:** en móvil, el corazón de las tarjetas abría el anuncio en vez de guardar, porque el enlace del título quedaba encima.
+- **Foco tapado:** el foco ya no queda debajo de la cabecera ni de las barras fijas (`scroll-padding`).
+- **Contraste AA** en /entrar, /comparar, «N fotos» y los atajos de la portada.
+- **Cabecera de escritorio:** objetivos de 44 px.
+- **Publicar:** al fallar un paso, el foco va al campo que falla.
+- **/entrar:** el botón ya no está desactivado sin explicación; la validación nativa del email avisa.
+- **Panel del buscador de la portada:** se cierra al salir de él con Tab.
+- **Hoja de filtros:** rol de diálogo válido y recuento anunciado.
+- **Guardadas:** H2 oculto para ordenar los encabezados.
+
+**Pendiente de esa auditoría (P3):**
+- `inert` en el resto de la página con la hoja de filtros abierta;
+- `aria-invalid` en los campos de publicar;
+- cabecera a 200 % de zoom (195 px);
+- enlaces del pie a 44 px;
+- CLS de 0,03 en /comparar.
+
+**Observación:** en el contacto de los anuncios DEMO sale «Este anuncio ya no está disponible» porque el seed no trae teléfonos. En producción el teléfono es obligatorio, pero convendría separar el mensaje si falta el teléfono.
+
+**Pruebas** (build de producción local):
+- typecheck y lint: 0;
+- unitarias: 328/328;
+- integración: 78/78;
+- pgTAP: 238/238 con la base limpia;
+- e2e + journeys: 90/90;
+- administración: 14/14;
+- visuales: 16/16, con las referencias actualizadas tras revisar cada cambio.
+
+Un build falló una vez por un *timeout* de `search_listings` en la base local al prerenderizar `/marcas/nsp`; el segundo intento salió limpio.
 
 ## Veredicto actualizado
 

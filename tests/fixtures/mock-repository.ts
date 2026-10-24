@@ -91,6 +91,7 @@ export const mockRepository: ListingRepository = {
   },
 
   byId: async (id) => inventory().find((l) => l.id === id) ?? null,
+  saveCount: async () => 0,
 
   byIds: async (ids) => ids.map((id) => inventory().find((l) => l.id === id)).filter((l): l is Listing => !!l),
 

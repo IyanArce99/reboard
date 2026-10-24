@@ -6,6 +6,7 @@ import type { Listing } from "@/lib/domain/types";
 import { eur } from "@/lib/domain/format";
 import {
   availability,
+  isReserved,
   consShort,
   isOff,
   listingPath,
@@ -51,6 +52,7 @@ function Card({ listing: l, now, hereZone, layout = "vertical", preload = false,
   const pro = l.seller.type !== "particular";
   const near = l.zone === hereZone && l.distanceKm != null;
   const av = availability(l, now);
+  const reserved = isReserved(l, now);
   const photo = l.photos[0];
 
   if (layout === "horizontal") {
@@ -74,6 +76,7 @@ function Card({ listing: l, now, hereZone, layout = "vertical", preload = false,
           )}
           {pro && <span className={`${ui.proBadge} ${styles.hPro}`}>{SELLER_LABEL[l.seller.type]}</span>}
           {off && <span className={`${ui.offBadge} ${styles.hOff}`}>{av.text}</span>}
+          {!off && reserved && <span className={`${ui.reservedBadge} ${styles.hOff}`}>Reservada</span>}
         </Link>
         <div className={styles.hBody}>
           <div className={styles.hTop}>
@@ -89,7 +92,7 @@ function Card({ listing: l, now, hereZone, layout = "vertical", preload = false,
             </Link>
           </h3>
           <div className={styles.hSpec}>
-            <strong>{volumeShort(l)}</strong>
+            {l.volume.value != null ? <strong>{volumeShort(l)}</strong> : <span className={styles.noVol}>{volumeShort(l)}</span>}
             <span>
               {" "}
               · {typeShort(l)} · {consShort(l)}
@@ -136,6 +139,7 @@ function Card({ listing: l, now, hereZone, layout = "vertical", preload = false,
         <span className={styles.vBadges}>
           {pro && <span className={ui.proBadge}>{SELLER_LABEL[l.seller.type]}</span>}
           {off && <span className={ui.offBadge}>{av.text}</span>}
+          {!off && reserved && <span className={ui.reservedBadge}>Reservada</span>}
         </span>
         <span className={styles.vBottom}>
           <span className={styles.km}>
@@ -159,15 +163,16 @@ function Card({ listing: l, now, hereZone, layout = "vertical", preload = false,
           </Link>
         </h3>
         <div className={styles.vSpec}>
-          <strong>{volumeShort(l)}</strong>
+          {l.volume.value != null ? <strong>{volumeShort(l)}</strong> : <span className={styles.noVol}>{volumeShort(l)}</span>}
           <span>
             {" "}
             · {typeShort(l)} · {consShort(l)}
           </span>
         </div>
         <div className={styles.vMeta}>
-          {responsive && <span className={styles.rTown}>{l.town}, </span>}
-          {zoneName(l)} · {CONDITION_LABEL[l.condition]}
+          {/* La isla ya va en la píldora de la foto: aquí, la localidad (y en móvil, donde no hay píldora, la isla). */}
+          {l.town}
+          {responsive && <span className={styles.rTown}>, {zoneName(l)}</span>} · {CONDITION_LABEL[l.condition]}
         </div>
         <div className={styles.avail}>
           <AvailabilityDot tone={av.tone} />
