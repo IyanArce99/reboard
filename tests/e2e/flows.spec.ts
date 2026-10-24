@@ -171,23 +171,23 @@ test("publicar: la foto se recodifica a WebP ≤ 1600 px y sin EXIF ni GPS", asy
   expect(errors).toEqual([]);
 });
 
-test("cabecera (escritorio): explorar, TablaFinder, guías, iconos y publicar", async ({ page }) => {
+test("cabecera (escritorio): comprar, ¿qué tabla necesito?, guías, iconos y vender", async ({ page }) => {
   const errors = trackErrors(page);
   await page.goto("/buscar");
   const header = page.locator("header");
   const nav = header.getByRole("navigation", { name: "Principal" });
-  await expect(nav.getByRole("link", { name: "Explorar tablas" })).toHaveAttribute("aria-current", "page");
-  await expect(nav.getByRole("link", { name: "TablaFinder" })).toHaveAttribute("href", "/calculadora-litros");
+  await expect(nav.getByRole("link", { name: "Comprar tablas" })).toHaveAttribute("aria-current", "page");
+  await expect(nav.getByRole("link", { name: "¿Qué tabla necesito?" })).toHaveAttribute("href", "/calculadora-litros");
   await expect(nav.getByRole("link", { name: "Guías" })).toHaveAttribute("href", "/guias");
   // Sin buscador en la cabecera; sin contador si no hay guardadas.
   await expect(header.getByRole("searchbox")).toHaveCount(0);
   await expect(header.getByText(/Buscar tablas por litros/)).toHaveCount(0);
   await expect(header.getByRole("link", { name: "Guardadas", exact: true })).toHaveAttribute("href", "/guardado");
   await expect(header.getByRole("link", { name: "Entrar" })).toHaveAttribute("href", "/entrar");
-  await header.getByRole("link", { name: "Publicar tabla" }).click();
+  await header.getByRole("link", { name: "Vender mi tabla" }).click();
   await expect(page).toHaveURL(/\/vender\/publicar$/);
   await page.goto("/calculadora-litros");
-  await expect(page.locator("header").getByRole("link", { name: "TablaFinder" })).toHaveAttribute("aria-current", "page");
+  await expect(page.locator("header").getByRole("link", { name: "¿Qué tabla necesito?" })).toHaveAttribute("aria-current", "page");
   expect(errors).toEqual([]);
 });
 
@@ -209,14 +209,14 @@ for (const width of [375, 768, 1024, 1440]) {
     const header = page.locator("header");
     const box = await header.boundingBox();
     expect(box!.height).toBeLessThanOrEqual(66);
-    // «Publicar tabla» está en la barra desde tablet; en móvil, dentro del menú.
-    await expect(header.getByRole("link", { name: "Publicar tabla" })).toBeVisible({ visible: width >= 760 });
+    // Vender se ve siempre en la barra: «Vender mi tabla» desde tablet y «Vender» en móvil.
+    await expect(header.getByRole("link", { name: width >= 760 ? "Vender mi tabla" : "Vender" })).toBeVisible();
     if (width < 1024) {
       await header.getByRole("button", { name: "Menú" }).click();
       const menu = page.getByRole("dialog", { name: "Menú" });
-      await expect(menu.getByRole("link", { name: "Explorar tablas" })).toBeVisible();
-      await expect(menu.getByRole("link", { name: /TablaFinder/ })).toHaveAttribute("href", "/calculadora-litros");
-      await expect(menu.getByRole("link", { name: "Publicar tabla" })).toBeVisible();
+      await expect(menu.getByRole("link", { name: "Comprar tablas" })).toBeVisible();
+      await expect(menu.getByRole("link", { name: /¿Qué tabla necesito\?/ })).toHaveAttribute("href", "/calculadora-litros");
+      await expect(menu.getByRole("link", { name: "Vender mi tabla" })).toBeVisible();
       await page.keyboard.press("Escape");
       await expect(menu).toHaveCount(0);
       await expect(header.getByRole("button", { name: "Menú" })).toBeFocused();
@@ -254,7 +254,7 @@ async function fillToReview(page: Page) {
 
   await expect(h1(page)).toHaveText("Cuéntanos qué tabla es");
   await page.getByRole("button", { name: "Shaper local" }).click();
-  await page.getByLabel(/Cópialas tal cual/).fill("6'4 x 20 1/2 x 2 5/8 34L");
+  await page.getByLabel(/Escríbelas tal cual/).fill("6'4 x 20 1/2 x 2 5/8 34L");
   await page.getByRole("button", { name: "Rellenar" }).click();
   await expect(page.locator("#pub-len")).toHaveValue(`6'4"`);
   await expect(page.locator("#pub-vol")).toHaveValue("34");
@@ -283,7 +283,9 @@ async function fillToReview(page: Page) {
   expect(await noOverflow(page)).toBe(0);
 }
 
-test("publicar (escritorio): 5 pasos con vista previa en vivo hasta el anuncio demo", async ({ page }) => {
+// Con Supabase (como corre esta suite) la revisión pide entrar con el código y publica de verdad:
+// el recorrido completo (código, publicar, panel) está en journeys.spec.ts. Aquí, hasta la revisión.
+test("publicar (escritorio): 5 pasos con vista previa en vivo hasta la revisión", async ({ page }) => {
   const errors = trackErrors(page);
   await page.setViewportSize({ width: 1440, height: 900 });
   await fillToReview(page);
@@ -292,21 +294,20 @@ test("publicar (escritorio): 5 pasos con vista previa en vivo hasta el anuncio d
   await expect(preview.getByText("280 €")).toBeVisible();
   await expect(preview.getByText(`Híbrida sin marca 6'4"`)).toBeVisible();
   await expect(preview.getByText("Los Llanos de Aridane, La Palma · Muy buen estado")).toBeVisible();
-  await expect(page.getByText(/no se publica nada/)).toBeVisible();
-  await page.getByRole("button", { name: "Terminar la prueba" }).click();
-  await expect(page.getByRole("heading", { name: "Prueba terminada" })).toBeVisible();
+  await expect(page.locator("#login-email")).toBeVisible();
+  await expect(page.getByRole("button", { name: "Enviarme el código" })).toBeVisible();
   expect(errors).toEqual([]);
 });
 
-test("publicar (móvil): 5 pasos en una columna sin desbordar hasta el anuncio demo", async ({ browser }) => {
+test("publicar (móvil): 5 pasos en una columna sin desbordar hasta la revisión", async ({ browser }) => {
   const ctx = await browser.newContext({ viewport: { width: 375, height: 812 }, isMobile: true, hasTouch: true });
   const page = await ctx.newPage();
   const errors = trackErrors(page);
   await fillToReview(page);
   // En móvil la vista previa lateral no se muestra: va arriba de la revisión.
   await expect(page.getByRole("complementary", { name: "Vista previa" })).toBeHidden();
-  await page.getByRole("button", { name: "Terminar la prueba" }).click();
-  await expect(page.getByRole("heading", { name: "Prueba terminada" })).toBeVisible();
+  await expect(page.locator("#login-email")).toBeVisible();
+  expect(await noOverflow(page)).toBe(0);
   expect(errors).toEqual([]);
   await ctx.close();
 });

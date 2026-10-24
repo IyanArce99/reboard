@@ -12,9 +12,9 @@ import ui from "@/styles/ui.module.css";
 import styles from "@/components/shops/Shops.module.css";
 import { OG_BASE } from "@/lib/site";
 
-const TITLE = "Tiendas y escuelas";
+const TITLE = "Tiendas y escuelas de surf";
 const DESCRIPTION =
-  "Tiendas de surf y escuelas que venden tablas de segunda mano: sus tablas usadas, su dirección y su horario. Sus anuncios también salen en la búsqueda.";
+  "Tiendas de surf y escuelas de Canarias que venden tablas de segunda mano: sus tablas usadas, su dirección y su horario. Sus anuncios también salen en la búsqueda.";
 
 export const metadata: Metadata = {
   title: TITLE,
@@ -56,7 +56,7 @@ export default async function ShopsPage() {
             <p className={styles.eyebrow}>Profesionales</p>
             <h1 className={styles.title}>{TITLE}</h1>
             <p className={styles.intro}>
-              Aquí tienes sus tablas usadas, su dirección y su horario. Sus anuncios también salen en la búsqueda, junto a
+              Tiendas de surf y escuelas de Canarias que venden tablas usadas: sus tablas, su dirección y su horario. Sus anuncios también salen en la búsqueda, junto a
               los de particulares.
             </p>
             <p className={styles.joinNote}>El alta de tiendas y escuelas aún no está abierta.</p>

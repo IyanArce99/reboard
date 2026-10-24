@@ -370,6 +370,8 @@
 .details {
   grid-area: d;
   min-width: 0;
+  /* Las medidas se adaptan al ancho de esta columna (en tablet es estrecha), no al de la pantalla. */
+  container-type: inline-size;
   display: flex;
   flex-direction: column;
   gap: 28px;
@@ -410,6 +412,7 @@
   margin: 0;
 }
 .measureV {
+  white-space: nowrap;
   font-size: 26px;
   font-weight: 700;
   line-height: 1.15;
@@ -661,6 +664,20 @@
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 16px;
 }
+@container (max-width: 600px) {
+  .measures {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@container (max-width: 520px) {
+  .features {
+    grid-template-columns: 1fr;
+  }
+  .feature:nth-last-child(2) {
+    border-bottom: 1px solid var(--rb-line-soft);
+  }
+}
+
 @media (max-width: 1023px) {
   .similarGrid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -768,8 +785,15 @@
     grid-template-areas: "g" "p" "d";
     gap: 16px;
   }
+  /* Primera pantalla en móvil: que asome el precio y el título bajo la foto (antes la galería
+     ocupaba toda la pantalla). «Volver» sobra: están las migas y el gesto atrás del móvil. */
+  .backRow {
+    display: none;
+  }
   .galMain {
     aspect-ratio: 4 / 5;
+    max-height: 50svh;
+    width: calc(100% + 32px);
     border-radius: 0;
     margin: 0 -16px;
   }

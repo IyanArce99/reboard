@@ -145,7 +145,8 @@ export function draftFromListing(l: Listing): PublishDraft {
   return {
     ...emptyDraft(l.zone),
     photos: l.photos.map((p) => ({ url: p.url, local: false })),
-    brand: l.brand ?? SHAPER_LOCAL,
+    // Sin marca guardada es «Sin marca» (los de shaper local guardan el texto «Shaper local»).
+    brand: l.brand ?? NO_BRAND_OPTION,
     model: l.model ?? "",
     size: l.brand ? l.sizeLabel : "",
     len: l.sizeLabel,

@@ -70,7 +70,7 @@ export default async function ShopPage({ params }: PageProps<"/tiendas/[slug]">)
         <div className={styles.hero}>
           <Image src={unsplash(s.image, 1200)} alt="" fill sizes="(max-width: 759px) 100vw, 50vw" preload />
           {/* Las tiendas aún no tienen foto propia (rowToShop usa una de stock): la etiqueta es cierta en demo y en real. */}
-          <span className={styles.stockTag}>foto de stock</span>
+          <span className={styles.stockTag}>foto ilustrativa</span>
         </div>
         <div className={styles.panel}>
           <div className={styles.badgeRow}>
@@ -92,7 +92,7 @@ export default async function ShopPage({ params }: PageProps<"/tiendas/[slug]">)
               {s.hours}
             </div>
             <div>
-              <span className={styles.factK}>Inventario · </span>
+              <span className={styles.factK}>Tablas en venta · </span>
               {s.inventorySource}
               {lastConfirmed != null ? ` · disponibilidad confirmada ${ago(lastConfirmed)}` : ""}
             </div>

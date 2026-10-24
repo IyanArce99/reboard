@@ -82,7 +82,7 @@ test.describe.serial("panel de administración", () => {
     await expect(page.getByRole("heading", { level: 1, name: "Panel" })).toBeVisible();
     await expect(page.locator('meta[name="robots"]')).toHaveAttribute("content", /noindex/);
     // Sin la cabecera del marketplace: el panel tiene su propia navegación.
-    await expect(page.getByRole("link", { name: "Publicar tabla" })).toHaveCount(0);
+    await expect(page.getByRole("link", { name: "Vender mi tabla" })).toHaveCount(0);
 
     for (const [path, title] of SECTIONS) {
       await page.goto(path);

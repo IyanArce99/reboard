@@ -159,7 +159,7 @@ export function StepReview({ d, catalog, now, live, editing, pending, needsLogin
             ) : (
               <>
                 <li>Sale en las búsquedas en cuanto lo publicas. Es gratis y sin comisiones.</li>
-                <li>Tu teléfono no aparece escrito en el anuncio: solo lo ve quien pulsa «Mostrar contacto».</li>
+                <li>Tu teléfono no aparece escrito en el anuncio: solo lo ve quien lo pide desde tu anuncio.</li>
                 <li>
                   Cada 14 días, entra en «Mis anuncios» y confirma que la tabla sigue a la venta. Si pasan 30 días sin confirmarlo, el
                   anuncio caduca. No enviamos recordatorios.

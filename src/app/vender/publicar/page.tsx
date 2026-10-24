@@ -55,17 +55,21 @@ async function Flow({ searchParams }: { searchParams: PageProps<"/vender/publica
   }
 
   return (
-    <PublishFlow
-      catalog={catalog}
-      brands={brandList.map((b) => b.name)}
-      featuredBrands={brandList.filter((b) => b.featured).map((b) => b.name)}
-      priceRefs={priceRefs}
-      nowIso={now.toISOString()}
-      dataIsDemo={repo.isDemo}
-      initial={initial}
-      editingId={editingId}
-      live={live}
-    />
+    <>
+      {/* Modo enfocado: sin pie ni «Vender» en la cabecera mientras se publica (ver globals.css). */}
+      <span data-focus-flow="" hidden />
+      <PublishFlow
+        catalog={catalog}
+        brands={brandList.map((b) => b.name)}
+        featuredBrands={brandList.filter((b) => b.featured).map((b) => b.name)}
+        priceRefs={priceRefs}
+        nowIso={now.toISOString()}
+        dataIsDemo={repo.isDemo}
+        initial={initial}
+        editingId={editingId}
+        live={live}
+      />
+    </>
   );
 }
 

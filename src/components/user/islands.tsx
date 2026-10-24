@@ -46,7 +46,7 @@ export function CompareButton({ item, name, className }: { item: CompareItem; na
   return (
     <button type="button" className={className} aria-pressed={on} data-on={on || undefined} onClick={() => toggleCompare(item)}>
       <CompareIcon on={on} />
-      {on ? "En comparación" : "Comparar"}
+      {on ? "Comparando" : "Comparar"}
       <span className="visually-hidden">: {name ?? item.label}</span>
     </button>
   );

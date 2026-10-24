@@ -66,9 +66,10 @@
   line-height: 1.5;
 }
 
-.introTag {
-  margin-left: 6px;
-  vertical-align: 1px;
+/* Las intros de marca aún no las ha revisado nadie de fuera: se dice, sin etiqueta «demo». */
+.introNote {
+  color: var(--rb-muted);
+  font-size: 0.9em;
 }
 
 .alertBtn {

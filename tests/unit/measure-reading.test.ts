@@ -85,7 +85,7 @@ describe("describeMeasure: lo que se enseña bajo cada campo", () => {
     expect(describeMeasure("vol", "34,5", "ft")).toEqual({ ok: true, text: "34,5 litros" });
   });
   it("avisa cuando se lee en la otra unidad", () => {
-    expect(describeMeasure("len", "193", "ft")).toEqual({ ok: true, text: `Lo leemos en cm: 6'4" · 193 cm` });
+    expect(describeMeasure("len", "193", "ft")).toEqual({ ok: true, text: `Lo hemos leído en cm: 6'4" · 193 cm` });
   });
   it("avisa de lo que no cuadra", () => {
     expect(describeMeasure("len", "3'", "ft")?.ok).toBe(false);
@@ -99,7 +99,7 @@ describe("parseMeasures (pegar las medidas tal cual)", () => {
   it.each([
     [`7'2 x 21 1/2 x 2 7/8 47L`, { len: `7'2"`, width: '21 1/2"', thick: '2 7/8"', vol: "47" }],
     [`6’4” × 20½” × 2⅝” — 34 L`, { len: `6'4"`, width: '20 1/2"', thick: '2 5/8"', vol: "34" }],
-    [`6'4" x 20.5 x 2.6 34,5l`, { len: `6'4"`, width: '20 1/2"', thick: '2 5/8"', vol: "34.5" }],
+    [`6'4" x 20.5 x 2.6 34,5l`, { len: `6'4"`, width: '20 1/2"', thick: '2 5/8"', vol: "34,5" }],
     ["193 x 52 x 6,7 cm 34l", { len: `6'4"`, width: '20 1/2"', thick: '2 5/8"', vol: "34" }],
   ])("«%s»", (text, out) => {
     expect(parseMeasures(text)).toEqual(out);

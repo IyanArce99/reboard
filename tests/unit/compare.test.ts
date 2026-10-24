@@ -134,7 +134,7 @@ describe("«Diferencias principales» (deterministas y prudentes)", () => {
       board({ id: "a4", price: 440, zone: "lanzarote" }),
     ];
     const t = compareSummary(ls, now).map((s) => s.text);
-    expect(t[0]).toBe("Las más baratas son la A y B (150 €); la más cara, la D (440 €): 290 € de diferencia.");
+    expect(t[0]).toBe("Las más baratas son las tablas A y B (150 €); la más cara, la D (440 €): 290 € de diferencia.");
     expect(t).toContain("En islas distintas: A y C en Tenerife; B en Gran Canaria; D en Lanzarote.");
   });
 

@@ -391,7 +391,7 @@ function VolumeOptions({
         <span className={styles.rangeUnit}>L</span>
       </div>
       <p className={styles.groupHint}>
-        Orientativo para unos 75 kg; lo tuyo depende de tu peso y tu nivel.{" "}
+        Orientativo para unos 75 kg: lo que necesitas depende de tu peso y tu nivel.{" "}
         <Link href="/calculadora-litros" className={styles.inlineLink}>
           Calcular mis litros →
         </Link>

@@ -109,7 +109,9 @@ export function alertText(f: Filters, names: CatalogNames) {
   const len = lengthPhrase(f);
   const b = f.brand ? ` ${brandName(f.brand, names)}` : "";
   const p = f.priceMax != null ? `, por menos de ${f.priceMax} €` : "";
-  const z = f.zone ? `, en ${placeName(f.zone) ?? f.zone}` : `, ${LAUNCH.inAll}`;
+  // Coma solo si hay medidas o precio delante («Tablas de 55 L o más, en Canarias»); «Tablas en Canarias», sin ella.
+  const sep = len || v || p ? "," : "";
+  const z = f.zone ? `${sep} en ${placeName(f.zone) ?? f.zone}` : `${sep} ${LAUNCH.inAll}`;
   return `${t}${b}${len}${v}${p}${z}`;
 }
 
@@ -190,10 +192,10 @@ export function emptyStateCopy(f: Filters, inventoryTotal: number): { kind: Empt
     return {
       kind: "inventory",
       title: "Todavía no hay tablas publicadas",
-      text: "Reboard acaba de arrancar y aún no hay anuncios activos. Si tienes una tabla parada, publícala gratis. Si buscas, guarda esta búsqueda como alerta y vuelve más adelante para ver cuántas coinciden.",
+      text: "Reboard acaba de arrancar y aún no hay tablas publicadas. ¿Tienes una parada? Publícala gratis. ¿Buscas? Crea una alerta con esta búsqueda y vuelve cuando quieras.",
     };
   return hasActiveFilters(f)
-    ? { kind: "filters", title: "No encontramos tablas con estos filtros", text: "Prueba a ampliar la búsqueda. Entre paréntesis, las tablas que verías:" }
+    ? { kind: "filters", title: "No encontramos tablas con estos filtros", text: "Amplía un poco la búsqueda. Entre paréntesis, cuántas tablas saldrían:" }
     : { kind: "filters", title: "No encontramos tablas", text: "Prueba con otra búsqueda." };
 }
 

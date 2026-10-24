@@ -30,7 +30,7 @@ const COLUMNS: { title: string; links: [string, string][] }[] = [
   {
     title: "Vender",
     links: [
-      ["Publicar tabla", "/vender/publicar"],
+      ["Vender mi tabla", "/vender/publicar"],
       ["Cómo vender tu tabla", "/vender"],
       ["Tiendas y escuelas", "/tiendas"],
     ],

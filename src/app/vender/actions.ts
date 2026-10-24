@@ -67,6 +67,8 @@ export async function saveListingAction(args: z.input<typeof SaveArgs>): Promise
 
   try {
     const r = await saveListing(s.sb!, s.user!.id, parsed.data, a.data.editingId);
+    // Al editar, los datos (y quizá el slug) ya han cambiado: se invalida ya, no solo tras las fotos.
+    if (a.data.editingId) invalidate(r.publicId);
     return { ok: true, publicId: r.publicId, listingId: r.id, userId: s.user!.id, status: r.status };
   } catch (e) {
     return failure(e);

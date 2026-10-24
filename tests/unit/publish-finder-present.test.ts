@@ -8,7 +8,7 @@ describe("parse (medidas pegadas)", () => {
   it("interpreta el formato del prototipo", () => {
     expect(parseMeasures(`7'2 x 21 1/2 x 2 7/8 47L`)).toEqual({ len: `7'2"`, width: '21 1/2"', thick: '2 7/8"', vol: "47" });
     expect(parseMeasures("  ")).toEqual({});
-    expect(parseMeasures("47,5 litros").vol).toBe("47.5");
+    expect(parseMeasures("47,5 litros").vol).toBe("47,5");
   });
 
   it("convierte a pulgadas", () => {
@@ -134,5 +134,15 @@ describe("nombre del vendedor en la ficha", () => {
     expect(sellerName(withSeller("Surfista", "particular"))).toBeNull();
     expect(soldBy(withSeller("Surfista", "particular"))).toEqual({ name: null, rest: "un particular" });
     expect(soldBy(withSeller("Surfista", "escuela"))).toEqual({ name: null, rest: "una escuela" });
+  });
+});
+
+describe("editar un anuncio: la marca se conserva (QA-1, auditoría 24-10-2026)", () => {
+  it("«Sin marca» sigue siendo «Sin marca» y «Shaper local» sigue siendo «Shaper local»", async () => {
+    const { draftFromListing, NO_BRAND_OPTION, SHAPER_LOCAL } = await import("@/lib/publish/draft");
+    const base = buildDemoInventory(20)[0];
+    expect(draftFromListing({ ...base, brand: null }).brand).toBe(NO_BRAND_OPTION);
+    expect(draftFromListing({ ...base, brand: SHAPER_LOCAL }).brand).toBe(SHAPER_LOCAL);
+    expect(draftFromListing({ ...base, brand: "Torq" }).brand).toBe("Torq");
   });
 });

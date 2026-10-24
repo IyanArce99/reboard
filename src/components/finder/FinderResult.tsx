@@ -8,6 +8,7 @@ import { BoardShape } from "@/components/brand/BoardShape";
 import { ListingCard } from "@/components/listing/ListingCard";
 import { AlertButton, CompareLink } from "@/components/user/islands";
 import { useUserState } from "@/components/user/UserStateProvider";
+import { litres } from "@/lib/domain/format";
 import { SHAPE_INFO } from "@/lib/domain/taxonomy";
 import type { Listing } from "@/lib/domain/types";
 import {
@@ -27,7 +28,7 @@ import type { SummaryItem } from "@/lib/finder/summary";
 import styles from "./Finder.module.css";
 
 /** Aviso único por pantalla (asistente o resultado): el cálculo no está validado. */
-export const FINDER_DISCLAIMER = "Cálculo orientativo y simplificado. Todavía no lo han validado surfistas ni shapers.";
+export const FINDER_DISCLAIMER = "Cálculo orientativo con reglas habituales. No sustituye el consejo de un shaper o de tu escuela.";
 
 interface Props {
   state: FinderState;
@@ -220,7 +221,7 @@ export function FinderResult({ state: W, rec: r, summary, onEdit, onRestart, set
               <div key={l.id} className={styles.cardWrap}>
                 <ListingCard listing={l} now={pool.now} hereZone={pool.here} layout="responsive" />
                 <span className={styles.reason}>
-                  En tu rango: {l.volume.value} L dentro de {r.lo}–{r.hi} L · {SHAPE_INFO[l.shape].label}
+                  {litres(l.volume.value ?? 0)} · dentro de tu rango ({r.lo}–{r.hi} L) · {SHAPE_INFO[l.shape].label}
                   {l.construction === "softboard" ? " · Softboard" : ""}
                 </span>
               </div>

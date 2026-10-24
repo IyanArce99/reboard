@@ -16,7 +16,7 @@ import { EmptyState } from "@/components/brand/EmptyState";
 import { useUserState } from "@/components/user/UserStateProvider";
 import { SHAPE_INFO } from "@/lib/domain/taxonomy";
 import type { Listing } from "@/lib/domain/types";
-import { ago, daysBetween, eur } from "@/lib/domain/format";
+import { ago, daysBetween, eur, litres } from "@/lib/domain/format";
 import { listingPath, listingTitle } from "@/lib/listing/present";
 import type { PanelAction } from "@/lib/publish/save";
 import ui from "@/styles/ui.module.css";
@@ -244,7 +244,7 @@ export function SellerPanel({ listings, nowIso, live = false, sellerName, contac
                       </Link>
                     </div>
                     <div className={styles.spec}>
-                      {l.volume.value != null ? `${l.volume.value} L` : "Litros sin indicar"} · {SHAPE_INFO[l.shape].label} · {l.town}
+                      {l.volume.value != null ? litres(l.volume.value) : "Litros sin indicar"} · {SHAPE_INFO[l.shape].label} · {l.town}
                     </div>
                     <div className={styles.status}>
                       <span className={`${ui.dot} ${tone}`} style={{ width: 8, height: 8 }} />
@@ -371,8 +371,8 @@ export function SellerPanel({ listings, nowIso, live = false, sellerName, contac
 
       <p className={styles.foot}>
         {live
-          ? "Confirma cada anuncio al menos cada 14 días: si pasan 30 sin confirmarlo, caduca. No enviamos recordatorios. Los cambios se ven al momento en las búsquedas y, si bajas el precio, la ficha muestra el anterior tachado. Lo único que contamos es cuántas veces han pulsado «Mostrar contacto»."
-          : "En la demo no hay estadísticas. Con datos reales, lo único que contamos es cuántas veces han pulsado «Mostrar contacto». Los cambios de este panel se guardan solo en este dispositivo."}
+          ? "Confirma cada anuncio al menos cada 14 días: si pasan 30 sin confirmarlo, caduca. No enviamos recordatorios. Los cambios se ven al momento en las búsquedas y, si bajas el precio, la ficha muestra el anterior tachado. Lo único que contamos es cuántas veces han pedido tu teléfono."
+          : "En la demo no hay estadísticas. Con datos reales, lo único que contamos es cuántas veces han pedido tu teléfono. Los cambios de este panel se guardan solo en este dispositivo."}
       </p>
     </main>
   );

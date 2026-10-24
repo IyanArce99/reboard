@@ -13,8 +13,8 @@ import styles from "./Publish.module.css";
 
 // Contacto directo por WhatsApp o teléfono (decisión aprobada; la base de datos solo admite estos dos).
 const CONTACTS: [ContactMethod, string][] = [
-  ["whatsapp", "WhatsApp"],
-  ["phone", "Llamada"],
+  ["whatsapp", "WhatsApp y llamadas"],
+  ["phone", "Solo llamadas"],
 ];
 
 interface Props extends StepProps {
@@ -127,7 +127,7 @@ export function StepPrice({ d, set, model, refs, dataIsDemo, live }: Props) {
             onChange={(e) => set({ phone: e.target.value })}
           />
           <span id="pub-phone-help" className={styles.small}>
-            No aparece escrito en el anuncio: solo lo ve quien pulsa «Mostrar contacto», y está protegido contra robots.
+            No aparece escrito en el anuncio: solo lo ve quien lo pide desde tu anuncio, y está protegido contra robots.
             {!live && " Todavía no se guarda."}
           </span>
         </div>

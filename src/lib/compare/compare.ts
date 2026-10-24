@@ -252,7 +252,7 @@ export function compareSummary(listings: Listing[], now: Date): SummaryLine[] {
     const dear = listings.map((_, i) => i).filter((i) => prices[i] === maxP).map(L);
     out.push({
       key: "precio",
-      text: `${cheap.length > 1 ? `Las más baratas son la ${joinLetters(cheap)}` : `La más barata es la ${cheap[0]}`} (${eur(minP)}); ${dear.length > 1 ? `las más caras, la ${joinLetters(dear)}` : `la más cara, la ${dear[0]}`} (${eur(maxP)}): ${eur(maxP - minP)} de diferencia.`,
+      text: `${cheap.length > 1 ? `Las más baratas son las tablas ${joinLetters(cheap)}` : `La más barata es la ${cheap[0]}`} (${eur(minP)}); ${dear.length > 1 ? `las más caras, las tablas ${joinLetters(dear)}` : `la más cara, la ${dear[0]}`} (${eur(maxP)}): ${eur(maxP - minP)} de diferencia.`,
     });
   }
 
@@ -262,11 +262,11 @@ export function compareSummary(listings: Listing[], now: Date): SummaryLine[] {
   if (vols.length >= 2) {
     const lo = vols.reduce((a, b) => (b.v < a.v ? b : a));
     const hi = vols.reduce((a, b) => (b.v > a.v ? b : a));
-    if (lo.v === hi.v) out.push({ key: "litros", text: `${vols.length === n ? (both ? "Las dos tienen" : "Todas tienen") : `La ${joinLetters(vols.map((x) => L(x.i)))} tienen`} ${dec(lo.v)} L.` });
+    if (lo.v === hi.v) out.push({ key: "litros", text: `${vols.length === n ? (both ? "Las dos tienen" : "Todas tienen") : `Las tablas ${joinLetters(vols.map((x) => L(x.i)))} tienen`} ${dec(lo.v)} L.` });
     else if (vols.length === 2) out.push({ key: "litros", text: `La ${L(hi.i)} tiene ${dec(hi.v - lo.v)} L más que la ${L(lo.i)} (${dec(hi.v)} L frente a ${dec(lo.v)} L).` });
     else out.push({ key: "litros", text: `Litros: de ${dec(lo.v)} L (${L(lo.i)}) a ${dec(hi.v)} L (${L(hi.i)}).` });
   }
-  if (noVol.length) out.push({ key: "sin-litros", text: `${noVol.length > 1 ? `La ${joinLetters(noVol)} no indican` : `La ${noVol[0]} no indica`} los litros: no se pueden comparar en volumen.` });
+  if (noVol.length) out.push({ key: "sin-litros", text: `${noVol.length > 1 ? `Las tablas ${joinLetters(noVol)} no indican` : `La ${noVol[0]} no indica`} los litros: no se pueden comparar en volumen.` });
 
   // Longitud
   const lens = listings.map((l, i) => ({ i, v: l.length.value, label: l.sizeLabel })).filter((x): x is { i: number; v: number; label: string } => x.v != null);
@@ -298,7 +298,7 @@ export function compareSummary(listings: Listing[], now: Date): SummaryLine[] {
   // Reparaciones declaradas
   const rep = listings.map((l, i) => (l.repairs ? L(i) : null)).filter((x): x is (typeof LETTERS)[number] => !!x);
   if (rep.length === n) out.push({ key: "reparaciones", text: `${both ? "Las dos declaran" : "Todas declaran"} reparaciones: mira el detalle en cada anuncio.` });
-  else if (rep.length) out.push({ key: "reparaciones", text: `${rep.length > 1 ? `La ${joinLetters(rep)} declaran` : `La ${rep[0]} declara`} reparaciones; ${n - rep.length > 1 ? "las demás no indican ninguna" : `la ${LETTERS.slice(0, n).find((x) => !rep.includes(x))} no indica ninguna`}.` });
+  else if (rep.length) out.push({ key: "reparaciones", text: `${rep.length > 1 ? `Las tablas ${joinLetters(rep)} declaran` : `La ${rep[0]} declara`} reparaciones; ${n - rep.length > 1 ? "las demás no indican ninguna" : `la ${LETTERS.slice(0, n).find((x) => !rep.includes(x))} no indica ninguna`}.` });
 
   // Ubicación
   const zones = byValue((l) => zoneName(l));

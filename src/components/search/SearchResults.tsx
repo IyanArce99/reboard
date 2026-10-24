@@ -183,8 +183,8 @@ export async function SearchResults({ filters: f, view, here, title, intro, crum
                 </div>
                 <div className={styles.alertBox}>
                   <div>
-                    <div className={styles.alertTitle}>¿No es lo que buscas?</div>
-                    <div className={styles.alertText}>Guárdala como alerta y vuelve cuando quieras para ver cuántas tablas coinciden: «{alert.text}»</div>
+                    <div className={styles.alertTitle}>¿No ves la tabla que buscas?</div>
+                    <div className={styles.alertText}>Guarda esta búsqueda como alerta y vuelve cuando quieras a ver cuántas coinciden: «{alert.text}»</div>
                   </div>
                   <AlertButton text={alert.text} query={alert.query} className={ui.btnStrong} />
                 </div>

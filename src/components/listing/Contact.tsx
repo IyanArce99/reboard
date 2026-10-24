@@ -42,6 +42,32 @@ function RevealContact({ data, onClose }: { data: ContactData; onClose: () => vo
   const [error, setError] = useState("");
   const [contact, setContact] = useState<{ method: "whatsapp" | "phone"; phone: string } | null>(null);
   const turnstile = useRef<TurnstileHandle>(null);
+  // El contacto se pide solo en cuanto pasa la comprobación anti-robots: «Contactar» → «Abrir WhatsApp»,
+  // sin un toque intermedio. El botón queda para reintentar si algo falla.
+  const tried = useRef(false);
+  const reveal = async (tok: string | null) => {
+    setBusy(true);
+    setError("");
+    const r = await revealContactAction({ publicId: data.listingId, token: tok });
+    turnstile.current?.reset();
+    setBusy(false);
+    if (r.ok) setContact({ method: r.method, phone: r.phone });
+    else setError(r.message);
+  };
+  const onToken = (t: string | null) => {
+    setToken(t);
+    if (t && !tried.current) {
+      tried.current = true;
+      void reveal(t);
+    }
+  };
+  // Sin Turnstile configurado (local), se pide al abrir.
+  const revealRef = useRef(reveal);
+  useEffect(() => {
+    if (TURNSTILE_SITE_KEY || tried.current) return;
+    tried.current = true;
+    void revealRef.current(null);
+  }, []);
 
   if (contact) {
     const wa = `https://wa.me/${contact.phone}?text=${encodeURIComponent(data.message)}`;
@@ -61,22 +87,9 @@ function RevealContact({ data, onClose }: { data: ContactData; onClose: () => vo
   const waiting = !!TURNSTILE_SITE_KEY && !token;
   return (
     <>
-      <Turnstile ref={turnstile} action="contacto" onToken={setToken} />
-      <button
-        type="button"
-        className={styles.waBtn}
-        disabled={busy || waiting}
-        onClick={async () => {
-          setBusy(true);
-          setError("");
-          const r = await revealContactAction({ publicId: data.listingId, token });
-          turnstile.current?.reset();
-          setBusy(false);
-          if (r.ok) setContact({ method: r.method, phone: r.phone });
-          else setError(r.message);
-        }}
-      >
-        {busy ? "Un momento…" : waiting ? "Comprobando que no eres un robot…" : "Mostrar contacto"}
+      <Turnstile ref={turnstile} action="contacto" onToken={onToken} />
+      <button type="button" className={styles.waBtn} disabled={busy || waiting} onClick={() => void reveal(token)}>
+        {busy ? "Un momento…" : waiting ? "Comprobando que no eres un robot…" : data.method === "whatsapp" ? "Ver teléfono y WhatsApp" : "Ver teléfono"}
       </button>
       <p className={styles.modalError} role="alert">
         {error}
@@ -118,7 +131,7 @@ export function ContactProvider({ data, children }: { data: ContactData; childre
                   <CloseIcon />
                 </button>
               </div>
-              <div className={styles.modalHint}>{byWhatsApp ? "Mensaje sugerido (puedes editarlo en WhatsApp):" : "Qué preguntar:"}</div>
+              <div className={styles.modalHint}>{byWhatsApp ? "Mensaje sugerido (puedes editarlo en WhatsApp):" : "Puedes preguntarle esto:"}</div>
               <div className={styles.modalMsg}>{data.message}</div>
               {data.live ? (
                 <RevealContact data={data} onClose={() => setOpen(false)} />
@@ -188,7 +201,7 @@ export function ContactBar({ price, specs }: { price: string; specs: string }) {
         <div className={styles.barSpecs}>{specs}</div>
       </div>
       <button type="button" className={styles.barBtn} disabled={!!data.unavailable} onClick={open}>
-        {data.unavailable ?? "Contactar"}
+        {data.unavailable ?? (data.method === "whatsapp" ? "WhatsApp" : "Llamar")}
       </button>
     </aside>
   );

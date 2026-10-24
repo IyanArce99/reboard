@@ -12,9 +12,9 @@ import styles from "./Header.module.css";
 
 /** Secciones principales. «Explorar» también se marca en las landings de /tablas. */
 const NAV: { label: string; href: string; match: (p: string) => boolean }[] = [
-  { label: "Explorar tablas", href: "/buscar", match: (p) => p.startsWith("/buscar") || p.startsWith("/tablas") },
-  // TablaFinder es el nombre de la herramienta; la URL y el SEO siguen siendo /calculadora-litros.
-  { label: "TablaFinder", href: "/calculadora-litros", match: (p) => p.startsWith("/calculadora-litros") },
+  { label: "Comprar tablas", href: "/buscar", match: (p) => p.startsWith("/buscar") || p.startsWith("/tablas") },
+  // La herramienta se llama TablaFinder (antetítulo de su página), pero en el menú se dice qué hace.
+  { label: "¿Qué tabla necesito?", href: "/calculadora-litros", match: (p) => p.startsWith("/calculadora-litros") },
   { label: "Guías", href: "/guias", match: (p) => p.startsWith("/guias") },
 ];
 
@@ -183,7 +183,7 @@ export function MobileMenu() {
   const main: [string, string, string, boolean][] = NAV.map((n) => [
     n.label,
     n.href,
-    n.href === "/calculadora-litros" ? "Calcula tus litros" : "",
+    n.href === "/calculadora-litros" ? "Tus litros y tipo de tabla, en 7 preguntas" : "",
     n.match(pathname),
   ]);
   const more: [string, string, string][] = [
@@ -235,7 +235,7 @@ export function MobileMenu() {
               </nav>
               <div className={styles.menuFoot}>
                 <Link href="/vender/publicar" className={styles.menuPublish} onClick={() => setOpen(false)}>
-                  Publicar tabla
+                  Vender mi tabla
                 </Link>
               </div>
             </div>

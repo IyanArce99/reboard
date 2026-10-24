@@ -552,7 +552,7 @@ export function FilterPanel({ counts, showCounts = true, resultCount, brands, mo
           Limpiar
         </button>
         <button type="button" className={ui.btnPrimary} onClick={() => setSheetOpen(false)}>
-          {resultCount === 0 ? "Ver resultados" : resultCount === 1 ? "Ver 1 tabla" : `Ver ${num(resultCount)} tablas`}
+          {resultCount === 0 ? "Ver alternativas" : resultCount === 1 ? "Ver 1 tabla" : `Ver ${num(resultCount)} tablas`}
         </button>
       </div>
     </aside>

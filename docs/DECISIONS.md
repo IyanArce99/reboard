@@ -549,3 +549,29 @@ El bloque «Datos técnicos» se leía como una hoja de cálculo: todo en IBM Pl
 ## Entrar con contraseña, solo por URL (24-10-2026)
 
 El formulario de `/entrar` decía «No necesitas contraseña» y debajo ofrecía «Tengo contraseña» (U5 de la auditoría). La contraseña solo la usa la administración, así que el enlace ya no se muestra. Se entra con contraseña en **`/entrar?contrasena`**; se puede combinar con `&siguiente=/moderacion`. El resto entra con el código por email (o Google/Apple cuando se activen).
+
+## Auditoría final: navegación, contacto y privacidad (24-10-2026)
+
+Rama `auditoria-final`; informe completo en `AUDIT_REBOARD.md`.
+
+**Navegación (Comprar / Vender):**
+- El menú pasa de «Explorar tablas · TablaFinder · Guías» + «Publicar tabla» a «Comprar tablas · ¿Qué tabla necesito? · Guías» + «Vender mi tabla».
+- «TablaFinder» era un nombre inventado que no decía qué hace; sigue como nombre de la herramienta dentro de su página.
+- En móvil se ve un botón corto «Vender» en la cabecera. Por debajo de 400 px, el icono de cuenta se esconde: sigue en el menú.
+
+**Contacto en dos toques:**
+- «Contactar» → «Abrir WhatsApp». El teléfono se pide solo al pasar Turnstile, sin el botón intermedio «Mostrar contacto», que queda para reintentar.
+- Abrir el contacto ya cuenta como contacto pedido (antes contaba el segundo toque).
+- La barra fija de la ficha en móvil dice «WhatsApp» o «Llamar».
+
+**Publicar:**
+- Modo enfocado: sin pie ni «Vender» en la cabecera (`data-focus-flow`, CSS en `globals.css`).
+- El orden del paso 2 no cambia (marca → modelo → medidas): elegir la medida del catálogo rellena las medidas.
+
+**Barra de comparación:** solo en inicio, búsqueda, landings, fichas, marcas y guardadas. El botón ya no es amarillo, porque no es la acción principal.
+
+**Privacidad** (migración `20261029090000_privacy_hardening.sql`; test `10_privacy_hardening`):
+- **Perfiles:** solo se ve el propio, los de quien tiene un anuncio visible o todos si eres de moderación. La fecha de alta ya no es pública.
+- **Contactos:** el vendedor ve anuncio, canal y fecha, pero no quién ni el hash de IP.
+- **Ajustes:** `app_settings.updated_by` deja de ser legible.
+- **Producción:** aplicada solo en local. Necesita aprobación (`supabase db push`, después de `--dry-run`).

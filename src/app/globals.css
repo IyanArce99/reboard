@@ -162,6 +162,13 @@ body:has([data-admin-shell]) [data-site-chrome] {
   display: none !important;
 }
 
+/* Publicar: modo enfocado. Sin el pie (unos 900 px en móvil) ni el «Vender» de la cabecera, que
+   llevaban fuera del formulario a mitad del anuncio. */
+body:has([data-focus-flow]) [data-site-chrome] > footer,
+body:has([data-focus-flow]) [data-header-publish] {
+  display: none;
+}
+
 .visually-hidden {
   position: absolute;
   width: 1px;

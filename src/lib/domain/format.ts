@@ -4,6 +4,9 @@ export const eur = (n: number) => `${n.toLocaleString("es-ES")} €`;
 
 export const num = (n: number) => n.toLocaleString("es-ES");
 
+/** Litros con coma decimal: 34.5 → «34,5 L». */
+export const litres = (n: number) => `${num(n)} L`;
+
 /** Pulgadas decimales a fracción de octavos: 21.5 → 21 1/2". */
 export function fmtIn(x: number) {
   const whole = Math.floor(x);

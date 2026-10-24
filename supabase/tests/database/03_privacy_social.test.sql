@@ -59,7 +59,8 @@ select results_eq(
          (select public_id from public.listings where slug = 't-contacto'), repeat('a', 64)),
   $$ values ('whatsapp', '+34600000000') $$,
   'reveal_contact devuelve método y teléfono');
-select is((select count(*) from public.contact_events), 1::bigint, 'el contacto queda registrado');
+select is((select count(*) from public.contact_events where listing_id = (select id from public.listings where slug = 't-contacto')),
+  1::bigint, 'el contacto queda registrado');
 select is_empty($$ select * from public.reveal_contact('a999999999', null, repeat('a', 64)) $$,
   'anuncio inexistente: sin datos');
 select throws_ok($$ select * from public.reveal_contact((select public_id from public.listings limit 1), null, null) $$,

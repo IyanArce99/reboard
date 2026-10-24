@@ -8,7 +8,7 @@ import Image from "next/image";
 import { BoardShape } from "@/components/brand/BoardShape";
 import { CONDITION_LABEL, CONSTRUCTION_INFO, SHAPE_INFO, zoneBySlug } from "@/lib/domain/taxonomy";
 import type { CatalogModel } from "@/lib/domain/types";
-import { eur } from "@/lib/domain/format";
+import { eur, litres } from "@/lib/domain/format";
 import { listingTitle } from "@/lib/listing/present";
 import { previewListing, type PublishDraft } from "@/lib/publish/draft";
 import styles from "./Publish.module.css";
@@ -19,7 +19,7 @@ export function previewTexts(d: PublishDraft, catalog: CatalogModel[], now: Date
   const hasLen = !!d.len.trim();
   const title = l.brand || d.shape ? listingTitle(l).replace(/ —$/, "") : hasLen ? `Tabla ${l.sizeLabel}` : "Tu tabla";
   const spec = [
-    l.volume.value != null ? `${l.volume.value} L` : "Litros sin indicar",
+    l.volume.value != null ? litres(l.volume.value) : "Litros sin indicar",
     d.shape ? SHAPE_INFO[d.shape].short : null,
     d.construction ? CONSTRUCTION_INFO[d.construction].short : null,
   ]

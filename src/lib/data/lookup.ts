@@ -10,9 +10,9 @@ import { isSupabaseConfigured, SUPABASE_ANON_KEY, SUPABASE_URL } from "@/lib/sup
 const TTL_MS = 60_000;
 const memo = new Map<string, { at: number; value: unknown }>();
 
-async function remember<T>(key: string, load: () => Promise<T>): Promise<T> {
+async function remember<T>(key: string, load: () => Promise<T>, fresh = false): Promise<T> {
   const hit = memo.get(key);
-  if (hit && Date.now() - hit.at < TTL_MS) return hit.value as T;
+  if (!fresh && hit && Date.now() - hit.at < TTL_MS) return hit.value as T;
   const value = await load();
   memo.set(key, { at: Date.now(), value });
   if (memo.size > 5_000) memo.clear(); // cota de memoria
@@ -27,13 +27,20 @@ const anon = () =>
     auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false },
   });
 
-/** Slug canónico de un anuncio visible (publicado, vendido o caducado), o null si no existe. */
-export async function listingSlug(publicId: string): Promise<string | null> {
+/**
+ * Slug canónico de un anuncio visible (publicado, vendido o caducado), o null si no existe.
+ * `fresh`: sin la caché en memoria (antes de redirigir: al editar, el slug puede haber cambiado).
+ */
+export async function listingSlug(publicId: string, fresh = false): Promise<string | null> {
   if (!fromSupabase()) return null;
-  return remember(`listing:${publicId}`, async () => {
-    const { data } = await anon().from("listings").select("slug").eq("public_id", publicId).maybeSingle();
-    return data?.slug ?? null;
-  });
+  return remember(
+    `listing:${publicId}`,
+    async () => {
+      const { data } = await anon().from("listings").select("slug").eq("public_id", publicId).maybeSingle();
+      return data?.slug ?? null;
+    },
+    fresh,
+  );
 }
 
 /** Pares marca/modelo del catálogo («torq» → ["fun-tet", …]). */

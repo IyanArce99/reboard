@@ -6,9 +6,10 @@ import { Breadcrumbs } from "@/components/seo/Breadcrumbs";
 import { GUIDES, guideDate } from "@/lib/content/guides";
 import type { PhotoSlug } from "@/lib/photos";
 import styles from "@/components/guides/Guides.module.css";
+import { noindexRobots } from "@/lib/seo";
 import { OG_BASE } from "@/lib/site";
 
-const TITLE = "Guías de compra";
+const TITLE = "Guías para comprar tu tabla";
 const DESCRIPTION =
   "Qué revisar antes de comprar una tabla usada y herramientas para calcular tus litros y comparar tablas.";
 
@@ -17,6 +18,8 @@ export const metadata: Metadata = {
   description: DESCRIPTION,
   alternates: { canonical: "/guias", languages: { "es-ES": "/guias" } },
   openGraph: { ...OG_BASE, title: TITLE, description: DESCRIPTION, url: "/guias" },
+  // Sin ninguna guía revisada, el índice no se indexa (como las guías de demostración).
+  ...(GUIDES.every((g) => g.isDemo) ? { robots: noindexRobots() } : {}),
 };
 
 const TOOLS: { t: string; d: string; href: string; photo: PhotoSlug; cta: string }[] = [

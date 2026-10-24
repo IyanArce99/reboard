@@ -2,7 +2,7 @@
 
 import { CONSTRUCTION_INFO, SELLER_LABEL, SHAPE_INFO, isActiveStatus, zoneLabel } from "@/lib/domain/taxonomy";
 import type { DataSource, Listing } from "@/lib/domain/types";
-import { ago, daysBetween } from "@/lib/domain/format";
+import { ago, daysBetween, litres } from "@/lib/domain/format";
 
 export const listingTitle = (l: Listing) =>
   l.brand
@@ -32,7 +32,7 @@ export const idFromSlugId = (slugId: string) => slugId.match(/-(a\d+)$/)?.[1] ??
 
 export const zoneName = (l: Listing) => zoneLabel(l.zone);
 
-export const volumeShort = (l: Listing) => (l.volume.value != null ? `${l.volume.value} L` : "Litros sin indicar");
+export const volumeShort = (l: Listing) => (l.volume.value != null ? litres(l.volume.value) : "Litros sin indicar");
 
 export type Tone = "success" | "warning" | "error";
 

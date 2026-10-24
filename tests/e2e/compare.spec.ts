@@ -22,7 +22,7 @@ test("buscar → añadir dos → comparar → ver tabla → volver sin perder la
   await addButtons(page).first().click();
   await expect(tray(page)).toContainText("1 tabla");
   await expect(tray(page)).toContainText("Añade otra");
-  await expect(page.getByRole("button", { name: /^En comparación\s*:/ })).toHaveCount(1);
+  await expect(page.getByRole("button", { name: /^Comparando\s*:/ })).toHaveCount(1);
 
   await addButtons(page).first().click();
   await expect(tray(page)).toContainText("2 tablas");
@@ -71,7 +71,7 @@ test("teclado: «Comparar» se activa con Enter y anuncia su estado", async ({ p
   const btn = addButtons(page).first();
   await btn.focus();
   await page.keyboard.press("Enter");
-  await expect(page.getByRole("button", { name: /^En comparación\s*:/ }).first()).toHaveAttribute("aria-pressed", "true");
+  await expect(page.getByRole("button", { name: /^Comparando\s*:/ }).first()).toHaveAttribute("aria-pressed", "true");
 });
 
 test("/comparar: TablaFinder, tabla vendida, anuncio eliminado e ids antiguos", async ({ page }) => {

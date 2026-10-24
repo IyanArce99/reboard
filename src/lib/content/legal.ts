@@ -56,7 +56,7 @@ export const LEGAL_DOCS: LegalDoc[] = [
         p: [
           "Si creas una cuenta: tu email (para entrar con un código de un solo uso) y el nombre visible que elijas.",
           "Si entras con Google o con Apple: recibimos de ellos tu email y tu nombre. Usamos solo el nombre de pila como nombre visible inicial (puedes cambiarlo en «Mi cuenta»). Si en Apple eliges ocultar tu email, recibimos una dirección de reenvío de Apple.",
-          "Si publicas un anuncio: los datos de la tabla, la localidad (nunca una dirección exacta), las fotos (antes de subirlas, tu dispositivo les quita los datos de ubicación y de la cámara) y tu teléfono de contacto. El teléfono no aparece en el anuncio: se muestra a quien pulsa «Mostrar contacto».",
+          "Si publicas un anuncio: los datos de la tabla, la localidad (nunca una dirección exacta), las fotos (antes de subirlas, tu dispositivo les quita los datos de ubicación y de la cámara) y tu teléfono de contacto. El teléfono no aparece en el anuncio: se muestra a quien lo pide desde el anuncio.",
           "Cuando alguien pide el contacto de un anuncio: registramos el anuncio, la fecha y un código derivado de la dirección IP (HMAC) que no permite recuperar la IP. Sirve para limitar abusos y para que el vendedor vea cuántas veces se ha pedido su contacto.",
           "Si guardas tablas con tu cuenta: la lista de anuncios guardados. Si reportas un anuncio: el motivo y el detalle que escribas.",
           "Sin cuenta, tus guardados, alertas y comparaciones se quedan en tu dispositivo y no los recibimos.",

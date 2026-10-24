@@ -9,7 +9,9 @@ import ui from "@/styles/ui.module.css";
 import styles from "./CompareTray.module.css";
 
 /**
- * Barra fija abajo con las tablas elegidas para comparar. Solo aparece con alguna tabla.
+ * Barra fija abajo con las tablas elegidas para comparar. Solo aparece con alguna tabla y solo donde
+ * se eligen tablas (inicio, búsqueda, landings, fichas, marcas y guardadas). En vender, entrar, guías,
+ * tiendas o el 404 tapaba botones sin aportar nada.
  * - No aparece en /comparar (ya estás comparando) ni en publicar o TablaFinder (taparía su barra
  *   Atrás / Continuar; el resultado de TablaFinder tiene su propio acceso al comparador).
  * - En la ficha solo en escritorio: en móvil ya hay una barra de contacto fija (y un enlace al comparador).
@@ -17,7 +19,8 @@ import styles from "./CompareTray.module.css";
 export function CompareTray() {
   const { compare, removeCompare, clearCompare } = useUserState();
   const pathname = usePathname();
-  const hidden = ["/comparar", "/vender/publicar", "/calculadora-litros"].some((p) => pathname.startsWith(p));
+  const where = pathname === "/" || ["/buscar", "/tablas", "/anuncio", "/marcas", "/guardado"].some((p) => pathname.startsWith(p));
+  const hidden = !where;
   if (!compare.length || hidden) return null;
   const n = compare.length;
   const ready = n >= 2;
@@ -58,7 +61,7 @@ export function CompareTray() {
           Vaciar
         </button>
         {ready ? (
-          <Link href="/comparar" className={`${ui.btnPrimary} ${styles.go}`}>
+          <Link href="/comparar" className={`${ui.btnNeutral} ${styles.go}`}>
             <span className={styles.goLong}>Comparar {n} tablas</span>
             <span className={styles.goShort} aria-hidden="true">
               Comparar ({n})

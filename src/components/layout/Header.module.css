@@ -178,6 +178,13 @@
   align-items: center;
   transition: background 0.15s ease;
 }
+.publishShort {
+  display: none;
+}
+/* Contenedor del botón de cuenta: no altera la fila (solo sirve para ocultarlo en móvil pequeño). */
+.accountSlot {
+  display: contents;
+}
 .publish:hover {
   background: var(--rb-sand-hover);
 }
@@ -267,8 +274,24 @@
   .actions {
     gap: 0;
   }
-  /* En móvil, «Publicar tabla» vive en el menú: así no se satura la barra. */
+  /* En móvil, «Vender» corto: vender tiene que verse sin abrir el menú. */
   .publish {
+    margin-left: 4px;
+    height: 40px;
+    padding: 0 14px;
+    font-size: 14px;
+  }
+  .publishLong {
+    display: none;
+  }
+  .publishShort {
+    display: inline;
+  }
+}
+
+/* Móvil pequeño: la cuenta sigue en el menú; así cabe «Vender». */
+@media (max-width: 399px) {
+  .accountSlot {
     display: none;
   }
 }

@@ -36,8 +36,8 @@ async function brand(slug: string) {
 
 export async function generateMetadata({ params }: PageProps<"/marcas/[marca]">): Promise<Metadata> {
   const b = await brand((await params).marca);
-  const title = `Tablas ${b.name} de segunda mano`;
-  const description = `Tablas de surf ${b.name} usadas en venta y los modelos de su catálogo con sus medidas y litros. Contacto directo con el vendedor, sin comisiones.`;
+  const title = `Tablas ${b.name} de segunda mano en Canarias`;
+  const description = `Tablas de surf ${b.name} usadas en venta en Canarias y los modelos de su catálogo con sus medidas y litros. Habla directamente con quien vende, sin comisiones.`;
   const path = brandPath(b.slug);
   return {
     title,
@@ -79,7 +79,7 @@ export default async function BrandPage({ params }: PageProps<"/marcas/[marca]">
           {content && (
             <p className={styles.intro}>
               {content.intro}
-              {content.isDemo && <span className={`${ui.demoTag} ${styles.introTag}`}>texto demo</span>}
+              {content.isDemo && <span className={styles.introNote}> Descripción orientativa de Reboard.</span>}
             </p>
           )}
         </div>

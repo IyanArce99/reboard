@@ -6,8 +6,9 @@ import { AccountButton, MainNav, MobileMenu, SavedButton } from "./HeaderClient"
 import styles from "./Header.module.css";
 
 // Cabecera: explorar, encontrar mi tabla y publicar. Sin buscador (el completo está en /buscar).
-// Escritorio: logo · Explorar tablas · TablaFinder · Guías | guardadas · cuenta · Publicar tabla.
-// Tablet: logo | guardadas · cuenta · Publicar tabla · menú. Móvil: logo | guardadas · cuenta · menú.
+// Escritorio: logo · Comprar tablas · ¿Qué tabla necesito? · Guías | guardadas · cuenta · Vender mi tabla.
+// Tablet: logo | guardadas · cuenta · Vender mi tabla · menú. Móvil: logo | guardadas · (cuenta) · Vender · menú.
+// Comprar / Vender es la pareja que se espera en un marketplace (auditoría UX, 24-10-2026).
 export function Header() {
   return (
     <header className={styles.header}>
@@ -37,17 +38,20 @@ export function Header() {
           >
             <SavedButton />
           </Suspense>
-          <Suspense
-            fallback={
-              <Link href="/entrar" aria-label="Entrar" data-tip="Entrar" className={styles.iconBtn}>
-                <UserIcon />
-              </Link>
-            }
-          >
-            <AccountButton />
-          </Suspense>
-          <Link href="/vender/publicar" className={styles.publish}>
-            Publicar tabla
+          <span className={styles.accountSlot}>
+            <Suspense
+              fallback={
+                <Link href="/entrar" aria-label="Entrar" data-tip="Entrar" className={styles.iconBtn}>
+                  <UserIcon />
+                </Link>
+              }
+            >
+              <AccountButton />
+            </Suspense>
+          </span>
+          <Link href="/vender/publicar" className={styles.publish} data-header-publish="">
+            <span className={styles.publishLong}>Vender mi tabla</span>
+            <span className={styles.publishShort}>Vender</span>
           </Link>
           <Suspense
             fallback={

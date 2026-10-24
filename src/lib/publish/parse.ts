@@ -186,7 +186,7 @@ export function parseLitres(text: string): number | null {
   return n == null ? null : Math.round(n * 10) / 10;
 }
 
-const LABEL: Record<MeasureKey, string> = { len: "longitud", width: "anchura", thick: "grosor", vol: "litros" };
+const LABEL: Record<MeasureKey, string> = { len: "la longitud", width: "la anchura", thick: "el grosor", vol: "los litros" };
 const EXAMPLE: Record<MeasureKey, Record<Unit, string>> = {
   len: { ft: `6'4" o 6.4`, cm: "193" },
   width: { ft: `20 1/2" o 20,5`, cm: "52" },
@@ -202,7 +202,7 @@ export function describeMeasure(key: MeasureKey, text: string, unit: Unit): { ok
   if (key === "vol") {
     const l = parseLitres(text);
     if (l == null) return { ok: false, text: `No lo entendemos. Escribe solo el número, como ${EXAMPLE.vol.ft}.` };
-    if (!inRange("vol", l)) return { ok: false, text: `${l.toLocaleString("es-ES")} L no parece correcto: debe estar entre 10 y 150 L.` };
+    if (!inRange("vol", l)) return { ok: false, text: `${l.toLocaleString("es-ES")} L no cuadra: una tabla tiene entre 10 y 150 L.` };
     return { ok: true, text: `${l.toLocaleString("es-ES")} litros` };
   }
   const r = readMeasure(key, text, unit);
@@ -214,11 +214,11 @@ export function describeMeasure(key: MeasureKey, text: string, unit: Unit): { ok
   if (!inRange(key, r.inches)) {
     const [lo, hi] = MEASURE_LIMITS[key];
     const range = key === "len" ? `4' y 12' (122–366 cm)` : `${fmtIn(lo)} y ${fmtIn(hi)}`;
-    return { ok: false, text: `${shown} no parece correcto: la ${LABEL[key]} debe estar entre ${range}. Revisa la unidad.` };
+    return { ok: false, text: `${shown} no cuadra: ${LABEL[key]} debe estar entre ${range}. Revisa la unidad.` };
   }
   // Si se ha leído en otra unidad que la elegida, se dice: así nadie se lleva sorpresas.
   const other = (unit === "ft" && (r.as === "cm" || r.as === "m")) || (unit === "cm" && (r.as === "ft" || r.as === "in"));
-  return { ok: true, text: other ? `Lo leemos en ${r.as === "ft" ? "pies" : r.as === "in" ? "pulgadas" : r.as === "m" ? "metros" : "cm"}: ${shown}` : shown };
+  return { ok: true, text: other ? `Lo hemos leído en ${r.as === "ft" ? "pies" : r.as === "in" ? "pulgadas" : r.as === "m" ? "metros" : "cm"}: ${shown}` : shown };
 }
 
 const VOL_RE = /(\d{2,3}(?:[.,]\d+)?) ?(?:l|lt|lts|ltr|litros?)\b\.?/;
@@ -236,7 +236,7 @@ export function parseMeasures(input: string): ParsedMeasures {
   const v = s.match(VOL_RE);
   if (v) {
     const l = parseLitres(v[1]);
-    if (l != null) out.vol = String(l);
+    if (l != null) out.vol = String(l).replace(".", ",");
     s = s.replace(VOL_RE, " ");
   }
   // «cm» al final vale para las tres medidas («193 x 52 x 6,7 cm»).

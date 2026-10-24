@@ -53,7 +53,7 @@ const SHAPE_INTROS: Partial<Record<LandingForm, string>> = {
   longboard: "Tablas de 9 pies o más para olas pequeñas, remada fácil y estilo clásico.",
   midlength: "Tablas de entre 6'8\" y 8'0\" que reman fácil y deslizan mucho, para olas tranquilas y un surf fluido.",
   gun: "Tablas largas y estrechas para olas grandes y con fuerza. Revisa longitud y litros antes de comprar.",
-  softboard: "Las softboards son tablas de espuma. Es una construcción, no una forma: las hay evolutivas, fish y longboard. Ideales para empezar.",
+  softboard: "Las softboards son tablas de espuma: blandas, estables y seguras para aprender. Las hay con forma de evolutiva, fish o longboard.",
   principiantes: `Tablas de ${BEGINNER_MIN_VOLUME} litros o más: estabilidad y remada fácil para aprender. Si no sabes cuántos litros necesitas, calcúlalo en «¿Qué tabla necesito?».`,
 };
 

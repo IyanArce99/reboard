@@ -662,6 +662,7 @@ button.seg::after {
 }
 
 .resAccent {
+  white-space: nowrap;
   color: var(--rb-teal-light);
 }
 
@@ -731,6 +732,7 @@ button.seg::after {
 }
 
 .volNum {
+  white-space: nowrap;
   font-family: var(--rb-font-ui);
   font-variant-numeric: tabular-nums;
   font-size: 40px;
@@ -764,8 +766,9 @@ button.seg::after {
   text-transform: uppercase;
   color: var(--rb-teal-light);
 }
+/* «Qué evitar»: tono cálido suave, no el amarillo (reservado a la acción principal). */
 .tipAvoid {
-  color: var(--rb-sand);
+  color: #f2b8a0;
 }
 
 .tipList {

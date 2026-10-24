@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { notFound, permanentRedirect } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { AvailabilityDot } from "@/components/listing/AvailabilityDot";
 import {
   BackLink,
@@ -23,7 +23,7 @@ import { getRepository } from "@/lib/data";
 import { getCatalogNames } from "@/lib/data/names";
 import { CONDITION_HELP, CONDITION_LABEL, CONSTRUCTION_INFO, SELLER_LABEL, SHAPE_INFO, slugify } from "@/lib/domain/taxonomy";
 import type { Listing } from "@/lib/domain/types";
-import { eur, fmtIn, inToCm } from "@/lib/domain/format";
+import { eur, fmtIn, inToCm, litres } from "@/lib/domain/format";
 import {
   availability,
   idFromSlugId,
@@ -57,13 +57,16 @@ async function load(slugId: string) {
   const id = idFromSlugId(slugId);
   const l = id ? await getRepository().byId(id) : null;
   if (!l) notFound();
-  if (`${l.slug}-${l.id}` !== slugId) permanentRedirect(listingPath(l));
+  // Redirección TEMPORAL a la URL actual: si al editar cambia el slug y durante unos segundos alguna
+  // caché aún tiene el anterior, una 308 quedaba guardada en el navegador y el viejo y el nuevo se
+  // redirigían el uno al otro en bucle (QA-2, auditoría 24-10-2026). El canonical ya da la URL buena.
+  if (`${l.slug}-${l.id}` !== slugId) redirect(listingPath(l));
   return l;
 }
 
 export async function generateMetadata({ params }: PageProps<"/anuncio/[slugId]">): Promise<Metadata> {
   const l = await load((await params).slugId);
-  const vol = l.volume.value != null ? ` · ${l.volume.value} L` : "";
+  const vol = l.volume.value != null ? ` · ${litres(l.volume.value)}` : "";
   const title = `${listingTitle(l)}${vol} · ${eur(l.price)} en ${zoneName(l)}`;
   // Sin doble punto cuando la localidad acaba en abreviatura («Las Palmas de G.C.»).
   const description = `${SHAPE_INFO[l.shape].label} ${CONSTRUCTION_INFO[l.construction].short}, ${CONDITION_LABEL[l.condition].toLowerCase()}, en ${l.town.replace(/\.$/, "")}. Contacto directo con el vendedor, sin comisiones.`;
@@ -104,7 +107,7 @@ export default async function FichaPage({ params }: PageProps<"/anuncio/[slugId]
 
   const keySpecs = [
     { k: "Longitud", v: l.sizeLabel, s: len != null ? `${inToCm(len)} cm` : "" },
-    { k: "Litros", v: vol != null ? `${vol} L` : "—", s: vol != null ? (l.volume.source === "manufacturer" ? "según el fabricante" : "según el vendedor") : "sin indicar", unknown: vol == null },
+    { k: "Litros", v: vol != null ? litres(vol) : "—", s: vol != null ? (l.volume.source === "manufacturer" ? "según el fabricante" : "según el vendedor") : "sin indicar", unknown: vol == null },
     { k: "Anchura", v: width != null ? fmtIn(width) : "—", s: thick != null ? `grosor ${fmtIn(thick)}` : "" },
   ];
 
@@ -115,7 +118,7 @@ export default async function FichaPage({ params }: PageProps<"/anuncio/[slugId]
     { k: "Longitud", v: len != null ? l.sizeLabel : null, sub: len != null ? `${inToCm(len)} cm` : "", src: l.length.source },
     { k: "Anchura", v: width != null ? fmtIn(width) : null, sub: width != null ? cmText(width) : "", src: l.width.source },
     { k: "Grosor", v: thick != null ? fmtIn(thick) : null, sub: thick != null ? cmText(thick) : "", src: l.thickness.source },
-    { k: "Volumen", v: vol != null ? `${String(vol).replace(".", ",")} L` : null, sub: "", src: l.volume.source },
+    { k: "Volumen", v: vol != null ? litres(vol) : null, sub: "", src: l.volume.source },
   ];
   const features: { k: string; v: string | null; src: Listing["volume"]["source"] }[] = [
     { k: "Tipo", v: SHAPE_INFO[l.shape].label, src: l.shapeSource },
@@ -361,7 +364,7 @@ export default async function FichaPage({ params }: PageProps<"/anuncio/[slugId]
         </section>
       </main>
 
-      <ContactBar price={eur(l.price)} specs={`${l.sizeLabel} · ${vol != null ? `${vol} L` : "sin litros"}`} />
+      <ContactBar price={eur(l.price)} specs={`${l.sizeLabel} · ${vol != null ? litres(vol) : "sin litros"}`} />
 
       <JsonLd
         data={{
@@ -369,7 +372,7 @@ export default async function FichaPage({ params }: PageProps<"/anuncio/[slugId]
           "@type": "Product",
           name: title,
           url,
-          image: l.photos.map((p) => p.url),
+          ...(l.photos.length ? { image: l.photos.map((p) => p.url) } : {}),
           ...(hasDescription ? { description: l.description } : {}),
           ...(l.brand ? { brand: { "@type": "Brand", name: l.brand } } : {}),
           ...(l.model ? { model: l.model } : {}),

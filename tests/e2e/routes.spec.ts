@@ -72,11 +72,11 @@ test.describe("códigos HTTP", () => {
   }
 
   // Anuncios: ids reales del inventario DEMO de Supabase local (cambian en cada carga).
-  test("200 en la ficha de un anuncio y 308 al slug canónico", async ({ request }) => {
+  test("200 en la ficha de un anuncio y 307 al slug canónico (temporal: el slug cambia al editar)", async ({ request }) => {
     const torq = await demoListing("torq-fun-tet-7-2-gran-canaria");
     expect((await request.get(torq.path, { maxRedirects: 0 })).status()).toBe(200);
     const res = await request.get(`/anuncio/slug-viejo-${torq.id}`, { maxRedirects: 0 });
-    expect(res.status()).toBe(308);
+    expect(res.status()).toBe(307);
     expect(res.headers()["location"]).toMatch(new RegExp(`/anuncio/torq-fun-tet-7-2-gran-canaria-${torq.id}$`));
   });
 

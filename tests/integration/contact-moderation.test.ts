@@ -113,7 +113,9 @@ describe("revelar el contacto (F1)", () => {
     expect(r).toEqual({ ok: true, method: "whatsapp", phone: "34611000111" });
     const { data } = await seller.client.from("contact_events").select("listing_id").eq("listing_id", listing.id);
     expect(data).toHaveLength(1);
-    expect((await reporters[0].client.from("contact_events").select("id").eq("listing_id", listing.id)).data).toEqual([]);
+    // Otro usuario no ve los contactos ajenos (RLS). Desde 20261029090000 solo se pueden leer
+    // listing_id, method y created_at.
+    expect((await reporters[0].client.from("contact_events").select("listing_id").eq("listing_id", listing.id)).data).toEqual([]);
   });
 
   it("limita a 30 por hora y por IP", async () => {

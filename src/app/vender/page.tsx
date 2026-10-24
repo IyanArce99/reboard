@@ -7,9 +7,9 @@ import styles from "@/components/publish/SellLanding.module.css";
 
 // Landing de venta indexable (docs/SEO.md). Con datos DEMO hereda el noindex global del layout.
 export const metadata: Metadata = {
-  title: "Vende tu tabla de surf usada gratis",
+  title: "Vende tu tabla de surf usada en Canarias, gratis",
   description:
-    "Publica gratis tu tabla de surf de segunda mano desde el móvil, sin comisiones. Quien la quiera te escribe por WhatsApp o te llama.",
+    "Publica gratis tu tabla de surf de segunda mano en Canarias desde el móvil, sin comisiones. Quien la quiera te escribe por WhatsApp o te llama.",
   alternates: { canonical: "/vender" },
 };
 

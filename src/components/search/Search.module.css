@@ -594,6 +594,19 @@
   padding: 0 20px;
 }
 
+/* Tablet: barra lateral más estrecha y tarjetas más pequeñas para que quepan dos columnas
+   (con 300 px de filtros, a 820 px solo cabía una y /buscar medía 18.000 px). */
+@media (min-width: 760px) and (max-width: 1023px) {
+  .layout {
+    grid-template-columns: 240px minmax(0, 1fr);
+    gap: 20px;
+  }
+  .grid {
+    grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+    gap: 12px;
+  }
+}
+
 @media (max-width: 759px) {
   .page {
     padding-top: 14px;

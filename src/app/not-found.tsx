@@ -13,8 +13,8 @@ export default function NotFound() {
         <p className={styles.eyebrow}>Error 404</p>
         <h1 className={styles.title}>Esta ola ya pasó</h1>
         <p className={styles.lead}>
-          No encontramos esta página. Puede que el anuncio ya no esté o que el enlace esté mal. Busca otra tabla por litros, tipo y
-          zona.
+          No encontramos esta página. Puede que el anuncio ya no esté o que el enlace esté mal. Busca otra tabla por litros, tipo e
+          isla.
         </p>
         <div className={styles.actions}>
           <Link href="/buscar" className={styles.primary}>

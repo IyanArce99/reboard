@@ -168,7 +168,7 @@ export function StepBoard({ d, set, setD, catalog, brands: known, featuredBrands
 
         <div className={styles.paste}>
           <label htmlFor="pub-paste" className={styles.pasteLabel}>
-            ¿Las tienes escritas en la tabla? Cópialas tal cual
+            ¿Vienen escritas en la tabla? Escríbelas tal cual y las separamos
           </label>
           <div className={styles.pasteRow}>
             <input

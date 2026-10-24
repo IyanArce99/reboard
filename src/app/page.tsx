@@ -18,7 +18,7 @@ import { absoluteUrl, SITE_NAME, OG_BASE } from "@/lib/site";
 import styles from "@/components/home/Home.module.css";
 
 const DESCRIPTION =
-  "Compra y vende tablas de surf de segunda mano en Canarias, en todas las islas. Busca por litros, medidas, tipo e isla y habla directamente con quien vende, sin comisiones.";
+  "Compra y vende tablas de surf de segunda mano en Canarias. Busca por litros, medidas, tipo e isla y habla directamente con quien vende, sin comisiones.";
 
 export const metadata: Metadata = {
   description: DESCRIPTION,
@@ -40,9 +40,9 @@ const CATEGORIES: { label: string; form: LandingForm; shape: Shape; soft?: boole
 ];
 
 const STEPS = [
-  { n: "01", t: "Filtra por lo que importa", d: "Litros, longitud, tipo, precio e isla. En cada medida ves de dónde sale: del vendedor, del fabricante o «sin indicar»." },
+  { n: "01", t: "Filtra por lo que importa", d: "Litros, longitud, tipo, precio e isla. En cada medida ves si la da el vendedor o el fabricante." },
   { n: "02", t: "Escribe o llama a quien vende", d: "Por WhatsApp o por teléfono, sin intermediarios. Reboard no se lleva comisión." },
-  { n: "03", t: "Mírala bien antes de pagar", d: "Quedad en un sitio público, revisa cantos, fondo y quillas, y paga en mano al llevártela. Nunca por adelantado." },
+  { n: "03", t: "Mírala bien antes de pagar", d: "Queda en un sitio público, revisa cantos, fondo y quillas, y paga en mano al llevártela. Nunca por adelantado." },
 ];
 
 const GUIDES: { t: string; d: string; href: string; photo: PhotoSlug }[] = [

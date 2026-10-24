@@ -76,11 +76,17 @@ export async function proxy(request: NextRequest) {
 
   if (parts[0] === "anuncio" && parts.length === 2) {
     const id = idFromSlugId(parts[1]);
-    const slug = id ? await listingSlug(id) : null;
+    let slug = id ? await listingSlug(id) : null;
+    // Antes de dar un 404 o redirigir, se confirma sin caché: si el anuncio se acaba de editar (slug
+    // nuevo) o publicar, la caché de 60 s tenía el dato viejo y el proxy y la página se redirigían
+    // el uno al otro en bucle (QA-2, auditoría 24-10-2026).
+    if (id && (!slug || `/anuncio/${slug}-${id}` !== request.nextUrl.pathname)) slug = await listingSlug(id, true);
     if (!slug) return notFound(request);
     const canonical = `/anuncio/${slug}-${id}`;
     if (canonical !== request.nextUrl.pathname) {
-      return NextResponse.redirect(new URL(canonical, request.url), 308);
+      // Temporal (307): una 308 se guarda en el navegador y, si el slug vuelve a cambiar (p. ej., se
+      // deshace una edición), crearía un bucle. El canonical de la ficha ya indica la URL buena.
+      return NextResponse.redirect(new URL(canonical, request.url), 307);
     }
     return NextResponse.next();
   }
