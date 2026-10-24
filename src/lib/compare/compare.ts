@@ -47,6 +47,17 @@ export function sanitizeCompare(raw: unknown): CompareItem[] {
   return out;
 }
 
+/** `?ids=a1,a2` de un enlace compartido → ids válidos (sin repetir, máximo 4). */
+export function parseIdsParam(raw: string | null | undefined): string[] {
+  if (!raw) return [];
+  return sanitizeCompare(raw.split(",").map((id) => ({ id: id.trim(), label: "Tabla" }))).map((c) => c.id);
+}
+
+/** Enlace para compartir una comparación. */
+export const compareSharePath = (ids: string[]) => `/comparar?ids=${ids.join(",")}`;
+
+export const sameIds = (a: string[], b: string[]) => a.length === b.length && a.every((x) => b.includes(x));
+
 /** Elemento de la selección a partir de un anuncio (tarjetas y ficha). */
 export const compareItemOf = (l: Listing): CompareItem => ({
   id: l.id,

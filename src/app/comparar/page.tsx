@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import { Comparator } from "@/components/compare/Comparator";
 import { privateMetadata } from "@/components/saved/metadata";
 import ui from "@/styles/ui.module.css";
@@ -10,7 +11,10 @@ export default function CompararPage() {
     <main className={`container ${styles.page}`}>
       <h1 className={`${ui.h1} ${styles.title}`}>Compara tablas de surf</h1>
       <p className={styles.lead}>Hasta 4 tablas, una al lado de otra: precio, litros, medidas, estado e isla.</p>
-      <Comparator />
+      {/* Lee ?ids= de un enlace compartido: la URL en el cliente necesita su Suspense. */}
+      <Suspense fallback={<div className={styles.skeleton} aria-hidden="true" />}>
+        <Comparator />
+      </Suspense>
     </main>
   );
 }

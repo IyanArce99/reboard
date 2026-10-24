@@ -169,3 +169,17 @@ describe("«Diferencias principales» (deterministas y prudentes)", () => {
     expect(joinLetters(["A", "B", "C"])).toBe("A, B y C");
   });
 });
+
+describe("enlace compartido (/comparar?ids=)", () => {
+  it("lee ids válidos, sin repetir y como mucho 4", async () => {
+    const { parseIdsParam, compareSharePath, sameIds } = await import("@/lib/compare/compare");
+    expect(parseIdsParam("a100001,a100002")).toEqual(["a100001", "a100002"]);
+    expect(parseIdsParam(" a100001 , a100001,1040,<script>,a100003")).toEqual(["a100001", "a100003"]);
+    expect(parseIdsParam("a1,a2,a3,a4,a5")).toHaveLength(4);
+    expect(parseIdsParam("")).toEqual([]);
+    expect(parseIdsParam(null)).toEqual([]);
+    expect(compareSharePath(["a1", "a2"])).toBe("/comparar?ids=a1,a2");
+    expect(sameIds(["a1", "a2"], ["a2", "a1"])).toBe(true);
+    expect(sameIds(["a1"], ["a1", "a2"])).toBe(false);
+  });
+});

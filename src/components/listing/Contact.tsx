@@ -193,28 +193,8 @@ export function ContactBar({ price, specs }: { price: string; specs: string }) {
   );
 }
 
-export function ShareButton({ url, className }: { url: string; className: string }) {
-  const { toast } = useUserState();
-  return (
-    <button
-      type="button"
-      className={className}
-      onClick={async () => {
-        try {
-          if (navigator.share) await navigator.share({ url });
-          else {
-            await navigator.clipboard.writeText(url);
-            toast("Enlace copiado");
-          }
-        } catch {
-          // El usuario canceló el diálogo de compartir.
-        }
-      }}
-    >
-      Compartir
-    </button>
-  );
-}
+/** Compartir la ficha: ahora vive en islands.tsx (también lo usa el comparador). */
+export { ShareButton } from "@/components/user/islands";
 
 // Motivos y etiquetas compartidos con moderación y el panel (enum report_reason).
 const REASONS = REPORT_REASONS;

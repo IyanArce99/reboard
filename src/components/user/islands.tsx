@@ -75,6 +75,48 @@ export function CompareLink({ className }: { className?: string }) {
   );
 }
 
+/**
+ * Compartir un enlace: en el móvil abre el menú del sistema (WhatsApp, Telegram…) con un título y un
+ * texto; donde no existe (la mayoría de navegadores de escritorio), copia el enlace y lo avisa.
+ */
+export function ShareButton({
+  url,
+  className,
+  title,
+  text,
+  label = "Compartir",
+}: {
+  /** Absoluta o relativa a la web (se completa con el dominio actual). */
+  url: string;
+  className?: string;
+  title?: string;
+  text?: string;
+  label?: string;
+}) {
+  const { toast } = useUserState();
+  return (
+    <button
+      type="button"
+      className={className}
+      onClick={async () => {
+        const href = new URL(url, window.location.origin).toString();
+        try {
+          if (navigator.share) await navigator.share({ title, text, url: href });
+          else {
+            await navigator.clipboard.writeText(href);
+            toast("Enlace copiado: pégalo donde quieras compartirlo.");
+          }
+        } catch (e) {
+          // Cancelar el menú de compartir no es un error; si falla el portapapeles, se avisa.
+          if ((e as Error)?.name !== "AbortError") toast("No hemos podido copiar el enlace. Cópialo de la barra de direcciones.");
+        }
+      }}
+    >
+      {label}
+    </button>
+  );
+}
+
 /** «Te encaja»: el volumen está dentro del rango orientativo del perfil de surfista. */
 export function FitBadge({ volume, text = "Te encaja · en tu rango de litros", className = ui.fitBadge }: { volume: number | null; text?: string; className?: string }) {
   const { profile } = useUserState();

@@ -37,6 +37,14 @@ Compara de 2 a 4 tablas en `/comparar`. La selección vive en el dispositivo (`l
   - «Solo lo que cambia» oculta las iguales.
 - **Datos que faltan:** salen como «Sin indicar». Las reparaciones, como «Ninguna indicada»: no afirmamos que no tenga.
 
+## Compartir
+- **«Compartir comparación»** (desde 2 tablas) genera `/comparar?ids=a1,a2…`. En el móvil abre el menú del sistema (WhatsApp, Telegram…) con un texto que nombra las tablas; en el escritorio copia el enlace.
+- **Al abrir un enlace compartido:**
+  - sin selección propia, la comparación pasa a ser la tuya y la URL vuelve a `/comparar`;
+  - con otra selección distinta, se muestra la compartida **sin tocar la tuya**, con «Usar esta comparación» o «Volver a la mía».
+- **Ids del enlace:** se validan con la misma regla que `localStorage` (`parseIdsParam`: formato, sin repetir, máximo 4).
+- **Ficha del anuncio:** su «Compartir» (el mismo componente, `ShareButton` en `islands.tsx`) envía también el título y el precio: «Torq Fun TET 7'2" · 190 € en Gran Canaria, en Reboard».
+
 ## Móvil (< 760 px)
 - Las tarjetas forman una tira con desplazamiento horizontal propio; la página nunca se desplaza en horizontal.
 - La ficha técnica muestra **dos tablas a la vez** en columnas. Cada dato lleva la etiqueta encima.
@@ -68,5 +76,4 @@ Compara de 2 a 4 tablas en `/comparar`. La selección vive en el dispositivo (`l
 
 ## Pendiente (no implementado)
 - **Medición de uso** (añadidas, comparaciones abiertas, clics en «Ver tabla» desde el comparador): cuando haya analítica sin cookies.
-- **Enlace compartible a una comparación** (`/comparar?ids=…`).
 - **Tablas nuevas de tiendas o de afiliación:** `compare.ts` solo lee los campos de un anuncio. Una oferta nueva podría compararse si se adapta a esa forma (precio, medidas con su origen, tipo, construcción, ubicación o «online», estado). Hoy no hay modelo de ofertas.

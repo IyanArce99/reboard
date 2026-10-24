@@ -7,11 +7,24 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
 import { BoardShape } from "@/components/brand/BoardShape";
 import { useListings } from "@/components/saved/useListings";
+import { ShareButton } from "@/components/user/islands";
 import { MAX_COMPARE, useUserState, type SurferProfile } from "@/components/user/UserStateProvider";
-import { LETTERS, compareGroups, compareSummary, fitOf, fitText, type CompareGroup } from "@/lib/compare/compare";
+import {
+  LETTERS,
+  compareGroups,
+  compareItemOf,
+  compareSharePath,
+  compareSummary,
+  fitOf,
+  fitText,
+  parseIdsParam,
+  sameIds,
+  type CompareGroup,
+} from "@/lib/compare/compare";
 import { eur } from "@/lib/domain/format";
 import type { Listing } from "@/lib/domain/types";
 import { availability, listingPath, listingTitle, zoneName } from "@/lib/listing/present";
@@ -34,9 +47,41 @@ function useMedia(query: string) {
 }
 
 export function Comparator() {
-  const { compare, profile, ready, removeCompare, clearCompare } = useUserState();
-  const ids = compare.map((c) => c.id);
+  const { compare, profile, ready, removeCompare, clearCompare, replaceCompare } = useUserState();
+  const router = useRouter();
+  const params = useSearchParams();
+  const localIds = compare.map((c) => c.id);
+  // Enlace compartido (/comparar?ids=…): si no tienes selección, pasa a ser la tuya; si tienes otra
+  // distinta, se muestra la compartida sin tocar la tuya, y eliges.
+  const sharedIds = parseIdsParam(params.get("ids"));
+  const shared = ready && sharedIds.length > 0 && localIds.length > 0 && !sameIds(sharedIds, localIds);
+  const ids = ready && sharedIds.length > 0 && !localIds.length ? sharedIds : shared ? sharedIds : localIds;
   const { listings, gone, now, loading, failed, retry } = useListings(ids, ready);
+  const sharedKey = sharedIds.join(",");
+  const localKey = localIds.join(",");
+
+  useEffect(() => {
+    if (!ready || !sharedKey) return;
+    const s = sharedKey.split(",");
+    const local = localKey ? localKey.split(",") : [];
+    if (!local.length) replaceCompare(s.map((id) => ({ id, label: "Tabla" })));
+    if (!local.length || sameIds(s, local)) router.replace("/comparar", { scroll: false });
+  }, [ready, sharedKey, localKey, replaceCompare, router]);
+
+  // Las etiquetas y miniaturas de la barra se refrescan con los datos reales (enlaces compartidos,
+  // selecciones antiguas sin foto).
+  useEffect(() => {
+    if (shared || !listings.length || listings.length !== compare.length) return;
+    const fresh = listings.map(compareItemOf);
+    if (JSON.stringify(fresh) !== JSON.stringify(compare)) replaceCompare(fresh);
+  }, [shared, listings, compare, replaceCompare]);
+
+  const removeOne = (id: string) => {
+    if (!shared) return removeCompare(id);
+    const rest = sharedIds.filter((x) => x !== id);
+    router.replace(rest.length ? compareSharePath(rest) : "/comparar", { scroll: false });
+  };
+  const clearAll = () => (shared ? router.replace("/comparar", { scroll: false }) : clearCompare());
   const mobile = useMedia(MOBILE);
   const [onlyDiff, setOnlyDiff] = useState(false);
   const [pair, setPair] = useState<[number, number]>([0, 1]);
@@ -47,9 +92,11 @@ export function Comparator() {
   useEffect(() => {
     if (!goneKey) return;
     const list = goneKey.split(",");
-    list.forEach((id) => removeCompare(id));
+    if (shared) router.replace(compareSharePath(sharedIds.filter((x) => !list.includes(x))), { scroll: false });
+    else list.forEach((id) => removeCompare(id));
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setRemoved((n) => n + list.length);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [goneKey, removeCompare]);
 
   const n = listings.length;
@@ -65,18 +112,50 @@ export function Comparator() {
       <span className={styles.count}>
         <strong>{n}</strong> de {MAX_COMPARE} tablas
       </span>
-      {n < MAX_COMPARE ? (
+      {shared ? null : n < MAX_COMPARE ? (
         <Link href="/buscar" className={styles.toolLink}>
           + Añadir otra tabla
         </Link>
       ) : (
         <span className={styles.toolNote}>Máximo {MAX_COMPARE}: quita una para añadir otra</span>
       )}
-      {n > 0 && (
-        <button type="button" className={styles.toolBtn} onClick={clearCompare}>
+      {n >= 2 && (
+        <ShareButton
+          url={compareSharePath(listings.map((l) => l.id))}
+          title="Comparación de tablas en Reboard"
+          text={`Mira estas ${n} tablas una al lado de otra: ${listings.map((l) => listingTitle(l)).join(", ")}.`}
+          label="Compartir comparación"
+          className={styles.toolLink}
+        />
+      )}
+      {n > 0 && !shared && (
+        <button type="button" className={styles.toolBtn} onClick={clearAll}>
           Vaciar comparación
         </button>
       )}
+    </div>
+  );
+
+  const sharedNote = shared && (
+    <div className={styles.sharedNote} role="status">
+      <p>
+        Estás viendo una comparación que te han compartido. La tuya ({localIds.length} {localIds.length === 1 ? "tabla" : "tablas"}) sigue guardada.
+      </p>
+      <div className={styles.sharedActions}>
+        <button
+          type="button"
+          className={ui.btnStrong}
+          onClick={() => {
+            replaceCompare(listings.map(compareItemOf));
+            router.replace("/comparar", { scroll: false });
+          }}
+        >
+          Usar esta comparación
+        </button>
+        <button type="button" className={ui.btnNeutral} onClick={() => router.replace("/comparar", { scroll: false })}>
+          Volver a la mía
+        </button>
+      </div>
     </div>
   );
 
@@ -118,9 +197,10 @@ export function Comparator() {
     return (
       <>
         {toolbar}
+        {sharedNote}
         {removedNote}
         <div className={styles.single}>
-          <BoardCard l={l} i={0} now={now} onRemove={() => removeCompare(l.id)} />
+          <BoardCard l={l} i={0} now={now} onRemove={() => removeOne(l.id)} />
           <div className={styles.singleText}>
             <h2 className={styles.h2}>Añade otra tabla para compararla</h2>
             <p>Pulsa «Comparar» en cualquier tabla del buscador o de su ficha. Puedes comparar hasta {MAX_COMPARE}.</p>
@@ -144,13 +224,14 @@ export function Comparator() {
   return (
     <>
       {toolbar}
+      {sharedNote}
       {removedNote}
 
       {/* Tarjetas de las tablas: en móvil, una tira con desplazamiento propio (nunca la página). */}
       <ol className={styles.cards} aria-label="Tablas en comparación" data-n={n}>
         {listings.map((l, i) => (
           <li key={l.id}>
-            <BoardCard l={l} i={i} now={now} onRemove={() => removeCompare(l.id)} />
+            <BoardCard l={l} i={i} now={now} onRemove={() => removeOne(l.id)} />
           </li>
         ))}
       </ol>

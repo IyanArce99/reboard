@@ -164,7 +164,8 @@
   margin: 0 0 22px;
   padding: 0;
   display: grid;
-  grid-template-columns: repeat(var(--n, 2), minmax(0, 1fr));
+  /* Ancho máximo por tarjeta: con 2 tablas no ocupan media pantalla cada una. */
+  grid-template-columns: repeat(var(--n, 2), minmax(0, 300px));
   gap: 14px;
 }
 .cards[data-n="2"] {
@@ -717,4 +718,28 @@ tr:not([data-diff]) .cell,
   .mRow[data-diff] .mCell {
     font-weight: 600;
   }
+}
+
+/* Comparación compartida por otra persona (no sustituye la tuya hasta que lo eliges). */
+.sharedNote {
+  margin: 0 0 14px;
+  padding: 14px 16px;
+  border-radius: 14px;
+  border: 1px solid var(--rb-teal);
+  background: var(--rb-teal-tint);
+  color: var(--rb-teal-ink);
+  font-size: 15px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px 16px;
+}
+.sharedNote p {
+  margin: 0;
+}
+.sharedActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
 }

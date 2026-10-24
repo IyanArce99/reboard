@@ -209,7 +209,7 @@ export default async function FichaPage({ params }: PageProps<"/anuncio/[slugId]
             <ContactButton className={styles.contact} />
             <div className={styles.actions}>
               <SaveTextButton id={l.id} className={styles.action} />
-              <ShareButton url={url} className={styles.action} />
+              <ShareButton url={url} title={listingTitle(l)} text={`${listingTitle(l)} · ${eur(l.price)} en ${zoneName(l)}, en Reboard`} className={styles.action} />
               <CompareButton item={compareItemOf(l)} name={listingTitle(l)} className={styles.action} />
             </div>
             {/* En móvil la barra de comparación no se muestra en la ficha (ya está la de contacto). */}

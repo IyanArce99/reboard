@@ -163,3 +163,41 @@ test("móvil: en la ficha no hay barra (está la de contacto) pero sí el acceso
   await expect(tray(page).getByRole("link", { name: /Comparar/ })).toBeVisible();
   await ctx.close();
 });
+
+test("enlace compartido: sin selección propia, la comparación pasa a ser la tuya", async ({ page }) => {
+  const [a, b] = await demoPublished(2);
+  await page.goto(`/comparar?ids=${a.id},${b.id}`);
+  await expect(page.getByText(/2.*de 4 tablas/)).toBeVisible();
+  await expect(page).toHaveURL(/\/comparar$/);
+  expect((await stored(page)).map((c: { id: string }) => c.id)).toEqual([a.id, b.id]);
+  // La barra recibe nombre y miniatura reales (no «Tabla»).
+  expect((await stored(page)).every((c: { label: string }) => c.label !== "Tabla")).toBe(true);
+});
+
+test("enlace compartido: con otra selección, se muestra sin tocar la tuya y eliges", async ({ page }) => {
+  const [a, b, c, d] = await demoPublished(4);
+  await page.addInitScript(([k, v]) => localStorage.setItem(k, v), [STATE_KEY, state([{ id: c.id, label: c.label }, { id: d.id, label: d.label }])]);
+  await page.goto(`/comparar?ids=${a.id},${b.id}`);
+  await expect(page.getByText("Estás viendo una comparación que te han compartido")).toBeVisible();
+  expect((await stored(page)).map((x: { id: string }) => x.id)).toEqual([c.id, d.id]);
+  await page.getByRole("button", { name: "Usar esta comparación" }).click();
+  await expect(page).toHaveURL(/\/comparar$/);
+  await expect(page.getByText("Estás viendo una comparación que te han compartido")).toHaveCount(0);
+  await expect.poll(async () => (await stored(page)).map((x: { id: string }) => x.id)).toEqual([a.id, b.id]);
+});
+
+test("compartir: copia el enlace de la comparación y el de la ficha (escritorio)", async ({ browser }) => {
+  const ctx = await browser.newContext({ permissions: ["clipboard-read", "clipboard-write"] });
+  const [a, b] = await demoPublished(2);
+  await ctx.addInitScript(([k, v]) => localStorage.setItem(k, v), [STATE_KEY, state([{ id: a.id, label: a.label }, { id: b.id, label: b.label }])]);
+  const page = await ctx.newPage();
+  await page.goto("/comparar");
+  await page.getByRole("button", { name: "Compartir comparación" }).click();
+  await expect(page.getByText("Enlace copiado")).toBeVisible();
+  expect(await page.evaluate(() => navigator.clipboard.readText())).toContain(`/comparar?ids=${a.id},${b.id}`);
+
+  await page.goto(a.path);
+  await page.getByRole("button", { name: "Compartir", exact: true }).click();
+  expect(await page.evaluate(() => navigator.clipboard.readText())).toMatch(new RegExp(`${a.path}$`));
+  await ctx.close();
+});

@@ -55,6 +55,8 @@ interface UserState extends Stored {
   toggleCompare: (item: CompareItem) => void;
   removeCompare: (id: string) => void;
   clearCompare: () => void;
+  /** Sustituye la selección entera (comparación compartida o datos actualizados). */
+  replaceCompare: (items: CompareItem[]) => void;
   addAlert: (text: string, query: string) => void;
   toggleAlert: (id: string) => void;
   removeAlert: (id: string) => void;
@@ -256,6 +258,10 @@ export function UserStateProvider({ children, authEnabled = false }: { children:
     setState((s) => ({ ...s, compare: [] }));
   }, []);
 
+  const replaceCompare = useCallback((items: CompareItem[]) => {
+    setState((s) => ({ ...s, compare: sanitizeCompare(items) }));
+  }, []);
+
   const addAlert = useCallback(
     (text: string, query: string) => {
       // Una alerta por búsqueda: si ya existe la misma `query`, no se duplica.
@@ -300,6 +306,7 @@ export function UserStateProvider({ children, authEnabled = false }: { children:
       toggleCompare,
       removeCompare,
       clearCompare,
+      replaceCompare,
       addAlert,
       toggleAlert,
       removeAlert,
@@ -317,6 +324,7 @@ export function UserStateProvider({ children, authEnabled = false }: { children:
       toggleCompare,
       removeCompare,
       clearCompare,
+      replaceCompare,
       addAlert,
       toggleAlert,
       removeAlert,
