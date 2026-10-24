@@ -795,23 +795,46 @@ button.slot:hover {
   font-size: 40px;
   color: var(--rb-muted);
 }
-.zoneGroup {
+/* «¿Dónde está la tabla?»: isla y localidad dentro del mismo bloque. */
+.whereBlock {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 8px;
+  margin-top: 6px;
 }
-.zoneName {
-  font-size: 12px;
-  font-weight: 700;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
+.subLabel {
+  font-size: 14px;
+  font-weight: 600;
   color: var(--rb-muted);
 }
+.townSuggest {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+/* Sugerencia de localidad: texto turquesa sobre tinte suave, sin borde (no es otra elección como la isla). */
 .townChip {
-  height: 44px;
-  font-size: 14px;
-  font-weight: 400;
+  min-height: 44px;
   padding: 0 14px;
+  border: 0;
+  border-radius: var(--rb-r-chip);
+  background: rgba(8, 126, 139, 0.08);
+  color: var(--rb-teal-text);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.townChip:hover {
+  background: rgba(8, 126, 139, 0.14);
+}
+.townChip[aria-pressed="true"] {
+  background: var(--rb-teal);
+  color: var(--rb-white);
+}
+.townChip:focus-visible {
+  outline: 2px solid var(--rb-teal);
+  outline-offset: 2px;
 }
 .contactBox {
   display: flex;
