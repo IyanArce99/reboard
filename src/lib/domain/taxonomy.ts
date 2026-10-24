@@ -43,6 +43,14 @@ export const CONDITIONS = [
 ] as const;
 export type Condition = (typeof CONDITIONS)[number];
 
+/** Qué significa cada estado (publicar y ficha). */
+export const CONDITION_HELP: Record<Condition, string> = {
+  "como-nueva": "Sin golpes ni reparaciones. Apenas se ha usado.",
+  "muy-buen-estado": "Marcas de uso leves, como presiones en la cubierta. Sin reparaciones importantes.",
+  "buen-estado": "Marcas visibles o algún golpe ya reparado. Lista para surfear.",
+  "con-reparaciones": "Reparaciones importantes o algún golpe que necesita arreglo.",
+};
+
 export const CONDITION_LABEL: Record<Condition, string> = {
   "como-nueva": "Como nueva",
   "muy-buen-estado": "Muy buen estado",

@@ -21,7 +21,7 @@ import { AlertButton, CompareButton, CompareLink, SaveTextButton } from "@/compo
 import { compareItemOf } from "@/lib/compare/compare";
 import { getRepository } from "@/lib/data";
 import { getCatalogNames } from "@/lib/data/names";
-import { CONDITION_LABEL, CONSTRUCTION_INFO, SELLER_LABEL, SHAPE_INFO, slugify } from "@/lib/domain/taxonomy";
+import { CONDITION_HELP, CONDITION_LABEL, CONSTRUCTION_INFO, SELLER_LABEL, SHAPE_INFO, slugify } from "@/lib/domain/taxonomy";
 import type { Listing } from "@/lib/domain/types";
 import { eur, fmtIn, inToCm } from "@/lib/domain/format";
 import {
@@ -32,7 +32,6 @@ import {
   listingTitle,
   sellerName,
   soldBy,
-  sourceBadge,
   zoneName,
 } from "@/lib/listing/present";
 import { alertText } from "@/lib/search/describe";
@@ -109,16 +108,27 @@ export default async function FichaPage({ params }: PageProps<"/anuncio/[slugId]
     { k: "Anchura", v: width != null ? fmtIn(width) : "—", s: thick != null ? `grosor ${fmtIn(thick)}` : "" },
   ];
 
-  const rows: { k: string; v: string | null; src: Listing["volume"]["source"] }[] = [
-    { k: "Longitud", v: len != null ? `${l.sizeLabel} · ${inToCm(len)} cm` : null, src: l.length.source },
-    { k: "Anchura", v: width != null ? `${fmtIn(width)} · ${(width * 2.54).toFixed(1)} cm` : null, src: l.width.source },
-    { k: "Grosor", v: thick != null ? `${fmtIn(thick)} · ${(thick * 2.54).toFixed(1)} cm` : null, src: l.thickness.source },
-    { k: "Litros", v: vol != null ? `${vol} L` : null, src: l.volume.source },
-    { k: "Forma", v: SHAPE_INFO[l.shape].label, src: l.shapeSource },
+  // Medidas (tarjetas) y características (lista). Cada dato conserva su origen: se marca «Fabricante»
+  // cuando la medida es del catálogo; lo demás lo indica el vendedor (nota al pie de la sección).
+  const cmText = (inches: number) => `${(inches * 2.54).toFixed(1).replace(".", ",")} cm`;
+  const measures: { k: string; v: string | null; sub: string; src: Listing["volume"]["source"] }[] = [
+    { k: "Longitud", v: len != null ? l.sizeLabel : null, sub: len != null ? `${inToCm(len)} cm` : "", src: l.length.source },
+    { k: "Anchura", v: width != null ? fmtIn(width) : null, sub: width != null ? cmText(width) : "", src: l.width.source },
+    { k: "Grosor", v: thick != null ? fmtIn(thick) : null, sub: thick != null ? cmText(thick) : "", src: l.thickness.source },
+    { k: "Volumen", v: vol != null ? `${String(vol).replace(".", ",")} L` : null, sub: "", src: l.volume.source },
+  ];
+  const features: { k: string; v: string | null; src: Listing["volume"]["source"] }[] = [
+    { k: "Tipo", v: SHAPE_INFO[l.shape].label, src: l.shapeSource },
     { k: "Construcción", v: CONSTRUCTION_INFO[l.construction].label, src: l.constructionSource },
     { k: "Quillas", v: l.fins.value, src: l.fins.source },
     { k: "Accesorios", v: l.accessories.value, src: l.accessories.source },
   ];
+  // Origen: si todo viene del mismo sitio basta con una nota; la etiqueta «Fabricante» solo distingue
+  // los datos de catálogo cuando se mezclan con los del vendedor.
+  const known = [...measures, ...features].filter((x) => x.v != null);
+  const fromMaker = known.filter((x) => x.src === "manufacturer").length;
+  const mixed = fromMaker > 0 && fromMaker < known.length;
+  const makerTag = (x: { v: string | null; src: Listing["volume"]["source"] }) => mixed && x.v != null && x.src === "manufacturer";
 
   const nearText = `${l.town}, ${zoneName(l)}${l.distanceKm != null ? ` · a ${l.distanceKm} km` : ""}`;
   // «tu evolutiva sin marca…»: sin mayúscula a mitad de frase cuando el título empieza por el tipo.
@@ -228,36 +238,66 @@ export default async function FichaPage({ params }: PageProps<"/anuncio/[slugId]
           </div>
 
           <div className={styles.details}>
-            <section>
-              <h2 className={styles.h2}>Datos técnicos</h2>
-              <p className={styles.sub}>Junto a cada dato verás de dónde sale: del vendedor o del fabricante. No damos por buena ninguna medida estimada.</p>
-              <dl className={styles.specTable}>
-                {rows.map((r) => {
-                  const badge = sourceBadge(r.v, r.src);
-                  return (
-                    <div key={r.k} className={styles.specRow}>
-                      <dt>{r.k}</dt>
-                      <dd className={styles.specV} data-unknown={r.v == null || undefined}>
-                        {r.v ?? "Sin indicar"}
-                      </dd>
-                      <dd className={styles.badge} data-tone={badge.tone}>
-                        {badge.text}
-                      </dd>
-                    </div>
-                  );
-                })}
+            <section aria-labelledby="tabla-title">
+              <h2 id="tabla-title" className={styles.h2}>
+                La tabla
+              </h2>
+              <dl className={styles.measures}>
+                {measures.map((m) => (
+                  <div key={m.k} className={styles.measure} data-unknown={m.v == null || undefined}>
+                    <dt>{m.k}</dt>
+                    <dd className={styles.measureV}>{m.v ?? "Sin indicar"}</dd>
+                    {m.sub && <dd className={styles.measureSub}>{m.sub}</dd>}
+                    {makerTag(m) && <dd className={styles.maker}>Fabricante</dd>}
+                  </div>
+                ))}
               </dl>
+              <dl className={styles.features}>
+                {features.map((f) => (
+                  <div key={f.k} className={styles.feature}>
+                    <dt>{f.k}</dt>
+                    <dd data-unknown={f.v == null || undefined}>
+                      {f.v ?? "Sin indicar"}
+                      {makerTag(f) && <span className={styles.maker}>Fabricante</span>}
+                    </dd>
+                  </div>
+                ))}
+              </dl>
+              <p className={styles.sourceNote}>
+                {mixed
+                  ? "«Fabricante»: dato de la tabla oficial del modelo. El resto lo indica el vendedor; si algo no cuadra, pregúntale."
+                  : fromMaker > 0
+                    ? "Medidas de la tabla oficial del fabricante para este modelo."
+                    : "Datos que indica el vendedor. Si algo no cuadra, pregúntale antes de ir a verla."}
+              </p>
             </section>
-            <section>
-              <h2 className={styles.h2}>Reparaciones y desperfectos</h2>
-              <div className={styles.repairs} data-has={l.repairs ? true : undefined}>
-                {l.repairs ?? "El vendedor no ha indicado reparaciones."}
+
+            <section aria-labelledby="estado-title">
+              <h2 id="estado-title" className={styles.h2}>
+                Estado
+              </h2>
+              <div className={styles.condition}>
+                <div className={styles.conditionHead}>
+                  <span className={styles.conditionName}>{CONDITION_LABEL[l.condition]}</span>
+                  <span className={styles.conditionHelp}>{CONDITION_HELP[l.condition]}</span>
+                </div>
+                {l.repairs ? (
+                  <div className={styles.repairs}>
+                    <strong>Reparaciones que indica el vendedor</strong>
+                    <p>{l.repairs}</p>
+                  </div>
+                ) : (
+                  <p className={styles.noRepairs}>El vendedor no indica reparaciones. Revísala igualmente cuando la veas.</p>
+                )}
               </div>
             </section>
+
             {hasDescription && (
-              <section>
-                <h2 className={styles.h2}>Descripción del vendedor</h2>
-                <p className={styles.desc}>{l.description}</p>
+              <section aria-labelledby="desc-title">
+                <h2 id="desc-title" className={styles.h2}>
+                  {seller ? `Lo que cuenta ${seller}` : "Lo que cuenta el vendedor"}
+                </h2>
+                <blockquote className={styles.desc}>{l.description}</blockquote>
               </section>
             )}
             <section className={styles.twoCards}>

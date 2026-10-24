@@ -518,3 +518,16 @@ No hay que rehacer la arquitectura.
 - `tests/unit/territory.test.ts`;
 - `supabase/tests/database/09_launch_territory.test.sql`;
 - e2e de rutas (404 de la península y 308 de `/tablas/canarias`).
+
+## Ficha: datos técnicos más legibles (24-10-2026)
+
+El bloque «Datos técnicos» se leía como una hoja de cálculo: todo en IBM Plex Mono y una etiqueta verde «Según…» en cada fila.
+
+**Cambio respecto al prototipo:**
+- Las medidas de la ficha (cabecera, «La tabla» y la barra fija en móvil) usan Barlow con cifras tabulares (`font-variant-numeric: tabular-nums`), no la mono. La mono sigue en el resto de pantallas.
+- «La tabla»: cuatro tarjetas de medidas (Longitud, Anchura, Grosor, Volumen) y una lista de características (Tipo, Construcción, Quillas, Accesorios).
+- **Se mantiene el origen de cada dato:**
+  - si todo viene del mismo sitio, una sola nota lo dice;
+  - si se mezclan, los datos del fabricante llevan la etiqueta «Fabricante».
+- «Estado»: el estado con su explicación (`CONDITION_HELP`, compartida con publicar). Las reparaciones solo salen en ámbar si el vendedor las indica; si no, una nota neutra (antes era una caja verde que parecía una garantía).
+- La descripción pasa a «Lo que cuenta {vendedor}», en una tarjeta.

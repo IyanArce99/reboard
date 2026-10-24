@@ -3,16 +3,10 @@
 // Paso 3 · Estado. La base de datos solo admite 4 estados (enum board_condition): se explican
 // en lenguaje llano para que cada vendedor encaje su tabla sin dudar. Ver docs/DESIGN_AUDIT.md.
 
-import { CONDITIONS, CONDITION_LABEL, type Condition } from "@/lib/domain/taxonomy";
+import { CONDITIONS, CONDITION_HELP, CONDITION_LABEL } from "@/lib/domain/taxonomy";
 import { Group, type StepProps } from "./parts";
 import styles from "./Publish.module.css";
 
-const CONDITION_HELP: Record<Condition, string> = {
-  "como-nueva": "Sin golpes ni reparaciones. Apenas se ha usado.",
-  "muy-buen-estado": "Marcas de uso leves, como presiones en la cubierta. Sin reparaciones importantes.",
-  "buen-estado": "Marcas visibles o algún golpe ya reparado. Lista para surfear.",
-  "con-reparaciones": "Reparaciones importantes o algún golpe que necesita arreglo.",
-};
 
 export function StepCondition({ d, set }: StepProps) {
   const repairsNeeded = d.condition === "con-reparaciones" || d.condition === "buen-estado";

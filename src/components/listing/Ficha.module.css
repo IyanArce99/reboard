@@ -248,10 +248,10 @@
 }
 
 .keyV {
-  font-family: var(--rb-font-mono);
-  font-size: 18px;
-  font-weight: 600;
-  margin-top: 3px;
+  font-size: 20px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  margin-top: 2px;
 }
 .keyV[data-unknown] {
   color: var(--rb-muted);
@@ -384,83 +384,165 @@
   margin-bottom: 10px;
 }
 
-.sub {
-  margin: -6px 0 12px;
+/* «La tabla»: medidas en tarjetas y características en lista. Barlow con cifras tabulares
+   (no monoespaciada): se lee como una ficha, no como una hoja de cálculo. */
+.measures {
+  margin: 0;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+}
+.measure {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 14px 14px 12px;
+  border: 1px solid var(--rb-line);
+  border-radius: var(--rb-r-card);
+  background: var(--rb-white);
+}
+.measure dt {
   font-size: 13px;
+  font-weight: 600;
   color: var(--rb-muted);
 }
-
-.specTable {
+.measure dd {
   margin: 0;
-  border: 1px solid var(--rb-line);
-  border-radius: 12px;
-  background: var(--rb-white);
-  overflow: hidden;
 }
-
-.specRow {
-  display: grid;
-  grid-template-columns: 160px minmax(0, 1fr) auto;
-  gap: 4px 12px;
-  align-items: center;
-  padding: 12px 14px;
-  border-bottom: 1px solid var(--rb-line-soft);
+.measureV {
+  font-size: 26px;
+  font-weight: 700;
+  line-height: 1.15;
+  font-variant-numeric: tabular-nums;
+  color: var(--rb-petrol);
 }
-.specRow:last-child {
-  border-bottom: 0;
+.measure[data-unknown] .measureV {
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 1.6;
+  color: var(--rb-muted);
 }
-.specRow dt {
+.measureSub {
   font-size: 14px;
   color: var(--rb-muted);
+  font-variant-numeric: tabular-nums;
 }
-.specRow dd {
-  margin: 0;
-}
-
-.specV {
-  font-family: var(--rb-font-mono);
-  font-size: 15px;
-  font-weight: 500;
-}
-.specV[data-unknown] {
-  color: var(--rb-muted);
-}
-
-.badge {
-  justify-self: start;
-  font-size: 12px;
-  font-weight: 700;
-  padding: 3px 7px;
-  border-radius: 5px;
-}
-.badge[data-tone="seller"] {
-  background: var(--rb-success-tint);
-  color: #1f5640;
-}
-.badge[data-tone="manufacturer"] {
+.maker {
+  align-self: flex-start;
+  margin-top: 6px;
+  padding: 2px 8px;
+  border-radius: var(--rb-r-chip);
   background: var(--rb-teal-tint);
   color: var(--rb-teal-ink);
+  font-size: 12px;
+  font-weight: 700;
 }
-.badge[data-tone="none"] {
-  background: #e3eeed;
+
+.features {
+  margin: 14px 0 0;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  column-gap: 28px;
+  padding: 4px 18px;
+  border: 1px solid var(--rb-line);
+  border-radius: var(--rb-r-card);
+  background: var(--rb-white);
+}
+.feature {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+  padding: 13px 0;
+  border-bottom: 1px solid var(--rb-line-soft);
+}
+.feature:nth-last-child(-n + 2) {
+  border-bottom: 0;
+}
+.feature dt {
+  font-size: 15px;
+  color: var(--rb-muted);
+}
+.feature dd {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+  text-align: right;
+}
+.feature dd[data-unknown] {
+  font-weight: 500;
+  color: var(--rb-muted);
+}
+.feature .maker {
+  margin: 0 0 0 8px;
+  vertical-align: 1px;
+}
+
+.sourceNote {
+  margin-top: 10px;
+  font-size: 13px;
+  line-height: 1.45;
   color: var(--rb-muted);
 }
 
+/* Estado: qué significa y, si las hay, las reparaciones (en ámbar; sin ellas, una nota neutra). */
+.condition {
+  padding: 18px;
+  border: 1px solid var(--rb-line);
+  border-radius: var(--rb-r-card);
+  background: var(--rb-white);
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.conditionHead {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.conditionName {
+  font-size: 19px;
+  font-weight: 700;
+  color: var(--rb-petrol);
+}
+.conditionHelp {
+  font-size: 15px;
+  line-height: 1.5;
+  color: var(--rb-muted);
+}
 .repairs {
-  padding: 14px;
+  padding: 12px 14px;
   border-radius: 12px;
-  background: var(--rb-success-tint);
+  background: var(--rb-warning-tint);
+  color: var(--rb-warning-ink);
   font-size: 15px;
   line-height: 1.5;
 }
-.repairs[data-has] {
-  background: var(--rb-warning-tint);
+.repairs strong {
+  display: block;
+  font-size: 14px;
+  margin-bottom: 2px;
+}
+.repairs p {
+  white-space: pre-line;
+}
+.noRepairs {
+  padding-top: 12px;
+  border-top: 1px solid var(--rb-line-soft);
+  font-size: 14px;
+  color: var(--rb-muted);
 }
 
+/* Lo que cuenta el vendedor: su voz, en una tarjeta con filete turquesa. */
 .desc {
-  font-size: 15px;
-  line-height: 1.6;
-  max-width: 68ch;
+  margin: 0;
+  padding: 16px 20px;
+  border-left: 3px solid var(--rb-teal);
+  border-radius: 0 var(--rb-r-card) var(--rb-r-card) 0;
+  background: var(--rb-white);
+  font-size: 16px;
+  line-height: 1.65;
+  white-space: pre-line;
   text-wrap: pretty;
 }
 
@@ -703,11 +785,19 @@
   .contact {
     display: none;
   }
-  .specRow {
-    grid-template-columns: 1fr auto;
+  .measures {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
   }
-  .specRow dt {
-    grid-column: 1 / -1;
+  .measureV {
+    font-size: 23px;
+  }
+  .features {
+    grid-template-columns: 1fr;
+    padding: 2px 16px;
+  }
+  .feature:nth-last-child(2) {
+    border-bottom: 1px solid var(--rb-line-soft);
   }
   .twoCards {
     grid-template-columns: 1fr;
@@ -739,7 +829,7 @@
   .barSpecs {
     font-size: 12px;
     color: var(--rb-muted);
-    font-family: var(--rb-font-mono);
+    font-variant-numeric: tabular-nums;
     margin-top: 3px;
   }
   .barBtn {
