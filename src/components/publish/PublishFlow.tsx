@@ -19,7 +19,7 @@ import { publishDraft } from "@/lib/publish/client-publish";
 import { OTHER_BRAND, emptyDraft, pendingCount, type DraftPhoto, type PublishDraft } from "@/lib/publish/draft";
 import { clearStoredDraft, loadStoredDraft, saveStoredDraft } from "@/lib/publish/draft-store";
 import { processPhoto } from "@/lib/publish/image";
-import { fieldToInches, parseLitres } from "@/lib/publish/parse";
+import { describeMeasure } from "@/lib/publish/parse";
 import { ListingInput, draftToInput, firstIssueText, toE164 } from "@/lib/publish/schema";
 import { DoneScreen, type Done } from "./DoneScreen";
 import { CoverPhoto, LivePreview, previewTexts } from "./LivePreview";
@@ -59,17 +59,11 @@ function stepIssue(step: number, d: PublishDraft, processing: number): string {
       if (!d.len.trim()) return "Indica al menos la longitud de la tabla.";
       {
         // Se comprueba aquí, no al publicar: un formato que no entendemos debe avisarse en este paso.
-        const len = fieldToInches("len", d.len, d.unit);
-        if (len == null)
-          return d.unit === "cm"
-            ? `No entendemos la longitud «${d.len.trim()}». Escríbela en centímetros, por ejemplo 188.`
-            : `No entendemos la longitud «${d.len.trim()}». Escríbela como 6'2" o 6.2, o cambia la unidad a cm.`;
-        if (len < 48 || len > 144) return "La longitud debe estar entre 4' y 12' (122–366 cm). Revisa la unidad (pies o cm).";
-        for (const [k, name] of [["width", "anchura"], ["thick", "grosor"]] as const) {
-          if (d[k].trim() && fieldToInches(k, d[k], d.unit) == null)
-            return `No entendemos la ${name} «${d[k].trim()}». ${d.unit === "cm" ? "Escríbela en centímetros." : 'Escríbela en pulgadas, como 20 1/2" o 20.5.'}`;
+        // Mismo texto que la lectura bajo cada campo (describeMeasure).
+        for (const [k, name] of [["len", "Longitud"], ["width", "Anchura"], ["thick", "Grosor"], ["vol", "Litros"]] as const) {
+          const r = describeMeasure(k, d[k], d.unit);
+          if (r && !r.ok) return `${name} «${d[k].trim()}»: ${r.text}`;
         }
-        if (d.vol.trim() && parseLitres(d.vol) == null) return `No entendemos los litros «${d.vol.trim()}». Escribe solo el número, como 34 o 34,5.`;
       }
       if (!d.shape) return "Elige el tipo de tabla.";
       return d.construction ? "" : "Elige la construcción.";

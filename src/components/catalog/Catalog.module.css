@@ -172,7 +172,8 @@
 }
 
 .modelRange {
-  font-family: var(--rb-font-mono);
+  font-family: var(--rb-font-ui);
+  font-variant-numeric: tabular-nums;
   font-size: 13px;
   color: var(--rb-petrol);
 }
@@ -282,7 +283,8 @@
   background: var(--rb-white);
   color: var(--rb-petrol);
   font-size: 15px;
-  font-family: var(--rb-font-mono);
+  font-family: var(--rb-font-ui);
+  font-variant-numeric: tabular-nums;
   transition: border-color 0.15s ease;
 }
 .sizeChip:hover {
@@ -320,7 +322,8 @@
 }
 
 .specV {
-  font-family: var(--rb-font-mono);
+  font-family: var(--rb-font-ui);
+  font-variant-numeric: tabular-nums;
   font-size: 16px;
   font-weight: 600;
   margin-top: 3px;
@@ -407,7 +410,8 @@
   border-bottom: 1px solid var(--rb-line-soft);
   padding: 0 12px;
   height: 46px;
-  font-family: var(--rb-font-mono);
+  font-family: var(--rb-font-ui);
+  font-variant-numeric: tabular-nums;
   font-size: 14px;
   color: var(--rb-petrol);
 }

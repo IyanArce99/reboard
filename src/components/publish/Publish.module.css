@@ -504,7 +504,8 @@ button.slot:hover {
   padding: 0 12px;
   /* 16 px para que iOS no haga zoom al enfocar. */
   font-size: 16px;
-  font-family: var(--rb-font-mono);
+  font-family: var(--rb-font-ui);
+  font-variant-numeric: tabular-nums;
   background: var(--rb-white);
 }
 .pasteBtn {
@@ -555,12 +556,25 @@ button.slot:hover {
   border-radius: var(--rb-r-input);
   padding: 0 12px;
   font-size: 17px;
-  font-family: var(--rb-font-mono);
+  font-family: var(--rb-font-ui);
+  font-variant-numeric: tabular-nums;
   background: var(--rb-white);
 }
 .fieldInput[data-needs] {
   border-color: var(--rb-warning);
   background: #fffbf2;
+}
+.reading {
+  font-size: 13px;
+  line-height: 1.35;
+  color: var(--rb-error);
+}
+.reading[data-ok] {
+  color: var(--rb-muted);
+  font-variant-numeric: tabular-nums;
+}
+.fieldInput[aria-invalid="true"] {
+  border-color: var(--rb-error);
 }
 .srcRow {
   display: flex;
@@ -724,7 +738,8 @@ button.slot:hover {
 }
 .phoneInput {
   max-width: 320px;
-  font-family: var(--rb-font-mono);
+  font-family: var(--rb-font-ui);
+  font-variant-numeric: tabular-nums;
 }
 .textarea::placeholder,
 .text::placeholder,
@@ -911,7 +926,8 @@ button.slot:hover {
   color: var(--rb-petrol);
 }
 .sumMono {
-  font-family: var(--rb-font-mono);
+  font-family: var(--rb-font-ui);
+  font-variant-numeric: tabular-nums;
   font-size: 14px;
   color: var(--rb-petrol);
 }

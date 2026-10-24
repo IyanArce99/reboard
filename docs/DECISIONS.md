@@ -531,3 +531,17 @@ El bloque «Datos técnicos» se leía como una hoja de cálculo: todo en IBM Pl
   - si se mezclan, los datos del fabricante llevan la etiqueta «Fabricante».
 - «Estado»: el estado con su explicación (`CONDITION_HELP`, compartida con publicar). Las reparaciones solo salen en ámbar si el vendedor las indica; si no, una nota neutra (antes era una caja verde que parecía una garantía).
 - La descripción pasa a «Lo que cuenta {vendedor}», en una tarjeta.
+
+## Medidas: la letra y cómo se leen (24-10-2026)
+
+**Letra.** Los campos, chips y valores de datos usan Barlow con cifras tabulares, también en el buscador, los filtros, publicar, la calculadora, el catálogo y el panel. IBM Plex Mono queda solo para antetítulos («EXPLORA POR TIPO»), contadores y pantallas internas.
+
+**Lectura de medidas** (`src/lib/publish/parse.ts`, la usan publicar, el servidor y los filtros):
+- `normalizeMeasure`: comillas del móvil (’ ” ″), «''», fracciones «½ ⅝…», «⁄», comas y puntos.
+- `readMeasure`:
+  - la unidad escrita («cm», «m», «'», «"») manda sobre la elegida en el formulario;
+  - un número suelto que solo tiene sentido en la otra unidad se lee en esa: «193» con pies elegido son cm; «52» de anchura, también; «6.4» con cm elegido son pies.
+- Lo que no se entiende no se inventa (`null`); por ejemplo, «80» de longitud con pies elegido.
+- `describeMeasure` es la línea que se ve bajo cada campo al publicar («6'4" · 193 cm», «Lo leemos en cm: …» o qué no cuadra). La validación del paso usa el mismo texto.
+- Límites en `MEASURE_LIMITS`, los mismos que `schema.ts` y la base de datos.
+- Tests: `tests/unit/measure-reading.test.ts`.

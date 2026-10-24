@@ -318,7 +318,8 @@
 }
 
 .volValue {
-  font-family: var(--rb-font-mono);
+  font-family: var(--rb-font-ui);
+  font-variant-numeric: tabular-nums;
   font-size: 15px;
   font-weight: 500;
 }
@@ -354,7 +355,8 @@
   border-radius: 12px;
   padding: 0 12px;
   font-size: 16px;
-  font-family: var(--rb-font-mono);
+  font-family: var(--rb-font-ui);
+  font-variant-numeric: tabular-nums;
   background: var(--rb-white);
   color: var(--rb-petrol);
 }
@@ -365,7 +367,8 @@
   color: var(--rb-muted);
 }
 .rangeUnit {
-  font-family: var(--rb-font-mono);
+  font-family: var(--rb-font-ui);
+  font-variant-numeric: tabular-nums;
 }
 
 /* Tipo */

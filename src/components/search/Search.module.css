@@ -179,7 +179,8 @@
   font-size: 14px;
   padding: 0 32px 0 10px;
   background-position: right 10px center;
-  font-family: var(--rb-font-mono);
+  font-family: var(--rb-font-ui);
+  font-variant-numeric: tabular-nums;
 }
 
 .range {
@@ -380,7 +381,8 @@
   font-size: 16px;
 }
 .resultCount strong {
-  font-family: var(--rb-font-mono);
+  font-family: var(--rb-font-ui);
+  font-variant-numeric: tabular-nums;
   font-size: 18px;
 }
 

@@ -206,7 +206,8 @@ button.seg::after {
   min-width: 0;
   border: 0;
   background: transparent;
-  font-family: var(--rb-font-mono);
+  font-family: var(--rb-font-ui);
+  font-variant-numeric: tabular-nums;
   font-size: 44px;
   font-weight: 600;
   color: var(--rb-petrol);
@@ -247,7 +248,8 @@ button.seg::after {
   border: 1px solid var(--rb-line-strong);
   background: var(--rb-white);
   color: var(--rb-petrol);
-  font-family: var(--rb-font-mono);
+  font-family: var(--rb-font-ui);
+  font-variant-numeric: tabular-nums;
   font-size: 14px;
   transition: border-color 0.15s ease, background 0.15s ease;
 }
@@ -365,7 +367,8 @@ button.seg::after {
   border-radius: 10px;
   background-color: var(--rb-white);
   color: var(--rb-petrol);
-  font-family: var(--rb-font-mono);
+  font-family: var(--rb-font-ui);
+  font-variant-numeric: tabular-nums;
 }
 .select {
   padding: 0 36px 0 12px;
@@ -418,7 +421,8 @@ button.seg::after {
   color: var(--rb-white);
 }
 .choiceMono {
-  font-family: var(--rb-font-mono);
+  font-family: var(--rb-font-ui);
+  font-variant-numeric: tabular-nums;
 }
 
 .otherZone {
@@ -447,7 +451,8 @@ button.seg::after {
   width: 70px;
   border: 0;
   font-size: 15px;
-  font-family: var(--rb-font-mono);
+  font-family: var(--rb-font-ui);
+  font-variant-numeric: tabular-nums;
   background: transparent;
 }
 .budgetInput:focus,
@@ -613,7 +618,8 @@ button.seg::after {
 }
 
 .liveValue {
-  font-family: var(--rb-font-mono);
+  font-family: var(--rb-font-ui);
+  font-variant-numeric: tabular-nums;
   font-size: 30px;
   font-weight: 600;
   color: var(--rb-white);
@@ -725,7 +731,8 @@ button.seg::after {
 }
 
 .volNum {
-  font-family: var(--rb-font-mono);
+  font-family: var(--rb-font-ui);
+  font-variant-numeric: tabular-nums;
   font-size: 40px;
   font-weight: 600;
   line-height: 1;
@@ -737,7 +744,8 @@ button.seg::after {
 }
 .volLens strong {
   color: var(--rb-petrol);
-  font-family: var(--rb-font-mono);
+  font-family: var(--rb-font-ui);
+  font-variant-numeric: tabular-nums;
 }
 
 .tipCard {
@@ -1172,7 +1180,8 @@ button.seg::after {
 }
 .examples td {
   text-align: right;
-  font-family: var(--rb-font-mono);
+  font-family: var(--rb-font-ui);
+  font-variant-numeric: tabular-nums;
   font-weight: 600;
   white-space: nowrap;
 }

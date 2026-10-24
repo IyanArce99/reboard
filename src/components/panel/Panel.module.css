@@ -159,7 +159,8 @@
 }
 
 .spec {
-  font-family: var(--rb-font-mono);
+  font-family: var(--rb-font-ui);
+  font-variant-numeric: tabular-nums;
   font-size: 13px;
 }
 
@@ -179,7 +180,8 @@
   font-size: 12px;
   color: var(--rb-muted);
   margin-top: 2px;
-  font-family: var(--rb-font-mono);
+  font-family: var(--rb-font-ui);
+  font-variant-numeric: tabular-nums;
 }
 
 

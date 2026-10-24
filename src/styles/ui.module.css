@@ -96,7 +96,8 @@
 }
 
 .chipMono {
-  font-family: var(--rb-font-mono);
+  font-family: var(--rb-font-ui);
+  font-variant-numeric: tabular-nums;
 }
 
 /* Filtro aplicado: tinte turquesa con ✕. */
@@ -164,7 +165,8 @@
 }
 
 .mono {
-  font-family: var(--rb-font-mono);
+  font-family: var(--rb-font-ui);
+  font-variant-numeric: tabular-nums;
 }
 
 .demoTag {

@@ -20,6 +20,7 @@ import {
 } from "@/lib/domain/taxonomy";
 import { ftLabel, inToCm, num } from "@/lib/domain/format";
 import { FIN_OPTIONS, emptyFilters, toQuery, type Filters } from "@/lib/search/filters";
+import { fieldToInches } from "@/lib/publish/parse";
 import { VOLUME_CHIPS } from "./SearchBar";
 import { useUserState } from "@/components/user/UserStateProvider";
 import { useSearchNav } from "./SearchNav";
@@ -65,17 +66,29 @@ const parseNum = (s: string) => {
   return s.trim() && Number.isFinite(n) && n >= 0 ? n : null;
 };
 
+/** Anchura o grosor como lo escriba la gente («21 1/2"», «21½», «21,5», «52 cm») → pulgadas. */
+const readInches = (k: "width" | "thick") => (s: string) => {
+  const n = fieldToInches(k, s, "ft");
+  return n == null ? null : Math.round(n * 1000) / 1000;
+};
+
 /** Campo numérico controlado: conserva lo que se escribe («4,») y se sincroniza si el valor cambia fuera. */
 function NumField({
   value,
   onValue,
+  parse = parseNum,
   ...rest
-}: { value: number | null; onValue: (v: number | null) => void } & Omit<React.InputHTMLAttributes<HTMLInputElement>, "value" | "onChange">) {
+}: {
+  value: number | null;
+  onValue: (v: number | null) => void;
+  /** Lectura del texto (por defecto, un número con coma o punto). */
+  parse?: (s: string) => number | null;
+} & Omit<React.InputHTMLAttributes<HTMLInputElement>, "value" | "onChange">) {
   const [text, setText] = useState(value == null ? "" : String(value));
   const [prev, setPrev] = useState(value);
   if (value !== prev) {
     setPrev(value);
-    if (parseNum(text) !== value) setText(value == null ? "" : String(value));
+    if (parse(text) !== value) setText(value == null ? "" : String(value));
   }
   return (
     <input
@@ -83,7 +96,7 @@ function NumField({
       value={text}
       onChange={(e) => {
         setText(e.target.value);
-        onValue(parseNum(e.target.value));
+        onValue(parse(e.target.value));
       }}
     />
   );
@@ -446,7 +459,7 @@ export function FilterPanel({ counts, showCounts = true, resultCount, brands, mo
         </div>
 
         <button type="button" className={styles.advToggle} aria-expanded={adv} onClick={() => setAdv((a) => !a)}>
-          {adv ? "− Menos filtros" : "+ Más filtros: estado, quillas, anchura…"}
+          {adv ? "− Ocultar estado, quillas y medidas" : "+ Estado, quillas, anchura y grosor"}
         </button>
 
         {adv && (
@@ -494,9 +507,10 @@ export function FilterPanel({ counts, showCounts = true, resultCount, brands, mo
                 Anchura mínima (&quot;)
                 <NumField
                   className={`${ui.input} ${ui.mono} ${styles.selectField}`}
-                  inputMode="decimal"
-                  placeholder="p. ej. 21"
+                  inputMode="text"
+                  placeholder='p. ej. 21 1/2"'
                   value={f.widthMin}
+                  parse={readInches("width")}
                   onValue={(v) => setTyped({ widthMin: v })}
                 />
               </label>
@@ -504,9 +518,10 @@ export function FilterPanel({ counts, showCounts = true, resultCount, brands, mo
                 Grosor mínimo (&quot;)
                 <NumField
                   className={`${ui.input} ${ui.mono} ${styles.selectField}`}
-                  inputMode="decimal"
-                  placeholder="p. ej. 2,75"
+                  inputMode="text"
+                  placeholder='p. ej. 2 3/4"'
                   value={f.thickMin}
+                  parse={readInches("thick")}
                   onValue={(v) => setTyped({ thickMin: v })}
                 />
               </label>

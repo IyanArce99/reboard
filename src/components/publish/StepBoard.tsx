@@ -19,7 +19,7 @@ import {
   type FieldSource,
   type PublishDraft,
 } from "@/lib/publish/draft";
-import { parseMeasures, type MeasureKey } from "@/lib/publish/parse";
+import { describeMeasure, parseMeasures, type MeasureKey } from "@/lib/publish/parse";
 import { Chip, Group, type CatalogProps, type StepProps } from "./parts";
 import styles from "./Publish.module.css";
 
@@ -201,6 +201,9 @@ export function StepBoard({ d, set, setD, catalog, brands: known, featuredBrands
           {fields.map(([k, label, ph, im]) => {
             const s = SRC_LABEL[d.src[k] ?? ""];
             const id = `pub-${k}`;
+            // Cómo hemos entendido lo escrito («6'4" · 193 cm») o qué no cuadra, al momento.
+            const reading = describeMeasure(k, d[k], d.unit);
+            const describedBy = [s.needs ? `${id}-src` : "", reading ? `${id}-read` : ""].filter(Boolean).join(" ") || undefined;
             return (
               <div key={k} className={styles.field}>
                 <label htmlFor={id} className={styles.fieldLabel}>
@@ -216,24 +219,28 @@ export function StepBoard({ d, set, setD, catalog, brands: known, featuredBrands
                   autoComplete="off"
                   data-needs={s.needs || undefined}
                   className={styles.fieldInput}
-                  aria-describedby={s.text ? `${id}-src` : undefined}
+                  aria-invalid={reading && !reading.ok ? true : undefined}
+                  aria-describedby={describedBy}
                   onChange={(e) => set({ [k]: e.target.value, src: { ...d.src, [k]: "ok" } })}
                 />
-                {s.text && (
+                {reading && (
+                  <span id={`${id}-read`} className={styles.reading} data-ok={reading.ok || undefined}>
+                    {reading.text}
+                  </span>
+                )}
+                {s.needs && (
                   <div className={styles.srcRow}>
                     <span id={`${id}-src`} className={styles.src} data-tone={s.tone}>
                       {s.text}
                     </span>
-                    {s.needs && (
-                      <button
-                        type="button"
-                        className={styles.confirm}
-                        aria-label={`Confirmar ${label.toLowerCase()}`}
-                        onClick={() => set({ src: { ...d.src, [k]: "ok" } })}
-                      >
-                        Confirmar
-                      </button>
-                    )}
+                    <button
+                      type="button"
+                      className={styles.confirm}
+                      aria-label={`Confirmar ${label.toLowerCase()}`}
+                      onClick={() => set({ src: { ...d.src, [k]: "ok" } })}
+                    >
+                      Confirmar
+                    </button>
                   </div>
                 )}
               </div>
