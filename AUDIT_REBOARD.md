@@ -2,9 +2,9 @@
 
 - **Rama:** `auditoria-final`, 5 commits sobre `main` (el último, la sesión de mejoras de la tarde: ver A9).
 - **Estado:**
-  - **nada está desplegado** y **ninguna migración se ha aplicado en producción**;
-  - producción sigue en `2f347e8`, con 18 migraciones aplicadas;
-  - la rama trae **5 migraciones nuevas**, pendientes de tu autorización.
+  - **desplegado en producción** (`dc7f07c`, con autorización del titular, 24-10-2026);
+  - **23 migraciones aplicadas en producción**: las 5 nuevas se aplicaron tras una copia (`db dump` de esquema y datos, guardada fuera del repositorio) y un `--dry-run`;
+  - pgTAP contra producción: 238/238.
 - **Estructura del documento:**
   - **Parte A:** el cierre de hoy. Cada punto lleva un estado: **COMPLETADO**, **PENDIENTE** o **NO VERIFICADO**.
   - **Parte B:** la auditoría de la mañana, como historial.
@@ -187,7 +187,7 @@
 | `NEXT_PUBLIC_AUTH_PROVIDERS` | Sin poner: Google y Apple ocultos (decisión) |
 | `RATE_LIMIT` | No hace falta en Vercel (el límite ya está activo allí) |
 
-### Migraciones pendientes en producción (en este orden)
+### Migraciones de esta rama (APLICADAS en producción el 24-10-2026)
 1. `20261029090000_privacy_hardening.sql`: perfiles, contactos y ajustes.
 2. `20261029090100_reveal_contact_needs_phone.sql`
 3. `20261029090200_storage_no_overwrite.sql`
