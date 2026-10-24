@@ -1,5 +1,10 @@
 # Lista de comprobación de lanzamiento
 
+> **Actualizado el 24-10-2026:** el checklist operativo vigente (variables, migraciones pendientes, correo, copias de seguridad, monitorización, analítica, indexación, despliegue y vuelta atrás) está en **`AUDIT_REBOARD.md`, apartado A8**. Esta lista es la del arranque y tiene datos desfasados:
+> - el correo sale por el SMTP de **DonDominio** (`hola@reboard.es`), no por Resend;
+> - el dominio canónico es **`www.reboard.es`**;
+> - hay variables nuevas: `NEXT_PUBLIC_POSTHOG_KEY` (`docs/ANALYTICS.md`) y `RATE_LIMIT` (solo fuera de Vercel).
+
 Pasos para llevar `main` a producción. **La guía paso a paso actualizada está en `docs/PRODUCTION_SETUP.md`**; esta lista resume y marca el progreso. Cada paso indica **quién** lo hace:
 - 🧑 **Titular:** cuentas, pagos, datos legales y decisiones.
 - 🤖 **Desarrollo:** se puede hacer con acceso delegado.

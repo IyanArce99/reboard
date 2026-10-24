@@ -1,5 +1,277 @@
-# Auditoría final de Reboard (24-10-2026)
+# Auditoría de Reboard: cierre y preparación para el lanzamiento (24-10-2026)
 
+- **Rama:** `auditoria-final`, 4 commits sobre `main`.
+- **Estado:**
+  - **nada está desplegado** y **ninguna migración se ha aplicado en producción**;
+  - producción sigue en `2f347e8`, con 18 migraciones aplicadas;
+  - la rama trae **4 migraciones nuevas**, pendientes de tu autorización.
+- **Estructura del documento:**
+  - **Parte A:** el cierre de hoy. Cada punto lleva un estado: **COMPLETADO**, **PENDIENTE** o **NO VERIFICADO**.
+  - **Parte B:** la auditoría de la mañana, como historial.
+- **Analítica:** detalle en `docs/ANALYTICS.md`.
+
+**Evidencia:**
+- **[PROD]:** www.reboard.es, solo lecturas.
+- **[LOCAL]:** build de producción en local contra Supabase local con 100 anuncios DEMO; 12 de ellos con fotos reales de prueba (`npm run db:seed-photos`, solo en local).
+- **[CÓDIGO]:** leído en el código, no ejecutado.
+
+---
+
+# Parte A · Cierre
+
+## A1. Problemas anteriores cerrados
+
+| Id | Problema | Arreglo | Estado |
+|---|---|---|---|
+| SEC-1/2/7 | Perfiles listables; el vendedor veía el usuario y el hash de IP de quien le contactaba; `updated_by` público | Migración `20261029090000_privacy_hardening` y test pgTAP `10` (13 comprobaciones) | **COMPLETADO** en local · PENDIENTE en producción |
+| QA-3 | `reveal_contact` contaba contactos sin teléfono | Migración `20261029090100_reveal_contact_needs_phone` y test pgTAP | **COMPLETADO** en local · PENDIENTE en producción |
+| SEC-4 | Turnstile no comprobaba acción ni dominio | `verifyTurnstile` exige la acción (`contacto`, `publicar`, `reportar`) y el dominio de `NEXT_PUBLIC_SITE_URL`. Con las claves de prueba de Cloudflare no lo comprueba (local y CI). 5 tests | **COMPLETADO** · prueba con claves reales NO VERIFICADA |
+| SEC-5 | APIs públicas sin límite | `/api/tablas` (30/min), `/api/tablas/recuento` (120/min) y `/api/anuncios` (60/min) por IP; 414 si la consulta pasa de 2.000 caracteres; caché de CDN de 30 s en recuento y anuncios. Activo en Vercel o con `RATE_LIMIT=on` | **COMPLETADO** · medido en local: 120 × 200 y luego 429 con `Retry-After`. El límite global (firewall de Vercel) está PENDIENTE |
+| SEC-6 | `reboard-gamma.vercel.app` servía la web entera | En el build de producción de Vercel, `*.vercel.app` → 308 a `www.reboard.es`. Las vistas previas no cambian | **COMPLETADO** en el código · NO VERIFICADO en Vercel |
+| SEC-8 | Se podía sobrescribir una foto ya publicada | Migración `20261029090200_storage_no_overwrite`, que quita la política de UPDATE en Storage. Test pgTAP `04` | **COMPLETADO** en local · PENDIENTE en producción |
+| QA-1 | Al editar, «Sin marca» se guardaba como «Shaper local» | `draftFromListing` | **COMPLETADO** (unitario y e2e) |
+| QA-2 | Bucle de redirecciones tras editar si cambiaba el slug | El proxy confirma el slug sin caché antes de redirigir; redirecciones 307; caché invalidada al guardar | **COMPLETADO** (e2e que edita y comprueba 200/307) |
+| QA-7 / UX-15 | 4 botones «Confirmar» en las medidas; editar abría en el paso 2 | Una sola confirmación, «Son correctas». Lo que viene del catálogo **sigue siendo «del fabricante»** al confirmar o al editar (antes pasaba a «vendedor»). Editar abre en la revisión | **COMPLETADO** |
+| PERF-1 | LCP de la portada | Foto con `fetchPriority="high"`: el retraso de carga baja a 0 | **PARCIAL** (ver A6: el retraso de pintado sigue) |
+| PERF-2 | Tarjetas duplicadas en el HTML | Una sola tarjeta que se recoloca con CSS en móvil: 48 → 24 artículos en `/buscar` | **COMPLETADO** |
+| PERF-3 | Fuentes de más | Barlow Condensed solo en 800, que es el único peso que se usa | **COMPLETADO** |
+| PERF-4 | supabase-js en todas las páginas | Ya no se carga al arrancar sin sesión. La precarga del enlace «Vender mi tabla» lo descarga a los ~1,6 s con prioridad baja, fuera del camino crítico | **PARCIAL** (decisión: no quitar la precarga del CTA principal) |
+| PERF-6 | `listing_facets` lenta y *timeouts* en el build | Una sola pasada (migración `20261029090300`; misma salida en 1.276 combinaciones de filtros), más un reintento si se corta por tiempo | **COMPLETADO** en local · PENDIENTE en producción |
+| PERF-7 | Imágenes con `max-age=0` | `images.minimumCacheTTL` de 31 días | **COMPLETADO** en el código · NO VERIFICADO en Vercel |
+| e2e intermitente | El test de hidratación fallaba en paralelo | Los recorridos que crean y borran datos van en su propio proyecto, **después** del resto; el test de hidratación ignora los 404 de red | **COMPLETADO** (las 2 pasadas completas posteriores, 90/90) |
+| Nuevo | El comparador entraba en bucle cuando el saneado descartaba la miniatura, y `/comparar?ids=` no se adoptaba | Se compara ya saneado. Apareció al probar con fotos reales | **COMPLETADO** |
+| Nuevo | CLS 0,855 en `/buscar` móvil (el pie saltaba al llegar los resultados) | El hueco de carga ocupa la pantalla (`/buscar`, `/panel`, publicar) | **COMPLETADO**: CLS 0 |
+| Nuevo | Galería: sin gesto de deslizar en móvil | Deslizar con el dedo; sin miniaturas en móvil (está el contador «1 / 3»), así el precio sube | **COMPLETADO** (e2e con 2 fotos reales) |
+| UX-10 | Áreas táctiles del logo, las migas y el deslizador | 44 px. La casilla del comparador ya estaba dentro de una etiqueta de 44 px (falso positivo) | **COMPLETADO** |
+| Analítica | No existía | PostHog EU sin cookies, con 19 eventos y embudos (ver A3) | **COMPLETADO** en el código · se activa al configurar la clave |
+
+## A2. Problemas que siguen abiertos
+
+| Id | Problema | Por qué sigue abierto | Estado |
+|---|---|---|---|
+| Inventario | Producción tiene **0 anuncios activos** [PROD: `recuento = 0`] y la Softech de prueba da 404 | Depende del titular | **PENDIENTE (bloqueante)** |
+| Legales | Marcadores «[Pendiente…]» visibles; base jurídica de la analítica y DPA de PostHog | Requiere un profesional (no se redactan textos definitivos) | **PENDIENTE (bloqueante)** |
+| SEC-3 | MFA de la cuenta de administración | La función existe (`/admin/seguridad`); hay que activarla | **PENDIENTE (titular)** |
+| Correo | SPF `~all` y sin DMARC (de la auditoría anterior) | DNS en DonDominio | **PENDIENTE (titular)** |
+| Copias de seguridad | No sé qué plan de Supabase hay en producción ni qué copias incluye | El plan gratuito no ofrece copias descargables; Pro hace copias diarias de 7 días | **NO VERIFICADO** |
+| Monitorización | No hay alertas de errores ni de disponibilidad | Propuesta: alertas de Vercel (Observability) más un *uptime check* gratuito de `/robots.txt` y `/api/tablas/recuento` | **PENDIENTE** |
+| PERF-1 | LCP de la portada en ~4,5 s en Lighthouse móvil simulado | La foto ya llega a los 0,7 s; el retraso es de pintado, atribuido al JS (279 KB) con la CPU 4× más lenta. Hace falta reducir el JS de hidratación de la portada (el buscador del hero es una isla grande) | **PENDIENTE (P1)** |
+| SEO-1 | Landings de isla casi iguales; indexación cerrada | Texto propio por isla antes de `SITE_INDEXABLE=true` | **PENDIENTE (P1)** |
+| SEC-9/10 | Permisos explícitos en funciones; Unsplash en la CSP (lo usan las fotos de tiendas); `security.txt`; `/sistema` | Bajo impacto | **PENDIENTE (P2)** |
+| QA-5/6/8/10/11 | 404 en una precarga tras cerrar sesión; 200 durante unos segundos tras borrar; recuento con retraso; «No tienes acceso» duplicado a veces; anuncio nuevo tarda ~2 s en salir | Menores | **PENDIENTE (P2)** |
+| Emails | Sin recordatorio antes de caducar ni avisos de alertas | Producto | **PENDIENTE (P1)** |
+
+## A3. Cambios implementados (desde la auditoría de la mañana)
+
+**Seguridad**
+- `src/lib/security/turnstile.ts` y las acciones de `src/app/anuncio/actions.ts` y `src/app/vender/actions.ts`: acción y dominio.
+- `src/lib/security/rate-limit.ts` (nuevo), aplicado en `src/app/api/tablas`, `src/app/api/tablas/recuento` y `src/app/api/anuncios`.
+- `next.config.ts`: redirección de `*.vercel.app` en producción y caché de imágenes.
+- Migraciones `20261029090200_storage_no_overwrite.sql` y `20261029090300_listing_facets_single_pass.sql`, con `04_storage_photos.test.sql` actualizado.
+
+**UX**
+- **Publicar** (`StepBoard.tsx`, `draft.ts`, `schema.ts`, `PublishFlow.tsx`): confirmación única de medidas, origen conservado y edición desde la revisión.
+- **Tarjeta y galería** (`ListingCard.tsx` y `.module.css`, `Gallery.tsx`, `Ficha.module.css`): tarjeta adaptable única, galería con gesto de deslizar y sin miniaturas en móvil.
+- **Áreas táctiles** (`Header.module.css`, `Breadcrumbs.module.css`, `Search.module.css`).
+- **Comparador** (`Comparator.tsx`): sin bucle.
+- **Textos generados** (`describe.ts`): «Tablas por menos de 300 €» sin coma.
+
+**Rendimiento**
+- **Huecos de carga:** `src/app/buscar/page.tsx`, `src/app/panel/page.tsx` y `src/app/vender/publicar/page.tsx`.
+- **Fuentes:** `src/app/layout.tsx`.
+- **supabase-js con sesión:** `UserStateProvider.tsx`, `LoginForm.tsx` y `src/lib/supabase/session-hint.ts` (nuevo).
+- **Facetas:** reintento en `supabase-repository.ts`.
+
+**Analítica** (`docs/ANALYTICS.md`)
+- **Módulo central:** `src/lib/analytics/events.ts` y `track.ts`.
+- **Componentes:** `src/components/analytics/AnalyticsInit.tsx` y `TrackOnMount.tsx`.
+- **Proxy:** `src/app/rb-e/[...path]/route.ts`.
+- **Puntos instrumentados:** ficha, resultados, contacto, publicar, acceso, TablaFinder, comparador, guardar y alertas.
+- **Textos:** Privacidad y Cookies actualizadas en `legal.ts`, pendientes de revisión legal.
+- **Dependencia:** `posthog-js@1.438.2`, fijada.
+
+**Pruebas y herramientas**
+- **Recorridos** (`tests/e2e/journeys.spec.ts`): en su propio proyecto, con fotos reales, galería, edición y comprobaciones de analítica.
+- **Visuales** (`visual.spec.ts`): fichas por slug y referencias nuevas.
+- **Unitarios:** `tests/unit/analytics.test.ts`, más tests nuevos en `auth-security` y `publish-finder-present`.
+- **Datos de prueba:** `scripts/seed-local-photos.mts` (`npm run db:seed-photos`).
+- **Playwright:** `playwright.config.ts`.
+
+## A4. Resultados reales de las pruebas (código final de la rama, 24-10-2026)
+
+| Suite | Resultado |
+|---|---|
+| `npm run typecheck` | ✅ sin errores |
+| `npm run lint` | ✅ **0 problemas** (antes, 4 avisos) |
+| `npm test` (unitarios) | ✅ **326/326** (20 archivos) |
+| `npm run test:integration` (Supabase local) | ✅ **78/78** |
+| `npm run db:test` (pgTAP, base limpia) | ✅ **227/227** (10 suites) |
+| `npm run build` | ✅ (sin *timeout* de facetas) |
+| Playwright `e2e` + `journeys` (`npm run test:e2e`) | ✅ **90/90** (86 + 4 recorridos) en las 2 últimas pasadas completas (antes y después de añadir la analítica). En el build de depuración de la analítica fallaron 2 recorridos por un fallo de la propia analítica (descartaba la propiedad `context`), corregido y vuelto a pasar 4/4 |
+| e2e de administración (`npm run test:e2e:admin`) | ✅ **14/14** (escritorio y móvil) |
+| Pruebas visuales (`npm run test:visual`) | ✅ **16/16** con **referencias nuevas** revisadas una a una (las anteriores eran del diseño previo y apuntaban a ids que ya no existían) |
+| Recorridos con analítica en modo depuración | ✅ 4/4: eventos y embudos correctos, `publish_completed` una sola vez y **ningún dato personal** en los eventos |
+| Comprador y vendedor con fotos reales | ✅ 2 fotos JPEG de 3000×4000 recodificadas, galería con flecha (escritorio) y gesto de deslizar (móvil) |
+| Límite de peticiones (`RATE_LIMIT=on`) | ✅ 120 × 200 y luego 429; 414 con consulta desmesurada |
+| Producción tras los cambios | ❌ **NO VERIFICADO**: no se ha desplegado |
+
+## A5. Comparativa visual (`docs/audit/`)
+
+| Pantalla | Antes | Después |
+|---|---|---|
+| Búsqueda en tablet | `antes-buscar-tablet.png` | `despues-buscar-tablet.png` |
+| Datos técnicos en tablet | `antes-ficha-tablet.png` | `despues-ficha-tablet.png` |
+| Ficha en móvil, primera pantalla | `antes-ficha-movil.png` | `despues-ficha-movil.png` y, con fotos reales, `cierre-ficha-fotos-movil.png` |
+| Portada en móvil | `antes-home-movil.png` | `despues-home-movil.png` |
+| Ficha en escritorio con fotos reales | — | `cierre-ficha-fotos-escritorio.png` |
+| Búsqueda en escritorio con fotos | — | `cierre-buscar-escritorio.png` |
+| Publicar: aviso único de medidas | 4 botones «Confirmar» | `cierre-publicar-medidas.png` |
+| Búsqueda sin resultados (móvil) | — | `cierre-buscar-vacio-movil.png` |
+
+## A6. Métricas antes y después
+
+**Lighthouse 12.8.2, móvil:**
+- **Condiciones:** mismo equipo, mismo build local y mismos datos (12 anuncios con fotos reales); mediana de 3 pasadas.
+- **Antes:** la rama tras la auditoría de la mañana. **Después:** el código final, sin clave de analítica.
+
+| Página | Rendimiento | LCP | TBT | CLS | Peso total | HTML (sin comprimir) | Fuentes |
+|---|---|---|---|---|---|---|---|
+| Portada | 83 → 82 | 4,53 → 4,48 s | 98 → 86 ms | 0,034 → 0,034 | 947 → 913 KiB | 333 → 334 KiB | 134 → 103 KiB |
+| `/buscar` | **54 → 88** | 4,87 → **3,85 s** | 213 → **74 ms** | **0,855 → 0** | 649 → 571 KiB | **537 → 326 KiB** | 123 → 92 KiB |
+| Ficha con fotos | 87 → **90** | 4,00 → **3,56 s** | 96 → 63 ms | 0 → 0 | 662 → 626 KiB | 129 → 100 KiB | 134 → 103 KiB |
+| Landing de isla | 87 → 89 | 3,90 → **3,56 s** | 96 → 138 ms | 0 → 0 | 632 → **550 KiB** | 354 → **216 KiB** | 134 → 103 KiB |
+
+- **Las pasadas varían:** son cifras de laboratorio con la CPU simulada. El TBT de la landing (96 → 138 ms) está dentro de esa variación.
+- **JavaScript:** sigue en 269–279 KiB por página. supabase-js ya no se carga al arrancar, pero se descarga después por la precarga de «Vender mi tabla».
+- **Con la analítica activa:** `posthog-js` se cargará cuando el navegador esté libre. Su efecto **no está medido** (NO VERIFICADO); se mide tras activarla.
+
+**Base de datos (`listing_facets`, rol `anon`, media de 50 llamadas):**
+
+| Datos | Antes | Después |
+|---|---|---|
+| 100 anuncios, sin filtros | 4,86 ms | 2,25 ms |
+| 1.000 anuncios, sin filtros | 10,57 ms | 5,94 ms |
+| 1.000 anuncios, 8 clientes a la vez (pgbench) | 188–211 tps | 330 tps |
+
+**HTML y producto:**
+- **`/buscar`:** 48 → 24 tarjetas en el HTML.
+- **Contactar:** 3 → 2 toques.
+- **Confirmar medidas:** de 4 confirmaciones a 1.
+
+## A7. Bloqueantes de lanzamiento
+
+| # | Bloqueante | Quién | Estado |
+|---|---|---|---|
+| 1 | **Autorizar el despliegue:** aplicar 4 migraciones (`db push --dry-run` y después `db push`) y fusionar `auditoria-final` en `main` | Titular → desarrollo | **PENDIENTE** |
+| 2 | **Inventario real:** 5–10 anuncios publicados antes de invitar a nadie (hoy 0) | Titular | **PENDIENTE** |
+| 3 | **Textos legales** revisados por un profesional, incluida la medición sin cookies | Titular y asesor | **PENDIENTE** |
+| 4 | **MFA** en la cuenta de administración y `admin_mfa_required = true` | Titular | **PENDIENTE** |
+| 5 | **Copias de seguridad:** confirmar el plan de Supabase o hacer `db dump` periódico | Titular | **NO VERIFICADO** |
+| 6 | **Correo:** SPF y DMARC del dominio; comprobar que el código de acceso llega a la bandeja de entrada | Titular | **PENDIENTE** |
+| 7 | **Monitorización mínima:** alertas de Vercel y *uptime* | Titular | **PENDIENTE** |
+| 8 | **Contacto en producción:** pedir el teléfono de un anuncio real tras desplegar (con `CONTACT_IP_SALT` ya puesto) | Titular | **NO VERIFICADO** |
+
+## A8. Checklist operativo de producción
+
+### Variables de entorno (Vercel → Production)
+
+| Variable | Estado |
+|---|---|
+| `NEXT_PUBLIC_SITE_URL` = `https://www.reboard.es` | COMPLETADO (comprobado ayer: los canonical salen con `www`) |
+| `NEXT_PUBLIC_SUPABASE_URL` y `NEXT_PUBLIC_SUPABASE_ANON_KEY` | COMPLETADO (la web funciona con Supabase) |
+| `SUPABASE_SERVICE_ROLE_KEY` | COMPLETADO (publicar funcionó en producción) |
+| `NEXT_PUBLIC_TURNSTILE_SITE_KEY` y `TURNSTILE_SECRET_KEY` | COMPLETADO. Con SEC-4, **el widget debe tener `www.reboard.es` en sus dominios**: si no, ahora falla |
+| `CONTACT_IP_SALT` y `CRON_SECRET` | COMPLETADO (las añadiste ayer) · funcionamiento NO VERIFICADO |
+| `SITE_INDEXABLE` | Sin poner (`false`) **a propósito**: indexación cerrada |
+| `NEXT_PUBLIC_POSTHOG_KEY` | PENDIENTE (solo en Production, tras configurar PostHog; ver `docs/ANALYTICS.md` §6) |
+| `NEXT_PUBLIC_AUTH_PROVIDERS` | Sin poner: Google y Apple ocultos (decisión) |
+| `RATE_LIMIT` | No hace falta en Vercel (el límite ya está activo allí) |
+
+### Migraciones pendientes en producción (en este orden)
+1. `20261029090000_privacy_hardening.sql`: perfiles, contactos y ajustes.
+2. `20261029090100_reveal_contact_needs_phone.sql`
+3. `20261029090200_storage_no_overwrite.sql`
+4. `20261029090300_listing_facets_single_pass.sql`
+
+**Cómo aplicarlas:**
+- Antes, `npx supabase db dump` como copia.
+- Después, `npx supabase db push --dry-run`, revisar la lista y `npx supabase db push`.
+- Todas son `create or replace`, `drop policy` o `revoke`/`grant`: no cambian tablas ni datos.
+
+### Correo y autenticación
+- **SMTP** de DonDominio (`hola@`) en Supabase, con plantillas de código: COMPLETADO (configurado ayer).
+- **SPF/DMARC:** PENDIENTE.
+- **Prueba de entrega a Gmail y Outlook:** NO VERIFICADO.
+
+### Copias de seguridad
+- NO VERIFICADO: confirmar el plan.
+- Mínimo recomendado: un `db dump` semanal cifrado, más uno antes de cada migración.
+
+### Monitorización
+- PENDIENTE: alertas de errores 5xx en Vercel, un *uptime check* y la alerta «`publish_completed` = 0 en 48 h» en PostHog cuando esté activo.
+
+### Textos legales
+- PENDIENTE de revisión profesional: aviso legal (propiedad intelectual y legislación), privacidad (bases jurídicas, conservación, DPA) y cookies (medición sin cookies).
+
+### Analítica
+- Código: COMPLETADO.
+- Activación: PENDIENTE. Pasos en `docs/ANALYTICS.md` §6:
+  - proyecto EU;
+  - *Cookieless server hash mode*;
+  - descartar la IP;
+  - DPA;
+  - clave en Vercel;
+  - revisión legal.
+
+### Indexación
+- Cerrada a propósito (`robots.txt: Disallow: /` [PROD]).
+- Abrir con `SITE_INDEXABLE=true` cuando haya 30–50 anuncios reales y texto propio por isla.
+
+### Inventario real
+- PENDIENTE: 0 anuncios activos [PROD].
+
+### Despliegue (cuando lo autorices)
+1. `npx supabase db dump -f backup-AAAAMMDD.sql`. Guardarlo fuera del repositorio.
+2. `npx supabase db push --dry-run` y comprobar que salen las 4 migraciones.
+3. `npx supabase db push`.
+4. `npx supabase test db --linked` (pgTAP contra producción: transaccional, no deja datos).
+5. Fusionar `auditoria-final` en `main` y hacer push. Vercel despliega solo.
+6. **Comprobaciones en producción:**
+   - portada, búsqueda y ficha;
+   - pedir un teléfono;
+   - publicar y editar un anuncio de prueba y borrarlo;
+   - `/comparar?ids=`;
+   - `curl -I https://reboard-gamma.vercel.app` debe dar 308;
+   - Lighthouse móvil en `/`, `/buscar` y una ficha.
+
+### Vuelta atrás (rollback)
+- **Web:** Vercel → *Deployments* → el despliegue anterior → «Promote to Production» (inmediato). O revertir el merge en `main`.
+- **Base de datos:** las migraciones son reversibles con otra migración nueva, sin tocar las aplicadas:
+  - `privacy_hardening`: volver a crear `profiles_read using (true)` y conceder `created_at`; dar `select` completo en `contact_events` y `app_settings`;
+  - `reveal_contact_needs_phone`: volver a crear la función con el cuerpo de `20261022120100_functions.sql`;
+  - `storage_no_overwrite`: volver a crear `listing_photos_owner_update` como en `20261027090000`;
+  - `listing_facets_single_pass`: volver a crear la función con el cuerpo de `20261023090200_search_performance.sql`.
+- **Si algo va mal con datos:** restaurar el `db dump` del paso 1, solo como último recurso: pierde lo publicado después.
+
+## Veredicto actualizado
+
+| Categoría | Mañana | Cierre | Evidencia |
+|---|---|---|---|
+| Estado funcional | 8 | **8,5** | 90/90 e2e, 14/14 administración y 78/78 integración; edición arreglada; comparador con fotos arreglado. Resta: producción sin anuncios y contacto sin verificar en [PROD] |
+| UX/UI | 8 | **8,5** | Una sola confirmación al publicar, galería táctil, tarjetas unificadas y áreas táctiles |
+| Móvil | 8 | **8,5** | CLS 0 en `/buscar`, galería con gesto de deslizar y el precio en la primera pantalla |
+| SEO | 6 | 6 | Sin cambios de fondo: la indexación sigue cerrada hasta tener inventario y texto por isla |
+| Rendimiento | 7 | **7,5** | `/buscar` 54 → 88; HTML −39 %; fuentes −23 %; facetas ×2. El LCP de la portada sigue pendiente |
+| Seguridad | 7 | **8** en la rama · 7 en producción | SEC-4, SEC-5, SEC-6 y SEC-8 cerrados en el código; privacidad en migraciones. Falta desplegar y la MFA |
+| Preparación para producción | 6 | 6,5 | Todo listo para desplegar, con checklist y vuelta atrás; faltan las decisiones del titular (A7) |
+
+**¿Lista para los primeros 100 usuarios? SÍ CON CONDICIONES:** los 8 bloqueantes de A7. Los de código están resueltos en la rama; quedan tu aprobación de despliegue, inventario, legales, MFA, copias, correo y monitorización.
+
+---
+
+# Parte B · Auditoría de la mañana (historial)
+
+## Resumen de la auditoría de la mañana
 - **Rama:** `auditoria-final`.
 - **Estado:** **nada de esta auditoría está desplegado.**
 - **Excepción:** el último cambio de «¿Dónde está la tabla?» se subió antes de empezar.
