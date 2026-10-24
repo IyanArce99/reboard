@@ -5,7 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { Logo } from "@/components/Logo";
-import { HeartIcon, MenuIcon, UserIcon } from "@/components/icons";
+import { CloseIcon, HeartIcon, MenuIcon, UserIcon } from "@/components/icons";
 import { useUserState } from "@/components/user/UserStateProvider";
 import { useDialogFocus } from "@/lib/a11y/useDialogFocus";
 import styles from "./Header.module.css";
@@ -207,7 +207,7 @@ export function MobileMenu() {
               <div className={styles.menuHead}>
                 <Logo size={26} />
                 <button ref={closeRef} type="button" aria-label="Cerrar" className={styles.menuClose} onClick={() => setOpen(false)}>
-                  ✕
+                  <CloseIcon />
                 </button>
               </div>
               <nav className={styles.menuList} aria-label="Principal">

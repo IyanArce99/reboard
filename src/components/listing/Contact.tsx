@@ -4,6 +4,7 @@
 // Con datos reales (`live`) el número no está en el HTML: se pide al servidor al pulsar
 // «Mostrar contacto», con Turnstile y límite por IP (src/app/anuncio/actions.ts).
 
+import { CloseIcon } from "@/components/icons";
 import { usePathname, useRouter } from "next/navigation";
 import { createContext, useContext, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
@@ -114,7 +115,7 @@ export function ContactProvider({ data, children }: { data: ContactData; childre
               <div className={styles.modalHead}>
                 <span id="contact-title">Contactar con {data.sellerName || "el vendedor"}</span>
                 <button type="button" aria-label="Cerrar" onClick={() => setOpen(false)}>
-                  ✕
+                  <CloseIcon />
                 </button>
               </div>
               <div className={styles.modalHint}>{byWhatsApp ? "Mensaje sugerido (puedes editarlo en WhatsApp):" : "Qué preguntar:"}</div>
@@ -261,7 +262,7 @@ export function ReportButton({ className }: { className: string }) {
               <div className={styles.modalHead}>
                 <span id="report-title">Reportar anuncio</span>
                 <button type="button" aria-label="Cerrar" onClick={() => setOpen(false)}>
-                  ✕
+                  <CloseIcon />
                 </button>
               </div>
               {!account ? (

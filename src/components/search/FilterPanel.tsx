@@ -20,6 +20,7 @@ import {
 } from "@/lib/domain/taxonomy";
 import { ftLabel, inToCm, num } from "@/lib/domain/format";
 import { FIN_OPTIONS, emptyFilters, toQuery, type Filters } from "@/lib/search/filters";
+import { CloseIcon } from "@/components/icons";
 import { fieldToInches } from "@/lib/publish/parse";
 import { VOLUME_CHIPS } from "./SearchBar";
 import { useUserState } from "@/components/user/UserStateProvider";
@@ -203,7 +204,7 @@ export function FilterPanel({ counts, showCounts = true, resultCount, brands, mo
             </button>
           )}
           <button type="button" aria-label="Cerrar" className={`${styles.closeBtn} ${styles.mOnly}`} onClick={() => setSheetOpen(false)}>
-            ✕
+            <CloseIcon />
           </button>
         </div>
       </div>

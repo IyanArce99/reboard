@@ -11,7 +11,7 @@ import { Fragment, useEffect, useRef, useState } from "react";
 import { useDialogFocus } from "@/lib/a11y/useDialogFocus";
 import { createPortal } from "react-dom";
 import { BoardShape } from "@/components/brand/BoardShape";
-import { SlidersIcon } from "@/components/icons";
+import { CloseIcon, SlidersIcon } from "@/components/icons";
 import { LAUNCH, SHAPES, SHAPE_INFO, ZONES, zoneBySlug, type Shape } from "@/lib/domain/taxonomy";
 import { num } from "@/lib/domain/format";
 import { HERE_COOKIE } from "@/lib/here";
@@ -490,7 +490,7 @@ function SearchSheet({
             Buscar tablas
           </span>
           <button ref={closeRef} type="button" aria-label="Cerrar" className={styles.close} onClick={onClose}>
-            ✕
+            <CloseIcon />
           </button>
         </div>
         {children}

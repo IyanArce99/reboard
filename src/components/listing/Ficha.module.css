@@ -710,6 +710,10 @@
   background: #e3eeed;
   border-radius: 999px;
   flex: none;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  color: var(--rb-petrol);
 }
 
 .modalHint {

@@ -318,7 +318,9 @@
   border: 0;
   background: var(--rb-hover);
   border-radius: 999px;
-  font-size: 18px;
+  display: grid;
+  place-items: center;
+  padding: 0;
   color: var(--rb-petrol);
 }
 

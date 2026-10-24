@@ -127,7 +127,10 @@
   border: 0;
   background: #e3eeed;
   border-radius: 999px;
-  font-size: 18px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  color: var(--rb-petrol);
 }
 
 .panelBody {
@@ -648,6 +651,9 @@
   }
   .mOnly {
     display: flex;
+  }
+  .closeBtn.mOnly {
+    display: grid;
   }
   /* En la hoja móvil, «Limpiar» ya está en el pie junto a «Ver N tablas». */
   .dOnly {
