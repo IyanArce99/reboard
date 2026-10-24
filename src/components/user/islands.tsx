@@ -2,9 +2,10 @@
 
 // Pequeñas islas cliente que dependen del estado del usuario.
 
+import Link from "next/link";
 import { HeartIcon } from "@/components/icons";
 import ui from "@/styles/ui.module.css";
-import { useUserState } from "./UserStateProvider";
+import { useUserState, type CompareItem } from "./UserStateProvider";
 
 /** `name`: título del anuncio, para que en una lista no se oigan N «Guardar» iguales. */
 export function SaveButton({ id, name, className, size = 19 }: { id: string; name?: string; className?: string; size?: number }) {
@@ -35,21 +36,42 @@ export function SaveTextButton({ id, className }: { id: string; className?: stri
   );
 }
 
-/** `label`: etiqueta corta de la bandeja; `name`: título completo para lectores de pantalla. */
-export function CompareButton({ id, label, name, className }: { id: string; label: string; name?: string; className?: string }) {
+/**
+ * Añadir o quitar una tabla de la comparación. `item` lleva la etiqueta corta, la miniatura y la
+ * silueta para la barra de comparación; `name`, el título completo para lectores de pantalla.
+ */
+export function CompareButton({ item, name, className }: { item: CompareItem; name?: string; className?: string }) {
   const { compare, toggleCompare } = useUserState();
-  const on = compare.some((c) => c.id === id);
+  const on = compare.some((c) => c.id === item.id);
   return (
-    <button
-      type="button"
-      className={className}
-      aria-pressed={on}
-      data-on={on || undefined}
-      onClick={() => toggleCompare({ id, label })}
-    >
+    <button type="button" className={className} aria-pressed={on} data-on={on || undefined} onClick={() => toggleCompare(item)}>
+      <CompareIcon on={on} />
       {on ? "En comparación" : "Comparar"}
-      <span className="visually-hidden">: {name ?? label}</span>
+      <span className="visually-hidden">: {name ?? item.label}</span>
     </button>
+  );
+}
+
+function CompareIcon({ on }: { on: boolean }) {
+  return (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      {on ? <path d="M5 12.5l4.5 4.5L19 7.5" /> : <path d="M12 5v14M5 12h14" />}
+    </svg>
+  );
+}
+
+/**
+ * Acceso al comparador donde no se muestra la barra de comparación (ficha en móvil, que ya tiene su
+ * barra de contacto fija, y el resultado de TablaFinder). Solo aparece con alguna tabla elegida.
+ */
+export function CompareLink({ className }: { className?: string }) {
+  const { compare } = useUserState();
+  const n = compare.length;
+  if (!n) return null;
+  return (
+    <Link href="/comparar" className={className}>
+      {n >= 2 ? `Ver comparación (${n})` : "1 tabla en comparación · añade otra"}
+    </Link>
   );
 }
 

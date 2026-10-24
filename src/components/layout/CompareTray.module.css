@@ -1,68 +1,194 @@
+/* Barra de comparación: compacta, petróleo, pegada abajo (sticky: nunca tapa el pie al final). */
 .tray {
   position: sticky;
   bottom: 0;
   z-index: 25;
   background: var(--rb-petrol);
   color: var(--rb-white);
+  box-shadow: 0 -6px 18px rgba(16, 45, 59, 0.18);
 }
 
 .inner {
   max-width: var(--rb-container);
   margin: 0 auto;
-  padding: 10px var(--rb-pad-x);
+  /* Zona segura inferior (iPhone sin botón, Android con gestos). */
+  padding: 10px var(--rb-pad-x) calc(10px + env(safe-area-inset-bottom, 0px));
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 14px;
 }
 
-.items {
-  display: flex;
-  gap: 6px;
-  flex: 1;
+.status {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.3;
+  color: var(--rb-on-petrol-muted);
   min-width: 0;
-  overflow: hidden;
+}
+.status strong {
+  color: var(--rb-white);
+  font-weight: 800;
 }
 
-/* El botón mide 44 px de alto (área táctil); la ficha visible sigue siendo de 36 px. */
-.item {
+.thumbs {
+  display: flex;
+  gap: 8px;
+  margin: 0 0 0 auto;
+  padding: 0;
+  list-style: none;
+}
+
+/* Miniatura de 44 px (área táctil completa) que quita la tabla al pulsarla. */
+.thumb {
+  position: relative;
   display: flex;
   align-items: center;
+  width: 44px;
   height: 44px;
   padding: 0;
   border: 0;
   background: transparent;
-  color: var(--rb-white);
-  flex: none;
+  border-radius: 10px;
+  cursor: pointer;
 }
-.chip {
+.pic {
   display: flex;
   align-items: center;
-  gap: 6px;
-  height: 36px;
-  padding: 0 10px;
-  border-radius: 8px;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  overflow: hidden;
+  background: var(--rb-water);
   border: 1px solid var(--rb-petrol-3);
-  background: var(--rb-petrol-2);
-  color: var(--rb-white);
-  font-size: 13px;
-  white-space: nowrap;
 }
-.chip span {
+.img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.x {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  width: 18px;
+  height: 18px;
+  border-radius: 999px;
+  background: var(--rb-white);
+  color: var(--rb-petrol);
+  font-size: 10px;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
+}
+.thumb:hover .pic {
+  border-color: var(--rb-teal-light);
+}
+
+.slot {
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  border: 1px dashed var(--rb-petrol-3);
+}
+
+.clear {
+  height: 44px;
+  padding: 0 6px;
+  border: 0;
+  background: transparent;
   color: var(--rb-on-petrol-muted);
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+.clear:hover {
+  color: var(--rb-white);
 }
 
 .go {
+  flex: none;
+}
+.goShort {
+  display: none;
+}
+
+.hint {
+  flex: none;
   display: flex;
   align-items: center;
   height: 44px;
+  padding: 0 14px;
   border-radius: 10px;
-  background: #9db0b4;
-  color: var(--rb-petrol);
-  font-size: 15px;
-  font-weight: 800;
-  padding: 0 16px;
+  border: 1px dashed var(--rb-petrol-3);
+  color: var(--rb-on-petrol-muted);
+  font-size: 14px;
+  font-weight: 700;
   white-space: nowrap;
 }
-.go[data-ready] {
-  background: var(--rb-white);
+
+/* Móvil: solo contador, miniaturas y la acción. «Vaciar» está en /comparar. */
+@media (max-width: 759px) {
+  .tray[data-desktop-only] {
+    display: none;
+  }
+  .inner {
+    gap: 10px;
+    padding-top: 8px;
+    padding-bottom: calc(8px + env(safe-area-inset-bottom, 0px));
+  }
+  .statusRest,
+  .clear,
+  .slot {
+    display: none;
+  }
+  .thumbs {
+    gap: 6px;
+  }
+  .thumb,
+  .pic {
+    width: 40px;
+    height: 40px;
+  }
+  /* El botón conserva 44 px de alto aunque la miniatura mida 40. */
+  .thumb {
+    height: 44px;
+  }
+  .go {
+    padding: 0 12px;
+  }
+  /* Con 2 o más ya se entiende por las miniaturas: el contador deja sitio a la acción. */
+  .status[data-ready] {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
+  .goLong {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
+  .goShort {
+    display: inline;
+  }
+}
+
+@media (max-width: 359px) {
+  .thumb,
+  .pic {
+    width: 36px;
+  }
+  .pic {
+    height: 36px;
+  }
 }

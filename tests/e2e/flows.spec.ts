@@ -1,5 +1,6 @@
 // Recorridos clave que no deben romperse: buscador, calculadora de litros, comparador y ficha.
 import { expect, test, type Page } from "@playwright/test";
+import { demoListing, demoSold } from "./demo-data";
 
 const STATE_KEY = "rb-usuario-v1";
 
@@ -61,14 +62,12 @@ test("buscador: estado vacío con sugerencias", async ({ page }) => {
 test("home (escritorio): cada segmento abre su panel y el botón actualiza el recuento", async ({ page }) => {
   const errors = trackErrors(page);
   await page.goto("/");
-  await expect(page.getByRole("link", { name: "Buscar 27 tablas" })).toBeVisible();
+  // Sin isla elegida (no hay zona por defecto): todas las tablas publicadas.
+  await expect(page.getByRole("link", { name: /^Buscar \d+ tablas$/ })).toBeVisible();
   await page.getByRole("button", { name: /Litros/ }).click();
   const panel = page.getByRole("dialog", { name: "Litros" });
   await panel.getByRole("button", { name: /45–60 L/ }).click();
-  await expect(page.getByRole("link", { name: "Buscar 8 tablas" })).toHaveAttribute(
-    "href",
-    "/buscar?zona=gran-canaria&litros-min=45&litros-max=60",
-  );
+  await expect(page.getByRole("link", { name: /^Buscar \d+ tablas?$/ })).toHaveAttribute("href", "/buscar?litros-min=45&litros-max=60");
   // Otro segmento cambia de panel; Escape lo cierra.
   await page.getByRole("button", { name: /Tipo de tabla/ }).click();
   await page.getByRole("dialog", { name: "Tipo de tabla" }).getByRole("button", { name: /^Evolutiva/ }).click();
@@ -113,36 +112,27 @@ test("calculadora de litros: recorrido completo y perfil guardado", async ({ pag
   expect(errors).toEqual([]);
 });
 
-test("comparador: dos tablas con diferencias y la más barata", async ({ page }) => {
-  const errors = trackErrors(page);
-  await page.addInitScript(
-    ([k, v]) => localStorage.setItem(k, v),
-    [STATE_KEY, JSON.stringify({ saved: [], compare: [{ id: "a1040", label: "Torq 7'2" }, { id: "a1047", label: "Softech 7'0" }], alerts: [], profile: null })],
-  );
-  await page.goto("/comparar");
-  const table = page.getByRole("table");
-  await expect(table).toBeVisible();
-  await expect(table.getByText(/la más barata/)).toBeVisible();
-  await expect(table.getByText(`Torq Fun TET 7'2"`)).toBeVisible();
-  expect(errors).toEqual([]);
-});
+// El comparador tiene su propio archivo: tests/e2e/compare.spec.ts.
 
 test("ficha: contacto y anuncio vendido", async ({ page }) => {
-  await page.goto("/anuncio/torq-fun-tet-7-2-gran-canaria-a1040");
+  const torq = await demoListing("torq-fun-tet-7-2-gran-canaria");
+  const sold = await demoSold();
+  await page.goto(torq.path);
   await page.getByRole("button", { name: "Contactar por WhatsApp" }).click();
   await expect(page.getByRole("dialog", { name: /Contactar con Daniel/ })).toBeVisible();
 
-  await page.goto("/anuncio/x-a1096");
+  await page.goto(sold.path);
   await expect(page.getByText("Esta tabla ya se ha vendido")).toBeVisible();
   await expect(page.getByRole("button", { name: "Vendida" }).first()).toBeDisabled();
 });
 
 test("sin errores de hidratación con estado guardado", async ({ page }) => {
+  const torq = await demoListing("torq-fun-tet-7-2-gran-canaria");
   await page.addInitScript(
     ([k, v]) => localStorage.setItem(k, v),
-    [STATE_KEY, JSON.stringify({ saved: ["a1040"], compare: [{ id: "a1040", label: "Torq 7'2" }], alerts: [], profile: { lo: 45, hi: 60, level: "Iniciación", weight: 75 } })],
+    [STATE_KEY, JSON.stringify({ saved: [torq.id], compare: [{ id: torq.id, label: torq.label }], alerts: [], profile: { lo: 45, hi: 60, level: "Iniciación", weight: 75 } })],
   );
-  for (const url of ["/", "/buscar", "/tablas/evolutiva", "/anuncio/torq-fun-tet-7-2-gran-canaria-a1040", "/calculadora-litros", "/guardado", "/marcas/torq/fun-tet"]) {
+  for (const url of ["/", "/buscar", "/tablas/evolutiva", torq.path, "/calculadora-litros", "/guardado", "/comparar", "/marcas/torq/fun-tet"]) {
     const errors = trackErrors(page);
     await page.goto(url, { waitUntil: "networkidle" });
     expect(errors, url).toEqual([]);

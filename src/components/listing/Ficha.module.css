@@ -327,6 +327,10 @@
 
 .action {
   height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
   border: 1px solid var(--rb-line-strong);
   border-radius: 10px;
   background: var(--rb-white);
@@ -805,4 +809,17 @@
   width: 18px;
   height: 18px;
   accent-color: var(--rb-teal);
+}
+
+/* Acceso al comparador desde la ficha (en móvil no hay barra de comparación: está la de contacto). */
+.compareLink {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  margin-top: 2px;
+  color: var(--rb-teal-text);
+  font-size: 14px;
+  font-weight: 800;
+  text-decoration: underline;
+  text-underline-offset: 3px;
 }

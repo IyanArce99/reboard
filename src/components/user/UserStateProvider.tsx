@@ -7,12 +7,11 @@
 
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import { listingDbId } from "@/lib/auth/shared";
+import { MAX_COMPARE, sanitizeCompare, type CompareItem } from "@/lib/compare/compare";
 import styles from "./Toast.module.css";
 
-export interface CompareItem {
-  id: string;
-  label: string;
-}
+export type { CompareItem } from "@/lib/compare/compare";
+export { MAX_COMPARE } from "@/lib/compare/compare";
 
 export interface SavedAlert {
   id: string;
@@ -55,6 +54,7 @@ interface UserState extends Stored {
   toggleSaved: (id: string) => void;
   toggleCompare: (item: CompareItem) => void;
   removeCompare: (id: string) => void;
+  clearCompare: () => void;
   addAlert: (text: string, query: string) => void;
   toggleAlert: (id: string) => void;
   removeAlert: (id: string) => void;
@@ -64,7 +64,6 @@ interface UserState extends Stored {
 
 const KEY = "rb-usuario-v1";
 const EMPTY: Stored = { saved: [], compare: [], alerts: [], profile: null };
-export const MAX_COMPARE = 4;
 
 const Ctx = createContext<UserState | null>(null);
 
@@ -75,7 +74,8 @@ function load(): Stored {
     const p = JSON.parse(raw) as Partial<Stored>;
     return {
       saved: Array.isArray(p.saved) ? p.saved : [],
-      compare: Array.isArray(p.compare) ? p.compare.slice(0, MAX_COMPARE) : [],
+      // Ids antiguos, duplicados o manipulados se descartan: el comparador nunca se rompe por esto.
+      compare: sanitizeCompare(p.compare),
       alerts: Array.isArray(p.alerts) ? p.alerts : [],
       profile: p.profile ?? null,
     };
@@ -252,6 +252,10 @@ export function UserStateProvider({ children, authEnabled = false }: { children:
     setState((s) => ({ ...s, compare: s.compare.filter((c) => c.id !== id) }));
   }, []);
 
+  const clearCompare = useCallback(() => {
+    setState((s) => ({ ...s, compare: [] }));
+  }, []);
+
   const addAlert = useCallback(
     (text: string, query: string) => {
       // Una alerta por búsqueda: si ya existe la misma `query`, no se duplica.
@@ -295,6 +299,7 @@ export function UserStateProvider({ children, authEnabled = false }: { children:
       toggleSaved,
       toggleCompare,
       removeCompare,
+      clearCompare,
       addAlert,
       toggleAlert,
       removeAlert,
@@ -311,6 +316,7 @@ export function UserStateProvider({ children, authEnabled = false }: { children:
       toggleSaved,
       toggleCompare,
       removeCompare,
+      clearCompare,
       addAlert,
       toggleAlert,
       removeAlert,

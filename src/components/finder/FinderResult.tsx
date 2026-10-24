@@ -6,7 +6,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { BoardShape } from "@/components/brand/BoardShape";
 import { ListingCard } from "@/components/listing/ListingCard";
-import { AlertButton } from "@/components/user/islands";
+import { AlertButton, CompareLink } from "@/components/user/islands";
 import { useUserState } from "@/components/user/UserStateProvider";
 import { SHAPE_INFO } from "@/lib/domain/taxonomy";
 import type { Listing } from "@/lib/domain/types";
@@ -200,6 +200,12 @@ export function FinderResult({ state: W, rec: r, summary, onEdit, onRestart, set
                   ? "No hemos podido cargar las tablas."
                   : "Buscando tablas en tu rango…"}
             </div>
+            {comp.length >= 2 && (
+              <p className={styles.cmpHint}>
+                ¿Dudas entre varias? Pulsa «Comparar» en dos o más y míralas una al lado de otra.{" "}
+                <CompareLink className={styles.cmpLink} />
+              </p>
+            )}
           </div>
           {allCount > 0 && (
             <Link href={searchHref(all)} className={styles.seeAll}>

@@ -17,7 +17,8 @@ import { authEnabled } from "@/lib/auth/config";
 import { noindexRobots } from "@/lib/seo";
 import { Breadcrumbs } from "@/components/seo/Breadcrumbs";
 import { JsonLd } from "@/components/seo/JsonLd";
-import { AlertButton, CompareButton, SaveTextButton } from "@/components/user/islands";
+import { AlertButton, CompareButton, CompareLink, SaveTextButton } from "@/components/user/islands";
+import { compareItemOf } from "@/lib/compare/compare";
 import { getRepository } from "@/lib/data";
 import { getCatalogNames } from "@/lib/data/names";
 import { CONDITION_LABEL, CONSTRUCTION_INFO, SELLER_LABEL, SHAPE_INFO, slugify } from "@/lib/domain/taxonomy";
@@ -28,7 +29,6 @@ import {
   idFromSlugId,
   isOff,
   listingPath,
-  listingShortLabel,
   listingTitle,
   sourceBadge,
   zoneName,
@@ -210,8 +210,10 @@ export default async function FichaPage({ params }: PageProps<"/anuncio/[slugId]
             <div className={styles.actions}>
               <SaveTextButton id={l.id} className={styles.action} />
               <ShareButton url={url} className={styles.action} />
-              <CompareButton id={l.id} label={listingShortLabel(l)} className={styles.action} />
+              <CompareButton item={compareItemOf(l)} name={listingTitle(l)} className={styles.action} />
             </div>
+            {/* En móvil la barra de comparación no se muestra en la ficha (ya está la de contacto). */}
+            <CompareLink className={styles.compareLink} />
             <div className={styles.safety}>
               No pagues nada por adelantado, ni siquiera una señal. Ve a ver la tabla antes de pagar. <ReportButton className={styles.report} />
             </div>

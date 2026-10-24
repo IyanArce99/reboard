@@ -9,7 +9,6 @@ import {
   consShort,
   isOff,
   listingPath,
-  listingShortLabel,
   listingTitle,
   postedText,
   typeShort,
@@ -17,6 +16,7 @@ import {
   zoneName,
 } from "@/lib/listing/present";
 import { CompareButton, FitBadge, SaveButton } from "@/components/user/islands";
+import { compareItemOf } from "@/lib/compare/compare";
 import { AvailabilityDot } from "./AvailabilityDot";
 import ui from "@/styles/ui.module.css";
 import styles from "./ListingCard.module.css";
@@ -116,7 +116,7 @@ function Card({ listing: l, now, hereZone, layout = "vertical", preload = false,
           </div>
           <div className={styles.hFoot}>
             <FitBadge volume={l.volume.value} text="Te encaja" className={styles.hFit} />
-            <CompareButton id={l.id} label={listingShortLabel(l)} name={title} className={styles.hCmp} />
+            <CompareButton item={compareItemOf(l)} name={title} className={styles.hCmp} />
           </div>
         </div>
       </article>
@@ -184,7 +184,7 @@ function Card({ listing: l, now, hereZone, layout = "vertical", preload = false,
         </div>
         <FitBadge volume={l.volume.value} className={`${ui.fitBadge} ${styles.vFit}`} />
         <div className={styles.vFoot}>
-          <CompareButton id={l.id} label={listingShortLabel(l)} name={title} className={styles.vCmp} />
+          <CompareButton item={compareItemOf(l)} name={title} className={styles.vCmp} />
           <span>{postedText(l, now)}</span>
         </div>
       </div>

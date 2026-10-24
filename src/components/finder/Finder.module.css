@@ -1269,3 +1269,19 @@ button.seg::after {
     grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
   }
 }
+
+/* Acceso al comparador desde el resultado (aquí no se muestra la barra de comparación). */
+.cmpHint {
+  margin: 6px 0 0;
+  font-size: 14px;
+  color: var(--rb-muted);
+}
+.cmpLink {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  color: var(--rb-teal-text);
+  font-weight: 800;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}

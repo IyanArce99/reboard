@@ -1,6 +1,7 @@
 // Inventario de URLs con su código HTTP esperado. Si una tarea cambia una URL o un código,
 // este test falla: hay que justificarlo en docs/DECISIONS.md.
 import { expect, test } from "@playwright/test";
+import { demoListing } from "./demo-data";
 
 const OK = [
   "/",
@@ -13,7 +14,6 @@ const OK = [
   "/tablas/gran-canaria/evolutiva",
   "/tablas/la-gomera/principiantes",
   "/tablas/la-graciosa",
-  "/anuncio/torq-fun-tet-7-2-gran-canaria-a1040",
   "/calculadora-litros",
   "/comparar",
   "/guardado",
@@ -21,7 +21,6 @@ const OK = [
   "/vender",
   "/vender/publicar",
   "/vender/publicar?editar=a1040",
-  "/panel",
   "/marcas/torq",
   "/marcas/torq/fun-tet",
   "/marcas/channel-islands/ci-mid",
@@ -72,10 +71,21 @@ test.describe("códigos HTTP", () => {
     });
   }
 
-  test("308 al slug canónico del anuncio", async ({ request }) => {
-    const res = await request.get("/anuncio/slug-viejo-a1040", { maxRedirects: 0 });
+  // Anuncios: ids reales del inventario DEMO de Supabase local (cambian en cada carga).
+  test("200 en la ficha de un anuncio y 308 al slug canónico", async ({ request }) => {
+    const torq = await demoListing("torq-fun-tet-7-2-gran-canaria");
+    expect((await request.get(torq.path, { maxRedirects: 0 })).status()).toBe(200);
+    const res = await request.get(`/anuncio/slug-viejo-${torq.id}`, { maxRedirects: 0 });
     expect(res.status()).toBe(308);
-    expect(res.headers()["location"]).toMatch(/\/anuncio\/torq-fun-tet-7-2-gran-canaria-a1040$/);
+    expect(res.headers()["location"]).toMatch(new RegExp(`/anuncio/torq-fun-tet-7-2-gran-canaria-${torq.id}$`));
+  });
+
+  test("rutas privadas sin sesión: 307 a /entrar", async ({ request }) => {
+    for (const url of ["/panel", "/cuenta"]) {
+      const res = await request.get(url, { maxRedirects: 0 });
+      expect(res.status(), url).toBe(307);
+      expect(res.headers()["location"], url).toMatch(/\/entrar\?siguiente=/);
+    }
   });
 
   // «Canarias» es todo el territorio activo: su landing duplicaría las generales (proxy.ts).
@@ -103,8 +113,9 @@ test.describe("SEO", () => {
   });
 
   test("la ficha tiene JSON-LD Product y canonical propio", async ({ page }) => {
-    await page.goto("/anuncio/torq-fun-tet-7-2-gran-canaria-a1040");
-    await expect(page.locator('link[rel="canonical"]')).toHaveAttribute("href", /a1040$/);
+    const torq = await demoListing("torq-fun-tet-7-2-gran-canaria");
+    await page.goto(torq.path);
+    await expect(page.locator('link[rel="canonical"]')).toHaveAttribute("href", new RegExp(`${torq.id}$`));
     const ld = await page.locator('script[type="application/ld+json"]').allTextContents();
     expect(ld.some((t) => t.includes('"@type":"Product"'))).toBe(true);
   });
