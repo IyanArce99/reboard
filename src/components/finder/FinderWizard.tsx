@@ -18,6 +18,7 @@ import {
 import { FINDER_DISCLAIMER, FinderResult } from "./FinderResult";
 import { FinderStep } from "./FinderStep";
 import styles from "./Finder.module.css";
+import { trackOnce } from "@/lib/analytics/track";
 
 const KEY = "rb-asistente-v1";
 
@@ -87,6 +88,8 @@ export function FinderWizard({ intro }: { intro: React.ReactNode }) {
       setTried(true);
       return;
     }
+    // Analítica: empieza a usar TablaFinder (sin el peso ni ninguna respuesta).
+    if (step === 1) trackOnce("finder", "finder_started", {});
     if (step === TOTAL_STEPS) {
       // Desde el panel se puede saltar a cualquier paso: el peso y el nivel siguen siendo obligatorios.
       if (!r) {

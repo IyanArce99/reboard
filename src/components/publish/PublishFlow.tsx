@@ -14,9 +14,11 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { readPanelState } from "@/components/panel/panelStore";
 import { TURNSTILE_SITE_KEY, type TurnstileHandle } from "@/components/security/Turnstile";
 import { useUserState } from "@/components/user/UserStateProvider";
+import { priceBand, type PublishFailure } from "@/lib/analytics/events";
+import { track, trackOnce } from "@/lib/analytics/track";
 import type { CatalogModel } from "@/lib/domain/types";
 import { publishDraft } from "@/lib/publish/client-publish";
-import { OTHER_BRAND, emptyDraft, pendingCount, type DraftPhoto, type PublishDraft } from "@/lib/publish/draft";
+import { OTHER_BRAND, emptyDraft, isListedBrand, pendingCount, type DraftPhoto, type PublishDraft } from "@/lib/publish/draft";
 import { clearStoredDraft, loadStoredDraft, saveStoredDraft } from "@/lib/publish/draft-store";
 import { processPhoto } from "@/lib/publish/image";
 import { describeMeasure } from "@/lib/publish/parse";
@@ -84,6 +86,11 @@ export function PublishFlow({ catalog, brands, featuredBrands, priceRefs, nowIso
   const [d, setD] = useState<PublishDraft>(() => initial ?? emptyDraft());
   // Editar abre en la revisión: cada sección tiene su «Editar» y cambiar solo el precio son dos toques (QA-7).
   const [step, setStep] = useState(initial ? 5 : 1);
+  const mode = editingId ? ("editar" as const) : ("nuevo" as const);
+  // Analítica: empieza a publicar (solo anuncios nuevos; una vez por pestaña).
+  useEffect(() => {
+    if (!initial) trackOnce("publicar", "publish_started", {});
+  }, [initial]);
   // true al entrar a un paso con «Editar» desde la revisión: el botón principal vuelve a ella.
   const [fromReview, setFromReview] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -182,6 +189,8 @@ export function PublishFlow({ catalog, brands, featuredBrands, priceRefs, nowIso
       setError(issue);
       return;
     }
+    // Analítica: cada paso superado, una vez por paso (volver a revisarlo no cuenta de nuevo).
+    if (step >= 1 && step <= 4) trackOnce(`paso-${step}-${mode}`, "publish_step_completed", { step: step as 1 | 2 | 3 | 4, mode });
     goTo(fromReview ? 5 : step + 1);
   };
 
@@ -239,13 +248,16 @@ export function PublishFlow({ catalog, brands, featuredBrands, priceRefs, nowIso
 
   const publish = async (token: string | null = captcha) => {
     setError("");
+    const fail = (reason: PublishFailure) => track("publish_failed", { mode, reason });
     if (!toE164(d.phone)) {
       setError("Falta tu teléfono. Añádelo en «Precio y ubicación»: es por donde te contactarán (no aparece escrito en el anuncio).");
+      fail("datos");
       return;
     }
     const invalid = validate();
     if (invalid) {
       setError(invalid);
+      fail("datos");
       return;
     }
     if (!live) {
@@ -263,6 +275,7 @@ export function PublishFlow({ catalog, brands, featuredBrands, priceRefs, nowIso
       return;
     }
     setBusy(true);
+    track("publish_submitted", { mode });
     try {
       const r = await publishDraft({
         draft: d,
@@ -273,14 +286,28 @@ export function PublishFlow({ catalog, brands, featuredBrands, priceRefs, nowIso
         onProgress: setProgress,
       });
       if (r.ok) {
+        // El servidor ha confirmado que el anuncio está guardado (y publicado, si es nuevo): solo aquí.
+        track("publish_completed", {
+          mode,
+          shape: d.shape || "evolutiva",
+          construction: d.construction || "pu",
+          island: d.zone,
+          price_band: priceBand(Number(d.price) || 0),
+          photos: d.photos.length,
+          has_volume: Boolean(d.vol.trim()),
+          brand_known: isListedBrand(d.brand),
+        });
         if (!editingId) await clearStoredDraft();
         setDone({ path: r.path, persisted: true });
         window.scrollTo({ top: 0 });
       } else {
         if (r.publicId && !editingId) setCreatedId(r.publicId);
         setError(r.message);
+        // Motivo por categoría (nunca el texto del error).
+        fail("login" in r && r.login ? "sesion" : /robot/i.test(r.message) ? "captcha" : /foto/i.test(r.message) ? "fotos" : "servidor");
       }
     } catch {
+      fail("red");
       setError("Se ha cortado la conexión. No has perdido nada: el anuncio sigue guardado en este dispositivo. Vuelve a intentarlo.");
     } finally {
       // El token de Turnstile es de un solo uso.

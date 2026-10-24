@@ -26,6 +26,8 @@ import { alertText } from "@/lib/search/describe";
 import { searchHref, toQuery, withFilters, type Filters } from "@/lib/search/filters";
 import type { SummaryItem } from "@/lib/finder/summary";
 import styles from "./Finder.module.css";
+import { countBand } from "@/lib/analytics/events";
+import { trackOnce } from "@/lib/analytics/track";
 
 /** Aviso único por pantalla (asistente o resultado): el cálculo no está validado. */
 export const FINDER_DISCLAIMER = "Cálculo orientativo con reglas habituales. No sustituye el consejo de un shaper o de tu escuela.";
@@ -88,6 +90,12 @@ export function FinderResult({ state: W, rec: r, summary, onEdit, onRestart, set
   const saved = !!profile && profile.lo === r.lo && profile.hi === r.hi;
   // Sin tablas compatibles: estado vacío honesto (sin contadores a cero), con alerta y enlace a publicar.
   const empty = !!pool && comp.length === 0;
+  // Analítica: resultado visto (tipos recomendados y cuántas tablas encajan; nada de peso ni nivel).
+  const typesKey = r.types.join(",");
+  useEffect(() => {
+    if (!pool) return;
+    trackOnce(`${r.lo}-${r.hi}-${typesKey}`, "finder_completed", { types: typesKey.split(","), results: countBand(comp.length) });
+  }, [pool, r.lo, r.hi, typesKey, comp.length]);
   // Ninguna tabla publicada en todo el rango de litros (lo normal mientras la beta no tenga anuncios).
   const noneInRange = !!pool && listings.length === 0;
   const widen = pool && !noneInRange ? widenOptions(listings, r, zone, budget) : [];

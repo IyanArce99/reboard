@@ -1,5 +1,7 @@
 import Link from "next/link";
+import { TrackOnMount } from "@/components/analytics/TrackOnMount";
 import { BoardsIllustration } from "@/components/brand/EmptyState";
+import { countBand } from "@/lib/analytics/events";
 import { ListingCard } from "@/components/listing/ListingCard";
 import { Breadcrumbs, type Crumb } from "@/components/seo/Breadcrumbs";
 import { JsonLd } from "@/components/seo/JsonLd";
@@ -75,6 +77,23 @@ export async function SearchResults({ filters: f, view, here, title, intro, crum
 
   return (
     <main className={`container ${styles.page}`}>
+      {/* Analítica: una búsqueda por combinación de filtros y orden (sin textos libres ni zonas exactas). */}
+      <TrackOnMount
+        id={`${alert.query}|${view.sort}|${isSearchPage ? "b" : "l"}`}
+        event="search_performed"
+        props={{
+          source: isSearchPage ? "buscar" : "landing",
+          island: f.zone || null,
+          shapes: f.shapes,
+          constructions: f.constructions,
+          has_volume: hasVolumeFilter(f),
+          has_length: f.lenMin != null || f.lenMax != null,
+          has_price: f.priceMin != null || f.priceMax != null,
+          has_brand: Boolean(f.brand),
+          sort: view.sort,
+          results: countBand(res.total),
+        }}
+      />
       <Breadcrumbs items={crumbs} current={current} />
       <h1 className={ui.h1}>{title}</h1>
       {intro && <p className={styles.intro}>{intro}</p>}

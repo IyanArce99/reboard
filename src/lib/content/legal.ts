@@ -60,11 +60,15 @@ export const LEGAL_DOCS: LegalDoc[] = [
           "Cuando alguien pide el contacto de un anuncio: registramos el anuncio, la fecha y un código derivado de la dirección IP (HMAC) que no permite recuperar la IP. Sirve para limitar abusos y para que el vendedor vea cuántas veces se ha pedido su contacto.",
           "Si guardas tablas con tu cuenta: la lista de anuncios guardados. Si reportas un anuncio: el motivo y el detalle que escribas.",
           "Sin cuenta, tus guardados, alertas y comparaciones se quedan en tu dispositivo y no los recibimos.",
+          "Medición de audiencia, sin cookies: qué páginas se visitan, de qué web o campaña llegas (por ejemplo, «utm_source=instagram») y algunas acciones de uso (búsquedas por filtros, fichas vistas, contactos pedidos, comparaciones y los pasos al publicar), para hacer estadísticas. No incluye tu nombre, tu email, tu teléfono, tu localidad, lo que escribes ni tus respuestas de TablaFinder (peso, nivel u olas). No se guarda nada en tu dispositivo: con tu dirección IP y tu navegador, nuestro proveedor calcula en servidores de la Unión Europea un identificador que cambia cada día y no se puede revertir, y descarta la IP.",
         ],
       },
       {
         h: "Finalidad y base jurídica",
-        p: ["Prestar el servicio que pides (cuenta, publicar, contactar), prevenir el fraude y moderar contenidos. [Bases jurídicas pendientes de revisión legal.]"],
+        p: [
+          "Prestar el servicio que pides (cuenta, publicar, contactar), prevenir el fraude y moderar contenidos. [Bases jurídicas pendientes de revisión legal.]",
+          "Medir la audiencia de la web de forma estadística para mejorarla, solo por cuenta de Reboard y sin cruzar los datos con otros ni cederlos. Se plantea como medición exenta de consentimiento (artículo 22.2 de la LSSI y guía de la AEPD sobre herramientas de medición de audiencia, enero de 2024). [Pendiente de revisión legal.]",
+        ],
       },
       {
         h: "Proveedores que tratan datos por cuenta de Reboard",
@@ -74,6 +78,7 @@ export const LEGAL_DOCS: LegalDoc[] = [
           "Cloudflare Turnstile (comprobación anti-robots en el acceso, el contacto, publicar y reportar).",
           "Google y Apple, solo si eliges entrar con su cuenta: verifican tu identidad y nos envían tu email y tu nombre.",
           "DonDominio (correo electrónico de Reboard y envío del email con el código de acceso).",
+          "PostHog (medición de audiencia sin cookies; servidores en la Unión Europea), como encargado del tratamiento, con el compromiso de no reutilizar los datos. [Pendiente de firmar su contrato de encargo (DPA).]",
           "[Revisar contratos de encargo de tratamiento y transferencias internacionales.]",
         ],
       },
@@ -82,11 +87,13 @@ export const LEGAL_DOCS: LegalDoc[] = [
         p: [
           "Los anuncios que no se confirman en 30 días caducan; los borradores sin publicar se borran a los 7 días con sus fotos. Si borras tu cuenta, se borran tu perfil, tus anuncios, tus fotos, tus guardados y tus reportes.",
           "[Plazo de conservación del registro de contactos y de los anuncios caducados o vendidos: pendiente de decidir.]",
+          "Estadísticas de uso: como máximo 12 meses (por debajo de los 25 meses que fija la AEPD).",
         ],
       },
       {
         h: "Tus derechos",
         p: [
+          "Si activas «No rastrear» o «Global Privacy Control» en tu navegador, no medimos tu visita.",
           `Puedes borrar tu cuenta desde «Mi cuenta». Para acceder, rectificar, oponerte o pedir la portabilidad de tus datos, escribe a ${EMAIL}. [Información sobre la reclamación ante la AEPD pendiente de revisión legal.]`,
         ],
       },
@@ -95,7 +102,7 @@ export const LEGAL_DOCS: LegalDoc[] = [
   {
     slug: "cookies",
     title: "Política de cookies",
-    intro: "Reboard no usa cookies de publicidad ni de analítica. Solo las técnicas necesarias para que la web funcione.",
+    intro: "Reboard no usa cookies de publicidad ni de analítica. Solo las técnicas necesarias para que la web funcione. La audiencia se mide sin cookies (abajo te contamos cómo).",
     sections: [
       {
         h: "Cookies y almacenamiento que usamos",
@@ -107,7 +114,16 @@ export const LEGAL_DOCS: LegalDoc[] = [
           "Cloudflare Turnstile se carga solo en el acceso, al pedir un contacto, al publicar y al reportar, para comprobar que no eres un robot. [Revisar con la documentación de Cloudflare qué almacena.]",
         ],
       },
-      { h: "Analítica", p: ["No hay analítica, publicidad ni seguimiento de terceros. Si algún día se añade, se describirá aquí y se pedirá tu consentimiento antes de activarla."] },
+      {
+        h: "Medición de audiencia (sin cookies)",
+        p: [
+          "Medimos cuánta gente usa Reboard y cómo (páginas vistas, de qué web o campaña llega, búsquedas por filtros, fichas vistas, contactos pedidos y los pasos al publicar) con PostHog, en servidores de la Unión Europea y solo para Reboard.",
+          "No usa cookies ni guarda nada en tu dispositivo: con tu dirección IP y tu navegador, PostHog calcula un identificador que cambia cada día (con una clave que borra a diario) y descarta la IP. No sirve para seguirte en otras webs ni de un día para otro.",
+          "No mide nada de tu cuenta, de «Mi cuenta», de «Mis anuncios» ni de moderación, y nunca envía tu nombre, tu email, tu teléfono, tu localidad ni lo que escribes.",
+          "Por estas condiciones se considera medición de audiencia exenta de consentimiento (artículo 22.2 de la LSSI; guía de la AEPD de enero de 2024). Si activas «No rastrear» o «Global Privacy Control» en tu navegador, no medimos tu visita. [Pendiente de revisión legal.]",
+          "No hay publicidad ni seguimiento de terceros.",
+        ],
+      },
     ],
   },
   {

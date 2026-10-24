@@ -32,6 +32,7 @@ import { availability, listingPath, listingTitle, zoneName } from "@/lib/listing
 import { searchHref, withFilters } from "@/lib/search/filters";
 import ui from "@/styles/ui.module.css";
 import styles from "./Compare.module.css";
+import { track, trackOnce } from "@/lib/analytics/track";
 
 const MOBILE = "(max-width: 759px)";
 
@@ -68,6 +69,13 @@ export function Comparator() {
     if (!local.length) replaceCompare(s.map((id) => ({ id, label: "Tabla" })));
     if (!local.length || sameIds(s, local)) router.replace("/comparar", { scroll: false });
   }, [ready, sharedKey, localKey, replaceCompare, router]);
+
+  // Analítica: comparación vista (cuántas tablas y si viene de un enlace compartido).
+  const viewKey = ids.join(",");
+  useEffect(() => {
+    if (!ready || !viewKey) return;
+    trackOnce(`${viewKey}|${shared}`, "compare_viewed", { count: viewKey.split(",").length, shared });
+  }, [ready, viewKey, shared]);
 
   // Las etiquetas y miniaturas de la barra se refrescan con los datos reales (enlaces compartidos,
   // selecciones antiguas sin foto).
@@ -130,6 +138,7 @@ export function Comparator() {
           text={`Mira estas ${n} tablas una al lado de otra: ${listings.map((l) => listingTitle(l)).join(", ")}.`}
           label="Compartir comparación"
           className={styles.toolLink}
+          onShare={() => track("compare_shared", { count: n })}
         />
       )}
       {n > 0 && !shared && (

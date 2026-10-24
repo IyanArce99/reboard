@@ -24,6 +24,28 @@ function trackErrors(page: Page) {
   return errors;
 }
 
+// ——— Analítica (docs/ANALYTICS.md) ———
+// Con NEXT_PUBLIC_ANALYTICS_DEBUG=1 en el build, los eventos no salen a PostHog: se guardan en
+// window.__rbAnalytics. Sin ese modo, estas comprobaciones no hacen nada.
+type Ev = { event: string; props: Record<string, unknown> };
+const analytics = (page: Page) => page.evaluate(() => (window as unknown as { __rbAnalytics?: Ev[] }).__rbAnalytics ?? null);
+async function expectEvent(page: Page, event: string, props: Record<string, unknown> = {}) {
+  if ((await analytics(page)) === null) return;
+  await expect
+    .poll(async () => ((await analytics(page)) ?? []).some((e) => e.event === event && Object.entries(props).every(([k, v]) => JSON.stringify(e.props[k]) === JSON.stringify(v))), {
+      message: `evento ${event} ${JSON.stringify(props)}`,
+      timeout: 10_000,
+    })
+    .toBe(true);
+}
+/** Nada personal en ningún evento: ni email, ni teléfono, ni nombre, ni localidad. */
+async function expectNoPersonalData(page: Page, forbidden: string[]) {
+  const ev = await analytics(page);
+  if (ev === null) return;
+  const all = JSON.stringify(ev).toLowerCase();
+  for (const f of forbidden) expect(all, `«${f}» no debe salir en la analítica`).not.toContain(f.toLowerCase());
+}
+
 const h1 = (page: Page) => page.getByRole("heading", { level: 1 }).first();
 const count = (page: Page) => page.getByText(/tablas? coincide/).first();
 const noOverflow = (page: Page) => page.evaluate(() => document.documentElement.scrollWidth - innerWidth);
@@ -85,6 +107,8 @@ for (const kind of Object.keys(VIEWPORTS) as Kind[]) {
     if (!mobile) await page.keyboard.press("Escape");
     await cta.click();
     await expect(count(page)).toHaveText("2 tablas coinciden");
+    await expectEvent(page, "$pageview");
+    await expectEvent(page, "search_performed", { source: "buscar", island: "tenerife", shapes: ["fish"], has_volume: true, results: "1-5" });
 
     // Filtros: panel lateral (escritorio) u hoja a pantalla completa (móvil), con «Estado, quillas…».
     await page.goto("/buscar");
@@ -116,8 +140,10 @@ for (const kind of Object.keys(VIEWPORTS) as Kind[]) {
     const listingUrl = page.url();
     await expect(page.getByRole("region", { name: "La tabla" })).toContainText("Longitud");
     expect(await noOverflow(page)).toBe(0);
+    await expectEvent(page, "listing_viewed");
     await page.getByRole("button", { name: /^Guardar$/ }).first().click();
     await expect(page.locator("header").getByRole("link", { name: "Guardadas (1)" })).toBeVisible();
+    await expectEvent(page, "listing_saved");
     await page.goto("/guardado");
     await expect(page.locator("main article:visible")).toHaveCount(1);
 
@@ -126,9 +152,11 @@ for (const kind of Object.keys(VIEWPORTS) as Kind[]) {
     const add = page.getByRole("button", { name: /^Comparar\s*:/ });
     await add.nth(0).click();
     await add.nth(1).click();
+    await expectEvent(page, "compare_added", { count: 2 });
     await page.getByRole("complementary", { name: "Comparación de tablas" }).getByRole("link", { name: /Comparar 2 tablas/ }).click();
     await expect(page).toHaveURL(/\/comparar$/);
     await expect(page.getByText("2 de 4 tablas")).toBeVisible();
+    await expectEvent(page, "compare_viewed", { count: 2, shared: false });
 
     // Contacto: el diálogo abre y, al pasar Turnstile (claves de prueba), pide el teléfono solo.
     // El inventario DEMO no tiene teléfonos: queda el botón para reintentar. La revelación real se
@@ -137,6 +165,9 @@ for (const kind of Object.keys(VIEWPORTS) as Kind[]) {
     await page.getByRole("button", { name: mobile ? /^(WhatsApp|Llamar)$/ : /Contactar por WhatsApp|Llamar al vendedor/ }).last().click();
     const contact = page.getByRole("dialog", { name: /Contactar con/ });
     await expect(contact.getByRole("button", { name: /^Ver teléfono/ })).toBeEnabled({ timeout: 20_000 });
+    await expectEvent(page, "contact_opened", { surface: mobile ? "barra_movil" : "ficha" });
+    // La ficha vista una sola vez aunque se vuelva a ella en la misma pestaña.
+    if ((await analytics(page)) !== null) expect(((await analytics(page)) ?? []).filter((e) => e.event === "listing_viewed").length).toBe(1);
     await contact.getByRole("button", { name: "Cerrar" }).click();
     await expect(contact).toHaveCount(0);
 
@@ -220,6 +251,19 @@ for (const kind of Object.keys(VIEWPORTS) as Kind[]) {
       await page.locator("#pub-name").fill("QA Journey");
       await page.getByRole("button", { name: "Publicar gratis" }).click();
       await expect(h1(page)).toHaveText("Tu tabla está publicada", { timeout: 45_000 });
+      // Analítica: embudo de publicación completo, cada paso una vez y `publish_completed` solo tras el OK
+      // del servidor; y nada personal (email, teléfono, nombre, localidad) en ningún evento.
+      await expectEvent(page, "publish_started");
+      for (const step of [1, 2, 3, 4]) await expectEvent(page, "publish_step_completed", { step, mode: "nuevo" });
+      await expectEvent(page, "publish_submitted", { mode: "nuevo" });
+      await expectEvent(page, "login_completed", { context: "publicar" });
+      await expectEvent(page, "publish_completed", { mode: "nuevo", island: "la-palma", shape: "hibrida", has_volume: true, brand_known: false });
+      const evs = await analytics(page);
+      if (evs !== null) {
+        expect(evs.filter((e) => e.event === "publish_completed").length).toBe(1);
+        expect(evs.filter((e) => e.event === "publish_step_completed").length).toBe(4);
+      }
+      await expectNoPersonalData(page, [email, "Tazacorte", "QA Journey", "612345678", "612 345 678", "+34612345678"]);
       let path = await page.getByRole("link", { name: /Ver mi anuncio/ }).getAttribute("href");
       expect(path).toMatch(/^\/anuncio\/qa-journey-6-4-la-palma-a\d+$/);
       const id = path!.match(/-(a\d+)$/)![1];

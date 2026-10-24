@@ -15,6 +15,8 @@ import { Gallery } from "@/components/listing/Gallery";
 import { ListingCard } from "@/components/listing/ListingCard";
 import { authEnabled } from "@/lib/auth/config";
 import { noindexRobots } from "@/lib/seo";
+import { TrackOnMount } from "@/components/analytics/TrackOnMount";
+import { priceBand } from "@/lib/analytics/events";
 import { Breadcrumbs } from "@/components/seo/Breadcrumbs";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { AlertButton, CompareButton, CompareLink, SaveTextButton } from "@/components/user/islands";
@@ -152,9 +154,24 @@ export default async function FichaPage({ params }: PageProps<"/anuncio/[slugId]
         unavailable: off ? av.text : null,
         listingId: l.id,
         live: authEnabled(),
+        analytics: { shape: l.shape, island: l.zone, price_band: priceBand(l.price) },
       }}
     >
       <main className={`container ${styles.page}`}>
+        {/* Analítica: ficha vista (categorías; sin id, vendedor ni localidad). */}
+        <TrackOnMount
+          id={l.id}
+          event="listing_viewed"
+          props={{
+            shape: l.shape,
+            construction: l.construction,
+            island: l.zone,
+            price_band: priceBand(l.price),
+            seller_type: l.seller.type,
+            photos: l.photos.length,
+            available: !off,
+          }}
+        />
         <Breadcrumbs
           items={[
             { label: "Inicio", href: "/" },

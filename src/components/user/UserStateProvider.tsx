@@ -10,6 +10,7 @@ import { listingDbId } from "@/lib/auth/shared";
 import { MAX_COMPARE, sanitizeCompare, type CompareItem } from "@/lib/compare/compare";
 import { hasSessionCookie, SIGNED_IN_EVENT } from "@/lib/supabase/session-hint";
 import styles from "./Toast.module.css";
+import { track } from "@/lib/analytics/track";
 
 export type { CompareItem } from "@/lib/compare/compare";
 export { MAX_COMPARE } from "@/lib/compare/compare";
@@ -207,6 +208,7 @@ export function UserStateProvider({ children, authEnabled = false }: { children:
       const acc = accountRef.current;
       const dbId = listingDbId(id);
       setState((s) => ({ ...s, saved: on ? s.saved.filter((x) => x !== id) : [...s.saved, id] }));
+      if (!on) track("listing_saved", {});
       if (!acc || dbId === null) {
         if (!on) toast("Guardada en este dispositivo. En Guardadas verás si baja de precio o se vende.");
         return;
@@ -256,6 +258,7 @@ export function UserStateProvider({ children, authEnabled = false }: { children:
         toast(`Puedes comparar hasta ${MAX_COMPARE} tablas. Quita una para añadir esta.`);
       } else {
         setState((p) => ({ ...p, compare: [...p.compare, item] }));
+        track("compare_added", { count: s.compare.length + 1 });
       }
     },
     [toast],
@@ -280,6 +283,7 @@ export function UserStateProvider({ children, authEnabled = false }: { children:
         toast("Ya tienes esta alerta.");
         return;
       }
+      track("alert_created", {});
       setState((s) =>
         s.alerts.some((a) => a.query === query)
           ? s

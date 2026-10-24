@@ -85,6 +85,7 @@ export function ShareButton({
   title,
   text,
   label = "Compartir",
+  onShare,
 }: {
   /** Absoluta o relativa a la web (se completa con el dominio actual). */
   url: string;
@@ -92,6 +93,8 @@ export function ShareButton({
   title?: string;
   text?: string;
   label?: string;
+  /** Al pulsar (p. ej., analítica). */
+  onShare?: () => void;
 }) {
   const { toast } = useUserState();
   return (
@@ -99,6 +102,7 @@ export function ShareButton({
       type="button"
       className={className}
       onClick={async () => {
+        onShare?.();
         const href = new URL(url, window.location.origin).toString();
         try {
           if (navigator.share) await navigator.share({ title, text, url: href });

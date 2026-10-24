@@ -13,6 +13,8 @@ import { REPORT_REASONS, type ReportReason } from "@/components/moderation/label
 import { Turnstile, TURNSTILE_SITE_KEY, type TurnstileHandle } from "@/components/security/Turnstile";
 import { useUserState } from "@/components/user/UserStateProvider";
 import { useDialogFocus } from "@/lib/a11y/useDialogFocus";
+import type { PriceBand } from "@/lib/analytics/events";
+import { track } from "@/lib/analytics/track";
 import ui from "@/styles/ui.module.css";
 import styles from "./Ficha.module.css";
 
@@ -28,6 +30,8 @@ interface ContactData {
   listingId: string;
   /** Datos reales: contacto y reportes van al servidor. */
   live: boolean;
+  /** Categorías del anuncio para la analítica del embudo de contacto (sin ids ni datos personales). */
+  analytics: { shape: string; island: string; price_band: PriceBand };
 }
 
 /** «+34 600 000 000» a partir de «34600000000». */
@@ -51,8 +55,10 @@ function RevealContact({ data, onClose }: { data: ContactData; onClose: () => vo
     const r = await revealContactAction({ publicId: data.listingId, token: tok });
     turnstile.current?.reset();
     setBusy(false);
-    if (r.ok) setContact({ method: r.method, phone: r.phone });
-    else setError(r.message);
+    if (r.ok) {
+      setContact({ method: r.method, phone: r.phone });
+      track("contact_revealed", { method: r.method });
+    } else setError(r.message);
   };
   const onToken = (t: string | null) => {
     setToken(t);
@@ -74,11 +80,24 @@ function RevealContact({ data, onClose }: { data: ContactData; onClose: () => vo
     return (
       <>
         {contact.method === "whatsapp" && (
-          <a href={wa} target="_blank" rel="noopener noreferrer" className={styles.waBtn} onClick={onClose}>
+          <a
+            href={wa}
+            target="_blank"
+            rel="noopener noreferrer"
+            className={styles.waBtn}
+            onClick={() => {
+              track("contact_link_clicked", { channel: "whatsapp" });
+              onClose();
+            }}
+          >
             Abrir WhatsApp
           </a>
         )}
-        <a href={`tel:+${contact.phone}`} className={contact.method === "whatsapp" ? styles.callBtn : styles.waBtn}>
+        <a
+          href={`tel:+${contact.phone}`}
+          className={contact.method === "whatsapp" ? styles.callBtn : styles.waBtn}
+          onClick={() => track("contact_link_clicked", { channel: "llamada" })}
+        >
           Llamar al {prettyPhone(contact.phone)}
         </a>
       </>
@@ -185,7 +204,15 @@ const useContact = () => {
 export function ContactButton({ className }: { className: string }) {
   const { open, data } = useContact();
   return (
-    <button type="button" className={className} disabled={!!data.unavailable} onClick={open}>
+    <button
+      type="button"
+      className={className}
+      disabled={!!data.unavailable}
+      onClick={() => {
+        track("contact_opened", { method: data.method, surface: "ficha", ...data.analytics });
+        open();
+      }}
+    >
       {data.unavailable ?? (data.method === "whatsapp" ? "Contactar por WhatsApp" : "Llamar al vendedor")}
     </button>
   );
@@ -200,7 +227,15 @@ export function ContactBar({ price, specs }: { price: string; specs: string }) {
         <div className={styles.barPrice}>{price}</div>
         <div className={styles.barSpecs}>{specs}</div>
       </div>
-      <button type="button" className={styles.barBtn} disabled={!!data.unavailable} onClick={open}>
+      <button
+        type="button"
+        className={styles.barBtn}
+        disabled={!!data.unavailable}
+        onClick={() => {
+          track("contact_opened", { method: data.method, surface: "barra_movil", ...data.analytics });
+          open();
+        }}
+      >
         {data.unavailable ?? (data.method === "whatsapp" ? "WhatsApp" : "Llamar")}
       </button>
     </aside>

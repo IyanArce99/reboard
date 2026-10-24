@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Barlow, Barlow_Condensed, IBM_Plex_Mono } from "next/font/google";
 import { Suspense } from "react";
+import { AnalyticsInit } from "@/components/analytics/AnalyticsInit";
 import { CompareTray } from "@/components/layout/CompareTray";
 import { Footer } from "@/components/layout/Footer";
 import { Header } from "@/components/layout/Header";
@@ -78,6 +79,10 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
           <div id="contenido" className="skip-target" tabIndex={-1}>
             {children}
           </div>
+          {/* Analítica de producto sin cookies (docs/ANALYTICS.md): no hace nada sin NEXT_PUBLIC_POSTHOG_KEY. */}
+          <Suspense fallback={null}>
+            <AnalyticsInit />
+          </Suspense>
           <SiteChrome>
             <Footer />
             <Suspense fallback={null}>
