@@ -243,7 +243,7 @@ export function StepBoard({ d, set, setD, catalog, brands: known, featuredBrands
         {!d.vol.trim() && <p className={styles.small}>Los litros son opcionales, pero sin ellos tu tabla sale en menos búsquedas.</p>}
       </div>
 
-      <Group id="pub-shape" title="Tipo de tabla">
+      <Group id="pub-shape" title="Tipo de tabla" hint="¿Es una softboard (de espuma)? Elige su forma (casi siempre evolutiva) y abajo, en Construcción, marca Softboard.">
         <div className={styles.shapeGrid}>
           {SHAPES.map((s) => (
             <button key={s} type="button" aria-pressed={d.shape === s} className={styles.shapeOpt} onClick={() => set({ shape: s })}>

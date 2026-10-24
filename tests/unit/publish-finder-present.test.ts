@@ -92,3 +92,32 @@ describe("present", () => {
     expect(sourceBadge(47, "seller").text).toBe("Según el vendedor");
   });
 });
+
+describe("parseFeet: la longitud como la escribe la gente (bug de publicar, 24-10-2026)", () => {
+  it.each([
+    [`6'2"`, 74],
+    [`6’2”`, 74], // teclado del iPhone
+    [`6′2″`, 74], // primas
+    [`6'2''`, 74], // dos apóstrofes
+    [`6' 2`, 74],
+    [`6'2`, 74],
+    [`6'`, 72],
+    ["6.2", 74],
+    ["6,2", 74],
+    ["6 2", 74],
+    ["6-2", 74],
+    ["6.10", 82],
+    ["6 ft 2 in", 74],
+    ["6 pies 2", 74],
+    ["7", 84],
+    [`9'0"`, 108],
+    [`5'11"`, 71],
+    [`6'2.5"`, 74.5],
+  ])("«%s» → %d pulgadas", (text, inches) => {
+    expect(parseFeet(text)).toBe(inches);
+  });
+
+  it.each(["abc", "", "6'13", "6.12", "190", "6'2'2", "6 x 2"])("«%s» no se entiende", (text) => {
+    expect(parseFeet(text)).toBeNull();
+  });
+});

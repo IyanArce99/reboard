@@ -69,6 +69,8 @@ export function SearchBar({ here, initialCount, supportsDistance = true, zoneCou
   const [volMin, setVolMin] = useState("");
   const [volMax, setVolMax] = useState("");
   const [shapes, setShapes] = useState<Shape[]>([]);
+  /** Softboard: para quien busca es «un tipo más», pero en los datos es la construcción (CLAUDE.md). */
+  const [soft, setSoft] = useState(false);
   const [count, setCount] = useState(initialCount);
   const [panel, setPanel] = useState<Panel | null>(null);
   const [left, setLeft] = useState(0);
@@ -83,6 +85,7 @@ export function SearchBar({ here, initialCount, supportsDistance = true, zoneCou
     volMin: volMin ? Number(volMin.replace(",", ".")) : null,
     volMax: volMax ? Number(volMax.replace(",", ".")) : null,
     shapes,
+    constructions: soft ? ["softboard"] : [],
   });
   const query = toQuery(filters);
   const first = useRef(true);
@@ -140,7 +143,8 @@ export function SearchBar({ here, initialCount, supportsDistance = true, zoneCou
   const hasVol = Boolean(volMin || volMax);
   const where = `${zn}${zone && dist ? ` · < ${dist} km` : ""}`;
   const vol = hasVol ? (volMin && volMax ? `${volMin}–${volMax} L` : volMin ? `Desde ${volMin} L` : `Hasta ${volMax} L`) : null;
-  const type = shapes.length ? shapes.map((s) => SHAPE_INFO[s].label).join(", ") : null;
+  const typeLabels = [...shapes.map((s) => SHAPE_INFO[s].label), ...(soft ? ["Softboard"] : [])];
+  const type = typeLabels.length ? typeLabels.join(", ") : null;
   // Sin ninguna tabla publicada no hay alternativas que ver: «Buscar tablas» (lleva al estado vacío honesto).
   const goText = searchCtaText(count, totalCount, num);
   const href = searchHref(filters);
@@ -180,6 +184,7 @@ export function SearchBar({ here, initialCount, supportsDistance = true, zoneCou
     setVolMin("");
     setVolMax("");
     setShapes([]);
+    setSoft(false);
   };
   const clearPanel = (p: Panel) => {
     if (p === "zona") {
@@ -188,7 +193,10 @@ export function SearchBar({ here, initialCount, supportsDistance = true, zoneCou
     } else if (p === "litros") {
       setVolMin("");
       setVolMax("");
-    } else setShapes([]);
+    } else {
+      setShapes([]);
+      setSoft(false);
+    }
   };
 
   const sections: Record<Panel, React.ReactNode> = {
@@ -204,7 +212,7 @@ export function SearchBar({ here, initialCount, supportsDistance = true, zoneCou
       />
     ),
     litros: <VolumeOptions volMin={volMin} volMax={volMax} onPick={pickVolume} onMin={setVolMin} onMax={setVolMax} />,
-    tipo: <ShapeOptions shapes={shapes} onToggle={toggleShape} />,
+    tipo: <ShapeOptions shapes={shapes} onToggle={toggleShape} soft={soft} onToggleSoft={() => setSoft((v) => !v)} />,
   };
 
   const seg = (p: Panel, label: string, value: string | null, placeholder: string, extra = "") => (
@@ -392,7 +400,17 @@ function VolumeOptions({
   );
 }
 
-function ShapeOptions({ shapes, onToggle }: { shapes: Shape[]; onToggle: (s: Shape) => void }) {
+function ShapeOptions({
+  shapes,
+  onToggle,
+  soft,
+  onToggleSoft,
+}: {
+  shapes: Shape[];
+  onToggle: (s: Shape) => void;
+  soft: boolean;
+  onToggleSoft: () => void;
+}) {
   return (
     <section className={styles.group} aria-labelledby="sb-tipo">
       <h2 id="sb-tipo" className={styles.groupTitle}>
@@ -408,6 +426,15 @@ function ShapeOptions({ shapes, onToggle }: { shapes: Shape[]; onToggle: (s: Sha
             <span className={styles.shapeHint}>{SHAPE_HINT[s]}</span>
           </button>
         ))}
+        {/* Como en la home: «Softboard» junto a los tipos. Filtra por construcción (espuma), así que
+            combinada con un tipo da, p. ej., «evolutiva de espuma». */}
+        <button type="button" className={styles.shapeOpt} aria-pressed={soft} onClick={onToggleSoft}>
+          <span className={styles.shapeSil}>
+            <BoardShape shape="evolutiva" size={80} tone="soft" />
+          </span>
+          <span className={styles.shapeName}>Softboard</span>
+          <span className={styles.shapeHint}>De espuma, para aprender</span>
+        </button>
       </div>
     </section>
   );

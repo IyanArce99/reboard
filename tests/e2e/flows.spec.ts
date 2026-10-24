@@ -373,3 +373,15 @@ test("publicar: recupera el borrador (con fotos) al recargar", async ({ page }) 
   await expect(page.getByRole("img", { name: /Foto 1/ })).toHaveCount(0);
   expect(errors).toEqual([]);
 });
+
+test("home: «Softboard» está entre los tipos del buscador y filtra por construcción", async ({ page }) => {
+  await page.goto("/");
+  await page.getByRole("button", { name: /Tipo de tabla/ }).click();
+  const panel = page.getByRole("dialog", { name: "Tipo de tabla" });
+  await panel.getByRole("button", { name: /^Softboard/ }).click();
+  await expect(panel.getByRole("button", { name: /^Softboard/ })).toHaveAttribute("aria-pressed", "true");
+  await expect(page.getByRole("link", { name: /^Buscar \d+ tablas?$/ })).toHaveAttribute("href", /construccion=softboard/);
+  // Combinada con un tipo: softboards evolutivas.
+  await panel.getByRole("button", { name: /^Evolutiva/ }).click();
+  await expect(page.getByRole("link", { name: /^Buscar \d+ tablas?$/ })).toHaveAttribute("href", /forma=evolutiva.*construccion=softboard|construccion=softboard.*forma=evolutiva/);
+});

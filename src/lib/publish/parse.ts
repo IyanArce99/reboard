@@ -48,11 +48,28 @@ export function parseInches(text: string): number | null {
   return Number.isFinite(n) && n > 0 ? n : null;
 }
 
-/** «7'2"» → 86 pulgadas. También acepta «7'». */
+/**
+ * Longitud en pies y pulgadas → pulgadas. Acepta cómo la escribe la gente de verdad (también con el
+ * teclado del móvil, que cambia ' y " por comillas tipográficas):
+ * «7'2"», «7’2”», «7′2″», «7'2''», «7' 2», «7'», «7.2», «7,2», «7 2», «7-2», «7 ft 2 in», «7 pies 2» y «7».
+ * «7.2» se lee como 7'2" (así lo escriben los surfistas), no como 7,2 pies. Pulgadas de 0 a 11.
+ */
 export function parseFeet(text: string): number | null {
-  const m = text.trim().match(/^(\d{1,2})\s*['’]\s*(\d{1,2})?\s*["”]?$/);
+  const s = text
+    .trim()
+    .toLowerCase()
+    .replace(/[’‘′`´]/g, "'")
+    .replace(/''|[“”″]/g, '"')
+    .replace(/\s+/g, " ");
+  const m =
+    s.match(/^(\d{1,2}) ?(?:'|ft|pies?) ?(?:(\d{1,2}(?:[.,]5)?) ?(?:"|in|pulgadas?)?)?$/) ??
+    s.match(/^(\d{1,2})[.,\- ](\d{1,2})"?$/) ??
+    s.match(/^(\d{1,2})$/);
   if (!m) return null;
-  const n = Number(m[1]) * 12 + (m[2] ? Number(m[2]) : 0);
+  const feet = Number(m[1]);
+  const inches = m[2] ? Number(m[2].replace(",", ".")) : 0;
+  if (inches >= 12) return null;
+  const n = feet * 12 + inches;
   return n > 0 ? n : null;
 }
 
