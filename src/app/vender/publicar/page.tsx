@@ -75,7 +75,7 @@ async function Flow({ searchParams }: { searchParams: PageProps<"/vender/publica
 
 export default function PublicarPage(props: PageProps<"/vender/publicar">) {
   return (
-    <Suspense fallback={<main className={styles.page} aria-busy="true" />}>
+    <Suspense fallback={<main className={styles.page} aria-busy="true" style={{ minHeight: "100svh" }} />}>
       <Flow searchParams={props.searchParams} />
     </Suspense>
   );

@@ -82,7 +82,8 @@ function stepIssue(step: number, d: PublishDraft, processing: number): string {
 export function PublishFlow({ catalog, brands, featuredBrands, priceRefs, nowIso, dataIsDemo, initial, editingId, live }: Props) {
   const { toast, account } = useUserState();
   const [d, setD] = useState<PublishDraft>(() => initial ?? emptyDraft());
-  const [step, setStep] = useState(initial ? 2 : 1);
+  // Editar abre en la revisión: cada sección tiene su «Editar» y cambiar solo el precio son dos toques (QA-7).
+  const [step, setStep] = useState(initial ? 5 : 1);
   // true al entrar a un paso con «Editar» desde la revisión: el botón principal vuelve a ella.
   const [fromReview, setFromReview] = useState(false);
   const [busy, setBusy] = useState(false);

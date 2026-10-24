@@ -61,6 +61,7 @@ describe("alertText", () => {
     expect(alertText(withFilters({ lenMax: 90 }), names)).toBe(`Tablas de hasta 7'6", en Canarias`);
     expect(alertText(withFilters({ lenMin: 84 }), names)).toBe(`Tablas desde 7'0", en Canarias`);
     expect(alertText(emptyFilters(), names)).toBe("Tablas en Canarias");
+    expect(alertText(withFilters({ priceMax: 300 }), names)).toBe("Tablas por menos de 300 €, en Canarias");
     expect(alertText(withFilters({ brand: "torq", lenMin: 84, lenMax: 90 }), names)).toBe(`Tablas Torq entre 7'0" y 7'6", en Canarias`);
   });
 });

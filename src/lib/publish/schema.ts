@@ -112,7 +112,7 @@ export function firstIssueText(error: z.ZodError): string {
   return FIELD_TEXT[field] ?? "Revisa los datos del anuncio.";
 }
 
-const isCatalogValue = (s: FieldSource | undefined) => s === "cat";
+const isCatalogValue = (s: FieldSource | undefined) => s === "cat" || s === "catok";
 
 /**
  * Borrador de la UI → datos para el servidor.

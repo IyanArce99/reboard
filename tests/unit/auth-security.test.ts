@@ -62,23 +62,23 @@ describe("authErrorText", () => {
 });
 
 describe("verifyTurnstile (falla cerrado)", () => {
-  const ok = (_url?: string | URL | Request, _init?: RequestInit) => Promise.resolve(new Response(JSON.stringify({ success: true })));
+  const ok = () => Promise.resolve(new Response(JSON.stringify({ success: true })));
 
   it("sin clave secreta, rechaza", async () => {
-    const fetchImpl = vi.fn(ok);
+    const fetchImpl = vi.fn<typeof fetch>(ok);
     expect(await verifyTurnstile("t", { secret: "", fetchImpl })).toEqual({ ok: false, reason: "not-configured" });
     expect(fetchImpl).not.toHaveBeenCalled();
   });
 
   it("sin token, rechaza sin llamar a Cloudflare", async () => {
-    const fetchImpl = vi.fn(ok);
+    const fetchImpl = vi.fn<typeof fetch>(ok);
     expect(await verifyTurnstile(null, { secret: "s", fetchImpl })).toEqual({ ok: false, reason: "missing-token" });
     expect(await verifyTurnstile("x".repeat(3000), { secret: "s", fetchImpl })).toEqual({ ok: false, reason: "missing-token" });
     expect(fetchImpl).not.toHaveBeenCalled();
   });
 
   it("token válido: envía secreto, token e IP", async () => {
-    const fetchImpl = vi.fn(ok);
+    const fetchImpl = vi.fn<typeof fetch>(ok);
     expect(await verifyTurnstile("tok", { secret: "s", ip: "1.2.3.4", fetchImpl })).toEqual({ ok: true });
     const body = fetchImpl.mock.calls[0][1]!.body as URLSearchParams;
     expect(body.get("secret")).toBe("s");
@@ -93,5 +93,67 @@ describe("verifyTurnstile (falla cerrado)", () => {
     expect(await verifyTurnstile("t", { secret: "s", fetchImpl: http })).toEqual({ ok: false, reason: "unavailable" });
     const net = vi.fn(() => Promise.reject(new Error("offline")));
     expect(await verifyTurnstile("t", { secret: "s", fetchImpl: net })).toEqual({ ok: false, reason: "unavailable" });
+  });
+});
+
+describe("verifyTurnstile: acción y dominio (SEC-4)", () => {
+  const reply = (data: object) => vi.fn<typeof fetch>(() => Promise.resolve(new Response(JSON.stringify(data))));
+  const hostnames = ["reboard.es", "www.reboard.es"];
+
+  it("acepta la acción y el dominio esperados", async () => {
+    const fetchImpl = reply({ success: true, action: "contacto", hostname: "www.reboard.es" });
+    expect(await verifyTurnstile("t", { secret: "s", action: "contacto", hostnames, fetchImpl })).toEqual({ ok: true });
+  });
+
+  it("rechaza un token resuelto en otro formulario", async () => {
+    const fetchImpl = reply({ success: true, action: "reportar", hostname: "www.reboard.es" });
+    expect(await verifyTurnstile("t", { secret: "s", action: "contacto", hostnames, fetchImpl })).toEqual({ ok: false, reason: "invalid" });
+  });
+
+  it("rechaza un token resuelto en otra web", async () => {
+    const fetchImpl = reply({ success: true, action: "contacto", hostname: "copia-de-reboard.example" });
+    expect(await verifyTurnstile("t", { secret: "s", action: "contacto", hostnames, fetchImpl })).toEqual({ ok: false, reason: "invalid" });
+  });
+
+  it("con las claves de prueba de Cloudflare no comprueba acción ni dominio (local y CI)", async () => {
+    const fetchImpl = reply({ success: true, action: "", hostname: "example.com" });
+    const secret = "1x0000000000000000000000000000000AA";
+    expect(await verifyTurnstile("t", { secret, action: "contacto", hostnames, fetchImpl })).toEqual({ ok: true });
+  });
+
+  it("dominios permitidos a partir de la URL de la web", async () => {
+    const { allowedHostnames } = await import("@/lib/security/turnstile");
+    expect(allowedHostnames("https://www.reboard.es")).toEqual(["reboard.es", "www.reboard.es"]);
+    expect(allowedHostnames("http://localhost:3000")).toEqual([]);
+    expect(allowedHostnames(undefined)).toEqual([]);
+  });
+});
+
+describe("rateLimit (SEC-5)", () => {
+  it("deja pasar hasta el límite, luego 429 con Retry-After, y se reinicia con la ventana", async () => {
+    const { rateLimit, resetRateLimits } = await import("@/lib/security/rate-limit");
+    resetRateLimits();
+    const t0 = 1_000_000;
+    for (let i = 0; i < 3; i++) expect(rateLimit("x", "1.1.1.1", 3, 60_000, t0 + i)).toBeNull();
+    const blocked = rateLimit("x", "1.1.1.1", 3, 60_000, t0 + 10_000);
+    expect(blocked?.status).toBe(429);
+    expect(blocked?.headers.get("Retry-After")).toBe("50");
+    // Otra IP u otra API llevan su propia cuenta.
+    expect(rateLimit("x", "2.2.2.2", 3, 60_000, t0 + 10_000)).toBeNull();
+    expect(rateLimit("y", "1.1.1.1", 3, 60_000, t0 + 10_000)).toBeNull();
+    // Pasada la ventana, vuelve a contar desde cero.
+    expect(rateLimit("x", "1.1.1.1", 3, 60_000, t0 + 60_001)).toBeNull();
+  });
+});
+
+describe("hasSessionCookie (PERF-4: supabase-js solo con sesión)", () => {
+  it("detecta la cookie de sesión de Supabase, también troceada", async () => {
+    const { hasSessionCookie } = await import("@/lib/supabase/session-hint");
+    expect(hasSessionCookie("")).toBe(false);
+    expect(hasSessionCookie("rb_zona=tenerife; theme=x")).toBe(false);
+    expect(hasSessionCookie("sb-127-auth-token=base64-abc")).toBe(true);
+    expect(hasSessionCookie("rb_zona=x; sb-abcdefgh-auth-token.0=base64-a; sb-abcdefgh-auth-token.1=b")).toBe(true);
+    // El verificador PKCE no es una sesión.
+    expect(hasSessionCookie("sb-abcdefgh-auth-token-code-verifier=x")).toBe(false);
   });
 });

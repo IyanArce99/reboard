@@ -19,10 +19,11 @@ const barlow = Barlow({
   display: "swap",
 });
 
+// Títulos: solo se usa el 800 (H1, H2, logo). 600 y 700 se descargaban sin usarse (PERF-3).
 const barlowCondensed = Barlow_Condensed({
   variable: "--font-barlow-condensed",
   subsets: ["latin"],
-  weight: ["600", "700", "800"],
+  weight: ["800"],
   display: "swap",
 });
 

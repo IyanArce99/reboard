@@ -52,7 +52,7 @@ async function Results({ searchParams }: { searchParams: PageProps<"/buscar">["s
 
 export default function BuscarPage(props: PageProps<"/buscar">) {
   return (
-    <Suspense fallback={<main className={`container ${styles.page}`} aria-busy="true" />}>
+    <Suspense fallback={<main className={`container ${styles.page}`} aria-busy="true" style={{ minHeight: "100svh" }} />}>
       <Results searchParams={props.searchParams} />
     </Suspense>
   );

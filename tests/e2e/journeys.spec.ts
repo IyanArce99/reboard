@@ -4,6 +4,7 @@
 // desde la propia interfaz (panel → Eliminar, cuenta → Borrar la cuenta); si algo falla a medias, el
 // afterAll borra el usuario con service role (solo local).
 import { expect, test, type Browser, type BrowserContext, type Page } from "@playwright/test";
+import { readFileSync } from "node:fs";
 import sharp from "sharp";
 import { serviceClient } from "../integration/local-supabase";
 
@@ -48,12 +49,14 @@ async function otp(email: string, since: number) {
   throw new Error(`No ha llegado el código a ${email} (¿Mailpit en ${MAILPIT}?)`);
 }
 
+// Fotos reales de tablas (banco editorial del proyecto), convertidas a JPEG de móvil (3000×4000 px),
+// para probar la recodificación y la galería con imágenes de verdad y no con colores lisos.
 const photos = () =>
   Promise.all(
-    ["#336699", "#88aa55"].map(async (c, i) => ({
-      name: `foto-${i + 1}.jpg`,
+    ["tabla-azul-arena", "tablas-orilla"].map(async (f, i) => ({
+      name: `IMG_000${i + 1}.jpg`,
       mimeType: "image/jpeg",
-      buffer: await sharp({ create: { width: 900, height: 1200, channels: 3, background: c } }).jpeg().toBuffer(),
+      buffer: await sharp(readFileSync(`public/images/fotos/${f}.webp`)).resize(3000, 4000, { fit: "cover" }).jpeg({ quality: 85 }).toBuffer(),
     })),
   );
 
@@ -224,6 +227,18 @@ for (const kind of Object.keys(VIEWPORTS) as Kind[]) {
       // La ficha y la búsqueda lo muestran.
       await page.goto(path!);
       await expect(h1(page)).toContainText("QA Journey 6'4\"", { ignoreCase: true });
+      // Galería con las dos fotos reales: flecha en escritorio, deslizar el dedo en móvil.
+      await expect(page.getByText("1 / 2", { exact: true })).toBeVisible();
+      if (mobile) {
+        const gal = page.getByRole("img", { name: /QA Journey.*·/ }).first();
+        const box = (await gal.boundingBox())!;
+        const y = box.y + box.height / 2;
+        await gal.dispatchEvent("touchstart", { touches: [{ identifier: 1, clientX: box.x + box.width - 30, clientY: y }] });
+        await gal.dispatchEvent("touchend", { changedTouches: [{ identifier: 1, clientX: box.x + 30, clientY: y }] });
+      } else {
+        await page.getByRole("button", { name: "Foto siguiente" }).click();
+      }
+      await expect(page.getByText("2 / 2", { exact: true })).toBeVisible();
       await expect(page.getByText("Tazacorte, La Palma", { exact: true }).first()).toBeVisible();
       await expect(async () => {
         await page.goto("/buscar?zona=la-palma");
@@ -232,12 +247,13 @@ for (const kind of Object.keys(VIEWPORTS) as Kind[]) {
 
       // Editar cambiando la marca a «Sin marca» (cambia el slug). QA-1: se guarda «Sin marca», no
       // «Shaper local». QA-2: la URL antigua redirige a la nueva (temporal) y la nueva responde 200.
+      // Editar abre en la revisión (QA-7): «Editar la tabla» → cambio → «Volver a revisar» → guardar.
       await page.goto(`/vender/publicar?editar=${id}`);
+      await expect(h1(page)).toHaveText("Revisa los cambios");
+      await page.getByRole("button", { name: "Editar la tabla" }).click();
       await expect(h1(page)).toHaveText("Cuéntanos qué tabla es");
       await page.getByRole("button", { name: "Sin marca" }).click();
-      await page.getByRole("button", { name: "Continuar" }).click();
-      await page.getByRole("button", { name: "Continuar" }).click();
-      await page.getByRole("button", { name: "Revisar anuncio" }).click();
+      await page.getByRole("button", { name: "Volver a revisar" }).click();
       await page.getByRole("button", { name: "Guardar cambios" }).click({ timeout: 20_000 });
       await expect(h1(page)).toHaveText("Cambios guardados", { timeout: 45_000 });
       const oldPath = path!;
@@ -251,6 +267,7 @@ for (const kind of Object.keys(VIEWPORTS) as Kind[]) {
       expect(fromOld.status()).toBe(307);
       expect(fromOld.headers()["location"]).toContain(path!);
       await page.goto(`/vender/publicar?editar=${id}`);
+      await page.getByRole("button", { name: "Editar la tabla" }).click();
       await expect(page.getByRole("button", { name: "Sin marca" })).toHaveAttribute("aria-pressed", "true");
 
       // Un comprador anónimo revela el contacto real (Turnstile de prueba + CONTACT_IP_SALT).

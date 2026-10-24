@@ -11,9 +11,15 @@ import { fieldToInches, parseLitres, type MeasureKey, type Unit } from "./parse"
  * Origen de un dato mientras se publica:
  * - cat: autorrellenado desde el catálogo → «Según catálogo · confírmalo».
  * - ai: interpretado de las medidas pegadas → «Propuesta automática · revísala».
- * - ok: escrito o confirmado por el vendedor → «Confirmado por ti».
+ * - catok: del catálogo y confirmado por el vendedor: sigue siendo dato del FABRICANTE.
+ * - ok: escrito (o corregido) por el vendedor.
+ * Confirmar ya no convierte un dato del fabricante en «según el vendedor» (cierre de auditoría).
  */
-export type FieldSource = "cat" | "ai" | "ok" | "";
+export type FieldSource = "cat" | "catok" | "ai" | "ok" | "";
+
+/** Confirma de una vez todas las medidas pendientes (catálogo → catok; interpretadas → ok). */
+export const confirmAll = (src: PublishDraft["src"]): PublishDraft["src"] =>
+  Object.fromEntries(Object.entries(src).map(([k, v]) => [k, v === "cat" ? "catok" : v === "ai" ? "ok" : v]));
 
 export const SHAPER_LOCAL = "Shaper local";
 export const NO_BRAND_OPTION = "Sin marca";
@@ -153,7 +159,13 @@ export function draftFromListing(l: Listing): PublishDraft {
     width: l.width.value != null ? fmtIn(l.width.value) : "",
     thick: l.thickness.value != null ? fmtIn(l.thickness.value) : "",
     vol: l.volume.value != null ? String(l.volume.value) : "",
-    src: { len: "ok", width: "ok", thick: "ok", vol: "ok" },
+    // Al editar se conserva el origen: lo que era del fabricante sigue siéndolo (antes pasaba a «vendedor»).
+    src: {
+      len: l.length.source === "manufacturer" ? "catok" : "ok",
+      width: l.width.source === "manufacturer" ? "catok" : "ok",
+      thick: l.thickness.source === "manufacturer" ? "catok" : "ok",
+      vol: l.volume.source === "manufacturer" ? "catok" : "ok",
+    },
     shape: l.shape,
     construction: l.construction,
     condition: l.condition,

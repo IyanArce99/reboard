@@ -90,7 +90,12 @@ async function facetsCached(f: Filters): Promise<Facets> {
   "use cache";
   cacheLife("minutes");
   cacheTag("listings");
-  const { data, error } = await createPublicClient().rpc("listing_facets", { p: toRpcParams(f) });
+  // Un reintento si la consulta se corta por tiempo (57014): pasaba en el build, con ~90 páginas
+  // pidiendo facetas a la vez contra una base recién arrancada (statement_timeout de anon: 3 s).
+  let { data, error } = await createPublicClient().rpc("listing_facets", { p: toRpcParams(f) });
+  if (error && (error as { code?: string }).code === "57014") {
+    ({ data, error } = await createPublicClient().rpc("listing_facets", { p: toRpcParams(f) }));
+  }
   fail("listing_facets", error);
   const out: Facets = { anyZone: 0, zones: {}, shapes: {}, brands: {} };
   for (const r of data ?? []) {

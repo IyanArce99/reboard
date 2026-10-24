@@ -8,6 +8,7 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import { listingDbId } from "@/lib/auth/shared";
 import { MAX_COMPARE, sanitizeCompare, type CompareItem } from "@/lib/compare/compare";
+import { hasSessionCookie, SIGNED_IN_EVENT } from "@/lib/supabase/session-hint";
 import styles from "./Toast.module.css";
 
 export type { CompareItem } from "@/lib/compare/compare";
@@ -167,25 +168,35 @@ export function UserStateProvider({ children, authEnabled = false }: { children:
       setState((s) => ({ ...s, saved: [...new Set([...remote, ...missing])] }));
     }
 
-    void loadSupabase().then((supabase) => {
-      if (cancelled) return;
-      supabase.auth.getUser().then(({ data }) => {
-        if (data.user && !cancelled) void signedIn(supabase, data.user);
+    // Sin cookie de sesión no se descarga supabase-js: la mayoría de visitas no han entrado nunca.
+    // Si alguien entra ahora (código por email o contraseña), LoginForm avisa con SIGNED_IN_EVENT.
+    let started = false;
+    const start = () => {
+      if (started || cancelled) return;
+      started = true;
+      void loadSupabase().then((supabase) => {
+        if (cancelled) return;
+        supabase.auth.getUser().then(({ data }) => {
+          if (data.user && !cancelled) void signedIn(supabase, data.user);
+        });
+        const { data: sub } = supabase.auth.onAuthStateChange((event, session) => {
+          if (event === "SIGNED_IN" && session?.user) {
+            // Fuera del callback: Supabase recomienda no esperar a otras llamadas dentro de él.
+            const user = session.user;
+            setTimeout(() => void signedIn(supabase, user), 0);
+          } else if (event === "SIGNED_OUT") {
+            syncedFor = null;
+            setAccount(null);
+          }
+        });
+        unsubscribe = () => sub.subscription.unsubscribe();
       });
-      const { data: sub } = supabase.auth.onAuthStateChange((event, session) => {
-        if (event === "SIGNED_IN" && session?.user) {
-          // Fuera del callback: Supabase recomienda no esperar a otras llamadas dentro de él.
-          const user = session.user;
-          setTimeout(() => void signedIn(supabase, user), 0);
-        } else if (event === "SIGNED_OUT") {
-          syncedFor = null;
-          setAccount(null);
-        }
-      });
-      unsubscribe = () => sub.subscription.unsubscribe();
-    });
+    };
+    if (hasSessionCookie()) start();
+    window.addEventListener(SIGNED_IN_EVENT, start);
     return () => {
       cancelled = true;
+      window.removeEventListener(SIGNED_IN_EVENT, start);
       unsubscribe();
     };
   }, [authEnabled, ready]);

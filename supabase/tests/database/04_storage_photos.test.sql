@@ -30,6 +30,13 @@ select throws_ok($$ insert into storage.objects (bucket_id, name) select 'listin
 select throws_ok($$ insert into storage.objects (bucket_id, name) select 'listing-photos', other_folder from _paths $$,
   '42501', null, 'A no sube a la carpeta de B');
 
+-- Sin política de UPDATE (20261029090200): A no puede sobrescribir ni renombrar su propia foto.
+update storage.objects set name = (select own_ok from _paths) || '.cambiada' where bucket_id = 'listing-photos' and name = (select own_ok from _paths);
+select is((select count(*) from storage.objects where bucket_id = 'listing-photos' and name = (select own_ok from _paths) || '.cambiada'), 0::bigint,
+  'A no puede modificar una foto ya subida (se sube una nueva)');
+select is((select count(*) from pg_policies where schemaname = 'storage' and tablename = 'objects' and policyname = 'listing_photos_owner_update'), 0::bigint,
+  'no hay política de UPDATE en el bucket de fotos');
+
 -- Tabla de fotos
 select lives_ok($$ insert into public.listing_photos (listing_id, storage_path, position) select listing_id, own_ok, 0 from _paths $$,
   'A registra la foto');

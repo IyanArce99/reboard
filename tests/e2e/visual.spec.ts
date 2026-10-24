@@ -2,14 +2,16 @@
 // Uso: `npm run test:visual` para comparar; `npm run test:visual -- --update-snapshots` tras un
 // cambio visual aprobado. Las referencias dependen del sistema operativo (sufijo -win32, -linux…).
 import { expect, test } from "@playwright/test";
+import { demoListing, demoSold } from "./demo-data";
 
 const SCREENS: [string, string][] = [
   ["home", "/"],
   ["buscar", "/buscar?forma=evolutiva&zona=gran-canaria"],
   ["buscar-vacio", "/buscar?forma=longboard&zona=lanzarote&precio-max=150"],
   ["landing", "/tablas/gran-canaria/evolutiva"],
-  ["ficha", "/anuncio/torq-fun-tet-7-2-gran-canaria-a1040"],
-  ["ficha-vendida", "/anuncio/alba-a1096"],
+  // Fichas: se resuelven por slug en Supabase local (los ids cambian en cada carga DEMO).
+  ["ficha", "demo:torq-fun-tet-7-2-gran-canaria"],
+  ["ficha-vendida", "demo:vendida"],
   ["calculadora", "/calculadora-litros"],
   ["modelo", "/marcas/torq/fun-tet"],
 ];
@@ -22,7 +24,9 @@ for (const viewport of [
     test.use({ viewport: { width: viewport.width, height: viewport.height } });
     for (const [name, url] of SCREENS) {
       test(name, async ({ page }) => {
-        await page.goto(url, { waitUntil: "networkidle" });
+        const path = url === "demo:vendida" ? (await demoSold()).path : url.startsWith("demo:") ? (await demoListing(url.slice(5))).path : url;
+        await page.goto(path, { waitUntil: "networkidle" });
+        await expect(page.getByRole("heading", { name: "Esta ola ya pasó" }), "la pantalla existe (no es un 404)").toHaveCount(0);
         // Fotos remotas (Unsplash) y fuentes: esperar a que carguen para no comparar huecos.
         await page.evaluate(async () => {
           for (let y = 0; y < document.body.scrollHeight; y += 700) {

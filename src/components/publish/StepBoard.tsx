@@ -13,8 +13,10 @@ import {
   OTHER_MODEL,
   SHAPER_LOCAL,
   applyCatalogSize,
+  confirmAll,
   convertUnits,
   orderBrands,
+  pendingCount,
   visibleBrandCount,
   type FieldSource,
   type PublishDraft,
@@ -24,9 +26,10 @@ import { Chip, Group, type CatalogProps, type StepProps } from "./parts";
 import styles from "./Publish.module.css";
 
 const SRC_LABEL: Record<FieldSource, { text: string; tone: string; needs: boolean }> = {
-  cat: { text: "Según catálogo · confírmalo", tone: "cat", needs: true },
-  ai: { text: "Sacado de tu texto · revísalo", tone: "ai", needs: true },
-  ok: { text: "Confirmado por ti", tone: "ok", needs: false },
+  cat: { text: "Del catálogo", tone: "cat", needs: true },
+  catok: { text: "Del catálogo", tone: "cat", needs: false },
+  ai: { text: "Sacado de tu texto", tone: "ai", needs: true },
+  ok: { text: "", tone: "none", needs: false },
   "": { text: "", tone: "none", needs: false },
 };
 
@@ -82,6 +85,8 @@ export function StepBoard({ d, set, setD, catalog, brands: known, featuredBrands
   };
 
   const ft = d.unit === "ft";
+  const pending = pendingCount(d);
+  const pendingFrom = Object.values(d.src).includes("cat") ? "cat" : "ai";
   const fields: [MeasureKey, string, string, React.HTMLAttributes<HTMLInputElement>["inputMode"]][] = [
     ["len", "Longitud", ft ? "6'4\"" : "193", ft ? "text" : "decimal"],
     ["width", "Anchura", ft ? '20 1/2"' : "52", ft ? "text" : "decimal"],
@@ -197,13 +202,28 @@ export function StepBoard({ d, set, setD, catalog, brands: known, featuredBrands
           </p>
         </div>
 
+        {/* Una sola confirmación para todas las medidas rellenadas automáticamente (antes, un botón por
+            medida). Corregir una a mano también la confirma. */}
+        {pending > 0 && (
+          <div className={styles.confirmAll} role="group" aria-label="Medidas rellenadas automáticamente">
+            <span>
+              {pendingFrom === "cat"
+                ? "Hemos rellenado las medidas del catálogo. ¿Coinciden con tu tabla?"
+                : "Hemos sacado las medidas de tu texto. ¿Están bien?"}
+              <small>Si alguna no cuadra, corrígela abajo.</small>
+            </span>
+            <button type="button" className={styles.confirm} onClick={() => set({ src: confirmAll(d.src) })}>
+              Son correctas
+            </button>
+          </div>
+        )}
         <div className={styles.fields}>
           {fields.map(([k, label, ph, im]) => {
             const s = SRC_LABEL[d.src[k] ?? ""];
             const id = `pub-${k}`;
             // Cómo hemos entendido lo escrito («6'4" · 193 cm») o qué no cuadra, al momento.
             const reading = describeMeasure(k, d[k], d.unit);
-            const describedBy = [s.needs ? `${id}-src` : "", reading ? `${id}-read` : ""].filter(Boolean).join(" ") || undefined;
+            const describedBy = [s.text ? `${id}-src` : "", reading ? `${id}-read` : ""].filter(Boolean).join(" ") || undefined;
             return (
               <div key={k} className={styles.field}>
                 <label htmlFor={id} className={styles.fieldLabel}>
@@ -228,20 +248,10 @@ export function StepBoard({ d, set, setD, catalog, brands: known, featuredBrands
                     {reading.text}
                   </span>
                 )}
-                {s.needs && (
-                  <div className={styles.srcRow}>
-                    <span id={`${id}-src`} className={styles.src} data-tone={s.tone}>
-                      {s.text}
-                    </span>
-                    <button
-                      type="button"
-                      className={styles.confirm}
-                      aria-label={`Confirmar ${label.toLowerCase()}`}
-                      onClick={() => set({ src: { ...d.src, [k]: "ok" } })}
-                    >
-                      Confirmar
-                    </button>
-                  </div>
+                {s.text && (
+                  <span id={`${id}-src`} className={styles.src} data-tone={s.tone}>
+                    {s.text}
+                  </span>
                 )}
               </div>
             );

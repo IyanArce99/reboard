@@ -595,10 +595,29 @@ button.slot:hover {
 .src[data-tone="ok"] {
   color: var(--rb-success);
 }
+/* Confirmar de una vez las medidas rellenadas automáticamente. */
+.confirmAll {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: var(--rb-teal-tint);
+  color: var(--rb-teal-ink);
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.4;
+}
+.confirmAll small {
+  display: block;
+  font-size: 13px;
+  font-weight: 400;
+}
 .confirm {
   position: relative;
   flex: none;
-  height: 36px;
+  height: 44px;
   border: 1px solid var(--rb-petrol);
   border-radius: 8px;
   background: var(--rb-white);

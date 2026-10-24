@@ -25,7 +25,7 @@ export async function revealContactAction(args: { publicId: string; token: strin
 
   const h = await headers();
   const ip = clientIp(h);
-  const captcha = await verifyTurnstile(a.data.token, { ip });
+  const captcha = await verifyTurnstile(a.data.token, { ip, action: "contacto" });
   if (!captcha.ok) return { ok: false, message: "No hemos podido comprobar que no eres un robot. Vuelve a intentarlo." };
   const hash = ipHash(ip);
   if (!hash) {
@@ -64,7 +64,7 @@ export async function reportListingAction(args: z.input<typeof Report>): Promise
   const { data: auth } = await sb.auth.getUser();
   if (!auth.user) return { ok: false, message: "Para reportar un anuncio tienes que entrar en tu cuenta.", login: true };
 
-  const captcha = await verifyTurnstile(a.data.token, { ip: clientIp(await headers()) });
+  const captcha = await verifyTurnstile(a.data.token, { ip: clientIp(await headers()), action: "reportar" });
   if (!captcha.ok) return { ok: false, message: "No hemos podido comprobar que no eres un robot. Vuelve a intentarlo." };
 
   const id = Number(a.data.publicId.slice(1));

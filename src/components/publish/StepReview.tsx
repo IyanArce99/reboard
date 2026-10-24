@@ -104,7 +104,7 @@ export function StepReview({ d, catalog, now, live, editing, pending, needsLogin
             {pending > 0
               ? `Tienes ${pending} medida${pending > 1 ? "s" : ""} sin confirmar. ${
                   Object.values(d.src).includes("cat")
-                    ? "Las del catálogo se mostrarán «según fabricante»: revisa que coinciden con tu tabla."
+                    ? "Las del catálogo se mostrarán como «según el fabricante»: revisa que coinciden con tu tabla."
                     : "Revisa que las medidas rellenadas automáticamente son correctas."
                 }`
               : "No has indicado los litros. El anuncio aparecerá como «litros sin indicar» y saldrá en menos búsquedas."}

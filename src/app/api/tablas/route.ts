@@ -3,6 +3,7 @@ import { getRepository } from "@/lib/data";
 import { zoneBySlug } from "@/lib/domain/taxonomy";
 import { DEFAULT_HERE, HERE_COOKIE } from "@/lib/here";
 import { parseFilters } from "@/lib/search/filters";
+import { limitRequest } from "@/lib/security/rate-limit";
 
 const MAX = 300;
 
@@ -12,6 +13,9 @@ const MAX = 300;
  * con tipo, zona y presupuesto. Devuelve también la fecha de referencia y la zona del usuario.
  */
 export async function GET(request: Request) {
+  // Hasta 300 anuncios por respuesta: 30 por minuto y por IP sobran para la calculadora.
+  const blocked = limitRequest(request, "tablas", 30);
+  if (blocked) return blocked;
   const params = new URL(request.url).searchParams;
   const filters = parseFilters(Object.fromEntries(params.entries()));
   const repo = getRepository();

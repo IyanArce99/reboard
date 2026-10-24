@@ -55,7 +55,7 @@ export async function saveListingAction(args: z.input<typeof SaveArgs>): Promise
 
   const h = await headers();
   const ip = h.get("x-forwarded-for")?.split(",")[0]?.trim() ?? h.get("x-real-ip");
-  const captcha = await verifyTurnstile(a.data.turnstileToken, { ip });
+  const captcha = await verifyTurnstile(a.data.turnstileToken, { ip, action: "publicar" });
   if (!captcha.ok) {
     if (captcha.reason === "not-configured") {
       // Fallo de configuración del servidor: se registra aquí y el usuario ve un mensaje neutro.

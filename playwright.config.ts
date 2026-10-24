@@ -23,7 +23,10 @@ export default defineConfig({
     toHaveScreenshot: { maxDiffPixelRatio: 0.01, animations: "disabled" },
   },
   projects: [
-    { name: "e2e", testIgnore: /visual\.spec\.ts/, use: { ...devices["Desktop Chrome"] } },
+    // Los recorridos de comprador y vendedor crean y borran anuncios y cuentas: van en su propio proyecto,
+    // DESPUÉS del resto, para no cambiar los datos que leen otros tests a la vez (test intermitente, 24-10-2026).
+    { name: "e2e", testIgnore: /(visual|journeys)\.spec\.ts/, use: { ...devices["Desktop Chrome"] } },
+    { name: "journeys", testMatch: /journeys\.spec\.ts/, dependencies: ["e2e"], use: { ...devices["Desktop Chrome"] } },
     { name: "visual", testMatch: /visual\.spec\.ts/, use: { ...devices["Desktop Chrome"] } },
   ],
   webServer: {

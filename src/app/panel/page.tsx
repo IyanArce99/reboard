@@ -37,7 +37,7 @@ async function Panel() {
 
 export default function PanelPage() {
   return (
-    <Suspense fallback={<main className="container" aria-busy="true" style={{ minHeight: 480 }} />}>
+    <Suspense fallback={<main className="container" aria-busy="true" style={{ minHeight: "100svh" }} />}>
       <Panel />
     </Suspense>
   );

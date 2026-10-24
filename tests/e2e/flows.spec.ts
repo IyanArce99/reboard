@@ -133,9 +133,11 @@ test("sin errores de hidratación con estado guardado", async ({ page }) => {
     [STATE_KEY, JSON.stringify({ saved: [torq.id], compare: [{ id: torq.id, label: torq.label }], alerts: [], profile: { lo: 45, hi: 60, level: "Iniciación", weight: 75 } })],
   );
   for (const url of ["/", "/buscar", "/tablas/evolutiva", torq.path, "/calculadora-litros", "/guardado", "/comparar", "/marcas/torq/fun-tet"]) {
+    // Solo errores de JavaScript y de hidratación: un 404 de red (p. ej., la precarga de un anuncio que
+    // otro test acaba de borrar) no es un error de hidratación y hacía fallar este test a veces.
     const errors = trackErrors(page);
     await page.goto(url, { waitUntil: "networkidle" });
-    expect(errors, url).toEqual([]);
+    expect(errors.filter((e) => !/^Failed to load resource/.test(e)), url).toEqual([]);
     page.removeAllListeners("pageerror");
     page.removeAllListeners("console");
   }

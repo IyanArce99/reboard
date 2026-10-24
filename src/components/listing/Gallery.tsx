@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { BoardShape } from "@/components/brand/BoardShape";
 import type { Shape } from "@/lib/domain/taxonomy";
 import type { Photo } from "@/lib/domain/types";
@@ -21,6 +21,8 @@ export function Gallery({
   shape?: Shape;
 }) {
   const [ix, setIx] = useState(0);
+  // Deslizar con el dedo (móvil): sin librerías, con el desplazamiento horizontal del toque.
+  const touchX = useRef<number | null>(null);
   const n = photos.length;
   if (!n)
     return (
@@ -34,7 +36,20 @@ export function Gallery({
 
   return (
     <div>
-      <div className={styles.galMain} data-off={off || undefined}>
+      <div
+        className={styles.galMain}
+        data-off={off || undefined}
+        onTouchStart={(e) => {
+          touchX.current = e.touches[0]?.clientX ?? null;
+        }}
+        onTouchEnd={(e) => {
+          const start = touchX.current;
+          touchX.current = null;
+          const end = e.changedTouches[0]?.clientX;
+          if (start == null || end == null || n < 2 || Math.abs(end - start) < 40) return;
+          go(end < start ? 1 : -1);
+        }}
+      >
         <Image
           key={p.url}
           src={p.url}

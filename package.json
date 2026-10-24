@@ -10,7 +10,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "typecheck": "next typegen && tsc --noEmit",
-    "test:e2e": "playwright test --project=e2e",
+    "test:e2e": "playwright test --project=e2e --project=journeys",
     "test:visual": "playwright test --project=visual --workers=1",
     "db:start": "supabase start -x realtime,edge-runtime,logflare,vector,studio,imgproxy,supavisor,postgres-meta",
     "db:stop": "supabase stop",
@@ -22,6 +22,7 @@
     "perf:local": "vitest run --config vitest.perf.config.ts",
     "env:local": "node scripts/env-local.mjs",
     "db:seed-demo": "tsx scripts/seed-local-demo.mts",
+    "db:seed-photos": "tsx scripts/seed-local-photos.mts",
     "admin:grant": "node --env-file-if-exists=.env.local scripts/grant-admin.mjs",
     "test:e2e:admin": "playwright test -c playwright.admin.config.ts"
   },

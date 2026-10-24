@@ -10,6 +10,7 @@ import { Turnstile, TURNSTILE_SITE_KEY, type TurnstileHandle } from "@/component
 import { enabledProviders, type OAuthProvider } from "@/lib/auth/providers";
 import { authErrorText, safeNext } from "@/lib/auth/shared";
 import { getBrowserSupabase } from "@/lib/supabase/browser";
+import { SIGNED_IN_EVENT } from "@/lib/supabase/session-hint";
 import ui from "@/styles/ui.module.css";
 import styles from "./Auth.module.css";
 
@@ -81,6 +82,8 @@ export function LoginForm({ onDone }: { onDone?: () => void } = {}) {
   }
 
   async function finish() {
+    // La app carga la sesión (supabase-js) solo cuando hace falta: se le avisa de que ya hay una.
+    window.dispatchEvent(new Event(SIGNED_IN_EVENT));
     if (onDone) {
       setBusy(false);
       onDone();

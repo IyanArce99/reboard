@@ -47,8 +47,9 @@
 .back::after {
   content: "";
   position: absolute;
-  left: -2px;
-  right: -2px;
+  /* También de ancho: «Inicio» medía 31 px (auditoría 24-10-2026). */
+  left: -7px;
+  right: -7px;
   top: 50%;
   height: 44px;
   transform: translateY(-50%);

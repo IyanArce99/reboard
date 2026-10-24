@@ -1,16 +1,5 @@
 /* Valores de design/prototype/Tarjeta Atlantic.dc.html */
 
-.onlyM {
-  display: none;
-}
-@media (max-width: 759px) {
-  .onlyD {
-    display: none;
-  }
-  .onlyM {
-    display: block;
-  }
-}
 
 .img {
   object-fit: cover;
@@ -360,6 +349,81 @@
 
 .hCmp {
   font-size: 12px;
+}
+
+/* ——— Responsive: la tarjeta vertical, recolocada en horizontal en móvil (una sola en el HTML) ——— */
+.rTown {
+  display: none;
+}
+@media (max-width: 759px) {
+  .r {
+    display: grid;
+    grid-template-columns: 116px minmax(0, 1fr);
+    height: auto;
+    border-radius: 14px;
+  }
+  .r:hover {
+    box-shadow: none;
+  }
+  .r .vPhoto {
+    aspect-ratio: auto;
+    min-height: 156px;
+  }
+  .r .vBadges {
+    left: 6px;
+    top: 6px;
+  }
+  .r .vBadges > span {
+    font-size: 10px;
+    padding: 3px 6px;
+    border-radius: 5px;
+  }
+  /* Distancia y número de fotos sobre la foto: no caben en 116 px. */
+  .r .vBottom {
+    display: none;
+  }
+  /* Guardar, arriba a la derecha de la tarjeta (sin el círculo blanco sobre la foto). */
+  .r .vSave {
+    right: 2px;
+    top: 2px;
+    background: transparent;
+  }
+  .r .vBody {
+    padding: 10px 10px 10px 12px;
+    gap: 2px;
+    min-width: 0;
+  }
+  .r .priceRow {
+    padding-right: 36px;
+  }
+  .r .vPrice {
+    font-size: 21px;
+  }
+  .r .vTitle {
+    font-size: 15px;
+    line-height: 1.2;
+  }
+  .r .vSpec {
+    font-size: 13.5px;
+  }
+  .r .vMeta {
+    font-size: 12.5px;
+  }
+  .r .rTown {
+    display: inline;
+  }
+  .r .vFoot {
+    margin-top: 4px;
+    padding-top: 0;
+    border-top: 0;
+    justify-content: flex-start;
+  }
+  .r .vPosted {
+    display: none;
+  }
+  .r .vCmp {
+    font-size: 12px;
+  }
 }
 
 /* Sin fotos: silueta centrada sobre el fondo de la foto. */

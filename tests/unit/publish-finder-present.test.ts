@@ -146,3 +146,24 @@ describe("editar un anuncio: la marca se conserva (QA-1, auditoría 24-10-2026)"
     expect(draftFromListing({ ...base, brand: "Torq" }).brand).toBe("Torq");
   });
 });
+
+describe("confirmar medidas: una sola vez y sin perder el origen (cierre de auditoría)", () => {
+  it("confirmAll: catálogo → catok (sigue siendo del fabricante), texto → ok", async () => {
+    const { confirmAll, pendingCount, emptyDraft } = await import("@/lib/publish/draft");
+    const src = { len: "cat", width: "cat", thick: "ai", vol: "ok" } as const;
+    expect(confirmAll({ ...src })).toEqual({ len: "catok", width: "catok", thick: "ok", vol: "ok" });
+    expect(pendingCount({ ...emptyDraft(), src: confirmAll({ ...src }) })).toBe(0);
+  });
+
+  it("al editar, lo que era del fabricante sigue siéndolo", async () => {
+    const { draftFromListing } = await import("@/lib/publish/draft");
+    const base = buildDemoInventory(20)[0];
+    const d = draftFromListing({
+      ...base,
+      length: { value: 86, source: "manufacturer" },
+      width: { value: 21.5, source: "seller" },
+    });
+    expect(d.src.len).toBe("catok");
+    expect(d.src.width).toBe("ok");
+  });
+});

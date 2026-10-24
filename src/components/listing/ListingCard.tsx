@@ -26,32 +26,20 @@ interface Props {
   now: Date;
   /** Zona de referencia del usuario: dentro de ella se muestra la distancia. */
   hereZone: string;
-  /** responsive = vertical en escritorio y horizontal en móvil (< 760 px). */
+  /**
+   * responsive = vertical en escritorio y horizontal en móvil (< 760 px), con UNA sola tarjeta que el
+   * CSS recoloca (antes se pintaban las dos y se ocultaba una: el doble de HTML, PERF-2).
+   */
   layout?: "vertical" | "horizontal" | "responsive";
   /** Solo para la imagen LCP (primera tarjeta): inserta un preload en <head>. */
   preload?: boolean;
-  /**
-   * Primeras 1–2 tarjetas de una lista: foto con fetchPriority="high". Se mantiene loading="lazy"
-   * para que la variante oculta por CSS (responsive) no se descargue también.
-   */
+  /** Primeras 1–2 tarjetas de una lista: foto con fetchPriority="high". */
   eager?: boolean;
   /** Vista previa al publicar: el anuncio aún no existe y sus enlaces no se precargan. */
   preview?: boolean;
 }
 
 export function ListingCard(props: Props) {
-  if (props.layout === "responsive") {
-    return (
-      <>
-        <div className={styles.onlyD}>
-          <ListingCard {...props} layout="vertical" />
-        </div>
-        <div className={styles.onlyM}>
-          <ListingCard {...props} layout="horizontal" preload={false} />
-        </div>
-      </>
-    );
-  }
   return <Card {...props} />;
 }
 
@@ -123,15 +111,17 @@ function Card({ listing: l, now, hereZone, layout = "vertical", preload = false,
     );
   }
 
+  // Vertical o responsive (la misma tarjeta; en móvil, el CSS de `.r` la pone en horizontal).
+  const responsive = layout === "responsive";
   return (
-    <article className={styles.v}>
+    <article className={responsive ? `${styles.v} ${styles.r}` : styles.v}>
       <Link href={href} prefetch={prefetch} className={styles.vPhoto} tabIndex={-1} aria-hidden="true">
         {photo ? (
           <Image
             src={photo.url}
             alt=""
             fill
-            sizes="(max-width: 759px) 262px, 292px"
+            sizes={responsive ? "(max-width: 759px) 116px, 292px" : "(max-width: 759px) 262px, 292px"}
             className={styles.img}
             data-off={off || undefined}
             preload={preload}
@@ -176,6 +166,7 @@ function Card({ listing: l, now, hereZone, layout = "vertical", preload = false,
           </span>
         </div>
         <div className={styles.vMeta}>
+          {responsive && <span className={styles.rTown}>{l.town}, </span>}
           {zoneName(l)} · {CONDITION_LABEL[l.condition]}
         </div>
         <div className={styles.avail}>
@@ -185,7 +176,7 @@ function Card({ listing: l, now, hereZone, layout = "vertical", preload = false,
         <FitBadge volume={l.volume.value} className={`${ui.fitBadge} ${styles.vFit}`} />
         <div className={styles.vFoot}>
           <CompareButton item={compareItemOf(l)} name={title} className={styles.vCmp} />
-          <span>{postedText(l, now)}</span>
+          <span className={styles.vPosted}>{postedText(l, now)}</span>
         </div>
       </div>
     </article>

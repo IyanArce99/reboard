@@ -108,7 +108,8 @@ export function alertText(f: Filters, names: CatalogNames) {
   const v = hasVolumeFilter(f) ? volumePhrase(f) : "";
   const len = lengthPhrase(f);
   const b = f.brand ? ` ${brandName(f.brand, names)}` : "";
-  const p = f.priceMax != null ? `, por menos de ${f.priceMax} €` : "";
+  // Coma delante del precio solo si hay medidas antes («… 60 L, por menos de 200 €»); «Tablas por menos de 200 €».
+  const p = f.priceMax != null ? `${len || v ? "," : ""} por menos de ${f.priceMax} €` : "";
   // Coma solo si hay medidas o precio delante («Tablas de 55 L o más, en Canarias»); «Tablas en Canarias», sin ella.
   const sep = len || v || p ? "," : "";
   const z = f.zone ? `${sep} en ${placeName(f.zone) ?? f.zone}` : `${sep} ${LAUNCH.inAll}`;

@@ -23,6 +23,7 @@ import {
   fitText,
   parseIdsParam,
   sameIds,
+  sanitizeCompare,
   type CompareGroup,
 } from "@/lib/compare/compare";
 import { eur } from "@/lib/domain/format";
@@ -72,7 +73,10 @@ export function Comparator() {
   // selecciones antiguas sin foto).
   useEffect(() => {
     if (shared || !listings.length || listings.length !== compare.length) return;
-    const fresh = listings.map(compareItemOf);
+    // Se compara ya saneado (lo mismo que se guarda): si el saneado descartaba algo (p. ej. una foto con
+    // http://), lo guardado y lo fresco nunca coincidían y esto se reescribía en bucle, cortando la
+    // navegación de /comparar?ids=… a /comparar (cierre de auditoría, 24-10-2026).
+    const fresh = sanitizeCompare(listings.map(compareItemOf));
     if (JSON.stringify(fresh) !== JSON.stringify(compare)) replaceCompare(fresh);
   }, [shared, listings, compare, replaceCompare]);
 
