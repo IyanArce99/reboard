@@ -135,8 +135,6 @@ export default async function Home() {
 
   return (
     <main>
-      {/* Esta página tiene su propia acción principal: «Vender» de la cabecera pasa a contorno. */}
-      <span data-own-cta="other" hidden />
       {/* ───────── Hero ───────── */}
       <div className={styles.heroWrap}>
         <div className={styles.heroPhoto}>
