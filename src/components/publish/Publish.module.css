@@ -1249,16 +1249,27 @@ button.slot:hover {
 }
 
 /* ——— Fin ——— */
+/* Confirmación: tarjeta centrada (horizontal y verticalmente) en el espacio bajo la cabecera. */
 .donePage {
-  max-width: 760px;
+  min-height: calc(100vh - var(--rb-header-h));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding-top: 32px;
   padding-bottom: 64px;
 }
 .done {
-  padding: 40px 0;
+  width: 100%;
+  max-width: 600px;
+  padding: 40px 40px 36px;
+  border: 1px solid var(--rb-line);
+  border-radius: 20px;
+  background: var(--rb-white);
   display: flex;
   flex-direction: column;
   gap: 14px;
-  align-items: flex-start;
+  align-items: center;
+  text-align: center;
 }
 .doneIcon {
   width: 56px;
@@ -1288,15 +1299,27 @@ button.slot:hover {
   outline: none;
 }
 .doneText {
-  font-size: 16px;
+  font-size: 17px;
   color: var(--rb-muted);
-  max-width: 52ch;
+  max-width: 46ch;
   line-height: 1.5;
+}
+.doneNote {
+  margin: 4px 0 6px;
+  padding: 12px 16px;
+  border-radius: 12px;
+  background: var(--rb-warning-tint);
+  color: var(--rb-warning-ink);
+  font-size: 15px;
+  line-height: 1.45;
+  text-align: left;
 }
 .doneBtns {
   display: flex;
   flex-wrap: wrap;
+  justify-content: center;
   gap: 10px;
+  margin-top: 4px;
 }
 .doneBtns .btnPetrol,
 .doneBtns .btnWhite {
@@ -1398,7 +1421,21 @@ button.slot:hover {
     font-size: 30px;
   }
   .donePage {
+    min-height: 0;
+    align-items: flex-start;
+    padding-top: 16px;
     padding-bottom: 40px;
+  }
+  .done {
+    padding: 28px 18px 22px;
+  }
+  .doneBtns {
+    flex-direction: column;
+    align-self: stretch;
+  }
+  .doneBtns .btnPetrol,
+  .doneBtns .btnWhite {
+    width: 100%;
   }
 }
 
