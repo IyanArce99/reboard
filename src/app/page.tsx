@@ -100,10 +100,37 @@ export default async function Home() {
   const brands = [...names.brands, { slug: NO_BRAND.slug, name: NO_BRAND.short }]
     .map((b) => ({ ...b, n: facets.brands[b.slug] ?? 0 }))
     .filter((b) => b.n > 0);
-  const sellLink = (
-    <Link key="vender" href="/vender/publicar" className={inventoryEmpty ? styles.heroSell : undefined}>
-      ¿Vendes una tabla? <span>Publícala gratis</span>
+  const shortcut = (href: string, icon: React.ReactNode, title: string, text: string) => (
+    <Link key={href} href={href} className={styles.shortcut}>
+      <span className={styles.shortcutIcon} aria-hidden="true">
+        {icon}
+      </span>
+      <span className={styles.shortcutText}>
+        <strong>{title}</strong>
+        <span>{text}</span>
+      </span>
+      <span className={styles.shortcutArrow} aria-hidden="true">
+        →
+      </span>
     </Link>
+  );
+  const sellLink = shortcut(
+    "/vender/publicar",
+    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+      <path d="M12 5v14M5 12h14" />
+    </svg>,
+    "Vende tu tabla",
+    "Gratis y sin comisiones",
+  );
+  const calcLink = shortcut(
+    "/calculadora-litros",
+    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M4 15a8 8 0 0 1 16 0" />
+      <path d="M12 15l4-5" />
+      <circle cx="12" cy="15" r="1.2" fill="currentColor" />
+    </svg>,
+    "¿Cuántos litros?",
+    "Calcúlalo en 7 preguntas",
   );
 
   return (
@@ -121,22 +148,17 @@ export default async function Home() {
             <span>de segunda mano</span> en&nbsp;Canarias
           </h1>
           <p className={styles.lead}>
-            Tablas de surfistas, tiendas y escuelas de las ocho islas. Filtra por litros, medidas e isla, y habla directamente con quien vende. Sin
-            comisiones.
+            Tablas de surfistas, tiendas y escuelas. Filtra por litros, medidas e isla y habla directamente con quien vende. Sin comisiones.
           </p>
 
           <Suspense fallback={<div className={styles.searchSkeleton} />}>
             <HeroSearch />
           </Suspense>
 
-          <div className={styles.heroLinks}>
-            {/* Mientras no hay tablas publicadas, vender va primero y más visible. */}
-            {inventoryEmpty && sellLink}
-            <Link href="/calculadora-litros">
-              ¿No sabes cuántos litros? <span>Calcúlalo en 7 preguntas</span>
-            </Link>
-            {!inventoryEmpty && sellLink}
-          </div>
+          <nav className={styles.shortcuts} aria-label="Accesos rápidos">
+            {/* Mientras no hay tablas publicadas, vender va primero. */}
+            {inventoryEmpty ? [sellLink, calcLink] : [calcLink, sellLink]}
+          </nav>
         </section>
       </div>
 

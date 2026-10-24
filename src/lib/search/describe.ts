@@ -198,8 +198,12 @@ export function emptyStateCopy(f: Filters, inventoryTotal: number): { kind: Empt
 }
 
 /** Texto del botón amarillo del buscador de la home según el recuento. */
+/** Por debajo de este inventario, el botón del buscador no muestra la cifra («Buscar 3 tablas» suena a vacío). */
+export const CTA_MIN_COUNT = 20;
+
 export function searchCtaText(count: number, inventoryTotal: number | undefined, fmt: (n: number) => string = String) {
   if (inventoryTotal === 0) return "Buscar tablas";
   if (count === 0) return "Ver alternativas";
+  if (inventoryTotal != null && inventoryTotal < CTA_MIN_COUNT) return "Buscar tablas";
   return `Buscar ${fmt(count)} ${count === 1 ? "tabla" : "tablas"}`;
 }

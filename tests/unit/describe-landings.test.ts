@@ -158,6 +158,10 @@ describe("botón del buscador de la home", () => {
   it("con inventario", () => {
     expect(searchCtaText(0, 30)).toBe("Ver alternativas");
     expect(searchCtaText(1, 30)).toBe("Buscar 1 tabla");
+    // Con poco inventario, sin cifra (pero «Ver alternativas» si los filtros no dan nada).
+    expect(searchCtaText(1, 1)).toBe("Buscar tablas");
+    expect(searchCtaText(12, 19)).toBe("Buscar tablas");
+    expect(searchCtaText(0, 5)).toBe("Ver alternativas");
     expect(searchCtaText(1200, 3000, (n) => n.toLocaleString("es-ES"))).toMatch(/^Buscar 1.?200 tablas$/);
     // Sin total conocido, se comporta como antes.
     expect(searchCtaText(0, undefined)).toBe("Ver alternativas");

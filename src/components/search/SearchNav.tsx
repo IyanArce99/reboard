@@ -32,6 +32,7 @@ export function SearchNavProvider({
   view,
   isSearchPage,
   supportsDistance = true,
+  initialSheetOpen = false,
   children,
 }: {
   filters: Filters;
@@ -39,11 +40,13 @@ export function SearchNavProvider({
   /** En /buscar se reemplaza la URL; desde una landing se navega a /buscar. */
   isSearchPage: boolean;
   supportsDistance?: boolean;
+  /** Llega con ?avanzados=1 («Más filtros» de la home): la hoja móvil sale ya abierta, sin parpadeo. */
+  initialSheetOpen?: boolean;
   children: React.ReactNode;
 }) {
   const router = useRouter();
   const [pending, start] = useTransition();
-  const [sheetOpen, setSheetOpen] = useState(false);
+  const [sheetOpen, setSheetOpen] = useState(initialSheetOpen);
 
   const navigate = useCallback(
     (f: Filters, v?: Partial<ViewState>) => {

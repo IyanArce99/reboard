@@ -119,12 +119,20 @@ export function FilterPanel({ counts, showCounts = true, resultCount, brands, mo
   }, [resets]);
   useEffect(() => () => clearTimeout(timer.current), []);
 
+  // Solo la hoja móvil es un diálogo modal: foco dentro, Tab atrapado y vuelta al botón «Filtros».
+  // En escritorio el panel es una barra lateral normal.
+  const isMobile = useSyncExternalStore(subscribeMobile, () => window.matchMedia(MOBILE).matches, () => false);
+  const isSheet = sheetOpen && isMobile;
+  useDialogFocus(isSheet, sheetRef);
+
+  // Con ?avanzados=1 la hoja empieza abierta (también en el HTML del servidor, sin parpadeo). En
+  // escritorio no hay hoja, así que se cierra el estado para que no bloquee el scroll.
   useEffect(() => {
-    if (openAdvanced && window.matchMedia(MOBILE).matches) setSheetOpen(true);
+    if (openAdvanced && !window.matchMedia(MOBILE).matches) setSheetOpen(false);
   }, [openAdvanced, setSheetOpen]);
 
   useEffect(() => {
-    if (!sheetOpen) return;
+    if (!isSheet) return;
     const onKey = (e: KeyboardEvent) => e.key === "Escape" && setSheetOpen(false);
     document.addEventListener("keydown", onKey);
     document.body.style.overflow = "hidden";
@@ -132,13 +140,7 @@ export function FilterPanel({ counts, showCounts = true, resultCount, brands, mo
       document.removeEventListener("keydown", onKey);
       document.body.style.overflow = "";
     };
-  }, [sheetOpen, setSheetOpen]);
-
-  // Solo la hoja móvil es un diálogo modal: foco dentro, Tab atrapado y vuelta al botón «Filtros».
-  // En escritorio el panel es una barra lateral normal.
-  const isMobile = useSyncExternalStore(subscribeMobile, () => window.matchMedia(MOBILE).matches, () => false);
-  const isSheet = sheetOpen && isMobile;
-  useDialogFocus(isSheet, sheetRef);
+  }, [isSheet, setSheetOpen]);
 
   const commit = (f: Filters, delay: number) => {
     setDraft(f);

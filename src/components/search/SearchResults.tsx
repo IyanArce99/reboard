@@ -91,7 +91,7 @@ export async function SearchResults({ filters: f, view, here, title, intro, crum
         </div>
       )}
 
-      <SearchNavProvider filters={f} view={view} isSearchPage={isSearchPage} supportsDistance={repo.capabilities.distance}>
+      <SearchNavProvider filters={f} view={view} isSearchPage={isSearchPage} supportsDistance={repo.capabilities.distance} initialSheetOpen={openAdvanced}>
         {/* Móvil: el botón de alerta va en esta barra; en escritorio, en la cabecera de resultados (.dControls).
             Sin resultados, ordenar no sirve y la alerta va en el estado vacío (una sola «Crear alerta» a la vista). */}
         <div className={styles.mBar} data-solo={noResults || undefined}>
