@@ -545,3 +545,7 @@ El bloque «Datos técnicos» se leía como una hoja de cálculo: todo en IBM Pl
 - `describeMeasure` es la línea que se ve bajo cada campo al publicar («6'4" · 193 cm», «Lo leemos en cm: …» o qué no cuadra). La validación del paso usa el mismo texto.
 - Límites en `MEASURE_LIMITS`, los mismos que `schema.ts` y la base de datos.
 - Tests: `tests/unit/measure-reading.test.ts`.
+
+## Entrar con contraseña, solo por URL (24-10-2026)
+
+El formulario de `/entrar` decía «No necesitas contraseña» y debajo ofrecía «Tengo contraseña» (U5 de la auditoría). La contraseña solo la usa la administración, así que el enlace ya no se muestra. Se entra con contraseña en **`/entrar?contrasena`**; se puede combinar con `&siguiente=/moderacion`. El resto entra con el código por email (o Google/Apple cuando se activen).

@@ -26,7 +26,9 @@ export function LoginForm({ onDone }: { onDone?: () => void } = {}) {
   const router = useRouter();
   const params = useSearchParams();
   const next = safeNext(params.get("siguiente"));
-  const [step, setStep] = useState<"email" | "code" | "password">("email");
+  // Entrar con contraseña solo lo usa la administración: no se ofrece en el formulario, se llega con
+  // /entrar?contrasena (el resto entra con el código por email).
+  const [step, setStep] = useState<"email" | "code" | "password">(params.has("contrasena") ? "password" : "email");
   const [password, setPassword] = useState("");
   const [email, setEmail] = useState("");
   const [code, setCode] = useState("");
@@ -192,11 +194,6 @@ export function LoginForm({ onDone }: { onDone?: () => void } = {}) {
           >
             {busy ? "Enviando…" : needsCaptcha && !captcha ? "Comprobando que no eres un robot…" : "Enviarme el código"}
           </button>
-          <div className={styles.secondary}>
-            <button type="button" className={styles.linkBtn} onClick={() => toggle("password")}>
-              Tengo contraseña
-            </button>
-          </div>
         </form>
       ) : step === "password" ? (
         <form onSubmit={signInPassword}>
