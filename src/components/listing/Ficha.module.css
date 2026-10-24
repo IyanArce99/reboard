@@ -811,6 +811,16 @@
   accent-color: var(--rb-teal);
 }
 
+/* «Lo vende Daniel · Particular»: quién vende, junto al precio y el contacto. */
+.soldBy {
+  font-size: 15px;
+  color: var(--rb-muted);
+}
+.soldBy strong {
+  color: var(--rb-petrol);
+  font-weight: 800;
+}
+
 /* Acceso al comparador desde la ficha (en móvil no hay barra de comparación: está la de contacto). */
 .compareLink {
   display: inline-flex;

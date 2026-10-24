@@ -967,6 +967,11 @@ button.slot:hover {
   line-height: 1.5;
   color: var(--rb-muted);
 }
+.nameField {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
 .loginBox {
   display: flex;
   flex-direction: column;

@@ -5,12 +5,17 @@
 // incrustado), Turnstile y la publicación. En la demo no se publica nada.
 
 import Image from "next/image";
-import type { ReactNode, RefObject } from "react";
+import { useState, type ReactNode, type RefObject } from "react";
 import { LoginForm } from "@/components/auth/LoginForm";
 import { Turnstile, type TurnstileHandle } from "@/components/security/Turnstile";
 import { CONDITION_LABEL, CONSTRUCTION_INFO, SHAPE_INFO, zoneBySlug } from "@/lib/domain/taxonomy";
 import type { CatalogModel } from "@/lib/domain/types";
 import type { PublishDraft } from "@/lib/publish/draft";
+import { updateDisplayName } from "@/app/cuenta/actions";
+import { useUserState } from "@/components/user/UserStateProvider";
+import { cleanDisplayName } from "@/lib/auth/shared";
+import { DEFAULT_SELLER_NAME } from "@/lib/listing/present";
+import ui from "@/styles/ui.module.css";
 import { LivePreview, previewTexts } from "./LivePreview";
 import styles from "./Publish.module.css";
 
@@ -54,6 +59,37 @@ export function StepReview({ d, catalog, now, live, editing, pending, needsLogin
   const t = previewTexts(d, catalog, now);
   const measures = [d.len, d.width, d.thick].filter((x) => x.trim()).join(" × ");
   const zone = zoneBySlug(d.zone)?.name ?? "";
+  const { setAccountName } = useUserState();
+  // Nombre que verán los compradores. Vacío si aún es el de por defecto («Surfista»).
+  const known = account && account.name !== DEFAULT_SELLER_NAME ? account.name : "";
+  const [typed, setTyped] = useState<string | null>(null);
+  const name = typed ?? known;
+  const [nameError, setNameError] = useState("");
+  const [savingName, setSavingName] = useState(false);
+
+  const publish = async () => {
+    if (live && account) {
+      const clean = cleanDisplayName(name);
+      if (!clean) {
+        setNameError("Escribe tu nombre o un apodo (de 2 a 40 caracteres): es lo que verá quien abra tu anuncio.");
+        return;
+      }
+      setNameError("");
+      if (clean !== account.name) {
+        setSavingName(true);
+        const fd = new FormData();
+        fd.set("displayName", clean);
+        const r = await updateDisplayName({ ok: false, message: "" }, fd);
+        setSavingName(false);
+        if (!r.ok) {
+          setNameError(r.message);
+          return;
+        }
+        if (r.name) setAccountName(r.name);
+      }
+    }
+    onPublish();
+  };
 
   return (
     <div className={styles.stepBody}>
@@ -150,18 +186,34 @@ export function StepReview({ d, catalog, now, live, editing, pending, needsLogin
         ) : (
           <>
             {live && account && (
-              <p className={styles.small}>
-                Publicas como <strong>{account.name}</strong> ({account.email}).
-              </p>
+              <div className={styles.nameField}>
+                <label htmlFor="pub-name" className={ui.label}>
+                  Tu nombre en el anuncio
+                </label>
+                <input
+                  id="pub-name"
+                  className={ui.input}
+                  value={name}
+                  onChange={(e) => setTyped(e.target.value)}
+                  placeholder="Tu nombre o un apodo"
+                  autoComplete="given-name"
+                  maxLength={40}
+                  aria-describedby="pub-name-help"
+                  aria-invalid={nameError ? true : undefined}
+                />
+                <span id="pub-name-help" className={styles.small}>
+                  Lo verá quien abra tu anuncio («Lo vende…») y aparecerá en el mensaje de WhatsApp. Publicas con la cuenta {account.email}.
+                </span>
+              </div>
             )}
             {live && <Turnstile ref={turnstile} action="publicar" onToken={onCaptcha} />}
-            <button type="button" className={styles.publishBtn} onClick={onPublish} disabled={busy} aria-busy={busy || undefined}>
+            <button type="button" className={styles.publishBtn} onClick={() => void publish()} disabled={busy || savingName} aria-busy={busy || savingName || undefined}>
               {busy ? progress || "Publicando…" : !live ? "Terminar la prueba" : editing ? "Guardar cambios" : "Publicar gratis"}
             </button>
           </>
         )}
         <p className={styles.error} role="alert">
-          {error}
+          {nameError || error}
         </p>
       </section>
     </div>

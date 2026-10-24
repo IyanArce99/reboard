@@ -112,7 +112,7 @@ export function ContactProvider({ data, children }: { data: ContactData; childre
             <div className={styles.modalOverlay} onClick={() => setOpen(false)} aria-hidden="true" />
             <div ref={dialogRef} className={styles.modal} role="dialog" aria-modal="true" aria-labelledby="contact-title">
               <div className={styles.modalHead}>
-                <span id="contact-title">Contactar con {data.sellerName}</span>
+                <span id="contact-title">Contactar con {data.sellerName || "el vendedor"}</span>
                 <button type="button" aria-label="Cerrar" onClick={() => setOpen(false)}>
                   ✕
                 </button>

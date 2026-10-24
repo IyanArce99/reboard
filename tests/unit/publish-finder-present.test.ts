@@ -121,3 +121,18 @@ describe("parseFeet: la longitud como la escribe la gente (bug de publicar, 24-1
     expect(parseFeet(text)).toBeNull();
   });
 });
+
+describe("nombre del vendedor en la ficha", () => {
+  it("«Surfista» (el nombre por defecto) no se muestra como nombre", async () => {
+    const { sellerName, soldBy } = await import("@/lib/listing/present");
+    const { buildDemoInventory } = await import("../fixtures/demo-inventory");
+    const base = buildDemoInventory(20)[0];
+    const withSeller = (name: string, type: "particular" | "tienda" | "escuela") => ({ ...base, seller: { ...base.seller, name, type } });
+    expect(sellerName(withSeller("Daniel", "particular"))).toBe("Daniel");
+    expect(soldBy(withSeller("Daniel", "particular"))).toEqual({ name: "Daniel", rest: " · Particular" });
+    expect(soldBy(withSeller("Escuela Playa Chica", "escuela"))).toEqual({ name: "Escuela Playa Chica", rest: " · Escuela" });
+    expect(sellerName(withSeller("Surfista", "particular"))).toBeNull();
+    expect(soldBy(withSeller("Surfista", "particular"))).toEqual({ name: null, rest: "un particular" });
+    expect(soldBy(withSeller("Surfista", "escuela"))).toEqual({ name: null, rest: "una escuela" });
+  });
+});

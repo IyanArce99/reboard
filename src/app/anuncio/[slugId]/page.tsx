@@ -30,6 +30,8 @@ import {
   isOff,
   listingPath,
   listingTitle,
+  sellerName,
+  soldBy,
   sourceBadge,
   zoneName,
 } from "@/lib/listing/present";
@@ -121,13 +123,15 @@ export default async function FichaPage({ params }: PageProps<"/anuncio/[slugId]
   const nearText = `${l.town}, ${zoneName(l)}${l.distanceKm != null ? ` · a ${l.distanceKm} km` : ""}`;
   // «tu evolutiva sin marca…»: sin mayúscula a mitad de frase cuando el título empieza por el tipo.
   const inSentence = l.brand ? title : title.charAt(0).toLowerCase() + title.slice(1);
-  const message = `Hola ${l.seller.name}, he visto tu ${inSentence} en Reboard por ${eur(l.price)}. ¿Sigue disponible? ¿Cuándo podría verla?`;
+  const seller = sellerName(l);
+  const by = soldBy(l);
+  const message = `Hola${seller ? ` ${seller}` : ""}, he visto tu ${inSentence} en Reboard por ${eur(l.price)}. ¿Sigue disponible? ¿Cuándo podría verla?`;
   const url = absoluteUrl(listingPath(l));
 
   return (
     <ContactProvider
       data={{
-        sellerName: l.seller.name,
+        sellerName: seller ?? "",
         message,
         phone: l.contact.phone,
         method: l.contact.method === "phone" ? "phone" : "whatsapp",
@@ -205,6 +209,10 @@ export default async function FichaPage({ params }: PageProps<"/anuncio/[slugId]
               <AvailabilityDot tone={av.tone} size={9} />
               {av.text}
             </div>
+            <div className={styles.soldBy}>
+              Lo vende {by.name ? <strong>{by.name}</strong> : by.rest}
+              {by.name && by.rest}
+            </div>
             <FitNotice volume={vol} />
             <ContactButton className={styles.contact} />
             <div className={styles.actions}>
@@ -257,10 +265,10 @@ export default async function FichaPage({ params }: PageProps<"/anuncio/[slugId]
                 <div className={ui.label}>Vendedor</div>
                 <div className={styles.seller}>
                   <span className={styles.avatar} aria-hidden="true">
-                    {l.seller.name[0]}
+                    {(seller ?? SELLER_LABEL[l.seller.type])[0]}
                   </span>
                   <div>
-                    <div className={styles.sellerName}>{l.seller.name}</div>
+                    <div className={styles.sellerName}>{seller ?? SELLER_LABEL[l.seller.type]}</div>
                     <div className={styles.sellerMeta}>
                       {SELLER_LABEL[l.seller.type]}
                       {sameSeller > 1 ? ` · ${sameSeller} anuncios activos` : ""}
@@ -332,7 +340,7 @@ export default async function FichaPage({ params }: PageProps<"/anuncio/[slugId]
             itemCondition: "https://schema.org/UsedCondition",
             availability: off ? "https://schema.org/SoldOut" : "https://schema.org/InStock",
             url,
-            seller: { "@type": l.seller.type === "particular" ? "Person" : "Organization", name: l.seller.name },
+            seller: { "@type": l.seller.type === "particular" ? "Person" : "Organization", name: seller ?? SELLER_LABEL[l.seller.type] },
           },
           additionalProperty: [
             { "@type": "PropertyValue", name: "Longitud", value: l.sizeLabel },

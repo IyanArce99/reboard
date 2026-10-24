@@ -1,6 +1,6 @@
 // Textos de un anuncio para la interfaz (equivalente a card() y fichaVals() del prototipo).
 
-import { CONSTRUCTION_INFO, SHAPE_INFO, isActiveStatus, zoneLabel } from "@/lib/domain/taxonomy";
+import { CONSTRUCTION_INFO, SELLER_LABEL, SHAPE_INFO, isActiveStatus, zoneLabel } from "@/lib/domain/taxonomy";
 import type { DataSource, Listing } from "@/lib/domain/types";
 import { ago, daysBetween } from "@/lib/domain/format";
 
@@ -11,6 +11,19 @@ export const listingTitle = (l: Listing) =>
 
 /** Etiqueta corta para la bandeja de comparación. */
 export const listingShortLabel = (l: Listing) => `${l.brand ?? "Sin marca"} ${l.sizeLabel}`;
+
+/** Nombre por defecto de un perfil (profiles.display_name): el vendedor aún no ha elegido uno. */
+export const DEFAULT_SELLER_NAME = "Surfista";
+
+/** Nombre que ha elegido el vendedor, o null si sigue con el de por defecto. */
+export const sellerName = (l: Listing) => (l.seller.name && l.seller.name !== DEFAULT_SELLER_NAME ? l.seller.name : null);
+
+/** «Lo vende Daniel · Particular», «Lo vende Escuela Playa Chica · Escuela», «Lo vende un particular». */
+export function soldBy(l: Listing): { name: string | null; rest: string } {
+  const n = sellerName(l);
+  if (n) return { name: n, rest: ` · ${SELLER_LABEL[l.seller.type]}` };
+  return { name: null, rest: l.seller.type === "particular" ? "un particular" : l.seller.type === "escuela" ? "una escuela" : "una tienda" };
+}
 
 export const listingPath = (l: Listing) => `/anuncio/${l.slug}-${l.id}`;
 
