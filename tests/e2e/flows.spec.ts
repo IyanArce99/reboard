@@ -77,12 +77,27 @@ test("home (escritorio): cada segmento abre su panel y el botón actualiza el re
   expect(errors).toEqual([]);
 });
 
-test("home (móvil): la hoja abre en la sección tocada y no roba el foco al escribir", async ({ browser }) => {
+test("home (móvil): cada campo abre solo su sección; la isla se elige y vuelve al buscador", async ({ browser }) => {
   const ctx = await browser.newContext({ viewport: { width: 375, height: 812 }, isMobile: true, hasTouch: true });
   const page = await ctx.newPage();
   await page.goto("/");
-  await page.getByRole("button", { name: /Litros/ }).click();
-  const sheet = page.getByRole("dialog", { name: "Buscar tablas" });
+  // Isla: solo la lista de islas; al elegir, se cierra y el segmento muestra la isla.
+  await page.getByRole("button", { name: /^Isla/ }).click();
+  const island = page.getByRole("dialog", { name: "¿Dónde buscas?" });
+  await expect(island.getByRole("heading", { name: "¿Dónde buscas?" })).toBeVisible();
+  await expect(island.getByRole("heading", { name: "¿Cuántos litros?" })).toHaveCount(0);
+  await island.getByRole("button", { name: /Tenerife/ }).first().click();
+  await expect(page.getByRole("dialog")).toHaveCount(0);
+  await expect(page.getByRole("button", { name: /^Isla/ })).toContainText("Tenerife");
+  // Tipo: solo los tipos.
+  await page.getByRole("button", { name: /^Tipo de tabla/ }).click();
+  const type = page.getByRole("dialog", { name: /¿Qué tipo de tabla buscas?/ });
+  await expect(type.getByRole("heading", { name: /¿Qué tipo de tabla buscas?/ })).toBeVisible();
+  await expect(type.getByRole("heading", { name: "¿Dónde buscas?" })).toHaveCount(0);
+  await page.keyboard.press("Escape");
+  // Litros: escribir no roba el foco.
+  await page.getByRole("button", { name: /^Litros/ }).click();
+  const sheet = page.getByRole("dialog", { name: "¿Cuántos litros?" });
   await expect(sheet.getByRole("heading", { name: "¿Cuántos litros?" })).toBeInViewport();
   const min = sheet.getByLabel("Mínimo");
   await min.click();

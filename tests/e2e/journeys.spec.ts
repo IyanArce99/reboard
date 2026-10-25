@@ -94,13 +94,16 @@ for (const kind of Object.keys(VIEWPORTS) as Kind[]) {
     await page.goto("/");
     await expect(h1(page)).toContainText(/segunda mano/i);
     expect(await noOverflow(page)).toBe(0);
+    // Cada campo abre solo su parte (móvil: hoja con la pregunta como título; escritorio: panel).
     await page.getByRole("button", { name: /^Isla/ }).click();
-    const sheet = page.getByRole("dialog", { name: mobile ? "Buscar tablas" : "Isla" });
-    await sheet.getByRole("button", { name: /^Tenerife \d+/ }).click();
-    if (!mobile) await page.getByRole("button", { name: /^Litros/ }).click();
-    await (mobile ? sheet : page.getByRole("dialog", { name: "Litros" })).getByRole("button", { name: /^35–45 L/ }).click();
-    if (!mobile) await page.getByRole("button", { name: /^Tipo de tabla/ }).click();
-    await (mobile ? sheet : page.getByRole("dialog", { name: "Tipo de tabla" })).getByRole("button", { name: /^Fish/ }).click();
+    await page.getByRole("dialog", { name: mobile ? "¿Dónde buscas?" : "Isla" }).getByRole("button", { name: /^Tenerife \d+/ }).click();
+    if (mobile) await expect(page.getByRole("dialog")).toHaveCount(0); // la isla es una sola opción: vuelve al buscador
+    await page.getByRole("button", { name: /^Litros/ }).click();
+    await page.getByRole("dialog", { name: mobile ? "¿Cuántos litros?" : "Litros" }).getByRole("button", { name: /^35–45 L/ }).click();
+    if (mobile) await page.keyboard.press("Escape");
+    await page.getByRole("button", { name: /^Tipo de tabla/ }).click();
+    const sheet = page.getByRole("dialog", { name: mobile ? /¿Qué tipo de tabla buscas?/ : "Tipo de tabla" });
+    await sheet.getByRole("button", { name: /^Fish/ }).click();
     const cta = (mobile ? sheet : page).getByRole("link", { name: /^Buscar \d+ tablas?$/ });
     await expect(cta).toHaveAttribute("href", "/buscar?zona=tenerife&litros-min=35&litros-max=45&forma=fish");
     await expect(cta).toHaveText("Buscar 2 tablas");

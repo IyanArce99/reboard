@@ -21,7 +21,17 @@ export function ContactForm() {
   const [topic, setTopic] = useState<ContactTopic | null>(initial);
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState("");
-  const [captcha, setCaptcha] = useState<string | null>(null);
+  const [captcha, setCaptchaState] = useState<string | null>(null);
+  // El último token, también para quien está esperando a que llegue (enviar antes de que termine la comprobación).
+  const tokenRef = useRef<string | null>(null);
+  const setCaptcha = (t: string | null) => {
+    tokenRef.current = t;
+    setCaptchaState(t);
+  };
+  const waitForToken = async (ms = 10_000) => {
+    for (let waited = 0; !tokenRef.current && waited < ms; waited += 200) await new Promise((r) => setTimeout(r, 200));
+    return tokenRef.current;
+  };
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<{ message: string; field?: Field } | null>(null);
   const [sentTo, setSentTo] = useState<string | null>(null);
@@ -45,13 +55,16 @@ export function ContactForm() {
       focusField(f);
       return;
     }
-    if (needsCaptcha && !captcha) {
-      setError({ message: "Espera un momento: estamos comprobando que no eres un robot." });
-      return;
-    }
     setBusy(true);
     setError(null);
-    const r = await sendContactMessageAction({ ...v.data, token: captcha });
+    // Si la comprobación anti-robots aún no ha terminado, se espera un poco en vez de dar un error.
+    const token = needsCaptcha ? (captcha ?? (await waitForToken())) : null;
+    if (needsCaptcha && !token) {
+      setBusy(false);
+      setError({ message: "No hemos podido comprobar que no eres un robot. Recarga la página y vuelve a intentarlo." });
+      return;
+    }
+    const r = await sendContactMessageAction({ ...v.data, token });
     turnstile.current?.reset();
     setCaptcha(null);
     setBusy(false);

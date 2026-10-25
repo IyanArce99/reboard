@@ -479,17 +479,16 @@
 }
 
 .sheetHead {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+  position: absolute;
+  top: 14px;
+  right: 16px;
+  z-index: 1;
 }
-
-.sheetTitle {
-  font-family: var(--rb-font-display);
-  font-size: 26px;
-  font-weight: 800;
-  text-transform: uppercase;
-  white-space: nowrap;
+/* La pregunta de la sección hace de título de la hoja; deja sitio al botón de cerrar. */
+.sheet .groupTitle {
+  min-height: 44px;
+  padding-right: 56px;
+  align-content: center;
 }
 
 .close {

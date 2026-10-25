@@ -185,13 +185,6 @@ export function SearchBar({ here, initialCount, supportsDistance = true, zoneCou
     setVolMin(on ? "" : String(a));
     setVolMax(on || b == null ? "" : String(b));
   };
-  const clearAll = () => {
-    setDist(null);
-    setVolMin("");
-    setVolMax("");
-    setShapes([]);
-    setSoft(false);
-  };
   const clearPanel = (p: Panel) => {
     if (p === "zona") {
       pickZone(here);
@@ -282,11 +275,26 @@ export function SearchBar({ here, initialCount, supportsDistance = true, zoneCou
         </div>
       )}
 
+      {/* Móvil: cada segmento abre solo su sección (antes, los tres abrían la misma hoja completa). */}
       {sheet && (
-        <SearchSheet focus={sheet} onClose={() => setSheet(null)} goText={goText} href={href} onClear={clearAll}>
-          {sections.zona}
-          {sections.litros}
-          {sections.tipo}
+        <SearchSheet focus={sheet} onClose={() => setSheet(null)} goText={goText} href={href} onClear={() => clearPanel(sheet)}>
+          {sheet === "zona" ? (
+            <ZoneOptions
+              zone={zone}
+              dist={dist}
+              counts={zoneCounts}
+              total={totalCount}
+              supportsDistance={supportsDistance}
+              onZone={(z) => {
+                pickZone(z);
+                // Una sola opción: al elegir la isla se vuelve al buscador (salvo que haya distancia por elegir).
+                if (!supportsDistance) setSheet(null);
+              }}
+              onDist={setDist}
+            />
+          ) : (
+            sections[sheet]
+          )}
         </SearchSheet>
       )}
     </div>
@@ -468,7 +476,6 @@ function SearchSheet({
   useEffect(() => {
     onCloseRef.current = onClose;
   }, [onClose]);
-  const initialFocus = useRef(focus);
   // Diálogo modal: Tab no sale de la hoja y, al cerrar, el foco vuelve al segmento que la abrió.
   // Va antes del efecto que enfoca «Cerrar» para recordar el disparador.
   const sheetRef = useRef<HTMLDivElement>(null);
@@ -476,8 +483,6 @@ function SearchSheet({
 
   useEffect(() => {
     closeRef.current?.focus();
-    // Se abre en la sección que se ha tocado (Zona, Litros o Tipo).
-    if (initialFocus.current !== "zona") document.getElementById(`sb-${initialFocus.current}`)?.scrollIntoView({ block: "start" });
     const onKey = (e: KeyboardEvent) => e.key === "Escape" && onCloseRef.current();
     document.addEventListener("keydown", onKey);
     document.body.style.overflow = "hidden";
@@ -490,11 +495,9 @@ function SearchSheet({
   return createPortal(
     <>
       <div className={styles.overlay} onClick={onClose} aria-hidden="true" />
-      <div ref={sheetRef} className={styles.sheet} role="dialog" aria-modal="true" aria-labelledby="search-sheet-title">
+      {/* El título es la pregunta de la sección («¿Cuántos litros?»…): una sola línea, sin repetir. */}
+      <div ref={sheetRef} className={styles.sheet} role="dialog" aria-modal="true" aria-labelledby={`sb-${focus}`}>
         <div className={styles.sheetHead}>
-          <span id="search-sheet-title" className={styles.sheetTitle}>
-            Buscar tablas
-          </span>
           <button ref={closeRef} type="button" aria-label="Cerrar" className={styles.close} onClick={onClose}>
             <CloseIcon />
           </button>
