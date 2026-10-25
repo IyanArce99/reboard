@@ -190,7 +190,10 @@ test.describe.serial("panel de administración", () => {
     // El formulario público lo guarda con service role (aquí, directamente: el envío real lo cubre e2e).
     await sb.from("contact_messages").insert({ topic: "tienda", email: from, message: "Tengo una escuela y quiero publicar." });
     await sb.from("profiles").update({ role: "admin" }).eq("id", await userId(email));
-    await login(page, email, "/admin/mensajes");
+    await login(page, email, "/admin");
+    // La portada del panel avisa de los mensajes sin responder.
+    await page.getByRole("link", { name: /Mensajes sin responder/ }).click();
+    await expect(page).toHaveURL(/\/admin\/mensajes/);
     const card = page.locator("article:visible").filter({ hasText: from });
     await expect(card).toBeVisible();
     await expect(card.getByRole("link", { name: "Responder por email" })).toHaveAttribute("href", new RegExp(`^mailto:${from}`));

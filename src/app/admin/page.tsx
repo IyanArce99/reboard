@@ -40,8 +40,12 @@ export default async function AdminDashboard(props: PageProps<"/admin">) {
   const { sb } = await requireAdminPage("/admin");
   const sp = await props.searchParams;
   const days = PERIODS.find((p) => String(p) === str(sp.dias)) ?? 30;
-  const { data, error } = await sb.rpc("admin_stats", { p_days: days });
+  const [{ data, error }, msgs] = await Promise.all([
+    sb.rpc("admin_stats", { p_days: days }),
+    sb.from("contact_messages").select("id", { count: "exact", head: true }).eq("status", "new"),
+  ]);
   if (error || !data) return <Notice tone="error">{adminErrorText(error)}</Notice>;
+  const messagesNew = msgs.count ?? 0;
   const st = data as unknown as Stats;
   const period = `en los últimos ${days} días`;
 
@@ -49,7 +53,7 @@ export default async function AdminDashboard(props: PageProps<"/admin">) {
     <>
       <PageHeader
         title="Panel"
-        subtitle="Datos reales de la base de datos. No se muestran mensajes ni ventas cerradas: no hay forma fiable de medirlos."
+        subtitle="Datos reales de la base de datos. No se muestran las conversaciones entre usuarios ni las ventas cerradas: no hay forma fiable de medirlas."
         actions={
           <nav className={s.btnRow} aria-label="Periodo">
             {PERIODS.map((p) => (
@@ -61,8 +65,9 @@ export default async function AdminDashboard(props: PageProps<"/admin">) {
         }
       />
 
-      {(st.reports_open > 0 || st.listings_flagged > 0 || st.shops_pending > 0) && (
+      {(messagesNew > 0 || st.reports_open > 0 || st.listings_flagged > 0 || st.shops_pending > 0) && (
         <div className={s.stats}>
+          {messagesNew > 0 && <Stat label="Mensajes sin responder" value={messagesNew} href="/admin/mensajes" tone="warning" />}
           {st.reports_open > 0 && <Stat label="Reportes pendientes" value={st.reports_open} href="/admin/reportes" tone="warning" />}
           {st.listings_flagged > 0 && (
             <Stat label="Anuncios en revisión" value={st.listings_flagged} href="/admin/anuncios?moderacion=flagged" tone="warning" />
