@@ -85,12 +85,36 @@ export function landingDescription(place: string | null, form: LandingForm | nul
   return `${head}. ${kind}${tail}`;
 }
 
+/**
+ * Texto propio de cada isla (SEO: sin él, las landings de isla eran casi idénticas). Solo datos
+ * generales y conocidos de cada isla; nada de condiciones del mar ni recomendaciones de tabla.
+ */
+const ISLAND_INTROS: Record<string, string> = {
+  "gran-canaria":
+    "En Gran Canaria se surfea todo el año: de Las Canteras, en plena ciudad de Las Palmas, a los picos del norte de la isla. Aquí tienes las tablas de segunda mano que venden surfistas, tiendas y escuelas de Gran Canaria; filtra por litros, longitud y tipo y queda para verla en persona.",
+  tenerife:
+    "Tenerife tiene olas en el sur, en la zona de Las Américas, y en el norte, de Punta del Hidalgo a Almáciga. Estas son las tablas de surf usadas que se venden ahora en la isla, de particulares, tiendas y escuelas: compáralas por litros y medidas antes de quedar.",
+  lanzarote:
+    "Lanzarote es la isla de Famara, una de las playas con más escuelas de Canarias, y de los arrecifes de la costa norte. Encuentra aquí tablas de surf de segunda mano en Lanzarote, filtra por litros y tipo y habla directamente con quien la vende.",
+  fuerteventura:
+    "En Fuerteventura el surf se reparte entre Corralejo, El Cotillo y la costa oeste. Mira las tablas de segunda mano que se venden en la isla, con sus litros, medidas y estado, y contacta sin intermediarios.",
+  "la-palma":
+    "En La Palma hay menos surfistas que en las islas grandes, así que cada tabla en venta cuenta. Aquí están las que se venden en la isla; si no encuentras tu medida, guarda la búsqueda y vuelve a mirarla más adelante.",
+  "la-gomera":
+    "La Gomera es una isla pequeña y con poco mercado de segunda mano, así que aquí reunimos todas las tablas de surf que se venden en ella. Si buscas una medida concreta, guarda la búsqueda o mira también en Tenerife, a un ferry de distancia.",
+  "el-hierro":
+    "En El Hierro el surf es minoritario y las tablas de segunda mano escasean. Aquí aparecen todas las que se venden en la isla; si no hay la tuya, guarda la búsqueda o amplía a otras islas.",
+  "la-graciosa":
+    "La Graciosa, a un paso de Lanzarote, tiene muy pocas tablas en venta. Aquí salen las que se anuncian en la isla; para tener más opciones, mira también las de Lanzarote.",
+};
+
 export function landingIntro(place: string | null, form: LandingForm | null) {
   const zone = place ? placeName(place) : null;
   if (form && SHAPE_INTROS[form]) {
     // En /tablas/{zona}/{forma} se añade la zona para que cada landing tenga un texto propio.
     return zone ? `${SHAPE_INTROS[form]} Anuncios en ${zone}, con los más recientes primero.` : SHAPE_INTROS[form]!;
   }
+  if (place && ISLAND_INTROS[place]) return ISLAND_INTROS[place];
   if (zone) return `Tablas de surfistas, tiendas y escuelas de ${zone}. Busca por litros, longitud y tipo.`;
   return "";
 }
