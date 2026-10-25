@@ -10,6 +10,7 @@ import { PageFlag } from "@/components/layout/PageFlag";
 
 export interface AdminNavCounts {
   reports: number;
+  messages: number;
   shopsPending: number;
 }
 
@@ -19,6 +20,7 @@ const NAV: { group: string; items: { href: string; label: string; count?: keyof 
     group: "Marketplace",
     items: [
       { href: "/admin/reportes", label: "Reportes", count: "reports" },
+      { href: "/admin/mensajes", label: "Mensajes", count: "messages" },
       { href: "/admin/anuncios", label: "Anuncios" },
       { href: "/admin/usuarios", label: "Usuarios" },
       { href: "/admin/tiendas", label: "Tiendas y escuelas", count: "shopsPending" },

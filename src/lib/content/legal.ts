@@ -37,7 +37,7 @@ export const LEGAL_DOCS: LegalDoc[] = [
         h: "Titular",
         p: [
           `Reboard es una marca de ${TITULAR}, con NIF ${NIF} y domicilio en ${DOMICILIO}, ${REGISTRO}.`,
-          `Email de contacto: ${EMAIL}.`,
+          `Contacto: ${EMAIL} o el formulario de la página Contacto.`,
         ],
       },
       {
@@ -78,6 +78,7 @@ export const LEGAL_DOCS: LegalDoc[] = [
         links: [
           { href: "/legal/condiciones", label: "Condiciones de uso" },
           { href: "/creditos", label: "Créditos de fotografía" },
+          { href: "/contacto", label: "Contacto" },
         ],
       },
     ],
@@ -101,7 +102,7 @@ export const LEGAL_DOCS: LegalDoc[] = [
           "Si guardas tablas con tu cuenta: la lista de anuncios guardados. Si reportas un anuncio: el motivo y el detalle que escribas.",
           "Sin cuenta, tus tablas guardadas, búsquedas guardadas y comparaciones se quedan en tu dispositivo y no las recibimos.",
           "Medición de audiencia, sin cookies: qué páginas se visitan, de qué web o campaña llegas (por ejemplo, «utm_source=instagram») y algunas acciones de uso (búsquedas por filtros, fichas vistas, contactos pedidos, comparaciones y los pasos al publicar), para hacer estadísticas. No incluye tu nombre, tu email, tu teléfono, tu localidad, lo que escribes ni tus respuestas de la calculadora de litros (peso, nivel u olas).",
-          "Si nos escribes: tu email y lo que nos cuentes.",
+          "Si nos escribes, por email o con el formulario de contacto: tu email, el motivo y lo que nos cuentes. Si tienes la sesión iniciada, lo asociamos a tu cuenta para ayudarte mejor. Para evitar abusos del formulario guardamos también el código derivado de tu IP (HMAC) que se explica arriba.",
         ],
       },
       {
@@ -122,8 +123,8 @@ export const LEGAL_DOCS: LegalDoc[] = [
           "Proveedores que los tratan por cuenta de Reboard, con contrato de encargo del tratamiento:",
           "Supabase (base de datos, cuentas y fotos de los anuncios; servidores en la Unión Europea).",
           "Vercel (alojamiento de la web; se ejecuta en Dublín, Irlanda).",
-          "Cloudflare (Turnstile, la comprobación anti-robots al entrar, pedir un contacto, publicar y reportar).",
-          "DonDominio (correo electrónico de Reboard y envío del email con el código de acceso).",
+          "Cloudflare (Turnstile, la comprobación anti-robots al entrar, pedir un contacto, publicar, reportar y en el formulario de contacto).",
+          "DonDominio (correo electrónico de Reboard, envío del email con el código de acceso y aviso de los mensajes del formulario de contacto).",
           "PostHog (medición de audiencia sin cookies; servidores en la Unión Europea).",
           "Google y Apple, solo si eliges entrar con su cuenta, tratan tus datos como responsables independientes, según sus propias políticas.",
           "Supabase, Vercel, Cloudflare y PostHog son empresas de Estados Unidos. Aunque los datos se alojan en la Unión Europea, pueden acceder a ellos desde fuera para prestar el servicio. En ese caso, la transferencia se ampara en el Marco de Privacidad de Datos UE-EE. UU. o en las cláusulas contractuales tipo aprobadas por la Comisión Europea.",
@@ -136,14 +137,14 @@ export const LEGAL_DOCS: LegalDoc[] = [
           "Los anuncios, mientras estén publicados. Los vendidos, caducados o retirados se borran con sus fotos 12 meses después de su último cambio. Los borradores sin publicar, a los 7 días.",
           "El registro de contactos pedidos, los reportes y las acciones de moderación, 12 meses.",
           "Los datos de medición de audiencia, 12 meses como máximo.",
-          "Los emails que nos envíes, el tiempo necesario para atenderte y, como máximo, 12 meses después.",
+          "Los mensajes que nos envíes, por email o con el formulario de contacto, 12 meses.",
           "Pasados esos plazos, solo conservaremos lo que una ley nos obligue a guardar, bloqueado y durante el tiempo que esa ley indique.",
         ],
       },
       {
         h: "Tus derechos",
         p: [
-          `Puedes pedir acceder a tus datos, rectificarlos, suprimirlos, oponerte a su tratamiento, limitarlo o llevártelos a otro servicio (portabilidad). Escribe a ${EMAIL} desde el email de tu cuenta, o indicándolo, y te responderemos en el plazo de un mes.`,
+          `Puedes pedir acceder a tus datos, rectificarlos, suprimirlos, oponerte a su tratamiento, limitarlo o llevártelos a otro servicio (portabilidad). Escribe a ${EMAIL} o usa el formulario de contacto (motivo «Mis datos y privacidad») desde el email de tu cuenta, o indicándolo, y te responderemos en el plazo de un mes.`,
           "Puedes borrar tu cuenta tú mismo desde «Mi cuenta», en cualquier momento.",
           "Si crees que no hemos atendido bien tu solicitud, puedes reclamar ante la Agencia Española de Protección de Datos (www.aepd.es; C/ Jorge Juan 6, 28001 Madrid).",
         ],
@@ -236,9 +237,9 @@ export const LEGAL_DOCS: LegalDoc[] = [
       {
         h: "Reportes y moderación",
         p: [
-          `Cualquier persona puede avisarnos de un anuncio ilegal o que incumple estas condiciones con el botón «Reportar» del anuncio o escribiendo a ${EMAIL} con el enlace y el motivo. Revisamos los avisos con diligencia, de forma objetiva y sin arbitrariedad.`,
+          `Cualquier persona puede avisarnos de un anuncio ilegal o que incumple estas condiciones con el botón «Reportar» del anuncio, con el formulario de contacto o escribiendo a ${EMAIL}, con el enlace y el motivo. Revisamos los avisos con diligencia, de forma objetiva y sin arbitrariedad.`,
           "Podemos ocultar o retirar anuncios y suspender o cerrar cuentas que incumplan estas condiciones o la ley. Si lo hacemos con tu anuncio o tu cuenta, te lo comunicamos por email con el motivo, la norma incumplida y cómo reclamar. Puedes responder a ese email para pedir que lo revisemos de nuevo; lo revisará una persona.",
-          `Punto de contacto para usuarios y autoridades (Reglamento de Servicios Digitales): ${EMAIL}, en español.`,
+          `Punto de contacto para usuarios y autoridades (Reglamento de Servicios Digitales): ${EMAIL} y el formulario de la página Contacto, en español.`,
         ],
       },
       {

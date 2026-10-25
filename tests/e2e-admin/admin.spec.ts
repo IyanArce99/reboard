@@ -7,6 +7,7 @@ import { serviceClient } from "../integration/local-supabase";
 const sb = serviceClient();
 const SECTIONS: [string, RegExp][] = [
   ["/admin/reportes", /Reportes/],
+  ["/admin/mensajes", /Mensajes/],
   ["/admin/anuncios", /Anuncios/],
   ["/admin/usuarios", /Usuarios/],
   ["/admin/tiendas", /Tiendas/],
@@ -181,6 +182,23 @@ test.describe.serial("panel de administración", () => {
     await expect(page.getByText("Configuración guardada.")).toBeVisible();
     const { data } = await sb.from("admin_audit_log").select("action").eq("entity_type", "setting").eq("entity_id", "site_notice").limit(1);
     expect(data?.length).toBe(1);
+  });
+
+  test("4d. los mensajes de /contacto se ven en Mensajes y se marcan como atendidos", async ({ page }, info) => {
+    const email = `${prefix}admin@reboard.test`;
+    const from = `contacto-${info.project.name}-${Date.now()}@test.invalid`;
+    // El formulario público lo guarda con service role (aquí, directamente: el envío real lo cubre e2e).
+    await sb.from("contact_messages").insert({ topic: "tienda", email: from, message: "Tengo una escuela y quiero publicar." });
+    await sb.from("profiles").update({ role: "admin" }).eq("id", await userId(email));
+    await login(page, email, "/admin/mensajes");
+    const card = page.locator("article:visible").filter({ hasText: from });
+    await expect(card).toBeVisible();
+    await expect(card.getByRole("link", { name: "Responder por email" })).toHaveAttribute("href", new RegExp(`^mailto:${from}`));
+    await card.getByRole("button", { name: "Marcar como atendido" }).click();
+    await expect(page.locator("article:visible").filter({ hasText: from })).toHaveCount(0);
+    await page.goto("/admin/mensajes?estado=atendidos");
+    await expect(page.locator("article:visible").filter({ hasText: from })).toBeVisible();
+    await sb.from("contact_messages").delete().eq("email", from);
   });
 
   test("5. al revocar el rol, el acceso se pierde en la siguiente petición", async ({ page }) => {

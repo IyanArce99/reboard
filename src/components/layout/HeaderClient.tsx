@@ -193,6 +193,7 @@ export function MobileMenu() {
     ["Mis anuncios", "/panel", ""],
   ];
   if (authEnabled) more.push(account ? ["Mi cuenta", "/cuenta", ""] : ["Entrar", "/entrar", ""]);
+  more.push(["Contacto", "/contacto", ""]);
 
   return (
     <>

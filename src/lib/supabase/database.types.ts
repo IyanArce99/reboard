@@ -119,6 +119,32 @@ isOneToOne: false
       referencedColumns: ["id"]
     }
                   ]
+                },"contact_messages": {
+                  Row: {
+                    "created_at": string,"email": string,"handled_at": string | null,"handled_by": string | null,"id": number,"ip_hash": string | null,"message": string,"status": string,"topic": Database["public"]['Enums']["contact_topic"],"user_id": string | null
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "created_at"?: string,"email": string,"handled_at"?: string | null,"handled_by"?: string | null,"id"?: never,"ip_hash"?: string | null,"message": string,"status"?: string,"topic": Database["public"]['Enums']["contact_topic"],"user_id"?: string | null
+                  }
+                  Update: {
+                    "created_at"?: string,"email"?: string,"handled_at"?: string | null,"handled_by"?: string | null,"id"?: never,"ip_hash"?: string | null,"message"?: string,"status"?: string,"topic"?: Database["public"]['Enums']["contact_topic"],"user_id"?: string | null
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "contact_messages_handled_by_fkey"
+      columns: ["handled_by"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "contact_messages_user_id_fkey"
+      columns: ["user_id"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    }
+                  ]
                 },"favorites": {
                   Row: {
                     "created_at": string,"listing_id": number,"user_id": string
@@ -595,7 +621,7 @@ isOneToOne: false
       } }
           }
           Enums: {
-            "board_condition": "como-nueva"|"muy-buen-estado"|"buen-estado"|"con-reparaciones","board_construction": "pu"|"epoxy"|"softboard","board_shape": "shortboard"|"fish"|"hibrida"|"evolutiva"|"midlength"|"longboard"|"gun","contact_method": "whatsapp"|"phone","data_source": "seller"|"manufacturer","listing_status": "draft"|"published"|"sold"|"expired"|"withdrawn","moderation_state": "visible"|"flagged"|"removed","report_reason": "fraude"|"datos-falsos"|"fotos"|"vendida"|"duplicado"|"inapropiado"|"otro","report_status": "open"|"resolved"|"dismissed","seller_type": "particular"|"tienda"|"escuela","user_role": "user"|"moderator"|"admin"
+            "board_condition": "como-nueva"|"muy-buen-estado"|"buen-estado"|"con-reparaciones","board_construction": "pu"|"epoxy"|"softboard","board_shape": "shortboard"|"fish"|"hibrida"|"evolutiva"|"midlength"|"longboard"|"gun","contact_method": "whatsapp"|"phone","contact_topic": "anuncio"|"tienda"|"privacidad"|"otra","data_source": "seller"|"manufacturer","listing_status": "draft"|"published"|"sold"|"expired"|"withdrawn","moderation_state": "visible"|"flagged"|"removed","report_reason": "fraude"|"datos-falsos"|"fotos"|"vendida"|"duplicado"|"inapropiado"|"otro","report_status": "open"|"resolved"|"dismissed","seller_type": "particular"|"tienda"|"escuela","user_role": "user"|"moderator"|"admin"
           }
           CompositeTypes: {
             [_ in never]: never
@@ -711,7 +737,7 @@ export type CompositeTypes<
 export const Constants = {
   "public": {
           Enums: {
-            "board_condition": ["como-nueva", "muy-buen-estado", "buen-estado", "con-reparaciones"],"board_construction": ["pu", "epoxy", "softboard"],"board_shape": ["shortboard", "fish", "hibrida", "evolutiva", "midlength", "longboard", "gun"],"contact_method": ["whatsapp", "phone"],"data_source": ["seller", "manufacturer"],"listing_status": ["draft", "published", "sold", "expired", "withdrawn"],"moderation_state": ["visible", "flagged", "removed"],"report_reason": ["fraude", "datos-falsos", "fotos", "vendida", "duplicado", "inapropiado", "otro"],"report_status": ["open", "resolved", "dismissed"],"seller_type": ["particular", "tienda", "escuela"],"user_role": ["user", "moderator", "admin"]
+            "board_condition": ["como-nueva", "muy-buen-estado", "buen-estado", "con-reparaciones"],"board_construction": ["pu", "epoxy", "softboard"],"board_shape": ["shortboard", "fish", "hibrida", "evolutiva", "midlength", "longboard", "gun"],"contact_method": ["whatsapp", "phone"],"contact_topic": ["anuncio", "tienda", "privacidad", "otra"],"data_source": ["seller", "manufacturer"],"listing_status": ["draft", "published", "sold", "expired", "withdrawn"],"moderation_state": ["visible", "flagged", "removed"],"report_reason": ["fraude", "datos-falsos", "fotos", "vendida", "duplicado", "inapropiado", "otro"],"report_status": ["open", "resolved", "dismissed"],"seller_type": ["particular", "tienda", "escuela"],"user_role": ["user", "moderator", "admin"]
           }
         }
 } as const

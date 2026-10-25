@@ -604,3 +604,26 @@ Migración `20261030090000_reserved_and_saves.sql` (pgTAP `11_reserved_saves`), 
 - **Vender:** aviso «Tienes una tabla a medias» en `/vender` (el borrador ya se guardaba en el dispositivo).
 - **Seguridad:** el contacto avisa de los pagos por enlace de WhatsApp, el fraude típico que denuncia la Guardia Civil.
 - **Fotos:** consejo de luz y golpes en el paso 1.
+
+## Página de contacto y textos legales definitivos (25-10-2026)
+
+**Textos legales:**
+- Aviso legal, privacidad, cookies y condiciones definitivos, a nombre de Iyan Arcega SL, sin marcadores ni aviso de borrador.
+- Siguen la indexación general del sitio.
+- Del pie salen Condiciones y Créditos, que se enlazan desde el Aviso legal.
+
+**Conservación de 12 meses**, aplicada de verdad en el mantenimiento diario (`dailyMaintenance`):
+- anuncios vendidos, caducados o retirados sin cambios en 12 meses, con sus fotos;
+- registro de contactos, reportes, acciones de moderación, auditoría y mensajes de contacto.
+
+**/contacto:**
+- motivo (anuncio, tienda o escuela, privacidad, otra), email y mensaje;
+- Turnstile (`mensaje`), límite de 5 por hora y por IP (HMAC) y guardado con service role;
+- tabla `contact_messages` (migración `20261101090000`), sin acceso desde el navegador; el administrador la lee en /admin/mensajes.
+
+**Aviso por email:**
+- por SMTP (`nodemailer`, la única dependencia nueva, estándar para SMTP);
+- en producción, el correo de DonDominio; en local, Mailpit;
+- si falla el SMTP, el mensaje no se pierde.
+
+**Punto de contacto del Reglamento de Servicios Digitales:** hola@reboard.es y /contacto.

@@ -23,17 +23,18 @@ async function AdminFrame({ children }: { children: React.ReactNode }) {
   const email = ctx.user?.email ?? "";
   if (ctx.status === "needs_mfa") {
     return (
-      <AdminShell email={email} counts={{ reports: 0, shopsPending: 0 }} minimal>
+      <AdminShell email={email} counts={{ reports: 0, messages: 0, shopsPending: 0 }} minimal>
         {children}
       </AdminShell>
     );
   }
-  const [reports, shops] = await Promise.all([
+  const [reports, shops, messages] = await Promise.all([
     ctx.sb!.from("reports").select("id", { count: "exact", head: true }).eq("status", "open"),
     ctx.sb!.from("shops").select("id", { count: "exact", head: true }).eq("status", "pending"),
+    ctx.sb!.from("contact_messages").select("id", { count: "exact", head: true }).eq("status", "new"),
   ]);
   return (
-    <AdminShell email={email} counts={{ reports: reports.count ?? 0, shopsPending: shops.count ?? 0 }}>
+    <AdminShell email={email} counts={{ reports: reports.count ?? 0, messages: messages.count ?? 0, shopsPending: shops.count ?? 0 }}>
       {children}
     </AdminShell>
   );

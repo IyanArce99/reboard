@@ -62,6 +62,7 @@ export function Footer() {
       <div className={styles.bottom}>
         <span>© Reboard · Hecho en Canarias para surfistas de todas las islas</span>
         <nav className={styles.legal} aria-label="Legal">
+          <Link href="/contacto">Contacto</Link>
           <Link href="/legal/aviso-legal">Aviso legal</Link>
           <Link href="/legal/privacidad">Privacidad</Link>
           <Link href="/legal/cookies">Cookies</Link>

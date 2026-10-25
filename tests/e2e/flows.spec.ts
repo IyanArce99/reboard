@@ -429,3 +429,17 @@ test("cabecera y pie vuelven al salir de «Publicar» y de /vender (navegación 
   await page.waitForURL((u) => u.pathname === "/");
   await expect(publish).toBeVisible();
 });
+
+test("contacto: valida, envía y lo deja guardado (con aviso por email en local)", async ({ page }) => {
+  const errors = trackErrors(page);
+  await page.goto("/contacto?motivo=privacidad");
+  await expect(page.getByRole("radio", { name: /Mis datos y privacidad/ })).toHaveAttribute("aria-checked", "true");
+  await page.getByRole("button", { name: "Enviar mensaje" }).click();
+  await expect(page.locator("#contact-error")).toContainText("email");
+  await expect(page.getByLabel("Tu email")).toBeFocused();
+  await page.getByLabel("Tu email").fill(`e2e-${Date.now()}@test.invalid`);
+  await page.getByLabel("Mensaje").fill("Quiero saber qué datos tenéis de mí.");
+  await page.getByRole("button", { name: "Enviar mensaje" }).click();
+  await expect(page.getByRole("heading", { name: "Mensaje enviado" })).toBeVisible({ timeout: 15_000 });
+  expect(errors).toEqual([]);
+});

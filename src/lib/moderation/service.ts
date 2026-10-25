@@ -56,7 +56,8 @@ export async function dailyMaintenance(sb: Sb, now = new Date()) {
   // Conservación (Política de privacidad): 12 meses.
   // - Anuncios vendidos, caducados o retirados sin cambios en 12 meses: se borran con sus fotos (en
   //   cascada: contactos, guardados, reportes y acciones de moderación de ese anuncio).
-  // - Registro de contactos, reportes, acciones de moderación y auditoría de más de 12 meses: se borran.
+  // - Registro de contactos, reportes, acciones de moderación, auditoría y mensajes del formulario de
+  //   contacto de más de 12 meses: se borran.
   const year = new Date(now.getTime() - RETENTION_DAYS * 86_400_000).toISOString();
   const { data: old } = await sb
     .from("listings")
@@ -66,7 +67,7 @@ export async function dailyMaintenance(sb: Sb, now = new Date()) {
     .limit(500);
   for (const l of old ?? []) photos += await removeFolder(sb, `${l.seller_id}/${l.id}`);
   if (old?.length) await sb.from("listings").delete().in("id", old.map((l) => l.id));
-  for (const table of ["contact_events", "reports", "moderation_actions", "admin_audit_log"] as const) {
+  for (const table of ["contact_events", "reports", "moderation_actions", "admin_audit_log", "contact_messages"] as const) {
     const { error: e } = await sb.from(table).delete().lt("created_at", year);
     if (e) throw new Error(`limpieza ${table}: ${e.message}`);
   }
