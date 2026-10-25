@@ -13,6 +13,7 @@ import { emptyFilters } from "@/lib/search/filters";
 import { noindexRobots } from "@/lib/seo";
 import { absoluteUrl, SITE_NAME, OG_BASE } from "@/lib/site";
 import styles from "@/components/guides/Guides.module.css";
+import { PageFlag } from "@/components/layout/PageFlag";
 
 export function generateStaticParams() {
   return [...GUIDES, ...PENDING_GUIDES].map((g) => ({ slug: g.slug }));
@@ -76,7 +77,7 @@ export default async function GuidePage({ params }: PageProps<"/guias/[slug]">) 
   return (
     <main className={styles.article}>
       {/* Esta página tiene su propia acción principal: «Vender» de la cabecera pasa a contorno. */}
-      <span data-own-cta="other" hidden />
+      <PageFlag flag="cta-other" />
       <div className="container">
         <header className={styles.head}>
           <Breadcrumbs

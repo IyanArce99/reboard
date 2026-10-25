@@ -8,6 +8,7 @@ import { enabledProviders } from "@/lib/auth/providers";
 import { noindexRobots } from "@/lib/seo";
 import ui from "@/styles/ui.module.css";
 import styles from "@/components/auth/Auth.module.css";
+import { PageFlag } from "@/components/layout/PageFlag";
 
 export const metadata: Metadata = {
   title: "Entrar",
@@ -24,7 +25,7 @@ export default function EntrarPage() {
   return (
     <main className={styles.wrap}>
       {/* Esta página tiene su propia acción principal: «Vender» de la cabecera pasa a contorno. */}
-      <span data-own-cta="other" hidden />
+      <PageFlag flag="cta-other" />
       <div className={styles.photo}>
         <Photo slug="tablas-orilla" sizes="45vw" position="50% 50%" decorative />
       </div>

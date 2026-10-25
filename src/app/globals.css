@@ -167,24 +167,33 @@ select:not([multiple]):disabled {
   opacity: 0.6;
 }
 
+/* Marcas de página (PageFlag): clase pf-* en <html> mientras la página está activa; antes de
+   hidratar, el <span data-page-flag> de la página (primera carga sin parpadeo). No usar solo
+   body:has(...): Next deja montada la página anterior y su marca seguía aplicándose. */
+
 /* Panel de administración: sin la cabecera ni el pie del marketplace (ver SiteChrome). */
-body:has([data-admin-shell]) [data-site-chrome] {
+html:not([data-hydrated]) body:has([data-page-flag="admin"]) [data-site-chrome],
+html.pf-admin [data-site-chrome] {
   display: none !important;
 }
 
 /* Publicar: modo enfocado. Sin el pie (unos 900 px en móvil) ni el «Vender» de la cabecera, que
    llevaban fuera del formulario a mitad del anuncio. */
-body:has([data-focus-flow]) [data-site-chrome] > footer,
-body:has([data-focus-flow]) [data-header-publish] {
+html:not([data-hydrated]) body:has([data-page-flag="focus"]) [data-site-chrome] > footer,
+html:not([data-hydrated]) body:has([data-page-flag="focus"]) [data-header-publish],
+html.pf-focus [data-site-chrome] > footer,
+html.pf-focus [data-header-publish] {
   display: none;
 }
 
 /* El amarillo es solo la acción principal de cada página. Donde la página ya tiene la suya
    (contactar en la ficha, publicar en /vender), el «Vender» de la cabecera no compite. */
-body:has([data-own-cta="sell"]) [data-header-publish] {
+html:not([data-hydrated]) body:has([data-page-flag="cta-sell"]) [data-header-publish],
+html.pf-cta-sell [data-header-publish] {
   display: none;
 }
-body:has([data-own-cta="other"]) [data-header-publish] {
+html:not([data-hydrated]) body:has([data-page-flag="cta-other"]) [data-header-publish],
+html.pf-cta-other [data-header-publish] {
   background: var(--rb-white);
   box-shadow: inset 0 0 0 1.5px var(--rb-petrol);
 }

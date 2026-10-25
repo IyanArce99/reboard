@@ -5,6 +5,7 @@ import { authEnabled } from "@/lib/auth/config";
 import { Photo } from "@/components/brand/Photo";
 import { SectionHeader } from "@/components/brand/SectionHeader";
 import styles from "@/components/publish/SellLanding.module.css";
+import { PageFlag } from "@/components/layout/PageFlag";
 
 // Landing de venta indexable (docs/SEO.md). Con datos DEMO hereda el noindex global del layout.
 export const metadata: Metadata = {
@@ -42,7 +43,7 @@ export default function VenderPage() {
   return (
     <main>
       {/* Esta página ya tiene su «Publicar mi tabla»: sin el «Vender» de la cabecera (globals.css). */}
-      <span data-own-cta="sell" hidden />
+      <PageFlag flag="cta-sell" />
       <section className={styles.heroWrap}>
         <div className={`container ${styles.hero}`}>
           <div className={styles.heroText}>

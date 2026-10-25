@@ -4,6 +4,7 @@ import { FinderWizard } from "@/components/finder/FinderWizard";
 import { Breadcrumbs } from "@/components/seo/Breadcrumbs";
 import styles from "@/components/finder/Finder.module.css";
 import { OG_BASE } from "@/lib/site";
+import { PageFlag } from "@/components/layout/PageFlag";
 
 const PATH = "/calculadora-litros";
 const TITLE = "¿Qué tabla de surf necesito? Calculadora de litros";
@@ -21,7 +22,7 @@ export default function Page() {
   return (
     <main className={styles.page}>
       {/* Esta página tiene su propia acción principal: «Vender» de la cabecera pasa a contorno. */}
-      <span data-own-cta="other" hidden />
+      <PageFlag flag="cta-other" />
       <FinderWizard
         intro={
           <>

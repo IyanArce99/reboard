@@ -45,6 +45,7 @@ import { landingPath } from "@/lib/search/landings";
 import { absoluteUrl, OG_BASE } from "@/lib/site";
 import ui from "@/styles/ui.module.css";
 import styles from "@/components/listing/Ficha.module.css";
+import { PageFlag } from "@/components/layout/PageFlag";
 
 function HeartSmall() {
   return (
@@ -192,7 +193,7 @@ export default async function FichaPage({ params }: PageProps<"/anuncio/[slugId]
     >
       <main className={`container ${styles.page}`}>
         {/* Su acción principal es contactar: el «Vender» de la cabecera va en contorno (globals.css). */}
-        <span data-own-cta="other" hidden />
+        <PageFlag flag="cta-other" />
         {/* Analítica: ficha vista (categorías; sin id, vendedor ni localidad). */}
         <TrackOnMount
           id={l.id}

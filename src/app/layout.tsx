@@ -12,6 +12,7 @@ import { authEnabled } from "@/lib/auth/config";
 import { siteIndexable } from "@/lib/data";
 import { OG_BASE, SITE_NAME, SITE_URL } from "@/lib/site";
 import "./globals.css";
+import { HydrationMark } from "@/components/layout/PageFlag";
 
 const barlow = Barlow({
   variable: "--font-barlow",
@@ -68,6 +69,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="es" className={`${barlow.variable} ${barlowCondensed.variable} ${plexMono.variable}`}>
       <body>
+        <HydrationMark />
         <UserStateProvider authEnabled={authEnabled()}>
           <a className="skip-link" href="#contenido">
             Saltar al contenido

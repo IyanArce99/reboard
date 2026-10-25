@@ -10,6 +10,7 @@ import { loadOwnDraft } from "@/lib/publish/edit-load";
 import { noindexRobots } from "@/lib/seo";
 import ui from "@/styles/ui.module.css";
 import styles from "@/components/publish/Publish.module.css";
+import { PageFlag } from "@/components/layout/PageFlag";
 
 // Formulario privado: noindex (docs/SEO.md).
 export const metadata: Metadata = {
@@ -57,7 +58,7 @@ async function Flow({ searchParams }: { searchParams: PageProps<"/vender/publica
   return (
     <>
       {/* Modo enfocado: sin pie ni «Vender» en la cabecera mientras se publica (ver globals.css). */}
-      <span data-focus-flow="" hidden />
+      <PageFlag flag="focus" />
       <PublishFlow
         catalog={catalog}
         brands={brandList.map((b) => b.name)}

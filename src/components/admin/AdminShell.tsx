@@ -6,6 +6,7 @@ import { Suspense, useEffect, useRef, useState } from "react";
 import { useUserState } from "@/components/user/UserStateProvider";
 import { useDialogFocus } from "@/lib/a11y/useDialogFocus";
 import styles from "./Admin.module.css";
+import { PageFlag } from "@/components/layout/PageFlag";
 
 export interface AdminNavCounts {
   reports: number;
@@ -73,6 +74,7 @@ export function AdminShell({
 
   return (
     <div className={styles.shell} data-admin-shell="">
+      <PageFlag flag="admin" />
       <header className={styles.topbar}>
         <span className={styles.brand}>
           REBOARD <span>Admin</span>

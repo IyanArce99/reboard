@@ -407,3 +407,25 @@ test("orden «Menos litros»: las tablas sin litros van al final", async ({ page
   await expect(cards.first()).toBeVisible();
   await expect(cards.first()).not.toContainText("Litros sin indicar");
 });
+
+test("cabecera y pie vuelven al salir de «Publicar» y de /vender (navegación en cliente)", async ({ page }) => {
+  // Next deja montada la página anterior: sus marcas no deben seguir ocultando nada.
+  const publish = page.locator("[data-header-publish]").first();
+  const home = page.getByRole("link", { name: /Reboard, inicio/ }).first();
+  await page.goto("/");
+  await expect(publish).toBeVisible();
+  await publish.click();
+  await page.waitForURL("**/vender/publicar");
+  await expect(publish).toBeHidden();
+  await expect(page.locator("footer")).toBeHidden();
+  await home.click();
+  await page.waitForURL((u) => u.pathname === "/");
+  await expect(publish).toBeVisible();
+  await expect(page.locator("footer")).toBeVisible();
+
+  await page.goto("/vender");
+  await expect(publish).toBeHidden();
+  await home.click();
+  await page.waitForURL((u) => u.pathname === "/");
+  await expect(publish).toBeVisible();
+});
