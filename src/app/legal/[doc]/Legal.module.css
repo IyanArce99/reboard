@@ -4,13 +4,10 @@
   padding-bottom: 72px;
 }
 
-.draft {
-  padding: 14px 16px;
-  border-radius: 12px;
-  background: var(--rb-warning-tint);
-  color: var(--rb-warning-ink);
-  font-size: 15px;
-  line-height: 1.5;
+.updated {
+  margin-top: 8px;
+  font-size: 14px;
+  color: var(--rb-muted);
 }
 
 .title {
@@ -58,4 +55,21 @@
   align-items: center;
   font-weight: 700;
   color: var(--rb-teal-text);
+}
+
+/* Enlaces a otros textos dentro de una sección (Aviso legal → Condiciones, Créditos). */
+.links {
+  list-style: none;
+  margin: 8px 0 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 20px;
+}
+.links a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  color: var(--rb-teal-text);
+  font-weight: 700;
 }

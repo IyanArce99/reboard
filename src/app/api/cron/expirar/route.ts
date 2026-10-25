@@ -5,8 +5,8 @@ import { authEnabled } from "@/lib/auth/config";
 import { dailyMaintenance } from "@/lib/moderation/service";
 import { createServiceClient } from "@/lib/supabase/service";
 
-// Mantenimiento diario (Vercel Cron, vercel.json): caduca anuncios sin confirmar en 30 días y
-// borra borradores abandonados con sus fotos. Vercel envía `Authorization: Bearer $CRON_SECRET`.
+// Mantenimiento diario (Vercel Cron, vercel.json): caduca anuncios sin confirmar en 30 días,
+// borra borradores abandonados con sus fotos y aplica la conservación de 12 meses. Vercel envía `Authorization: Bearer $CRON_SECRET`.
 
 function authorized(request: NextRequest) {
   const secret = process.env.CRON_SECRET;

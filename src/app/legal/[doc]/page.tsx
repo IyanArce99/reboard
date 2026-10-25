@@ -1,8 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { LEGAL_DOCS, legalDoc } from "@/lib/content/legal";
-import { noindexRobots } from "@/lib/seo";
+import { LEGAL_DOCS, LEGAL_UPDATED, legalDoc } from "@/lib/content/legal";
 import styles from "./Legal.module.css";
 
 export function generateStaticParams() {
@@ -11,8 +10,8 @@ export function generateStaticParams() {
 
 export async function generateMetadata({ params }: PageProps<"/legal/[doc]">): Promise<Metadata> {
   const d = legalDoc((await params).doc);
-  // Borradores sin revisar: no se indexan.
-  return d ? { title: d.title, description: d.intro, robots: noindexRobots(), alternates: { canonical: `/legal/${d.slug}` } } : {};
+  // Textos definitivos: siguen la regla general de indexación del sitio (SITE_INDEXABLE).
+  return d ? { title: d.title, description: d.intro, alternates: { canonical: `/legal/${d.slug}` } } : {};
 }
 
 export default async function LegalPage({ params }: PageProps<"/legal/[doc]">) {
@@ -20,18 +19,24 @@ export default async function LegalPage({ params }: PageProps<"/legal/[doc]">) {
   if (!d) notFound();
   return (
     <main className={`container ${styles.page}`}>
-      <div className={styles.draft} role="note">
-        <strong>Borrador pendiente de revisión legal.</strong> Este texto aún no es definitivo: falta la revisión de un
-        profesional y hay apartados por completar (los que van entre corchetes).
-      </div>
       <h1 className={styles.title}>{d.title}</h1>
       <p className={styles.intro}>{d.intro}</p>
+      <p className={styles.updated}>Última actualización: {LEGAL_UPDATED}</p>
       {d.sections.map((s) => (
         <section key={s.h} className={styles.section}>
           <h2>{s.h}</h2>
           {s.p.map((t) => (
             <p key={t}>{t}</p>
           ))}
+          {s.links && (
+            <ul className={styles.links}>
+              {s.links.map((l) => (
+                <li key={l.href}>
+                  <Link href={l.href}>{l.label} →</Link>
+                </li>
+              ))}
+            </ul>
+          )}
         </section>
       ))}
       <nav className={styles.others} aria-label="Textos legales">

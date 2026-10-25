@@ -40,6 +40,9 @@ async function removeFolder(sb: Sb, folder: string) {
  * Mantenimiento diario (cron): caduca lo publicado sin confirmar en 30 días y borra los
  * borradores abandonados (más de 7 días) con sus fotos de Storage.
  */
+/** Plazo de conservación de anuncios cerrados y registros (docs legales: «12 meses»). */
+export const RETENTION_DAYS = 365;
+
 export async function dailyMaintenance(sb: Sb, now = new Date()) {
   const { data: expired, error } = await sb.rpc("expire_listings");
   if (error) throw new Error(`expire_listings: ${error.message}`);
@@ -50,7 +53,25 @@ export async function dailyMaintenance(sb: Sb, now = new Date()) {
   for (const d of drafts ?? []) photos += await removeFolder(sb, `${d.seller_id}/${d.id}`);
   if (drafts?.length) await sb.from("listings").delete().in("id", drafts.map((d) => d.id));
 
-  return { expired: expired ?? 0, draftsDeleted: drafts?.length ?? 0, photosDeleted: photos };
+  // Conservación (Política de privacidad): 12 meses.
+  // - Anuncios vendidos, caducados o retirados sin cambios en 12 meses: se borran con sus fotos (en
+  //   cascada: contactos, guardados, reportes y acciones de moderación de ese anuncio).
+  // - Registro de contactos, reportes, acciones de moderación y auditoría de más de 12 meses: se borran.
+  const year = new Date(now.getTime() - RETENTION_DAYS * 86_400_000).toISOString();
+  const { data: old } = await sb
+    .from("listings")
+    .select("id, seller_id")
+    .in("status", ["sold", "expired", "withdrawn"])
+    .lt("updated_at", year)
+    .limit(500);
+  for (const l of old ?? []) photos += await removeFolder(sb, `${l.seller_id}/${l.id}`);
+  if (old?.length) await sb.from("listings").delete().in("id", old.map((l) => l.id));
+  for (const table of ["contact_events", "reports", "moderation_actions", "admin_audit_log"] as const) {
+    const { error: e } = await sb.from(table).delete().lt("created_at", year);
+    if (e) throw new Error(`limpieza ${table}: ${e.message}`);
+  }
+
+  return { expired: expired ?? 0, draftsDeleted: drafts?.length ?? 0, oldListingsDeleted: old?.length ?? 0, photosDeleted: photos };
 }
 
 export type ModerationAction = "hide" | "remove" | "restore" | "mark_sold" | "dismiss_reports" | "resolve_reports";

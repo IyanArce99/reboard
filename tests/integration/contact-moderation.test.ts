@@ -1,3 +1,4 @@
+import { execSync } from "node:child_process";
 // Fase F contra Supabase LOCAL: revelar el contacto (límite por IP), caducidad y limpieza,
 // reportes con marca automática y moderación con registro (con la sesión del moderador, sin borrar fotos).
 
@@ -154,6 +155,29 @@ describe("caducidad y limpieza (F2)", () => {
     expect(rows?.find((x) => x.id === draft.id)).toBeUndefined();
     expect(await storageHas(path)).toBe(false);
     expect((await db.byId(old.publicId))?.status).toBe("caducada");
+  });
+});
+
+describe("conservación de 12 meses", () => {
+  it("borra anuncios cerrados hace más de 12 meses (con fotos) y contactos antiguos; respeta los recientes", async () => {
+    const oldSold = await publishOne();
+    const recentSold = await publishOne();
+    const live = await publishOne();
+    await sb.from("listings").update({ status: "sold", sold_at: new Date().toISOString() }).in("id", [oldSold.id, recentSold.id]);
+    const ev = await sb.from("contact_events").insert({ listing_id: live.id, method: "whatsapp", ip_hash: "x".repeat(64) }).select("id").single();
+    // Envejecer sin el disparador de updated_at (solo Supabase local).
+    const ago = new Date(Date.now() - 400 * 86_400_000).toISOString();
+    execSync(
+      `docker exec -i supabase_db_reboard psql -U postgres -d postgres -q -c "set session_replication_role = replica; update public.listings set updated_at = '${ago}' where id = ${oldSold.id}; update public.contact_events set created_at = '${ago}' where id = ${ev.data!.id};"`,
+      { stdio: "ignore" },
+    );
+
+    const r = await dailyMaintenance(sb);
+    expect(r.oldListingsDeleted).toBeGreaterThanOrEqual(1);
+    const { data: rows } = await sb.from("listings").select("id").in("id", [oldSold.id, recentSold.id, live.id]);
+    expect(rows?.map((x) => x.id).sort()).toEqual([recentSold.id, live.id].sort());
+    expect(await storageHas(oldSold.path)).toBe(false);
+    expect((await sb.from("contact_events").select("id").eq("id", ev.data!.id)).data).toEqual([]);
   });
 });
 

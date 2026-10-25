@@ -65,8 +65,6 @@ export function Footer() {
           <Link href="/legal/aviso-legal">Aviso legal</Link>
           <Link href="/legal/privacidad">Privacidad</Link>
           <Link href="/legal/cookies">Cookies</Link>
-          <Link href="/legal/condiciones">Condiciones</Link>
-          <Link href="/creditos">Créditos de fotografía</Link>
         </nav>
       </div>
     </footer>
