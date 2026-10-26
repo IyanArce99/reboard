@@ -36,7 +36,9 @@ interface Props {
   turnstile: RefObject<TurnstileHandle | null>;
   onCaptcha: (t: string | null) => void;
   onEdit: (step: number) => void;
-  onPublish: () => void;
+  /** Publica; recibe el nombre del vendedor de este anuncio, ya validado. */
+  onPublish: (sellerName?: string) => void;
+  setSellerName: (name: string) => void;
   onLogin: () => void;
 }
 
@@ -57,7 +59,7 @@ function Row({ title, step, onEdit, children }: { title: string; step: number; o
 // Solo los dos métodos que admite la base de datos (como draftToInput).
 const CONTACT_LABEL = { whatsapp: "WhatsApp", phone: "Llamada" } as const;
 
-export function StepReview({ d, catalog, now, live, editing, pending, needsLogin, account, busy, progress, error, turnstile, onCaptcha, onEdit, onPublish, onLogin }: Props) {
+export function StepReview({ d, catalog, now, live, editing, pending, needsLogin, account, busy, progress, error, turnstile, onCaptcha, onEdit, onPublish, setSellerName, onLogin }: Props) {
   const t = previewTexts(d, catalog, now);
   // Resumen en el formato de la ficha (6'4" × 20 1/2" × 2 5/8" · 34,5 L), no tal como se escribió.
   const canon = (k: "len" | "width" | "thick") => {
@@ -71,8 +73,9 @@ export function StepReview({ d, catalog, now, live, editing, pending, needsLogin
   const { setAccountName } = useUserState();
   // Nombre que verán los compradores. Vacío si aún es el de por defecto («Surfista»).
   const known = account && account.name !== DEFAULT_SELLER_NAME ? account.name : "";
-  const [typed, setTyped] = useState<string | null>(null);
-  const name = typed ?? known;
+  // El nombre es de ESTE anuncio (d.sellerName). Por defecto, el de la cuenta; cambiarlo aquí no
+  // cambia el de la cuenta ni el de los demás anuncios (útil al publicar tablas de otras personas).
+  const name = d.sellerName ?? known;
   const [nameError, setNameError] = useState("");
   const [savingName, setSavingName] = useState(false);
 
@@ -80,11 +83,12 @@ export function StepReview({ d, catalog, now, live, editing, pending, needsLogin
     if (live && account) {
       const clean = cleanDisplayName(name);
       if (!clean) {
-        setNameError("Escribe tu nombre o un apodo (de 2 a 40 caracteres): es lo que verá quien abra tu anuncio.");
+        setNameError("Escribe el nombre del vendedor o un apodo (de 2 a 40 caracteres): es lo que verá quien abra el anuncio.");
         return;
       }
       setNameError("");
-      if (clean !== account.name) {
+      // Primera vez (la cuenta aún no tiene nombre): se guarda también como nombre de la cuenta.
+      if (!known) {
         setSavingName(true);
         const fd = new FormData();
         fd.set("displayName", clean);
@@ -96,6 +100,9 @@ export function StepReview({ d, catalog, now, live, editing, pending, needsLogin
         }
         if (r.name) setAccountName(r.name);
       }
+      setSellerName(clean);
+      onPublish(clean);
+      return;
     }
     onPublish();
   };
@@ -200,13 +207,13 @@ export function StepReview({ d, catalog, now, live, editing, pending, needsLogin
             {live && account && (
               <div className={styles.nameField}>
                 <label htmlFor="pub-name" className={ui.label}>
-                  Tu nombre en el anuncio
+                  Nombre del vendedor en este anuncio
                 </label>
                 <input
                   id="pub-name"
                   className={ui.input}
                   value={name}
-                  onChange={(e) => setTyped(e.target.value)}
+                  onChange={(e) => setSellerName(e.target.value)}
                   placeholder="Tu nombre o un apodo"
                   autoComplete="given-name"
                   maxLength={40}
@@ -214,7 +221,8 @@ export function StepReview({ d, catalog, now, live, editing, pending, needsLogin
                   aria-invalid={nameError ? true : undefined}
                 />
                 <span id="pub-name-help" className={styles.small}>
-                  Lo verá quien abra tu anuncio («Lo vende…») y aparecerá en el mensaje de WhatsApp. Publicas con la cuenta {account.email}.
+                  Lo verá quien abra este anuncio («Lo vende…») y aparecerá en el mensaje de WhatsApp. Solo cambia en este anuncio, no en tu cuenta
+                  ni en tus otros anuncios. Publicas con la cuenta {account.email}.
                 </span>
               </div>
             )}

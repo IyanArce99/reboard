@@ -125,7 +125,8 @@ export default async function AdminListingPage(props: PageProps<"/admin/anuncios
           <dl className={s.dl}>
             <dt>Vendedor</dt>
             <dd>
-              <Link href={`/admin/usuarios/${l.seller_id}`}>{l.seller?.display_name ?? `${l.seller_id.slice(0, 8)}…`}</Link>
+              <Link href={`/admin/usuarios/${l.seller_id}`}>{l.seller_name ?? l.seller?.display_name ?? `${l.seller_id.slice(0, 8)}…`}</Link>
+              {l.seller_name && l.seller?.display_name && l.seller_name !== l.seller.display_name && <span className={s.small}> · cuenta {l.seller.display_name}</span>}
               {l.seller?.seller_type ? ` · ${SELLER_LABEL[l.seller.seller_type]}` : ""} ·{" "}
               <Link href={`/admin/anuncios?vendedor=${l.seller_id}`}>sus anuncios</Link>
             </dd>

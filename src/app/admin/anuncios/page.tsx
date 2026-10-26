@@ -42,7 +42,7 @@ export default async function AdminListingsPage(props: PageProps<"/admin/anuncio
   let q = sb
     .from("listings")
     .select(
-      "id, public_id, slug, status, moderation, size_label, price_eur, zone_slug, town, created_at, seller_id, brand_text, brand:brands!listings_brand_id_fkey(name), zone:zones!listings_zone_slug_fkey(name), seller:profiles!listings_seller_id_fkey(display_name)",
+      "id, public_id, slug, status, moderation, size_label, price_eur, zone_slug, town, created_at, seller_id, seller_name, brand_text, brand:brands!listings_brand_id_fkey(name), zone:zones!listings_zone_slug_fkey(name), seller:profiles!listings_seller_id_fkey(display_name)",
       { count: "exact" },
     );
   if (f.estado) q = q.eq("status", f.estado);
@@ -209,7 +209,10 @@ export default async function AdminListingsPage(props: PageProps<"/admin/anuncio
                       {open > 0 ? <Badge tone="warning">{open}</Badge> : "0"}
                     </td>
                     <td data-label="Vendedor">
-                      <Link href={`/admin/usuarios/${l.seller_id}`}>{l.seller?.display_name ?? `${l.seller_id.slice(0, 8)}…`}</Link>
+                      <Link href={`/admin/usuarios/${l.seller_id}`}>{l.seller_name ?? l.seller?.display_name ?? `${l.seller_id.slice(0, 8)}…`}</Link>
+                      {l.seller_name && l.seller?.display_name && l.seller_name !== l.seller.display_name && (
+                        <span className={s.small}> · cuenta {l.seller.display_name}</span>
+                      )}
                     </td>
                   </tr>
                 );

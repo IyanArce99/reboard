@@ -289,10 +289,12 @@ export function PublishFlow({ catalog, brands, featuredBrands, priceRefs, nowIso
     return parsed.success ? "" : firstIssueText(parsed.error);
   }, [d, catalog]);
 
-  const publish = async (token: string | null = captcha) => {
+  const publish = async (token: string | null = captcha, sellerName?: string) => {
     setError("");
+    // El nombre que se acaba de escribir en la revisión (el estado aún no se ha actualizado).
+    const cur = sellerName ? { ...d, sellerName } : d;
     const fail = (reason: PublishFailure) => track("publish_failed", { mode, reason });
-    if (!toE164(d.phone)) {
+    if ((cur.channels ?? "phone") !== "email" && !toE164(cur.phone)) {
       setError("Falta tu teléfono. Añádelo en «Precio y ubicación»: es por donde te contactarán (no aparece escrito en el anuncio).");
       fail("datos");
       return;
@@ -321,7 +323,7 @@ export function PublishFlow({ catalog, brands, featuredBrands, priceRefs, nowIso
     track("publish_submitted", { mode });
     try {
       const r = await publishDraft({
-        draft: d,
+        draft: cur,
         catalog,
         editingId: editingId ?? createdId,
         isNew: !editingId,
@@ -332,13 +334,13 @@ export function PublishFlow({ catalog, brands, featuredBrands, priceRefs, nowIso
         // El servidor ha confirmado que el anuncio está guardado (y publicado, si es nuevo): solo aquí.
         track("publish_completed", {
           mode,
-          shape: d.shape || "evolutiva",
-          construction: d.construction || "pu",
-          island: d.zone,
-          price_band: priceBand(Number(d.price) || 0),
-          photos: d.photos.length,
-          has_volume: Boolean(d.vol.trim()),
-          brand_known: isListedBrand(d.brand),
+          shape: cur.shape || "evolutiva",
+          construction: cur.construction || "pu",
+          island: cur.zone,
+          price_band: priceBand(Number(cur.price) || 0),
+          photos: cur.photos.length,
+          has_volume: Boolean(cur.vol.trim()),
+          brand_known: isListedBrand(cur.brand),
         });
         if (!editingId) await clearStoredDraft();
         setDone({ path: r.path, persisted: true });
@@ -526,7 +528,8 @@ export function PublishFlow({ catalog, brands, featuredBrands, priceRefs, nowIso
                 turnstile={turnstile}
                 onCaptcha={onCaptcha}
                 onEdit={(n) => goTo(n, { fromReview: true })}
-                onPublish={() => void publish()}
+                onPublish={(name) => void publish(captcha, name)}
+                setSellerName={(name) => set({ sellerName: name })}
                 onLogin={() => toast("Email confirmado. Ya puedes publicar.")}
               />
             )}

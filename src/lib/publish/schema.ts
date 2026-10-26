@@ -8,6 +8,7 @@ import type { CatalogModel } from "@/lib/domain/types";
 import { ftLabel } from "@/lib/domain/format";
 import { OTHER_MODEL, SHAPER_LOCAL, type FieldSource, type PublishDraft, OTHER_BRAND, isListedBrand } from "./draft";
 import { fieldToInches, parseLitres, type MeasureKey } from "./parse";
+import { cleanDisplayName } from "@/lib/auth/shared";
 
 // En el navegador, sin compilación con `new Function`: la CSP lo bloquea y zod lo detectaba con una
 // prueba que deja un aviso `securitypolicyviolation`. Va antes de crear los esquemas (zod lee la
@@ -67,6 +68,12 @@ export const ListingInput = z
     contactMethod: z.enum(["whatsapp", "phone"]),
     /** Teléfono, email (a través de Reboard, con el email de la cuenta) o los dos. */
     contactChannels: z.enum(["phone", "email", "both"]).default("phone"),
+    /** Nombre del vendedor en este anuncio; null = el de la cuenta. */
+    sellerName: z
+      .string()
+      .max(200)
+      .nullish()
+      .transform((v) => (v ? cleanDisplayName(v) : null)),
     // El teléfono solo es obligatorio si el anuncio se contacta por teléfono (superRefine).
     phone: z
       .string()
@@ -163,6 +170,7 @@ export function draftToInput(d: PublishDraft, catalog: CatalogModel[]): ListingI
     town: d.town,
     contactMethod: d.contact === "phone" ? "phone" : "whatsapp",
     contactChannels: d.channels ?? "phone",
+    sellerName: d.sellerName?.trim() || null,
     phone: d.phone,
   };
 }

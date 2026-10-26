@@ -84,6 +84,8 @@ export interface PublishDraft {
   channels: ContactChannels;
   description: string;
   phone: string;
+  /** Nombre del vendedor en ESTE anuncio («Lo vende …»). Sin él, el de la cuenta. */
+  sellerName?: string;
 }
 
 // Sin zona por defecto: quien vende la elige (no se presupone Gran Canaria).
@@ -177,6 +179,7 @@ export function draftFromListing(l: Listing): PublishDraft {
     town: l.town,
     contact: l.contact.method,
     channels: l.contact.channels,
+    sellerName: l.seller.name,
     description: l.description,
   };
 }

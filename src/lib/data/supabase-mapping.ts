@@ -124,7 +124,8 @@ export function rowToListing(row: ListingWithRelations, now: Date, photoUrl: (pa
     seller: {
       id: row.seller?.id ?? row.seller_id,
       type: row.seller?.seller_type ?? "particular",
-      name: row.seller?.display_name ?? "Surfista",
+      // Nombre del anuncio (publicar por otra persona) y, si no tiene, el del perfil.
+      name: row.seller_name ?? row.seller?.display_name ?? "Surfista",
       shopSlug: shop?.slug ?? null,
     },
     // El teléfono NUNCA viaja en el listado: se revela con reveal_contact (docs/SECURITY.md §5).

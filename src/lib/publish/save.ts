@@ -97,6 +97,7 @@ export async function saveListing(sb: Sb, userId: string, v: ListingData, editin
     town: v.town,
     contact_method: v.contactMethod,
     contact_channels: v.contactChannels,
+    seller_name: v.sellerName,
   };
 
   let listing: { id: number; public_id: string | null; slug: string; status: Status };
