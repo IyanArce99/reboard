@@ -7,6 +7,7 @@ import { Breadcrumbs } from "@/components/seo/Breadcrumbs";
 import { ShopDirectory } from "@/components/shops/ShopIslands";
 import { SHOP_TYPE_LABEL, shopPath, shopPlace, usedBoards } from "@/components/shops/shops";
 import { getRepository } from "@/lib/data";
+import { noindexRobots } from "@/lib/seo";
 import { unsplash } from "@/lib/images";
 import ui from "@/styles/ui.module.css";
 import styles from "@/components/shops/Shops.module.css";
@@ -16,12 +17,17 @@ const TITLE = "Tiendas y escuelas de surf";
 const DESCRIPTION =
   "Tiendas de surf y escuelas de Canarias que venden tablas de segunda mano: sus tablas usadas, su dirección y su horario. Sus anuncios también salen en la búsqueda.";
 
-export const metadata: Metadata = {
-  title: TITLE,
-  description: DESCRIPTION,
-  alternates: { canonical: "/tiendas", languages: { "es-ES": "/tiendas" } },
-  openGraph: { ...OG_BASE, title: TITLE, description: DESCRIPTION, url: "/tiendas" },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  // Sin tiendas, la página es un estado vacío: noindex (y fuera del sitemap) hasta que haya alguna.
+  const empty = (await getRepository().shops()).length === 0;
+  return {
+    title: TITLE,
+    description: DESCRIPTION,
+    alternates: { canonical: "/tiendas", languages: { "es-ES": "/tiendas" } },
+    openGraph: { ...OG_BASE, title: TITLE, description: DESCRIPTION, url: "/tiendas" },
+    ...(empty ? { robots: noindexRobots() } : {}),
+  };
+}
 
 export default async function ShopsPage() {
   const repo = getRepository();

@@ -29,6 +29,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: absoluteUrl("/") },
     { url: absoluteUrl("/calculadora-litros") },
     { url: absoluteUrl("/vender") },
+    { url: absoluteUrl("/contacto") },
     // Índices solo si tienen contenido: sin tiendas o sin guías revisadas serían páginas vacías.
     ...(shops.length ? [{ url: absoluteUrl("/tiendas") }] : []),
     ...(GUIDES.some((g) => !g.isDemo) ? [{ url: absoluteUrl("/guias") }] : []),
