@@ -101,6 +101,11 @@ describe("parseMeasures (pegar las medidas tal cual)", () => {
     [`6’4” × 20½” × 2⅝” — 34 L`, { len: `6'4"`, width: '20 1/2"', thick: '2 5/8"', vol: "34" }],
     [`6'4" x 20.5 x 2.6 34,5l`, { len: `6'4"`, width: '20 1/2"', thick: '2 5/8"', vol: "34,5" }],
     ["193 x 52 x 6,7 cm 34l", { len: `6'4"`, width: '20 1/2"', thick: '2 5/8"', vol: "34" }],
+    // Solo longitud y litros, sin comilla (lo que escribe mucha gente en un anuncio).
+    ["7.0x73L", { len: `7'0"`, vol: "73" }],
+    ["7,0 x 73 L", { len: `7'0"`, vol: "73" }],
+    ["7 x 73L", { len: `7'0"`, vol: "73" }],
+    ["9'1 73L", { len: `9'1"`, vol: "73" }],
   ])("«%s»", (text, out) => {
     expect(parseMeasures(text)).toEqual(out);
   });

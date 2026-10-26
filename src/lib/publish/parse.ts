@@ -257,6 +257,12 @@ export function parseMeasures(input: string): ParsedMeasures {
   } else {
     const ft = s.match(/(\d{1,2}) ?' ?(\d{1,2})?/);
     if (ft) out.len = `${ft[1]}'${ft[2] || 0}"`;
+    // Una sola medida sin comilla («7.0x73L», «7,0 73 L», «7 x 73L»): se lee como la longitud, con el
+    // mismo lector que el campo (antes solo se entendía con comilla y la longitud se quedaba vacía).
+    else if (parts[0]) {
+      const r = readMeasure("len", parts[0], unit);
+      if (r) out.len = ftLabel(Math.round(r.inches));
+    }
   }
   return out;
 }

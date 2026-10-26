@@ -74,10 +74,11 @@ export function StepBoard({ d, set, setD, catalog, brands: known, featuredBrands
   const pending = pendingCount(d);
   const pendingFrom = Object.values(d.src).includes("cat") ? "cat" : "ai";
   const fields: [MeasureKey, string, string, React.HTMLAttributes<HTMLInputElement>["inputMode"]][] = [
-    ["len", "Longitud", ft ? "6'4\"" : "193", ft ? "text" : "decimal"],
-    ["width", "Anchura", ft ? '20 1/2"' : "52", ft ? "text" : "decimal"],
-    ["thick", "Grosor", ft ? '2 5/8"' : "6,7", ft ? "text" : "decimal"],
-    ["vol", "Litros", "34", "decimal"],
+    // «ej.» delante: sin él, los ejemplos parecían medidas ya rellenadas.
+    ["len", "Longitud", ft ? "ej. 6'4\"" : "ej. 193", ft ? "text" : "decimal"],
+    ["width", "Anchura", ft ? 'ej. 20 1/2"' : "ej. 52", ft ? "text" : "decimal"],
+    ["thick", "Grosor", ft ? 'ej. 2 5/8"' : "ej. 6,7", ft ? "text" : "decimal"],
+    ["vol", "Litros", "ej. 34", "decimal"],
   ];
 
   return (
