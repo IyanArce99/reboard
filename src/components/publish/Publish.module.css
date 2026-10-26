@@ -1532,9 +1532,30 @@ button.slot:hover {
   color: var(--rb-petrol);
 }
 
-/* En ordenador (ratón) «Hacer foto» no tiene sentido: queda solo elegir o arrastrar fotos. */
+/* En ordenador (ratón) «Hacer foto» no tiene sentido: queda un solo botón, centrado y principal,
+   «Elegir fotos» (más arrastrar). En móvil, «Hacer foto» + «Elegir de la galería». */
+.mouseText {
+  display: none;
+}
 @media (hover: hover) and (pointer: fine) {
-  .cameraBtn {
+  .cameraBtn,
+  .touchText {
     display: none;
+  }
+  .mouseText {
+    display: inline;
+  }
+  .photoBtns {
+    grid-template-columns: auto;
+    justify-content: center;
+  }
+  .galleryBtn {
+    padding: 0 28px;
+    border: 0;
+    background: var(--rb-petrol);
+    color: var(--rb-white);
+  }
+  .galleryBtn:hover {
+    background: var(--rb-petrol-2);
   }
 }

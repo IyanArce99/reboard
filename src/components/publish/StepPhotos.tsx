@@ -76,9 +76,10 @@ export function StepPhotos({ photos, processing, live, onFiles, onRemove, onMove
         <CameraIcon />
         Hacer foto
       </button>
-      <button type="button" className={styles.btnWhite} onClick={() => open(galleryRef)}>
+      <button type="button" className={`${styles.btnWhite} ${styles.galleryBtn}`} onClick={() => open(galleryRef)}>
         <GalleryIcon />
-        {empty ? "Elegir de la galería" : "Añadir de la galería"}
+        <span className={styles.touchText}>{empty ? "Elegir de la galería" : "Añadir de la galería"}</span>
+        <span className={styles.mouseText}>{empty ? "Elegir fotos" : "Añadir más fotos"}</span>
       </button>
     </div>
   );
