@@ -35,3 +35,20 @@ export async function demoSold(): Promise<DemoRef> {
 
 export const STATE_KEY = "rb-usuario-v1";
 export const state = (compare: { id: string; label: string }[], profile: unknown = null) => JSON.stringify({ saved: [], alerts: [], profile, compare });
+
+/** Una tabla DEMO publicada que acepta contacto por email (`email` o `both`). Borra su registro de
+ * mensajes para que el e2e pueda repetirse (el mismo comprador no puede escribir dos veces en 24 h). */
+export async function demoByChannels(channels: "email" | "both"): Promise<DemoRef & { sellerEmail: string }> {
+  const { data, error } = await sb
+    .from("listings")
+    .select("id, public_id, slug, size_label, seller_id")
+    .eq("status", "published")
+    .eq("contact_channels", channels)
+    .order("id")
+    .limit(1)
+    .single();
+  if (error || !data) throw new Error(`No hay ninguna tabla DEMO con contacto «${channels}»: ejecuta npm run db:seed-demo`);
+  await sb.from("email_contact_events").delete().eq("listing_id", data.id);
+  const { data: u } = await sb.auth.admin.getUserById(data.seller_id);
+  return { id: data.public_id!, slug: data.slug, path: `/anuncio/${data.slug}-${data.public_id}`, label: data.size_label, sellerEmail: u.user?.email ?? "" };
+}

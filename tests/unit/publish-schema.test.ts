@@ -87,3 +87,27 @@ describe("photoPathOk", () => {
     expect(photoPathOk(`otro/100001/${crypto.randomUUID()}.webp`, u, 100001)).toBe(false);
   });
 });
+
+describe("canales de contacto (teléfono, email o los dos)", () => {
+  it("por defecto, teléfono (anuncios y borradores antiguos siguen igual)", () => {
+    const v = ListingInput.parse(draftToInput(catalogDraft(), DEMO_CATALOG));
+    expect(v.contactChannels).toBe("phone");
+    expect(v.phone).toBe("+34600111222");
+  });
+  it("solo email: el teléfono no es obligatorio", () => {
+    const v = ListingInput.parse(draftToInput({ ...catalogDraft(), channels: "email", phone: "" }, DEMO_CATALOG));
+    expect(v.contactChannels).toBe("email");
+    expect(v.phone).toBe("");
+  });
+  it("teléfono o los dos: sin teléfono válido no pasa", () => {
+    for (const channels of ["phone", "both"] as const) {
+      const r = ListingInput.safeParse(draftToInput({ ...catalogDraft(), channels, phone: "123" }, DEMO_CATALOG));
+      expect(r.success).toBe(false);
+      if (!r.success) expect(firstIssueText(r.error)).toMatch(/teléfono/);
+    }
+  });
+  it("rechaza un canal desconocido", () => {
+    const r = ListingInput.safeParse({ ...draftToInput(catalogDraft(), DEMO_CATALOG), contactChannels: "telegram" });
+    expect(r.success).toBe(false);
+  });
+});

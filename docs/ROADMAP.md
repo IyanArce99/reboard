@@ -158,3 +158,20 @@ Detalle y efecto técnico en [ARCHITECTURE.md §7](ARCHITECTURE.md).
 
 ## Después
 Perfil en la nube, push, feeds de tiendas, valoración orientativa de precio (solo con datos reales) y expansión a Portugal y Francia.
+
+## Contacto por email · fase 2 (pendiente)
+
+**Email de contacto distinto del de la cuenta.**
+- Hoy los mensajes llegan al email verificado de la cuenta.
+- Para permitir otro email:
+  - tabla privada `seller_contact_emails` (usuario, email, token con hash, fecha de verificación);
+  - enlace de verificación por email con caducidad;
+  - usarlo solo cuando esté verificado.
+
+**Publicación asistida** (vendedores captados en Wallapop, Milanuncios o Facebook):
+1. El administrador crea el anuncio como **borrador** en /admin, con el email que da el vendedor. No se asigna a ninguna cuenta existente.
+2. Reboard envía un enlace mágico de un solo uso a ese email. Al abrirlo, el vendedor entra o crea su cuenta con ese email, que queda verificado, y el borrador pasa a su cuenta.
+3. El vendedor revisa los datos y lo publica él mismo; puede corregirlo o retirarlo cuando quiera.
+4. Hasta que lo confirme, el anuncio no se publica y el contacto no se activa.
+
+Así no se inventan propietarios ni se asignan anuncios a cuentas equivocadas.

@@ -6,12 +6,20 @@
 
 import { LAUNCH, ZONES, zoneBySlug } from "@/lib/domain/taxonomy";
 import { eur } from "@/lib/domain/format";
-import type { CatalogModel } from "@/lib/domain/types";
+import type { CatalogModel, ContactChannels } from "@/lib/domain/types";
 import type { ContactMethod } from "@/lib/publish/draft";
 import { Chip, Group, type StepProps } from "./parts";
 import styles from "./Publish.module.css";
 
-// Contacto directo por WhatsApp o teléfono (decisión aprobada; la base de datos solo admite estos dos).
+// Canales de contacto: teléfono (WhatsApp o llamadas), email a través de Reboard (la dirección no se
+// muestra nunca) o los dos. El email solo se ofrece si el servidor puede enviarlo (emailContact).
+const CHANNELS: [ContactChannels, string, string][] = [
+  ["phone", "WhatsApp o teléfono", "Tu número solo lo ve quien lo pide desde el anuncio."],
+  ["email", "Correo electrónico", "Te escriben desde Reboard. Tu dirección no se muestra."],
+  ["both", "Los dos", "Quien compra elige: más fácil que te escriban."],
+];
+
+// Con teléfono: WhatsApp y llamadas, o solo llamadas.
 const CONTACTS: [ContactMethod, string][] = [
   ["whatsapp", "WhatsApp y llamadas"],
   ["phone", "Solo llamadas"],
@@ -22,9 +30,13 @@ interface Props extends StepProps {
   refs: number[];
   dataIsDemo: boolean;
   live: boolean;
+  emailContact?: boolean;
 }
 
-export function StepPrice({ d, set, model, refs, dataIsDemo, live }: Props) {
+export function StepPrice({ d, set, model, refs, dataIsDemo, live, emailContact = false }: Props) {
+  const channels: ContactChannels = emailContact ? (d.channels ?? "phone") : "phone";
+  const usesPhone = channels !== "email";
+  const usesEmail = channels !== "phone";
   const zone = zoneBySlug(d.zone);
   const pickZone = (slug: string) => {
     // Si la localidad era una sugerencia de la zona anterior, deja de tener sentido.
@@ -105,14 +117,37 @@ export function StepPrice({ d, set, model, refs, dataIsDemo, live }: Props) {
 
       <div className={styles.contactBox}>
         <Group id="pub-contact" title="¿Cómo quieres que te contacten?">
-          <div className={styles.segmented}>
-            {CONTACTS.map(([v, l]) => (
-              <button key={v} type="button" aria-pressed={d.contact === v} className={styles.segment} onClick={() => set({ contact: v })}>
-                {l}
-              </button>
-            ))}
-          </div>
+          {emailContact ? (
+            <div className={styles.channelGrid}>
+              {CHANNELS.map(([v, l, hint]) => (
+                <button key={v} type="button" aria-pressed={channels === v} className={styles.channelOpt} onClick={() => set({ channels: v })}>
+                  <span className={styles.channelCheck} aria-hidden="true" />
+                  <span>
+                    <span className={styles.channelLabel}>{l}</span>
+                    <span className={styles.channelHint}>{hint}</span>
+                  </span>
+                </button>
+              ))}
+            </div>
+          ) : (
+            <ContactSegmented d={d} set={set} />
+          )}
         </Group>
+        {emailContact && usesPhone && (
+          <div className={styles.labelField}>
+            <span id="pub-phone-kind">Por teléfono</span>
+            <div role="group" aria-labelledby="pub-phone-kind">
+              <ContactSegmented d={d} set={set} />
+            </div>
+          </div>
+        )}
+        {usesEmail && (
+          <p className={styles.emailNote} id="pub-email-note">
+            Los mensajes te llegarán al email con el que entres para publicar (lo confirmas con un código). Nadie verá tu dirección:
+            quien compra solo la conoce si le respondes.
+          </p>
+        )}
+        {usesPhone && (
         <div className={styles.labelField}>
           <label htmlFor="pub-phone">Tu teléfono</label>
           <input
@@ -131,7 +166,20 @@ export function StepPrice({ d, set, model, refs, dataIsDemo, live }: Props) {
             {!live && " Todavía no se guarda."}
           </span>
         </div>
+        )}
       </div>
+    </div>
+  );
+}
+
+function ContactSegmented({ d, set }: Pick<StepProps, "d" | "set">) {
+  return (
+    <div className={styles.segmented}>
+      {CONTACTS.map(([v, l]) => (
+        <button key={v} type="button" aria-pressed={d.contact === v} className={styles.segment} onClick={() => set({ contact: v })}>
+          {l}
+        </button>
+      ))}
     </div>
   );
 }

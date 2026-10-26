@@ -992,3 +992,118 @@
   text-decoration: underline;
   text-underline-offset: 3px;
 }
+
+/* ——— Contacto por email (EmailContact) ——— */
+/* Con teléfono y email: el email, botón secundario debajo del principal. */
+.contactAlt {
+  height: 50px;
+  width: 100%;
+  font-size: 15px;
+}
+.barMail {
+  display: none;
+}
+@media (max-width: 759px) {
+  .barMail {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: none;
+    width: 52px;
+    height: 52px;
+    border: 1.5px solid var(--rb-petrol);
+    border-radius: 12px;
+    background: var(--rb-white);
+    color: var(--rb-petrol);
+  }
+}
+.emailForm {
+  display: grid;
+  gap: 14px;
+}
+.emailField {
+  display: grid;
+  gap: 6px;
+}
+.emailField label {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--rb-ink);
+}
+.emailInput {
+  height: 48px;
+  width: 100%;
+  min-width: 0;
+  border: 1px solid var(--rb-line-strong);
+  border-radius: 10px;
+  padding: 0 12px;
+  font-size: 16px;
+  background: var(--rb-white);
+  color: var(--rb-ink);
+}
+.emailInput[aria-invalid="true"] {
+  border-color: var(--rb-error);
+}
+.emailTextarea {
+  height: auto;
+  min-height: 110px;
+  padding: 10px 12px;
+  line-height: 1.5;
+  resize: vertical;
+}
+.emailHelp {
+  font-size: 13px;
+  color: var(--rb-muted);
+}
+.emailError {
+  margin: 0;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: var(--rb-error-tint);
+  color: var(--rb-error-ink);
+  font-size: 14px;
+  font-weight: 600;
+}
+.emailLegal {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--rb-muted);
+}
+.emailLegal a {
+  color: var(--rb-teal-text);
+  font-weight: 600;
+  text-decoration: underline;
+}
+.emailSent {
+  display: grid;
+  justify-items: start;
+  gap: 10px;
+}
+.emailSentIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 999px;
+  background: var(--rb-teal-tint);
+  color: var(--rb-teal);
+}
+.emailSentTitle {
+  margin: 0;
+  font-family: var(--rb-font-display);
+  font-size: 24px;
+  font-weight: 800;
+  text-transform: uppercase;
+  color: var(--rb-petrol);
+}
+.emailSentText {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+.emailSent .sheetBtn {
+  width: 100%;
+}

@@ -67,7 +67,7 @@ export async function dailyMaintenance(sb: Sb, now = new Date()) {
     .limit(500);
   for (const l of old ?? []) photos += await removeFolder(sb, `${l.seller_id}/${l.id}`);
   if (old?.length) await sb.from("listings").delete().in("id", old.map((l) => l.id));
-  for (const table of ["contact_events", "reports", "moderation_actions", "admin_audit_log", "contact_messages"] as const) {
+  for (const table of ["contact_events", "reports", "moderation_actions", "admin_audit_log", "contact_messages", "email_contact_events"] as const) {
     const { error: e } = await sb.from(table).delete().lt("created_at", year);
     if (e) throw new Error(`limpieza ${table}: ${e.message}`);
   }

@@ -17,6 +17,16 @@ import type { PriceBand } from "@/lib/analytics/events";
 import { track } from "@/lib/analytics/track";
 import ui from "@/styles/ui.module.css";
 import styles from "./Ficha.module.css";
+import { EmailContact } from "./EmailContact";
+
+function MailIcon() {
+  return (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <rect x="3" y="5" width="18" height="14" rx="2" />
+      <path d="M3.5 6.5l8.5 6 8.5-6" />
+    </svg>
+  );
+}
 
 interface ContactData {
   sellerName: string;
@@ -24,6 +34,10 @@ interface ContactData {
   phone: string | null;
   /** Método que eligió el vendedor al publicar. */
   method: "whatsapp" | "phone";
+  /** Canales: teléfono, email (a través de Reboard; la dirección nunca llega aquí) o los dos. */
+  channels: "phone" | "email" | "both";
+  /** Título del anuncio, para el mensaje sugerido por email. */
+  title: string;
   /** Estado del anuncio no activo («Vendida», «Caducada», «Retirada»); null si se puede contactar. */
   unavailable: string | null;
   /** Id público del anuncio («a123»). */
@@ -119,10 +133,13 @@ function RevealContact({ data, onClose }: { data: ContactData; onClose: () => vo
   );
 }
 
-const Ctx = createContext<{ open: () => void; data: ContactData } | null>(null);
+type Mode = "phone" | "email";
+const Ctx = createContext<{ open: (mode?: Mode) => void; data: ContactData } | null>(null);
 
 export function ContactProvider({ data, children }: { data: ContactData; children: React.ReactNode }) {
-  const [isOpen, setOpen] = useState(false);
+  const [mode, setMode] = useState<Mode | null>(null);
+  const isOpen = mode != null;
+  const setOpen = (v: boolean) => !v && setMode(null);
   const { toast } = useUserState();
   const dialogRef = useRef<HTMLDivElement>(null);
   // Foco dentro del modal (el primero es «Cerrar»), atrapado con Tab y devuelto al botón al cerrar.
@@ -139,7 +156,14 @@ export function ContactProvider({ data, children }: { data: ContactData; childre
   const byWhatsApp = data.method === "whatsapp";
 
   return (
-    <Ctx.Provider value={{ open: () => !data.unavailable && setOpen(true), data }}>
+    <Ctx.Provider
+      value={{
+        open: (m) => {
+          if (!data.unavailable) setMode(m ?? (data.channels === "email" ? "email" : "phone"));
+        },
+        data,
+      }}
+    >
       {children}
       {isOpen &&
         createPortal(
@@ -147,7 +171,7 @@ export function ContactProvider({ data, children }: { data: ContactData; childre
             <div className={styles.modalOverlay} onClick={() => setOpen(false)} aria-hidden="true" />
             <div ref={dialogRef} className={styles.modal} role="dialog" aria-modal="true" aria-labelledby="contact-title">
               <div className={styles.modalHead}>
-                <span id="contact-title">Contactar con {data.sellerName || "el vendedor"}</span>
+                <span id="contact-title">{mode === "email" ? "Escribir a" : "Contactar con"} {data.sellerName || "el vendedor"}</span>
                 <button type="button" aria-label="Cerrar" onClick={() => setOpen(false)}>
                   <CloseIcon />
                 </button>
@@ -157,6 +181,10 @@ export function ContactProvider({ data, children }: { data: ContactData; childre
                   El vendedor la ha reservado para alguien. Pregúntale si la reserva sigue en pie.
                 </p>
               )}
+              {mode === "email" ? (
+                <EmailContact listingId={data.listingId} title={data.title} sellerName={data.sellerName} onClose={() => setOpen(false)} />
+              ) : (
+              <>
               <div className={styles.modalHint}>{byWhatsApp ? "Mensaje sugerido (puedes editarlo en WhatsApp):" : "Puedes preguntarle esto:"}</div>
               <div className={styles.modalMsg}>{data.message}</div>
               {data.live ? (
@@ -193,6 +221,8 @@ export function ContactProvider({ data, children }: { data: ContactData; childre
                   Llamar
                 </button>
               )}
+              </>
+              )}
               <div className={styles.modalNote}>
                 Antes de pagar, mírala en persona y en un sitio público. No pagues por adelantado, ni una señal, ni por un enlace que te
                 manden por WhatsApp: Reboard no gestiona pagos ni envíos.
@@ -213,18 +243,46 @@ const useContact = () => {
 
 export function ContactButton({ className }: { className: string }) {
   const { open, data } = useContact();
-  return (
+  const phoneLabel = data.reserved ? "Preguntar si queda libre" : data.method === "whatsapp" ? "Contactar por WhatsApp" : "Llamar al vendedor";
+  const openEmail = () => {
+    track("contact_email_opened", { surface: "ficha", ...data.analytics });
+    open("email");
+  };
+  if (data.unavailable) {
+    return (
+      <button type="button" className={className} disabled>
+        {data.unavailable}
+      </button>
+    );
+  }
+  // Solo email: un botón principal. Con los dos: teléfono principal y email secundario.
+  if (data.channels === "email") {
+    return (
+      <button type="button" className={className} onClick={openEmail}>
+        Enviar mensaje al vendedor
+      </button>
+    );
+  }
+  const phoneBtn = (
     <button
       type="button"
       className={className}
-      disabled={!!data.unavailable}
       onClick={() => {
         track("contact_opened", { method: data.method, surface: "ficha", ...data.analytics });
-        open();
+        open("phone");
       }}
     >
-      {data.unavailable ?? (data.reserved ? "Preguntar si queda libre" : data.method === "whatsapp" ? "Contactar por WhatsApp" : "Llamar al vendedor")}
+      {phoneLabel}
     </button>
+  );
+  if (data.channels !== "both") return phoneBtn;
+  return (
+    <>
+      {phoneBtn}
+      <button type="button" className={`${ui.btnOutline} ${styles.contactAlt}`} onClick={openEmail}>
+        Enviar mensaje al vendedor
+      </button>
+    </>
   );
 }
 
@@ -251,16 +309,34 @@ export function ContactBar({ price, specs, offLink }: { price: string; specs: st
         <div className={styles.barPrice}>{price}</div>
         <div className={styles.barSpecs}>{specs}</div>
       </div>
+      {data.channels === "both" && !data.unavailable && (
+        <button
+          type="button"
+          className={styles.barMail}
+          aria-label="Enviar mensaje al vendedor por email"
+          onClick={() => {
+            track("contact_email_opened", { surface: "barra_movil", ...data.analytics });
+            open("email");
+          }}
+        >
+          <MailIcon />
+        </button>
+      )}
       <button
         type="button"
         className={styles.barBtn}
         disabled={!!data.unavailable}
         onClick={() => {
+          if (data.channels === "email") {
+            track("contact_email_opened", { surface: "barra_movil", ...data.analytics });
+            open("email");
+            return;
+          }
           track("contact_opened", { method: data.method, surface: "barra_movil", ...data.analytics });
-          open();
+          open("phone");
         }}
       >
-        {data.unavailable ?? (data.reserved ? "Preguntar" : data.method === "whatsapp" ? "WhatsApp" : "Llamar")}
+        {data.unavailable ?? (data.channels === "email" ? "Enviar mensaje" : data.reserved ? "Preguntar" : data.method === "whatsapp" ? "WhatsApp" : "Llamar")}
       </button>
     </aside>
   );

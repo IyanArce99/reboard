@@ -183,6 +183,8 @@ export default async function FichaPage({ params }: PageProps<"/anuncio/[slugId]
         message,
         phone: l.contact.phone,
         method: l.contact.method === "phone" ? "phone" : "whatsapp",
+        channels: l.contact.channels,
+        title: listingTitle(l),
         // «Vendida», «Caducada» o «Retirada» en el botón desactivado.
         unavailable: off ? av.text : null,
         reserved,

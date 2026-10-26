@@ -65,13 +65,16 @@ export const ListingInput = z
     zoneSlug: z.enum(ZONES.map((zn) => zn.slug) as [string, ...string[]]),
     town: z.string().trim().min(2).max(80),
     contactMethod: z.enum(["whatsapp", "phone"]),
-    phone: z.string().max(30).transform((v, ctx) => {
-      const e164 = toE164(v);
-      if (!e164) ctx.addIssue({ code: "custom", message: "phone" });
-      return e164 ?? "";
-    }),
+    /** Teléfono, email (a través de Reboard, con el email de la cuenta) o los dos. */
+    contactChannels: z.enum(["phone", "email", "both"]).default("phone"),
+    // El teléfono solo es obligatorio si el anuncio se contacta por teléfono (superRefine).
+    phone: z
+      .string()
+      .max(30)
+      .transform((v) => toE164(v) ?? ""),
   })
   .superRefine((v, ctx) => {
+    if (v.contactChannels !== "email" && !v.phone) ctx.addIssue({ code: "custom", path: ["phone"], message: "phone" });
     const pairs: [unknown, unknown, string][] = [
       [v.widthIn, v.widthSource, "widthSource"],
       [v.thicknessIn, v.thicknessSource, "thicknessSource"],
@@ -159,6 +162,7 @@ export function draftToInput(d: PublishDraft, catalog: CatalogModel[]): ListingI
     zoneSlug: d.zone,
     town: d.town,
     contactMethod: d.contact === "phone" ? "phone" : "whatsapp",
+    contactChannels: d.channels ?? "phone",
     phone: d.phone,
   };
 }

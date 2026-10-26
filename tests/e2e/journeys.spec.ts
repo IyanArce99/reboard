@@ -243,9 +243,15 @@ for (const kind of Object.keys(VIEWPORTS) as Kind[]) {
       await page.getByRole("textbox", { name: "Precio" }).fill("280");
       await page.getByRole("button", { name: "La Palma" }).click();
       await page.locator("#pub-town").fill("Tazacorte");
+      // Contacto: «solo email» oculta el teléfono; «los dos» lo vuelve a pedir.
+      await page.getByRole("button", { name: /^Correo electrónico/ }).click();
+      await expect(page.locator("#pub-phone")).toHaveCount(0);
+      await expect(page.getByText(/Nadie verá tu dirección/)).toBeVisible();
+      await page.getByRole("button", { name: /^Los dos/ }).click();
       await page.locator("#pub-phone").fill("612 345 678");
       await page.getByRole("button", { name: "Revisar anuncio" }).click();
       await expect(h1(page)).toHaveText("Así quedará tu anuncio");
+      await expect(page.getByText(/y por email/)).toBeVisible();
 
       // Acceso con código (Mailpit) incrustado en la revisión.
       await page.locator("#login-email").fill(email);
@@ -278,6 +284,8 @@ for (const kind of Object.keys(VIEWPORTS) as Kind[]) {
       // La ficha y la búsqueda lo muestran.
       await page.goto(path!);
       await expect(h1(page)).toContainText("QA Journey 6'4\"", { ignoreCase: true });
+      // Eligió «los dos»: se le puede escribir por email además de por WhatsApp.
+      await expect(page.getByRole("button", { name: "Enviar mensaje al vendedor", exact: true })).toBeVisible();
       // Galería con las dos fotos reales: flecha en escritorio, deslizar el dedo en móvil.
       await expect(page.getByText("1 / 2", { exact: true })).toBeVisible();
       if (mobile) {

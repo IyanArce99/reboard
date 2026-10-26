@@ -48,6 +48,8 @@ interface Props {
   editingId: string | null;
   /** Publicación real (base de datos y cuentas activas). */
   live: boolean;
+  /** Se puede ofrecer el contacto por email (SMTP configurado). */
+  emailContact?: boolean;
 }
 
 /** Qué falta para pasar del paso `step` (vacío si está completo). */
@@ -65,7 +67,7 @@ function issueTarget(step: number, d: PublishDraft): string | null {
   if (step === 4) {
     if (!(Number(d.price) > 0)) return "pub-price";
     if (!d.zone) return "pub-zone";
-    return d.town.trim().length < 2 ? "pub-town" : "pub-phone";
+    return d.town.trim().length < 2 ? "pub-town" : (d.channels ?? "phone") === "email" ? null : "pub-phone";
   }
   return null;
 }
@@ -106,15 +108,23 @@ function stepIssue(step: number, d: PublishDraft, processing: number): string {
       if (!(Number(d.price) > 0)) return "Pon un precio para continuar.";
       if (!d.zone) return "Elige la isla donde está la tabla.";
       if (d.town.trim().length < 2) return "Indica la localidad donde está la tabla.";
+      // Con «solo email» no hace falta teléfono (se usa el email verificado de la cuenta).
+      if ((d.channels ?? "phone") === "email") return "";
       return toE164(d.phone) ? "" : "Revisa el teléfono: por ejemplo, 600 000 000 o +34 600 000 000.";
     default:
       return "";
   }
 }
 
-export function PublishFlow({ catalog, brands, featuredBrands, priceRefs, nowIso, dataIsDemo, initial, editingId, live }: Props) {
+/** Sin envío de email disponible, un borrador o anuncio con «email» vuelve a teléfono. */
+const onlyAvailable = (x: PublishDraft, emailContact: boolean): PublishDraft =>
+  emailContact || (x.channels ?? "phone") === "phone" ? x : { ...x, channels: "phone" };
+
+export function PublishFlow({ catalog, brands, featuredBrands, priceRefs, nowIso, dataIsDemo, initial, editingId, live, emailContact = false }: Props) {
   const { toast, account } = useUserState();
-  const [d, setD] = useState<PublishDraft>(() => initial ?? emptyDraft());
+  // Sin envío de email disponible, un borrador o anuncio con «email» vuelve a teléfono (no se ofrece
+  // un método que no funcionaría; el servidor también lo rechaza).
+  const [d, setD] = useState<PublishDraft>(() => onlyAvailable(initial ?? emptyDraft(), emailContact));
   // Editar abre en la revisión: cada sección tiene su «Editar» y cambiar solo el precio son dos toques (QA-7).
   const [step, setStep] = useState(initial ? 5 : 1);
   const mode = editingId ? ("editar" as const) : ("nuevo" as const);
@@ -160,14 +170,15 @@ export function PublishFlow({ catalog, brands, featuredBrands, priceRefs, nowIso
       loaded.current = true;
       if (!s) return;
       const photos: DraftPhoto[] = s.photos.map((p) => ({ url: URL.createObjectURL(p.blob), local: true, blob: p.blob, width: p.width, height: p.height }));
-      setD({ ...emptyDraft(), ...s.draft, photos });
+      setD(onlyAvailable({ ...emptyDraft(), ...s.draft, photos }, emailContact));
       setStep(Math.min(Math.max(s.step, 1), 5));
       setRestored(true);
     });
     return () => {
       cancelled = true;
     };
-  }, [initial]);
+    // emailContact llega del servidor y no cambia durante la página.
+  }, [initial, emailContact]);
 
   useEffect(() => {
     if (initial || !loaded.current || done) return;
@@ -498,7 +509,7 @@ export function PublishFlow({ catalog, brands, featuredBrands, priceRefs, nowIso
             )}
             {step === 2 && <StepBoard d={d} set={set} setD={setD} catalog={catalog} brands={brands} featuredBrands={featuredBrands} toast={toast} />}
             {step === 3 && <StepCondition d={d} set={set} setD={setD} />}
-            {step === 4 && <StepPrice d={d} set={set} setD={setD} model={pm} refs={refs} dataIsDemo={dataIsDemo} live={live} />}
+            {step === 4 && <StepPrice d={d} set={set} setD={setD} model={pm} refs={refs} dataIsDemo={dataIsDemo} live={live} emailContact={emailContact} />}
             {step === 5 && (
               <StepReview
                 d={d}

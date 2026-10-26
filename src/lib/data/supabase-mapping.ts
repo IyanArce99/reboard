@@ -2,7 +2,7 @@
 // Esquema: supabase/migrations · Mapeo documentado en docs/DATABASE.md.
 
 import { ACTIVE_ZONE_SLUGS, regionBySlug } from "@/lib/domain/taxonomy";
-import type { CatalogModel, DataSource, Listing, Measured, Shop } from "@/lib/domain/types";
+import type { CatalogModel, ContactChannels, DataSource, Listing, Measured, Shop } from "@/lib/domain/types";
 import { finLabel, type Filters } from "@/lib/search/filters";
 import type { Database } from "@/lib/supabase/database.types";
 
@@ -128,7 +128,7 @@ export function rowToListing(row: ListingWithRelations, now: Date, photoUrl: (pa
       shopSlug: shop?.slug ?? null,
     },
     // El teléfono NUNCA viaja en el listado: se revela con reveal_contact (docs/SECURITY.md §5).
-    contact: { method: row.contact_method, phone: null },
+    contact: { method: row.contact_method, phone: null, channels: (row.contact_channels ?? "phone") as ContactChannels },
     status: toUiStatus(row, now),
     publishedAt: row.published_at ?? row.created_at,
     confirmedAt: row.confirmed_at ?? row.published_at ?? row.created_at,

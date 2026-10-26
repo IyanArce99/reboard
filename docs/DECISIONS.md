@@ -627,3 +627,30 @@ Migración `20261030090000_reserved_and_saves.sql` (pgTAP `11_reserved_saves`), 
 - si falla el SMTP, el mensaje no se pierde.
 
 **Punto de contacto del Reglamento de Servicios Digitales:** hola@reboard.es y /contacto.
+
+## Contacto privado por email entre compradores y vendedores (26-10-2026)
+
+**Qué es.** El vendedor elige cómo le contactan: teléfono (WhatsApp o llamada, como antes), email o los dos.
+
+**Modelo de datos** (migración `20261103090000`):
+- `listings.contact_channels` (`phone` | `email` | `both`, por defecto `phone`; los anuncios antiguos quedan igual) es público: la ficha lo necesita para saber qué botones mostrar.
+- **El email del vendedor no se guarda en ninguna tabla nueva.** Se usa el de su cuenta, verificado al entrar con el código, y solo lo lee el servidor (service role) al enviar. No llega a ninguna consulta pública, HTML ni respuesta de la API.
+- Con «solo email» no se guarda teléfono; si lo había, se borra.
+- El control de publicación exige teléfono solo si el anuncio lo usa.
+
+**Envío:**
+- Server Action con Turnstile (`email`), validación con zod y comprobaciones: anuncio publicado, visible y que acepta email.
+- Límites persistentes en `email_contact_events`: sirven en serverless porque viven en la base de datos.
+  - el mismo comprador (IP con HMAC) no repite al mismo anuncio en 24 h;
+  - 5 por IP y hora y 15 por día;
+  - 30 por anuncio y día.
+- SMTP con `nodemailer` (el mismo del formulario de /contacto). Remitente `SMTP_FROM` y Reply-To del comprador; nombre y email sin saltos de línea (sin inyección de cabeceras) y HTML escapado.
+- Solo se confirma al comprador cuando el servidor de correo acepta el mensaje.
+- Sin SMTP configurado, la opción de email no se ofrece al publicar y el servidor la rechaza.
+
+**Privacidad:**
+- No se guarda el texto del mensaje, ni el nombre ni el email del comprador.
+- El registro (anuncio, fecha, resultado y HMAC de la IP) se borra a los 12 meses.
+- El formulario informa de que nombre, email y mensaje se envían al vendedor, y la Política de privacidad está actualizada.
+
+**Fuera de esta fase** (ver ROADMAP): un email de contacto distinto del de la cuenta, con su verificación, y la publicación asistida para vendedores sin cuenta.

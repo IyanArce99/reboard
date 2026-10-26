@@ -1,6 +1,6 @@
 // Recorridos clave que no deben romperse: buscador, calculadora de litros, comparador y ficha.
 import { expect, test, type Page } from "@playwright/test";
-import { demoListing, demoSold } from "./demo-data";
+import { demoByChannels, demoListing, demoSold } from "./demo-data";
 
 const STATE_KEY = "rb-usuario-v1";
 
@@ -457,4 +457,39 @@ test("contacto: valida, envía y lo deja guardado (con aviso por email en local)
   await page.getByRole("button", { name: "Enviar mensaje" }).click();
   await expect(page.getByRole("heading", { name: "Mensaje enviado" })).toBeVisible({ timeout: 15_000 });
   expect(errors).toEqual([]);
+});
+
+
+test("contacto por email: el comprador escribe al vendedor sin ver su dirección", async ({ page }) => {
+  const errors = trackErrors(page);
+  const l = await demoByChannels("email");
+  await fetch(`http://127.0.0.1:54324/api/v1/search?query=${encodeURIComponent(`to:"${l.sellerEmail}"`)}`, { method: "DELETE" });
+  await page.goto(l.path);
+  // Solo email: el botón principal es escribir; no hay WhatsApp ni llamada.
+  await expect(page.getByRole("button", { name: /Contactar por WhatsApp|Llamar al vendedor/ })).toHaveCount(0);
+  await page.getByRole("button", { name: "Enviar mensaje al vendedor" }).click();
+  const dialog = page.getByRole("dialog");
+  await expect(dialog.getByLabel("Mensaje")).toHaveValue(/^¡Hola! He visto tu tabla .+ en REBOARD y quería saber si sigue disponible\.$/);
+  await dialog.getByRole("button", { name: "Enviar mensaje", exact: true }).click();
+  await expect(dialog.locator("#buyer-error")).toContainText("nombre");
+  await expect(dialog.getByLabel("Tu nombre")).toBeFocused();
+  await dialog.getByLabel("Tu nombre").fill("Ana E2E");
+  await dialog.getByLabel("Tu email").fill("ana-e2e@test.invalid");
+  await dialog.getByRole("button", { name: "Enviar mensaje", exact: true }).click();
+  await expect(dialog.getByText("Mensaje enviado")).toBeVisible({ timeout: 15_000 });
+  // El email del vendedor no aparece en la página.
+  expect(await page.content()).not.toContain(l.sellerEmail);
+  // Llega al vendedor (Mailpit local) con Reply-To del comprador.
+  const res = await (await fetch(`http://127.0.0.1:54324/api/v1/search?query=${encodeURIComponent(`to:"${l.sellerEmail}"`)}`)).json();
+  expect(res.messages?.[0]?.Subject).toBe("Nuevo interesado en tu tabla — REBOARD");
+  expect(res.messages?.[0]?.ReplyTo?.[0]?.Address).toBe("ana-e2e@test.invalid");
+  expect(errors).toEqual([]);
+});
+
+test("contacto por los dos canales: WhatsApp principal y email secundario", async ({ page }) => {
+  const l = await demoByChannels("both");
+  await page.goto(l.path);
+  await expect(page.getByRole("button", { name: "Contactar por WhatsApp" })).toBeVisible();
+  await page.getByRole("button", { name: "Enviar mensaje al vendedor" }).click();
+  await expect(page.getByRole("dialog").getByLabel("Tu email")).toBeVisible();
 });

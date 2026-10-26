@@ -34,8 +34,13 @@ export interface Seller {
   shopSlug: string | null;
 }
 
+/** Por dónde acepta contactos el vendedor: teléfono (WhatsApp o llamada), email a través de Reboard o los dos. */
+export type ContactChannels = "phone" | "email" | "both";
+
 export interface ContactInfo {
   method: "whatsapp" | "phone" | "email";
+  /** Canales que acepta. El email del vendedor nunca está aquí: solo lo lee el servidor al enviar. */
+  channels: ContactChannels;
   /** Teléfono en formato internacional sin «+». null hasta que exista el backend. */
   phone: string | null;
 }

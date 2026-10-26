@@ -9,6 +9,7 @@ import { z } from "zod";
 import { authEnabled } from "@/lib/auth/config";
 import { ListingInput, firstIssueText } from "@/lib/publish/schema";
 import { deleteOwnListing, PublishError, finalizeListing, panelAction, saveListing, type PanelAction, type PhotoRef } from "@/lib/publish/save";
+import { mailConfigured } from "@/lib/email/notify";
 import { verifyTurnstile } from "@/lib/security/turnstile";
 import { createUserClient } from "@/lib/supabase/server";
 
@@ -50,8 +51,17 @@ export async function saveListingAction(args: z.input<typeof SaveArgs>): Promise
   const parsed = ListingInput.safeParse(a.data.input);
   if (!parsed.success) return { ok: false, message: firstIssueText(parsed.error) };
 
+  // Contacto por email: solo si el servidor puede enviarlo (SMTP configurado) y la cuenta tiene un
+  // email verificado (al entrar con el código lo está). Si no, no se activa un método que no funcionaría.
+  if (parsed.data.contactChannels !== "phone" && !mailConfigured()) {
+    return { ok: false, message: "El contacto por email no está disponible ahora mismo. Elige WhatsApp o teléfono." };
+  }
+
   const s = await session();
   if ("error" in s) return s.error!;
+  if (parsed.data.contactChannels !== "phone" && !s.user!.email_confirmed_at) {
+    return { ok: false, message: "Para recibir mensajes por email, tu cuenta necesita un email verificado. Elige WhatsApp o teléfono." };
+  }
 
   const h = await headers();
   const ip = h.get("x-forwarded-for")?.split(",")[0]?.trim() ?? h.get("x-real-ip");

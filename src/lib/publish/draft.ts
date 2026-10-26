@@ -3,7 +3,7 @@
 
 import type { Condition, Construction, Shape } from "@/lib/domain/taxonomy";
 import { POPULAR_BRANDS, zoneBySlug } from "@/lib/domain/taxonomy";
-import type { CatalogModel, Listing, Measured, Photo } from "@/lib/domain/types";
+import type { CatalogModel, ContactChannels, Listing, Measured, Photo } from "@/lib/domain/types";
 import { fmtIn, ftLabel } from "@/lib/domain/format";
 import { fieldToInches, parseLitres, type MeasureKey, type Unit } from "./parse";
 
@@ -80,6 +80,8 @@ export interface PublishDraft {
   zone: string;
   town: string;
   contact: ContactMethod;
+  /** Canales de contacto: teléfono (WhatsApp o llamada, según `contact`), email o los dos. */
+  channels: ContactChannels;
   description: string;
   phone: string;
 }
@@ -105,6 +107,7 @@ export const emptyDraft = (zone = ""): PublishDraft => ({
   zone,
   town: "",
   contact: "whatsapp",
+  channels: "phone",
   description: "",
   phone: "",
 });
@@ -173,6 +176,7 @@ export function draftFromListing(l: Listing): PublishDraft {
     price: String(l.price),
     town: l.town,
     contact: l.contact.method,
+    channels: l.contact.channels,
     description: l.description,
   };
 }
@@ -219,7 +223,7 @@ export function previewListing(d: PublishDraft, catalog: CatalogModel[], now: Da
     condition: d.condition || "buen-estado",
     repairs: d.repairs || null,
     seller: { id: null, type: "particular", name: "Tú", shopSlug: null },
-    contact: { method: d.contact, phone: null },
+    contact: { method: d.contact, phone: null, channels: d.channels ?? "phone" },
     status: "disponible",
     publishedAt: iso,
     confirmedAt: iso,

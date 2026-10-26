@@ -11,6 +11,7 @@ import { noindexRobots } from "@/lib/seo";
 import ui from "@/styles/ui.module.css";
 import styles from "@/components/publish/Publish.module.css";
 import { PageFlag } from "@/components/layout/PageFlag";
+import { mailConfigured } from "@/lib/email/notify";
 
 // Formulario privado: noindex (docs/SEO.md).
 export const metadata: Metadata = {
@@ -69,6 +70,8 @@ async function Flow({ searchParams }: { searchParams: PageProps<"/vender/publica
         initial={initial}
         editingId={editingId}
         live={live}
+        // El contacto por email solo se ofrece si el servidor puede enviarlo de verdad (SMTP).
+        emailContact={live && mailConfigured()}
       />
     </>
   );

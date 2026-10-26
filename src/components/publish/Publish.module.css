@@ -1655,3 +1655,74 @@ button.slot:hover {
   background: var(--rb-teal-tint);
   color: var(--rb-teal-ink);
 }
+
+/* ——— Paso 4 · Canales de contacto (teléfono, email o los dos) ——— */
+.channelGrid {
+  display: grid;
+  gap: 10px;
+}
+@media (min-width: 640px) {
+  .channelGrid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+.channelOpt {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  min-height: 44px;
+  padding: 12px 14px;
+  border: 1.5px solid var(--rb-line-strong);
+  border-radius: 12px;
+  background: var(--rb-white);
+  text-align: left;
+  color: var(--rb-ink);
+}
+@media (hover: hover) {
+  .channelOpt:hover {
+    border-color: var(--rb-teal);
+  }
+}
+.channelOpt[aria-pressed="true"] {
+  border-color: var(--rb-teal);
+  background: var(--rb-teal-tint);
+}
+.channelCheck {
+  flex: none;
+  width: 18px;
+  height: 18px;
+  margin-top: 2px;
+  border-radius: 999px;
+  border: 2px solid var(--rb-line-strong);
+  background: var(--rb-white);
+}
+.channelOpt[aria-pressed="true"] .channelCheck {
+  border-color: var(--rb-teal);
+  background: var(--rb-teal);
+  box-shadow: inset 0 0 0 3px var(--rb-white);
+}
+.channelLabel {
+  display: block;
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1.25;
+}
+.channelHint {
+  display: block;
+  margin-top: 2px;
+  font-size: 13px;
+  line-height: 1.4;
+  color: var(--rb-muted);
+}
+.channelOpt[aria-pressed="true"] .channelHint {
+  color: var(--rb-teal-ink);
+}
+.emailNote {
+  margin: 0;
+  padding: 12px 14px;
+  border-radius: 10px;
+  background: var(--rb-teal-tint);
+  color: var(--rb-teal-ink);
+  font-size: 14px;
+  line-height: 1.45;
+}

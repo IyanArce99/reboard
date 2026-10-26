@@ -43,6 +43,12 @@ export interface EventProps {
   contact_opened: { method: "whatsapp" | "phone"; surface: "ficha" | "barra_movil"; shape: string; island: string; price_band: PriceBand };
   contact_revealed: { method: "whatsapp" | "phone" };
   contact_link_clicked: { channel: "whatsapp" | "llamada" };
+  /** Contacto por email (formulario de la ficha). Nunca nombre, email ni texto del mensaje. */
+  contact_email_opened: { surface: "ficha" | "barra_movil"; shape: string; island: string; price_band: PriceBand };
+  contact_email_submitted: Record<string, never>;
+  /** SOLO cuando el servidor confirma que el servidor de correo ha aceptado el mensaje. */
+  contact_email_sent: Record<string, never>;
+  contact_email_failed: { reason: "validacion" | "limite" | "no_disponible" | "error" };
   listing_saved: Record<string, never>;
   alert_created: Record<string, never>;
 

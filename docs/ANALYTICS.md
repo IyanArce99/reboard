@@ -92,6 +92,10 @@ Referencia: **AEPD, «Guía sobre el uso de cookies para herramientas de medici�
 | `listing_viewed` | Ficha abierta | `shape`, `construction`, `island`, `price_band`, `seller_type`, `photos`, `available` |
 | `contact_opened` | «Contactar» (ficha o barra móvil) | `method`, `surface` (ficha/barra_movil), `shape`, `island`, `price_band` |
 | `contact_revealed` | El servidor devuelve el teléfono | `method` |
+| `contact_email_opened` | «Enviar mensaje al vendedor» (ficha o barra móvil) | `surface`, `shape`, `island`, `price_band` |
+| `contact_email_submitted` | El comprador envía el formulario | — |
+| `contact_email_sent` | **Solo** cuando el servidor de correo ha aceptado el mensaje | — |
+| `contact_email_failed` | Error de validación, límite, anuncio no disponible o fallo del envío | `reason` |
 | `contact_link_clicked` | «Abrir WhatsApp» o «Llamar» | `channel` (whatsapp/llamada) |
 | `listing_saved` | Guardar una tabla | — |
 | `alert_created` | Crear una alerta | — |

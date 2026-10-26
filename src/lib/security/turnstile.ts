@@ -8,7 +8,7 @@ const VERIFY_URL = "https://challenges.cloudflare.com/turnstile/v0/siteverify";
 
 export type TurnstileResult = { ok: true } | { ok: false; reason: "missing-token" | "not-configured" | "invalid" | "unavailable" };
 
-export type TurnstileAction = "contacto" | "publicar" | "reportar" | "mensaje";
+export type TurnstileAction = "contacto" | "publicar" | "reportar" | "mensaje" | "email";
 
 /** Claves secretas de prueba de Cloudflare: responden con datos ficticios (hostname «example.com»). */
 const isTestSecret = (secret: string) => /^[123]x0+AA$/.test(secret);

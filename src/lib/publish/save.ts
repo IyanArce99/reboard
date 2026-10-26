@@ -96,6 +96,7 @@ export async function saveListing(sb: Sb, userId: string, v: ListingData, editin
     zone_slug: v.zoneSlug,
     town: v.town,
     contact_method: v.contactMethod,
+    contact_channels: v.contactChannels,
   };
 
   let listing: { id: number; public_id: string | null; slug: string; status: Status };
@@ -122,9 +123,11 @@ export async function saveListing(sb: Sb, userId: string, v: ListingData, editin
     listing = data;
   }
 
-  const { error: contactError } = await sb
-    .from("listing_contacts")
-    .upsert({ listing_id: listing.id, phone_e164: v.phone, updated_at: new Date().toISOString() });
+  // Teléfono privado solo si el anuncio lo usa; con «solo email» se borra (minimización de datos).
+  const { error: contactError } =
+    v.contactChannels === "email"
+      ? await sb.from("listing_contacts").delete().eq("listing_id", listing.id)
+      : await sb.from("listing_contacts").upsert({ listing_id: listing.id, phone_e164: v.phone, updated_at: new Date().toISOString() });
   if (contactError) throw new PublishError("db", contactError.message);
 
   return { id: listing.id, publicId: listing.public_id ?? `a${listing.id}`, slug: listing.slug, status: listing.status };

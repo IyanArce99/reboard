@@ -152,7 +152,10 @@ export function StepReview({ d, catalog, now, live, editing, pending, needsLogin
         <Row title="Precio y ubicación" step={4} onEdit={onEdit}>
           <span className={styles.sumMain}>{t.price ?? "Sin precio"}</span>
           <span className={styles.sumMeta}>
-            {d.town.trim() ? `${d.town.trim()}, ${zone}` : zone} · Contacto: {CONTACT_LABEL[d.contact === "phone" ? "phone" : "whatsapp"]} · {d.phone.trim() || "—"}
+            {d.town.trim() ? `${d.town.trim()}, ${zone}` : zone} · Contacto:{" "}
+            {(d.channels ?? "phone") === "email"
+              ? "por email (tu dirección no se muestra)"
+              : `${CONTACT_LABEL[d.contact === "phone" ? "phone" : "whatsapp"]} · ${d.phone.trim() || "—"}${(d.channels ?? "phone") === "both" ? " · y por email" : ""}`}
           </span>
         </Row>
       </div>

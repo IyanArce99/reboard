@@ -8,6 +8,11 @@ import { z } from "zod";
 import { REPORT_REASON_VALUES } from "@/components/moderation/labels";
 import { authEnabled } from "@/lib/auth/config";
 import { revealContact } from "@/lib/moderation/service";
+import { SellerEmailInput } from "@/lib/contact/seller-email-schema";
+import { sendSellerEmail } from "@/lib/contact/seller-email";
+import { getRepository } from "@/lib/data";
+import { listingPath, listingTitle } from "@/lib/listing/present";
+import { absoluteUrl } from "@/lib/site";
 import { clientIp, ipHash } from "@/lib/security/ip";
 import { verifyTurnstile } from "@/lib/security/turnstile";
 import { createServiceClient } from "@/lib/supabase/service";
@@ -77,4 +82,59 @@ export async function reportListingAction(args: z.input<typeof Report>): Promise
     return { ok: false, message: "No hemos podido enviar el reporte. Vuelve a intentarlo." };
   }
   return { ok: true };
+}
+
+export type SellerEmailResponse = { ok: true } | { ok: false; message: string; field?: "name" | "email" | "message" };
+
+const SellerEmailArgs = SellerEmailInput.extend({ publicId: PublicId, token: Token });
+
+/**
+ * «Enviar mensaje al vendedor»: el comprador escribe y el vendedor lo recibe en el email de su cuenta,
+ * que nunca se muestra. Turnstile (falla cerrado), límites persistentes por IP y anuncio, y éxito solo
+ * cuando el servidor de correo acepta el envío (src/lib/contact/seller-email.ts).
+ */
+export async function sendSellerEmailAction(args: z.input<typeof SellerEmailArgs>): Promise<SellerEmailResponse> {
+  const a = SellerEmailArgs.safeParse(args);
+  if (!a.success) {
+    const issue = a.error.issues[0];
+    const field = issue?.path[0];
+    return {
+      ok: false,
+      message: field === "name" || field === "email" || field === "message" ? issue.message : "No hemos podido procesar el mensaje. Recarga la página y vuelve a intentarlo.",
+      field: field === "name" || field === "email" || field === "message" ? field : undefined,
+    };
+  }
+  const unavailable = "Ahora mismo no podemos enviar mensajes a este vendedor. Si el anuncio tiene WhatsApp, prueba por ahí.";
+  if (!authEnabled()) return { ok: false, message: unavailable };
+
+  const h = await headers();
+  const ip = clientIp(h);
+  const captcha = await verifyTurnstile(a.data.token, { ip, action: "email" });
+  if (!captcha.ok) return { ok: false, message: "No hemos podido comprobar que no eres un robot. Vuelve a intentarlo." };
+  const hash = ipHash(ip);
+  if (!hash) {
+    console.error("[email-vendedor] falta CONTACT_IP_SALT o la IP");
+    return { ok: false, message: unavailable };
+  }
+
+  const listing = await getRepository().byId(a.data.publicId);
+  if (!listing) return { ok: false, message: "Este anuncio ya no está disponible." };
+  const r = await sendSellerEmail(createServiceClient(), {
+    publicId: a.data.publicId,
+    input: { name: a.data.name, email: a.data.email, message: a.data.message },
+    ipHash: hash,
+    listingTitle: listingTitle(listing),
+    listingUrl: absoluteUrl(listingPath(listing)),
+  });
+  if (r.ok) return r;
+  switch (r.reason) {
+    case "duplicate":
+      return { ok: false, message: "Ya le has escrito por esta tabla. Te responderá a tu email; revisa también la carpeta de spam." };
+    case "rate-limited":
+      return { ok: false, message: "Has enviado varios mensajes en poco rato. Vuelve a intentarlo más tarde." };
+    case "unavailable":
+      return { ok: false, message: "Este anuncio ya no acepta mensajes por email." };
+    default:
+      return { ok: false, message: "No hemos podido enviar el mensaje. Vuelve a intentarlo en unos minutos." };
+  }
 }

@@ -205,7 +205,7 @@ function mk(h: Hand, i: number): Listing {
     condition: h.cond,
     repairs,
     seller: { id: null, type: h.seller, name: sname, shopSlug: shop?.slug ?? null },
-    contact: { method: "whatsapp", phone: null },
+    contact: { method: "whatsapp", phone: null, channels: "phone" },
     status,
     publishedAt: daysBefore(h.post),
     confirmedAt: daysBefore(h.conf),
@@ -262,5 +262,12 @@ export function buildDemoInventory(n: number): Listing[] {
     if (r() < 0.15) h.fins = null;
     out.push(mk(h, out.length));
   }
+  // Canales de contacto (contacto por email): «los dos» en algunos y «solo email» en unos pocos con
+  // reparaciones (los recorridos e2e filtran «muy buen estado» y usan los primeros o un Torq).
+  out.forEach((l, i) => {
+    if (i < 10) return;
+    if (l.condition === "con-reparaciones" && l.brand !== "Torq" && i % 2 === 0) l.contact = { ...l.contact, channels: "email" };
+    else if (i % 7 === 3) l.contact = { ...l.contact, channels: "both" };
+  });
   return out;
 }

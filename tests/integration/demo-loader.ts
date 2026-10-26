@@ -159,6 +159,7 @@ export async function loadDemo(sb: Sb, listings: Listing[]) {
         zone_slug: l.zone,
         town: l.town,
         contact_method: "whatsapp" as const,
+        contact_channels: l.contact.channels,
       };
     });
     // El servidor puede fijar las fechas al importar: se insertan ya con las del mock.
