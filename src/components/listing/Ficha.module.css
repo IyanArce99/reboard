@@ -1107,3 +1107,8 @@
 .emailSent .sheetBtn {
   width: 100%;
 }
+
+.emailOptional {
+  font-weight: 400;
+  color: var(--rb-muted);
+}

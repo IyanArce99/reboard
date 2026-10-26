@@ -84,7 +84,7 @@ export async function reportListingAction(args: z.input<typeof Report>): Promise
   return { ok: true };
 }
 
-export type SellerEmailResponse = { ok: true } | { ok: false; message: string; field?: "name" | "email" | "message" };
+export type SellerEmailResponse = { ok: true } | { ok: false; message: string; field?: "name" | "email" | "phone" | "message" };
 
 const SellerEmailArgs = SellerEmailInput.extend({ publicId: PublicId, token: Token });
 
@@ -100,8 +100,8 @@ export async function sendSellerEmailAction(args: z.input<typeof SellerEmailArgs
     const field = issue?.path[0];
     return {
       ok: false,
-      message: field === "name" || field === "email" || field === "message" ? issue.message : "No hemos podido procesar el mensaje. Recarga la página y vuelve a intentarlo.",
-      field: field === "name" || field === "email" || field === "message" ? field : undefined,
+      message: field === "name" || field === "email" || field === "phone" || field === "message" ? issue.message : "No hemos podido procesar el mensaje. Recarga la página y vuelve a intentarlo.",
+      field: field === "name" || field === "email" || field === "phone" || field === "message" ? field : undefined,
     };
   }
   const unavailable = "Ahora mismo no podemos enviar mensajes a este vendedor. Si el anuncio tiene WhatsApp, prueba por ahí.";
@@ -121,7 +121,7 @@ export async function sendSellerEmailAction(args: z.input<typeof SellerEmailArgs
   if (!listing) return { ok: false, message: "Este anuncio ya no está disponible." };
   const r = await sendSellerEmail(createServiceClient(), {
     publicId: a.data.publicId,
-    input: { name: a.data.name, email: a.data.email, message: a.data.message },
+    input: { name: a.data.name, email: a.data.email, phone: a.data.phone, message: a.data.message },
     ipHash: hash,
     listingTitle: listingTitle(listing),
     listingUrl: absoluteUrl(listingPath(listing)),

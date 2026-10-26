@@ -9,7 +9,14 @@ describe("formulario «Enviar mensaje al vendedor»", () => {
     const v = SellerEmailInput.parse({ ...ok, email: "  ANA@Test.invalid " });
     expect(v.email).toBe("ana@test.invalid");
   });
+  it("teléfono opcional: vacío vale; si se pone, se normaliza a formato internacional", () => {
+    expect(SellerEmailInput.parse(ok).phone).toBeNull();
+    expect(SellerEmailInput.parse({ ...ok, phone: "" }).phone).toBeNull();
+    expect(SellerEmailInput.parse({ ...ok, phone: "600 111 222" }).phone).toBe("+34600111222");
+    expect(SellerEmailInput.parse({ ...ok, phone: "+351 912 345 678" }).phone).toBe("+351912345678");
+  });
   it.each([
+    [{ ...ok, phone: "123" }, "phone"],
     [{ ...ok, name: "A" }, "name"],
     [{ ...ok, name: "Ana\r\nBcc: x@y.z" }, "name"], // nada que pueda colarse como cabecera
     [{ ...ok, name: "x".repeat(61) }, "name"],
@@ -31,6 +38,11 @@ describe("email al vendedor (plantilla)", () => {
     buyerName: `<script>alert("x")</script>`,
     buyerEmail: "ana@test.invalid",
     message: "Hola\n<img src=x onerror=alert(1)>",
+  });
+  it("con teléfono, aparece en el texto y como enlace para llamar", () => {
+    const m = sellerInquiryEmail({ listingTitle: "T", listingUrl: "https://www.reboard.es/x", buyerName: "Ana", buyerEmail: "a@b.es", buyerPhone: "+34600111222", message: "Hola, ¿sigue?" });
+    expect(m.text).toContain("Teléfono: +34600111222");
+    expect(m.html).toContain('<a href="tel:+34600111222"');
   });
   it("asunto fijo y texto con todos los datos", () => {
     expect(mail.subject).toBe(SELLER_INQUIRY_SUBJECT);

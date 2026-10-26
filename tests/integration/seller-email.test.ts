@@ -57,7 +57,7 @@ async function publish(over: Partial<Input> = {}) {
   return r;
 }
 
-const buyer = { name: "Ana", email: "ana@test.invalid", message: "¡Hola! ¿Sigue disponible la tabla?" };
+const buyer = { name: "Ana", email: "ana@test.invalid", phone: null as string | null, message: "¡Hola! ¿Sigue disponible la tabla?" };
 const args = (publicId: string, ipHash: string) => ({ publicId, input: buyer, ipHash, listingTitle: "Evolutiva 7'0\"", listingUrl: "https://www.reboard.es/anuncio/x" });
 
 beforeAll(async () => {
@@ -114,11 +114,23 @@ describe("enviar un mensaje al vendedor", () => {
     expect(sent[0].replyTo).toBe(buyer.email);
     expect(sent[0].subject).toBe("Nuevo interesado en tu tabla — REBOARD");
     expect(sent[0].text).toContain(buyer.message);
+    expect(sent[0].text).not.toContain("Teléfono:"); // sin teléfono, no aparece la línea
     const { data: ev } = await sb.from("email_contact_events").select("*").eq("listing_id", r.id);
     expect(ev).toHaveLength(1);
     expect(ev![0].status).toBe("sent");
     expect(JSON.stringify(ev)).not.toContain(buyer.email);
     expect(JSON.stringify(ev)).not.toContain(buyer.message);
+  });
+
+  it("con teléfono opcional, el vendedor lo recibe en el email (y no se guarda)", async () => {
+    const r = await publish();
+    const sent: (MailMessage & { from: string })[] = [];
+    const withPhone = { ...args(r.publicId, `ip-tel-${run}`), input: { ...buyer, phone: "+34600111222" } };
+    expect(await sendSellerEmail(sb, withPhone, async (m) => void sent.push(m))).toEqual({ ok: true });
+    expect(sent[0].text).toContain("Teléfono: +34600111222");
+    expect(sent[0].html).toContain('href="tel:+34600111222"');
+    const { data: ev } = await sb.from("email_contact_events").select("*").eq("listing_id", r.id);
+    expect(JSON.stringify(ev)).not.toContain("600111222");
   });
 
   it("el mismo comprador no repite al mismo anuncio (24 h)", async () => {

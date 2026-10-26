@@ -7,6 +7,8 @@ export interface SellerInquiry {
   listingUrl: string;
   buyerName: string;
   buyerEmail: string;
+  /** Opcional, en formato internacional (+34…). */
+  buyerPhone?: string | null;
   message: string;
 }
 
@@ -25,6 +27,7 @@ export function sellerInquiryEmail(i: SellerInquiry) {
     "",
     `Nombre: ${i.buyerName}`,
     `Email: ${i.buyerEmail}`,
+    ...(i.buyerPhone ? [`Teléfono: ${i.buyerPhone}`] : []),
     "",
     "Mensaje:",
     i.message,
@@ -48,7 +51,7 @@ export function sellerInquiryEmail(i: SellerInquiry) {
 ${p("¡Buenas!")}
 ${p("Alguien está interesado en tu tabla:")}
 ${p(`<strong>${esc(i.listingTitle)}</strong>`, "font-size:18px")}
-${p(`<strong>Nombre:</strong> ${esc(i.buyerName)}<br><strong>Email:</strong> ${esc(i.buyerEmail)}`)}
+${p(`<strong>Nombre:</strong> ${esc(i.buyerName)}<br><strong>Email:</strong> ${esc(i.buyerEmail)}${i.buyerPhone ? `<br><strong>Teléfono:</strong> <a href="tel:${esc(i.buyerPhone)}" style="color:#07717C">${esc(i.buyerPhone)}</a>` : ""}`)}
 ${p("<strong>Mensaje:</strong>", "margin-bottom:6px")}
 <div style="margin:0 0 18px;padding:12px 14px;background:#EFF6F5;border-radius:10px;white-space:pre-wrap;line-height:1.5">${esc(i.message)}</div>
 ${p("Puedes responder directamente a este correo para hablar con el comprador.")}

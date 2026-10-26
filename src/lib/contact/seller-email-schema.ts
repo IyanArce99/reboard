@@ -2,6 +2,7 @@
 // servidor. Nombre de una línea (nada que pueda colarse como cabecera), email válido y mensaje acotado.
 
 import { z } from "zod";
+import { toE164 } from "@/lib/publish/schema";
 
 export const BUYER_NAME_MAX = 60;
 export const BUYER_MESSAGE_MIN = 10;
@@ -22,6 +23,18 @@ export const SellerEmailInput = z.object({
     .toLowerCase()
     .max(254, "Ese email es demasiado largo.")
     .pipe(z.email({ message: "Revisa tu email: el vendedor te responderá ahí." })),
+  /** Opcional: si lo da, el vendedor puede llamarle o escribirle por WhatsApp. Se envía en formato internacional. */
+  phone: z
+    .string()
+    .trim()
+    .max(30)
+    .optional()
+    .transform((v, ctx) => {
+      if (!v) return null;
+      const e164 = toE164(v);
+      if (!e164) ctx.addIssue({ code: "custom", message: "Revisa el teléfono (por ejemplo, 600 000 000) o déjalo vacío." });
+      return e164;
+    }),
   message: z
     .string()
     .trim()

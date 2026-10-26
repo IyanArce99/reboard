@@ -13,11 +13,12 @@ import { track } from "@/lib/analytics/track";
 import { BUYER_MESSAGE_MAX, BUYER_NAME_MAX, SellerEmailInput, suggestedBuyerMessage } from "@/lib/contact/seller-email-schema";
 import styles from "./Ficha.module.css";
 
-type Field = "name" | "email" | "message";
+type Field = "name" | "email" | "phone" | "message";
 
 export function EmailContact({ listingId, title, sellerName, onClose }: { listingId: string; title: string; sellerName: string; onClose: () => void }) {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
   const [message, setMessage] = useState(() => suggestedBuyerMessage(title));
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<{ message: string; field?: Field } | null>(null);
@@ -36,7 +37,7 @@ export function EmailContact({ listingId, title, sellerName, onClose }: { listin
   async function submit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     if (busy) return;
-    const v = SellerEmailInput.safeParse({ name, email, message });
+    const v = SellerEmailInput.safeParse({ name, email, phone, message });
     if (!v.success) {
       const issue = v.error.issues[0];
       const f = issue?.path[0] as Field | undefined;
@@ -55,7 +56,8 @@ export function EmailContact({ listingId, title, sellerName, onClose }: { listin
       track("contact_email_failed", { reason: "error" });
       return;
     }
-    const r = await sendSellerEmailAction({ publicId: listingId, ...v.data, token });
+    // Se envía lo escrito (el servidor vuelve a validar y normalizar el teléfono).
+    const r = await sendSellerEmailAction({ publicId: listingId, name: v.data.name, email: v.data.email, phone: phone || undefined, message: v.data.message, token });
     turnstile.current?.reset();
     tokenRef.current = null;
     setBusy(false);
@@ -103,7 +105,10 @@ export function EmailContact({ listingId, title, sellerName, onClose }: { listin
           autoComplete="name"
           maxLength={BUYER_NAME_MAX}
           value={name}
-          onChange={(e) => setName(e.target.value)}
+          onChange={(e) => {
+            setName(e.target.value);
+            if (error?.field === "name") setError(null);
+          }}
           aria-invalid={err("name") ? true : undefined}
           aria-describedby={describedBy("name")}
         />
@@ -118,12 +123,39 @@ export function EmailContact({ listingId, title, sellerName, onClose }: { listin
           maxLength={254}
           className={styles.emailInput}
           value={email}
-          onChange={(e) => setEmail(e.target.value)}
+          onChange={(e) => {
+            setEmail(e.target.value);
+            if (error?.field === "email") setError(null);
+          }}
           aria-invalid={err("email") ? true : undefined}
           aria-describedby={describedBy("email", "buyer-email-help")}
         />
         <span id="buyer-email-help" className={styles.emailHelp}>
           {who} te responderá aquí.
+        </span>
+      </div>
+      <div className={styles.emailField}>
+        <label htmlFor="buyer-phone">
+          Tu teléfono <span className={styles.emailOptional}>(opcional)</span>
+        </label>
+        <input
+          id="buyer-phone"
+          type="tel"
+          inputMode="tel"
+          autoComplete="tel"
+          maxLength={30}
+          placeholder="ej. 600 000 000"
+          className={styles.emailInput}
+          value={phone}
+          onChange={(e) => {
+            setPhone(e.target.value);
+            if (error?.field === "phone") setError(null);
+          }}
+          aria-invalid={err("phone") ? true : undefined}
+          aria-describedby={describedBy("phone", "buyer-phone-help")}
+        />
+        <span id="buyer-phone-help" className={styles.emailHelp}>
+          Si lo pones, también podrá llamarte o escribirte por WhatsApp.
         </span>
       </div>
       <div className={styles.emailField}>
@@ -134,7 +166,10 @@ export function EmailContact({ listingId, title, sellerName, onClose }: { listin
           rows={4}
           maxLength={BUYER_MESSAGE_MAX}
           value={message}
-          onChange={(e) => setMessage(e.target.value)}
+          onChange={(e) => {
+            setMessage(e.target.value);
+            if (error?.field === "message") setError(null);
+          }}
           aria-invalid={err("message") ? true : undefined}
           aria-describedby={describedBy("message")}
         />
@@ -152,7 +187,7 @@ export function EmailContact({ listingId, title, sellerName, onClose }: { listin
         {busy ? "Enviando…" : "Enviar mensaje"}
       </button>
       <p className={styles.emailLegal}>
-        Enviaremos tu nombre, tu email y tu mensaje a {sellerName || "quien vende"} para que pueda responderte. Su dirección no se muestra y no
+        Enviaremos tu nombre, tu email, tu teléfono si lo pones y tu mensaje a {sellerName || "quien vende"} para que pueda responderte. Su dirección no se muestra y no
         guardamos el texto de tu mensaje. Más información en la <Link href="/legal/privacidad">Política de privacidad</Link>.
       </p>
     </form>

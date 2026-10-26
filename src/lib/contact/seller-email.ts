@@ -68,6 +68,7 @@ export async function sendSellerEmail(
     listingUrl: args.listingUrl,
     buyerName: args.input.name,
     buyerEmail: args.input.email,
+    buyerPhone: args.input.phone ?? null,
     message: args.input.message,
   });
   const result = await sendMail({ to, replyTo: args.input.email, ...mail }, mailer);
