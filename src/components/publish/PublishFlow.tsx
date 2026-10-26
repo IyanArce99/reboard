@@ -54,7 +54,7 @@ interface Props {
 /** Campo o grupo que provoca el aviso del paso: el foco va allí (WCAG 3.3.1). */
 function issueTarget(step: number, d: PublishDraft): string | null {
   if (step === 2) {
-    if (d.brand === OTHER_BRAND && !d.brandOther.trim()) return "pub-brand-other";
+    if (d.brand === OTHER_BRAND && !d.brandOther.trim()) return "pub-brand-input";
     for (const k of ["len", "width", "thick", "vol"] as const) {
       const r = describeMeasure(k, d[k], d.unit);
       if ((k === "len" && !d.len.trim()) || (r && !r.ok)) return `pub-${k}`;

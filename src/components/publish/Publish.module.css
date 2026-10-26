@@ -1559,3 +1559,99 @@ button.slot:hover {
     background: var(--rb-petrol-2);
   }
 }
+
+/* ——— Paso 2 · Marca: campo con autocompletado (BrandPicker) ——— */
+.brandPicker {
+  display: grid;
+  gap: 10px;
+  max-width: 520px;
+}
+.comboWrap {
+  position: relative;
+}
+.comboWrap .text {
+  padding-right: 48px;
+}
+.comboWrap .text[aria-invalid="true"] {
+  border-color: var(--rb-error);
+}
+.comboClear {
+  position: absolute;
+  top: 3px;
+  right: 3px;
+  width: 44px;
+  height: 44px;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--rb-muted);
+  font-size: 15px;
+}
+.comboList {
+  position: absolute;
+  z-index: 30;
+  top: calc(100% + 6px);
+  left: 0;
+  right: 0;
+  margin: 0;
+  padding: 6px;
+  list-style: none;
+  background: var(--rb-white);
+  border: 1px solid var(--rb-line-strong);
+  border-radius: 12px;
+  box-shadow: 0 12px 28px -14px rgba(16, 45, 59, 0.45);
+  max-height: 320px;
+  overflow-y: auto;
+}
+.comboOption {
+  display: flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 12px;
+  border-radius: 8px;
+  font-size: 16px;
+  color: var(--rb-ink);
+  cursor: pointer;
+}
+.comboOption[aria-selected="true"] {
+  background: var(--rb-teal-tint);
+  color: var(--rb-teal-ink);
+}
+.comboOption[data-custom] {
+  font-weight: 700;
+  color: var(--rb-teal-text);
+}
+.brandSpecial {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 8px;
+  font-size: 14px;
+  color: var(--rb-muted);
+}
+.brandSpecialBtn {
+  min-height: 36px;
+  padding: 0 12px;
+  border: 1px solid var(--rb-line-strong);
+  border-radius: 999px;
+  background: var(--rb-white);
+  color: var(--rb-ink);
+  font-size: 14px;
+  font-weight: 600;
+  position: relative;
+}
+/* 44 px de área táctil sin agrandar el botón. */
+.brandSpecialBtn::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  height: 44px;
+  transform: translateY(-50%);
+}
+.brandSpecialBtn[aria-pressed="true"] {
+  border-color: var(--rb-teal);
+  background: var(--rb-teal-tint);
+  color: var(--rb-teal-ink);
+}

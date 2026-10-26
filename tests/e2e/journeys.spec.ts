@@ -215,8 +215,12 @@ for (const kind of Object.keys(VIEWPORTS) as Kind[]) {
       await page.getByRole("button", { name: "Continuar" }).click();
 
       await expect(h1(page)).toHaveText("Cuéntanos qué tabla es");
-      await page.getByRole("button", { name: "Otra marca" }).click();
-      await page.locator("#pub-brand-other").fill("QA Journey");
+      // Marca: se escribe y se autocompleta; una que no está en la lista vale tal cual.
+      const brandBox = page.getByRole("combobox", { name: "Marca" });
+      await brandBox.fill("fire");
+      await expect(page.getByRole("option", { name: "Firewire" })).toBeVisible();
+      await brandBox.fill("QA Journey");
+      await page.getByRole("option", { name: "Usar «QA Journey» como marca" }).click();
       // Medidas como las escribe la gente: comillas tipográficas, ½, coma decimal y «L».
       await page.locator("#pub-len").fill("6’4”");
       await expect(page.locator("#pub-len-read")).toHaveText(`6'4" · 193 cm`);

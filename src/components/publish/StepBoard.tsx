@@ -8,20 +8,17 @@ import { useMemo, useState } from "react";
 import { BoardShape } from "@/components/brand/BoardShape";
 import { CONSTRUCTIONS, CONSTRUCTION_INFO, POPULAR_BRANDS, SHAPES, SHAPE_INFO } from "@/lib/domain/taxonomy";
 import {
-  NO_BRAND_OPTION,
-  OTHER_BRAND,
   OTHER_MODEL,
-  SHAPER_LOCAL,
   applyCatalogSize,
   confirmAll,
   convertUnits,
   orderBrands,
   pendingCount,
-  visibleBrandCount,
   type FieldSource,
   type PublishDraft,
 } from "@/lib/publish/draft";
 import { describeMeasure, parseMeasures, type MeasureKey } from "@/lib/publish/parse";
+import { BrandPicker } from "./BrandPicker";
 import { Chip, Group, type CatalogProps, type StepProps } from "./parts";
 import styles from "./Publish.module.css";
 
@@ -44,24 +41,13 @@ interface Props extends StepProps, CatalogProps {
   toast: (text: string) => void;
 }
 
-/** Marcas visibles antes de «Ver todas» como mínimo (y todas las destacadas, aunque sean más). */
-const TOP_BRANDS = 12;
-
 export function StepBoard({ d, set, setD, catalog, brands: known, featuredBrands, toast }: Props) {
   const [paste, setPaste] = useState("");
   // Error fijo bajo el campo (no un toast que desaparece): DESIGN_AUDIT §8.
   const [pasteError, setPasteError] = useState("");
-  const [allBrands, setAllBrands] = useState(false);
-  // Torq, NSP, Softech… primero; el listado completo, tras «Ver todas las marcas».
+  // Torq, NSP, Softech… primero (sugerencias con el campo vacío); el resto, al escribir.
   const featured = featuredBrands?.length ? featuredBrands : POPULAR_BRANDS;
   const brands = useMemo(() => orderBrands(known, [...new Set(catalog.map((m) => m.brand))], featured), [catalog, known, featured]);
-  const top = visibleBrandCount(brands.filter((b) => featured.includes(b)).length, TOP_BRANDS);
-  // Al editar un anuncio con una marca escrita a mano que no está en la lista, se muestra igual.
-  const special = [SHAPER_LOCAL, NO_BRAND_OPTION, OTHER_BRAND];
-  const shownBrands = [
-    ...(allBrands ? brands : brands.filter((b, i) => i < top || b === d.brand)),
-    ...(d.brand && !brands.includes(d.brand) && !special.includes(d.brand) ? [d.brand] : []),
-  ];
   const models = catalog.filter((m) => m.brand === d.brand);
   const pm = catalog.find((m) => m.brand === d.brand && m.model === d.model);
 
@@ -96,33 +82,17 @@ export function StepBoard({ d, set, setD, catalog, brands: known, featuredBrands
 
   return (
     <div className={styles.stepBody}>
-      <Group id="pub-brand" title="Marca" hint="¿No está en la lista? Elige «Otra marca» y escríbela. Si no tiene marca, «Shaper local» o «Sin marca».">
-        <div className={styles.chips}>
-          {[...shownBrands, SHAPER_LOCAL, NO_BRAND_OPTION, OTHER_BRAND].map((b) => (
-            <Chip key={b} on={d.brand === b} onClick={() => set({ brand: b, model: "", size: "" })}>
-              {b}
-            </Chip>
-          ))}
-        </div>
-        {brands.length > top && (
-          <button type="button" className={styles.moreBrands} aria-expanded={allBrands} onClick={() => setAllBrands((a) => !a)}>
-            {allBrands ? "Ver menos marcas" : `Ver todas las marcas (${brands.length})`}
-          </button>
-        )}
-        {d.brand === OTHER_BRAND && (
-          <div className={styles.labelField}>
-            <label htmlFor="pub-brand-other">¿Qué marca es?</label>
-            <input
-              id="pub-brand-other"
-              className={styles.text}
-              maxLength={60}
-              autoComplete="off"
-              placeholder="Escribe la marca"
-              value={d.brandOther}
-              onChange={(e) => set({ brandOther: e.target.value })}
-            />
-          </div>
-        )}
+      <Group id="pub-brand" title="Marca" hint="Escribe y elige de la lista. Si no aparece, vale tal cual la escribas.">
+        <BrandPicker
+          brands={brands}
+          featured={featured}
+          brand={d.brand}
+          brandOther={d.brandOther}
+          onChange={(brand, brandOther) =>
+            // Cambiar de marca borra modelo y medida del catálogo (eran de la marca anterior).
+            set(brand === d.brand ? { brandOther } : { brand, brandOther, model: "", size: "" })
+          }
+        />
       </Group>
 
       {models.length > 0 && (
